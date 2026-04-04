@@ -1,6 +1,11 @@
 import { fetchPropertiesLocal } from './mockApi';
 
 export const getApiBase = () => {
+  // Use Vite env variable if available
+  if (import.meta.env?.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
   if (typeof window === "undefined") return "";
   const host = window.location.hostname;
   
