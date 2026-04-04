@@ -494,7 +494,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* How Roomhy Works - Video Section */}
+        {/* How Roomhy Works - Video Section 
         <section className="py-16 bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
@@ -514,7 +514,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
+*/}
         {/* Trending Stays - Carousel with 12 properties */}
         <section className="py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
