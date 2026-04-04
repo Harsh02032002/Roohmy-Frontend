@@ -9,6 +9,7 @@ import {
   isWebsiteLoggedIn
 } from "../../utils/websiteSession";
 import { useLucideIcons, useWebsiteCommon } from "../../utils/websiteUi";
+import { Zap } from 'lucide-react';
 
 const defaultCities = [
   { _id: "kota", name: "Kota, Rajasthan" },
@@ -309,6 +310,41 @@ export default function WebsiteFastBidding() {
           </a>
         </div>
       </header>
+
+      {/* --- COMPACT & STYLISH HEADER --- */}
+      <div className="relative w-full py-10 px-6 overflow-hidden border-b border-stone-200/50" 
+           style={{ background: 'linear-gradient(135deg, #FFFAF5 0%, #FDFCFB 50%, #F5F7FA 100%)' }}>
+        
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+             style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/pinstripe.png")` }}>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto flex flex-col items-center text-center">
+          
+          {/* Icon */}
+          <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mb-4">
+            <Zap size={24} className="text-orange-600" />
+          </div>
+          
+          {/* MAIN HEADING */}
+          <div className="flex items-center gap-4 mb-2">
+            <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] tracking-tight">
+              Fast <span className="text-[#C5A059] font-serif italic font-medium">Bidding</span>
+            </h1>
+            <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
+          </div>
+
+          {/* SUB-HEADING */}
+          <p className="text-base md:text-lg text-stone-500 font-normal opacity-90 max-w-xl mx-auto">
+            Place bids on multiple properties instantly
+          </p>
+
+          {/* Bottom Accent Dot */}
+          <div className="mt-4 w-1.5 h-1.5 rounded-full bg-[#C5A059]/30"></div>
+        </div>
+      </div>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">

@@ -360,27 +360,32 @@ export default function HomePage() {
         <section className="py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
-              <div>
+              <div className="flex-1">
                 <h2 className="text-3xl font-bold text-gray-900">Popular Cities</h2>
                 <p className="text-lg text-gray-600 mt-1">Explore top cities for student accommodation</p>
               </div>
-              <div className="flex items-center gap-2">
+            </div>
+            
+            <div className="relative">
+              {/* Left Arrow - positioned on the side */}
+              {cities.length > citiesPerView && canShowPrevCities && (
                 <button 
                   onClick={prevCities}
-                  disabled={!canShowPrevCities}
-                  className={`p-3 rounded-full shadow-md hover:shadow-lg transition-all ${canShowPrevCities ? 'bg-white hover:bg-gray-50' : 'bg-gray-200 cursor-not-allowed'}`}
+                  className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
                 >
-                  <ChevronLeft className={`w-6 h-6 ${canShowPrevCities ? 'text-gray-700' : 'text-gray-400'}`} />
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
                 </button>
+              )}
+              
+              {/* Right Arrow - positioned on the side */}
+              {cities.length > citiesPerView && canShowNextCities && (
                 <button 
                   onClick={nextCities}
-                  disabled={!canShowNextCities}
-                  className={`p-3 rounded-full shadow-md hover:shadow-lg transition-all ${canShowNextCities ? 'bg-white hover:bg-gray-50' : 'bg-gray-200 cursor-not-allowed'}`}
+                  className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
                 >
-                  <ChevronRight className={`w-6 h-6 ${canShowNextCities ? 'text-gray-700' : 'text-gray-400'}`} />
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
                 </button>
-              </div>
-            </div>
+              )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {visibleCities.map((city) => (
@@ -401,6 +406,7 @@ export default function HomePage() {
                   </div>
                 </Link>
               ))}
+            </div>
             </div>
           </div>
         </section>
@@ -446,72 +452,65 @@ export default function HomePage() {
                         className="w-full h-full object-cover transition-all duration-300"
                       />
                       
-                      {/* Dark overlay on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      {/* Title always visible at TOP */}
+                      <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/50 to-transparent">
+                        <h3 className="text-lg font-bold text-white drop-shadow-md">{offering.title}</h3>
+                      </div>
                       
-                      {/* Hover Content - Title & Description */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <h3 className="text-xl font-bold text-white mb-2">{offering.title}</h3>
-                        <p className="text-sm text-white/90 line-clamp-2">{offering.description}</p>
+                      {/* Description on hover - from bottom */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <p className="text-sm text-white drop-shadow-md line-clamp-2">{offering.description}</p>
                       </div>
 
-                      {/* Left Arrow */}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <ChevronLeft className="w-5 h-5 text-gray-700" />
-                      </button>
+                      {/* Left Arrow - transparent bg */}
+                      {totalImages > 1 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <ChevronLeft className="w-6 h-6 text-white drop-shadow-lg" />
+                        </button>
+                      )}
 
-                      {/* Right Arrow */}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <ChevronRight className="w-5 h-5 text-gray-700" />
-                      </button>
+                      {/* Right Arrow - transparent bg */}
+                      {totalImages > 1 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <ChevronRight className="w-6 h-6 text-white drop-shadow-lg" />
+                        </button>
+                      )}
 
                       {/* Image Counter */}
                       <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
                         {selectedIdx + 1} / {totalImages}
                       </div>
                     </div>
-
-                    {/* Thumbnail Row - all 10 images scrollable with navigation */}
-                    <div className="flex gap-1.5 p-2 bg-gray-50 overflow-x-auto scrollbar-hide">
-                      {allImages.map((img, idx) => (
-                        <button
-                          key={idx}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOfferingSelectedImage(prev => ({ ...prev, [offering.title]: idx }));
-                          }}
-                          className={`flex-shrink-0 w-14 h-12 overflow-hidden rounded transition-all ${
-                            idx === selectedIdx 
-                              ? 'ring-2 ring-blue-500 ring-offset-1 opacity-100' 
-                              : 'opacity-50 hover:opacity-80'
-                          }`}
-                        >
-                          <img 
-                            src={img} 
-                            alt={`${offering.title} ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                            draggable="false"
-                          />
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* View More Link */}
-                    <Link 
-                      to={`/website/ourproperty?type=${offering.category}`}
-                      className="block text-center py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
-                    >
-                      View All {offering.title}s →
-                    </Link>
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* How Roomhy Works - Video Section */}
+        <section className="py-16 bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">How Roomhy Works</h2>
+              <p className="text-lg text-white/90">Watch how easy it is to find your perfect stay</p>
+            </div>
+            
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black">
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0"
+                title="How Roomhy Works"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
             </div>
           </div>
         </section>
@@ -524,23 +523,28 @@ export default function HomePage() {
                 <h2 className="text-3xl font-bold text-gray-900 mb-3">Trending Stays This Week</h2>
                 <p className="text-lg text-gray-600">Most popular properties among students</p>
               </div>
-              <div className="flex items-center gap-2">
+            </div>
+            
+            <div className="relative">
+              {/* Left Arrow */}
+              {featuredProperties.length > trendingPerView && canShowPrevTrending && (
                 <button 
                   onClick={prevTrending}
-                  disabled={!canShowPrevTrending}
-                  className={`p-3 rounded-full shadow-md hover:shadow-lg transition-all ${canShowPrevTrending ? 'bg-white hover:bg-gray-50' : 'bg-gray-200 cursor-not-allowed'}`}
+                  className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
                 >
-                  <ChevronLeft className={`w-6 h-6 ${canShowPrevTrending ? 'text-gray-700' : 'text-gray-400'}`} />
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
                 </button>
+              )}
+              
+              {/* Right Arrow */}
+              {featuredProperties.length > trendingPerView && canShowNextTrending && (
                 <button 
                   onClick={nextTrending}
-                  disabled={!canShowNextTrending}
-                  className={`p-3 rounded-full shadow-md hover:shadow-lg transition-all ${canShowNextTrending ? 'bg-white hover:bg-gray-50' : 'bg-gray-200 cursor-not-allowed'}`}
+                  className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
                 >
-                  <ChevronRight className={`w-6 h-6 ${canShowNextTrending ? 'text-gray-700' : 'text-gray-400'}`} />
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
                 </button>
-              </div>
-            </div>
+              )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {visibleTrending.map((property) => (
@@ -571,31 +575,31 @@ export default function HomePage() {
                       to="/website/fast-bidding"
                       className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-bold text-center block transition-colors"
                     >
-                      Bid Now
+                      Book Now
                     </Link>
                   </div>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         </section>
 
         {/* Why Choose Roomhy - Combined Section */}
         <WhyRoomhy />
-        <FindYourHome />
       </main>
 
       <WebsiteFooter />
 
-      {/* Floating BidNow Button */}
+      {/* Floating BidNow Button - rounded pill shape */}
       <Link
         to="/website/fast-bidding"
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-full text-base font-bold hover:shadow-2xl transition-all flex items-center gap-2 shadow-xl"
+        className="fixed bottom-32 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full font-bold hover:shadow-2xl transition-all flex items-center gap-2 shadow-xl group px-4 py-4 overflow-hidden"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
-        <span>BidNow</span>
+        <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">BidNow</span>
       </Link>
     </div>
   );

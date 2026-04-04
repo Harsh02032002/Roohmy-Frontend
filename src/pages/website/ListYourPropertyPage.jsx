@@ -101,21 +101,32 @@ export default function ListYourPropertyPage() {
       <WebsiteNavbar />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-gray-200 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">List Your Property</h1>
-              <p className="text-gray-600">Reach thousands of students looking for accommodation</p>
-            </div>
-            <a
-              href="/website/index"
-              className="hidden md:flex items-center text-gray-700 hover:text-teal-600 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Home
-            </a>
+      <div className="relative w-full py-10 px-6 overflow-hidden border-b border-stone-200/50" 
+           style={{ background: 'linear-gradient(135deg, #FFFAF5 0%, #FDFCFB 50%, #F5F7FA 100%)' }}>
+        
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+             style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/pinstripe.png")` }}>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto flex flex-col items-center text-center">
+          
+          {/* MAIN HEADING */}
+          <div className="flex items-center gap-4 mb-2">
+            <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] tracking-tight">
+              List Your <span className="text-[#C5A059] font-serif italic font-medium">Property</span>
+            </h1>
+            <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
           </div>
+
+          {/* SUB-HEADING */}
+          <p className="text-base md:text-lg text-stone-500 font-normal opacity-90 max-w-xl mx-auto">
+            Reach thousands of students looking for accommodation
+          </p>
+
+          {/* Bottom Accent Dot */}
+          <div className="mt-4 w-1.5 h-1.5 rounded-full bg-[#C5A059]/30"></div>
         </div>
       </div>
 

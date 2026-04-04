@@ -69,7 +69,7 @@ export default function WhyRoomhy() {
                 {point.title}
               </h3>
 
-              <p className="text-gray-500 mt-2 text-sm leading-relaxed text-center">
+              <p className="text-gray-900 mt-2 text-sm leading-relaxed text-center">
                 {point.description}
               </p>
             </div>

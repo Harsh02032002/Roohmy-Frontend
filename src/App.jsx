@@ -15,6 +15,7 @@ import WebsiteRefundRequest from './pages/website/WebsiteRefundRequest';
 import WebsiteLogin from './pages/website/WebsiteLogin';
 import WebsiteSignup from './pages/website/WebsiteSignup';
 import WebsiteChat from './pages/website/WebsiteChat';
+import WebsiteMystays from './pages/website/WebsiteMystays';
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/website/login" element={<WebsiteLogin />} />
         <Route path="/website/signup" element={<WebsiteSignup />} />
         <Route path="/website/chat" element={<WebsiteChat />} />
+        <Route path="/website/mystays" element={<WebsiteMystays />} />
         {/* Alias routes */}
         <Route path="/login" element={<WebsiteLogin />} />
         <Route path="/signup" element={<WebsiteSignup />} />

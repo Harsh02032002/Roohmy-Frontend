@@ -1,24 +1,59 @@
 import { useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
 export function useWebsiteLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // This would typically interact with your authentication API
-    console.log("Login attempt:", { email, password });
-    // Implement actual login logic here
+    setLoading(true);
+    setError("");
+    
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ identifier: email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+      
+      // Store token and user data
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("userId", data.user.id);
+      localStorage.setItem("userEmail", data.user.email);
+      
+      // Redirect to home or my stays
+      window.location.href = "/website/mystays";
+      
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgot = () => {
-    console.log("Forgot password for:", email);
-    // Implement password reset logic
+    window.location.href = "/website/forgot-password";
   };
 
   return {
     email,
     password,
+    loading,
+    error,
     setEmail,
     setPassword,
     handleSubmit,

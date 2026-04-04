@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 import { getWebsiteApiUrl } from "../../utils/websiteSession";
 import { useLucideIcons, useWebsiteCommon } from "../../utils/websiteUi";
+import { Building2 } from 'lucide-react';
 
 export default function WebsiteList() {
   useWebsiteCommon();
@@ -200,19 +201,38 @@ export default function WebsiteList() {
         </div>
       </header>
 
-      <section className="relative py-12 md:py-16 bg-gradient-to-r from-blue-50 to-teal-50 border-b border-gray-200 flex-shrink-0">
-        <div className="container mx-auto px-4 sm:px-6 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            List Your Property For Free
-          </h1>
-          <p className="text-lg text-gray-600">Reach thousands of verified students with a simple form.</p>
+      {/* --- COMPACT & STYLISH HEADER --- */}
+      <div className="relative w-full py-10 px-6 overflow-hidden border-b border-stone-200/50" 
+           style={{ background: 'linear-gradient(135deg, #FFFAF5 0%, #FDFCFB 50%, #F5F7FA 100%)' }}>
+          
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+               style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/pinstripe.png")` }}>
+          </div>
+
+          <div className="relative max-w-7xl mx-auto flex flex-col items-center text-center">
+            
+            {/* MAIN HEADING */}
+            <div className="flex items-center gap-4 mb-2">
+              <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
+              <h1 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] tracking-tight">
+                List Your <span className="text-[#C5A059] font-serif italic font-medium">Property</span>
+              </h1>
+              <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
+            </div>
+
+            {/* SUB-HEADING */}
+            <p className="text-base md:text-lg text-stone-500 font-normal opacity-90 max-w-xl mx-auto">
+              Reach thousands of verified students with a simple form
+            </p>
+
+            {/* Bottom Accent Dot */}
+            <div className="mt-4 w-1.5 h-1.5 rounded-full bg-[#C5A059]/30"></div>
+          </div>
         </div>
-      </section>
 
       <main className="container mx-auto px-4 sm:px-6 py-8 md:py-12 flex-grow">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">Property Listing Form</h1>
-          <p className="text-center text-gray-600 mb-10 -mt-4">Fill the details below and submit for review.</p>
 
           {submitMessage && (
             <div className={`mb-4 p-4 rounded-lg ${submitMessage.type === "success" ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-800"}`}>

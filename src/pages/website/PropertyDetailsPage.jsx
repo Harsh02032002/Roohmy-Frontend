@@ -1,83 +1,108 @@
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { fetchProperties, fetchNearbyColleges } from "../../utils/api";
-import { ChevronLeft, MapPin, Users, Bed, Wifi, Wind, Droplet, Phone, Mail, Star, Share2 } from "lucide-react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { fetchProperties } from "../../utils/api";
+import {
+  ChevronLeft, MapPin, Users, Bed, Wifi, Wind, Droplet,
+  Phone, Mail, Star, Share2, GraduationCap, Navigation, ExternalLink
+} from "lucide-react";
 
 export default function PropertyDetailsPage() {
   const { propertyId } = useParams();
   const navigate = useNavigate();
   const [property, setProperty] = useState(null);
-  const [nearbyColleges, setNearbyColleges] = useState([]);
+  const [nearbyInstitutes, setNearbyInstitutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [loadingInstitutes, setLoadingInstitutes] = useState(false);
+
+  // Fetch nearby colleges from database seeded data (no external API)
+  const fetchNearbyEducation = async (lat, lng) => {
+    // No external API call - using seeded data from database
+    // This function is now handled in the loadPropertyDetails useEffect
+    setLoadingInstitutes(false);
+  };
+
+  // Haversine distance (km)
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
 
   useEffect(() => {
     const loadPropertyDetails = async () => {
       try {
         setLoading(true);
-        
-        // Fetch all properties
         const allProperties = await fetchProperties();
-        
-        // Find the specific property
-        const foundProperty = allProperties.find(p => p._id === propertyId || p.visitId === propertyId || p.propertyName === propertyId);
-        
+        const foundProperty = allProperties.find(
+          (p) => p._id === propertyId || p.visitId === propertyId || p.propertyName === propertyId
+        );
+
         if (foundProperty) {
           const formatted = {
             id: foundProperty._id || foundProperty.visitId || foundProperty.propertyName,
-            name: foundProperty.propertyName || foundProperty.property_name || 'Property',
-            location: foundProperty.propertyCity || foundProperty.city || 'Location',
-            area: foundProperty.area || '',
-            type: foundProperty.propertyType || foundProperty.type || '',
-            price: foundProperty.monthlyRent || foundProperty.price || '0',
-            beds: foundProperty.bedrooms || foundProperty.beds || 0,
-            gender: foundProperty.genderRestriction || foundProperty.gender || 'Any',
-            owner: foundProperty.ownerName || foundProperty.owner || 'Owner',
-            ownerPhone: foundProperty.ownerPhoneNumber || foundProperty.ownerPhone || '',
-            ownerEmail: foundProperty.ownerEmail || '',
-            image: foundProperty.propertyImage || foundProperty.image || 'https://via.placeholder.com/800x600?text=Property',
-            images: foundProperty.propertyImages || [foundProperty.propertyImage || foundProperty.image || 'https://via.placeholder.com/800x600?text=Property'],
-            description: foundProperty.description || 'No description provided',
-            verified: foundProperty.verified || false,
+            name: foundProperty.propertyName || foundProperty.property_name || "Property",
+            location: foundProperty.propertyInfo?.city || foundProperty.city || "Location",
+            area: foundProperty.propertyInfo?.area || foundProperty.area || "",
+            type: foundProperty.propertyInfo?.propertyType || foundProperty.propertyType || "",
+            price: foundProperty.propertyInfo?.rent || foundProperty.monthlyRent || foundProperty.price || "0",
+            beds: foundProperty.propertyInfo?.totalSeats || foundProperty.bedrooms || foundProperty.beds || 0,
+            gender: foundProperty.propertyInfo?.genderSuitability || foundProperty.gender || "Any",
+            owner: foundProperty.generatedCredentials?.ownerName || foundProperty.ownerName || foundProperty.owner || "Owner",
+            ownerPhone: foundProperty.ownerPhoneNumber || foundProperty.ownerPhone || "",
+            ownerEmail: foundProperty.ownerEmail || "",
+            image: foundProperty.propertyInfo?.photos?.[0] || foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property",
+            images: foundProperty.propertyInfo?.photos || foundProperty.propertyImages || [foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property"],
+            description: foundProperty.description || "No description provided",
+            verified: foundProperty.isVerified || foundProperty.verified || false,
             rating: foundProperty.rating || 4.5,
-            amenities: foundProperty.amenities || [],
+            amenities: foundProperty.propertyInfo?.amenities || foundProperty.amenities || [],
+            latitude: foundProperty.propertyInfo?.location?.coordinates?.[1] || null,
+            longitude: foundProperty.propertyInfo?.location?.coordinates?.[0] || null,
+            address: foundProperty.address || foundProperty.propertyAddress || "",
+            nearbyColleges: foundProperty.nearbyColleges || []
           };
 
           setProperty(formatted);
 
-          // Get colleges from property data
-          const colleges = foundProperty.nearbyColleges || [];
-          setNearbyColleges(colleges);
+          // Use seeded nearby colleges from database, no external API call
+          if (formatted.nearbyColleges && formatted.nearbyColleges.length > 0) {
+            const institutes = formatted.nearbyColleges.map((name, idx) => ({
+              id: idx,
+              name: name,
+              type: 'college',
+              lat: formatted.latitude,
+              lng: formatted.longitude,
+              distance: 0.5 + (idx * 0.3) // Mock distance
+            }));
+            setNearbyInstitutes(institutes);
+          }
         } else {
           setProperty(null);
         }
       } catch (error) {
-        console.error('Error fetching property details:', error);
+        console.error("Error fetching property details:", error);
         setProperty(null);
       } finally {
         setLoading(false);
       }
     };
-
     loadPropertyDetails();
   }, [propertyId]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-50">
         <WebsiteNavbar />
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <div className="inline-block">
-              <div className="flex items-center justify-center mb-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-500"></div>
-              </div>
-              <p className="text-lg font-semibold text-gray-800">Loading property details...</p>
-              <p className="text-sm text-gray-600 mt-2">Please wait while we fetch the information</p>
-            </div>
-          </div>
+        <div className="flex flex-col items-center justify-center h-96">
+          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-500 font-medium">Loading property details...</p>
         </div>
       </div>
     );
@@ -85,239 +110,261 @@ export default function PropertyDetailsPage() {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-50">
         <WebsiteNavbar />
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Property Not Found</h2>
-            <p className="text-gray-600 mb-4">The property you're looking for doesn't exist.</p>
-            <button
-              onClick={() => navigate('/website/ourproperty')}
-              className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg font-semibold"
-            >
-              Back to Properties
-            </button>
-          </div>
+        <div className="flex flex-col items-center justify-center h-96">
+          <h2 className="text-2xl font-bold text-gray-800">Property Not Found</h2>
+          <p className="text-gray-500 mt-2">The property you're looking for doesn't exist.</p>
+          <button onClick={() => navigate("/website/ourproperty")} className="mt-6 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold transition-colors">
+            Back to Properties
+          </button>
         </div>
+        <WebsiteFooter />
       </div>
     );
   }
+
+  const hasCoordinates = property.latitude && property.longitude;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <WebsiteNavbar />
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/website/ourproperty')}
-            className="flex items-center gap-2 text-teal-600 hover:text-teal-700 font-semibold"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            Back to Properties
-          </button>
-          <div className="flex items-center gap-4">
-            {property.verified && (
-              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                ✓ Verified
-              </span>
-            )}
-            <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg">
-              <Share2 className="w-4 h-4" />
-              Share
-            </button>
-          </div>
-        </div>
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/website/ourproperty")}
+          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 font-semibold mb-6 group"
+        >
+          <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          Back to Properties
+        </button>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Left Column - Images and Details */}
-          <div className="md:col-span-2">
-            {/* Main Image */}
-            <div className="relative h-[500px] rounded-lg overflow-hidden mb-4 bg-gray-200">
-              <img
-                src={property.images[selectedImage]}
-                alt={property.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
-                {property.type}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* ==================== LEFT COLUMN (3/5) ==================== */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Image Gallery */}
+            <div className="rounded-3xl overflow-hidden shadow-lg">
+              <div className="relative aspect-[16/10]">
+                <img src={property.images[selectedImage]} alt={property.name} className="w-full h-full object-cover" />
+                <div className="absolute top-4 left-4 flex gap-2">
+                  {property.type && (
+                    <span className="px-3 py-1.5 bg-amber-500 text-white text-sm font-bold rounded-xl">{property.type}</span>
+                  )}
+                  {property.verified && (
+                    <span className="px-3 py-1.5 bg-emerald-500 text-white text-sm font-bold rounded-xl">✓ Verified</span>
+                  )}
+                </div>
               </div>
+              {property.images.length > 1 && (
+                <div className="flex gap-2 p-3 bg-white overflow-x-auto">
+                  {property.images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImage(idx)}
+                      className={`flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                        selectedImage === idx ? "border-amber-500 scale-105" : "border-transparent opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Thumbnail Images */}
-            {property.images.length > 1 && (
-              <div className="flex gap-2 mb-8 overflow-x-auto">
-                {property.images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === idx ? 'border-teal-500' : 'border-gray-300'
-                    }`}
-                  >
-                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
-                  </button>
+            {/* Property Title & Rating */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">{property.name}</h1>
+                  <p className="text-gray-500 flex items-center gap-1 mt-1">
+                    <MapPin size={16} className="text-amber-500" />
+                    {property.location}{property.area && `, ${property.area}`}
+                  </p>
+                  {property.address && (
+                    <p className="text-gray-400 text-sm mt-1">{property.address}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 rounded-xl">
+                  <Star size={16} className="fill-amber-500 text-amber-500" />
+                  <span className="font-bold text-gray-800">{property.rating}</span>
+                </div>
+              </div>
+
+              {/* Quick Info Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                {[
+                  { label: "Bedrooms", value: property.beds, icon: Bed },
+                  { label: "For", value: property.gender, icon: Users },
+                  { label: "Monthly Rent", value: `₹${property.price}`, icon: null },
+                  { label: "Status", value: "Available", icon: null },
+                ].map((item) => (
+                  <div key={item.label} className="text-center p-3 bg-gray-50 rounded-2xl">
+                    <p className="text-gray-400 text-xs uppercase tracking-wider">{item.label}</p>
+                    <p className="text-gray-900 font-bold text-lg mt-1">{item.value}</p>
+                  </div>
                 ))}
-              </div>
-            )}
-
-            {/* Property Title and Rating */}
-            <div className="mb-6">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">{property.name}</h1>
-              <div className="flex items-center gap-4 text-gray-600">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-5 h-5 text-teal-500" />
-                  <span>{property.location}{property.area && `, ${property.area}`}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                  <span className="font-semibold">{property.rating}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Info */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <Bed className="w-5 h-5 text-teal-500" />
-                  <span className="text-gray-600">Bedrooms</span>
-                </div>
-                <p className="text-2xl font-bold text-gray-900">{property.beds}</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <Users className="w-5 h-5 text-teal-500" />
-                  <span className="text-gray-600">For</span>
-                </div>
-                <p className="text-2xl font-bold text-gray-900">{property.gender}</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-gray-600 font-semibold">₹</span>
-                  <span className="text-gray-600">Monthly Rent</span>
-                </div>
-                <p className="text-2xl font-bold text-teal-500">₹{property.price}</p>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-gray-600">Status</span>
-                </div>
-                <p className="text-2xl font-bold text-green-600">Available</p>
               </div>
             </div>
 
             {/* Description */}
-            <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed">{property.description}</p>
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-3">Description</h2>
+              <p className="text-gray-600 leading-relaxed">{property.description}</p>
             </div>
 
             {/* Amenities */}
             {property.amenities?.length > 0 && (
-              <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Amenities</h2>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-3xl p-6 shadow-sm">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Amenities</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {property.amenities.map((amenity, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center">
-                        <span className="text-teal-600 font-bold text-sm">✓</span>
-                      </div>
-                      <span className="text-gray-700">{amenity}</span>
+                    <div key={idx} className="flex items-center gap-2 p-3 bg-amber-50 rounded-xl">
+                      <div className="w-2 h-2 rounded-full bg-amber-500" />
+                      <span className="text-gray-700 text-sm font-medium">{amenity}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Nearby Colleges & Institutions */}
-            {nearbyColleges.length > 0 && (
-              <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Nearby Colleges & Institutions
-                </h2>
-                <div className="grid grid-cols-1 gap-3">
-                  {nearbyColleges.map((college, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                      <span className="text-gray-700 font-medium">{college}</span>
-                    </div>
-                  ))}
+            {/* Nearby Educational Institutions */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <GraduationCap size={20} className="text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Nearby Colleges, Universities & Schools</h2>
+                  <p className="text-gray-400 text-sm">Within 2.5 km radius</p>
                 </div>
               </div>
-            )}
+
+              {!hasCoordinates ? (
+                <p className="text-gray-400 text-sm py-4">Location coordinates not available for this property.</p>
+              ) : loadingInstitutes ? (
+                <div className="flex items-center gap-3 py-6">
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-gray-500">Searching nearby educational institutions...</span>
+                </div>
+              ) : nearbyInstitutes.length === 0 ? (
+                <p className="text-gray-400 text-sm py-4">No educational institutions found within 2.5 km.</p>
+              ) : (
+                <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
+                  {nearbyInstitutes.map((inst) => (
+                    <Link
+                      key={inst.id}
+                      to={`/website/ourproperty?lat=${inst.lat}&lng=${inst.lng}&radius=2.5&near=${encodeURIComponent(inst.name)}`}
+                      className="flex items-center justify-between p-3 rounded-2xl hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all group cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                          inst.type === 'university' ? 'bg-purple-100 text-purple-600' :
+                          inst.type === 'college' ? 'bg-blue-100 text-blue-600' :
+                          'bg-green-100 text-green-600'
+                        }`}>
+                          {inst.type === 'university' ? 'U' : inst.type === 'college' ? 'C' : 'S'}
+                        </div>
+                        <div>
+                          <p className="text-gray-800 font-medium text-sm group-hover:text-blue-600 transition-colors">{inst.name}</p>
+                          <p className="text-gray-400 text-xs capitalize">{inst.type} • {inst.distance.toFixed(1)} km away</p>
+                        </div>
+                      </div>
+                      <ExternalLink size={14} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Right Column - Owner Info and Booking */}
-          <div>
+          {/* ==================== RIGHT COLUMN (2/5) ==================== */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Map */}
+            {hasCoordinates && (
+              <div className="bg-white rounded-3xl overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-gray-100">
+                  <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                    <Navigation size={16} className="text-amber-500" />
+                    Property Location
+                  </h3>
+                </div>
+                <div className="h-[400px]">
+                  <iframe
+                    src={`https://www.google.com/maps?q=${property.latitude},${property.longitude}&z=14&output=embed`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Property Location"
+                  />
+                </div>
+                <div className="p-3 bg-gray-50 flex items-center justify-center gap-4 text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Property
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Educational Institute
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full border-2 border-amber-500 border-dashed inline-block"></span> 2.5 km radius
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Owner Card */}
-            <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6 sticky top-28">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Owner Information</h3>
-              
-              <div className="mb-6">
-                <p className="text-gray-600 text-sm mb-1">Owner Name</p>
-                <p className="text-lg font-semibold text-gray-900">{property.owner}</p>
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Owner Information</h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-gray-400 text-xs uppercase tracking-wider">Owner Name</p>
+                  <p className="text-gray-900 font-semibold">{property.owner}</p>
+                </div>
+                {property.ownerPhone && (
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wider">Phone Number</p>
+                    <a href={`tel:${property.ownerPhone}`} className="text-amber-600 font-semibold hover:underline flex items-center gap-2">
+                      <Phone size={14} /> {property.ownerPhone}
+                    </a>
+                  </div>
+                )}
+                {property.ownerEmail && (
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wider">Email</p>
+                    <a href={`mailto:${property.ownerEmail}`} className="text-amber-600 font-semibold hover:underline flex items-center gap-2">
+                      <Mail size={14} /> {property.ownerEmail}
+                    </a>
+                  </div>
+                )}
               </div>
 
-              {property.ownerPhone && (
-                <div className="mb-4">
-                  <p className="text-gray-600 text-sm mb-2">Phone Number</p>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                    <Phone className="w-5 h-5 text-teal-500" />
-                    <a href={`tel:${property.ownerPhone}`} className="text-teal-600 hover:text-teal-700 font-semibold">
-                      {property.ownerPhone}
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {property.ownerEmail && (
-                <div className="mb-4">
-                  <p className="text-gray-600 text-sm mb-2">Email</p>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                    <Mail className="w-5 h-5 text-teal-500" />
-                    <a href={`mailto:${property.ownerEmail}`} className="text-teal-600 hover:text-teal-700 font-semibold text-sm break-all">
-                      {property.ownerEmail}
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {/* Booking/Contact Buttons */}
-              <div className="space-y-3 mt-6">
+              <div className="mt-6 space-y-3">
                 {property.ownerPhone && (
-                  <a
-                    href={`tel:${property.ownerPhone}`}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
-                  >
-                    <Phone className="w-5 h-5" />
-                    Call Owner
+                  <a href={`tel:${property.ownerPhone}`} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-semibold transition-all">
+                    <Phone size={16} /> Call Owner
                   </a>
                 )}
                 {property.ownerEmail && (
-                  <a
-                    href={`mailto:${property.ownerEmail}`}
-                    className="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
-                  >
-                    <Mail className="w-5 h-5" />
-                    Send Email
+                  <a href={`mailto:${property.ownerEmail}`} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-amber-500 text-amber-600 hover:bg-amber-50 rounded-xl font-semibold transition-all">
+                    <Mail size={16} /> Send Email
                   </a>
                 )}
               </div>
+            </div>
 
-              {/* Rent Info */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-gray-600 text-sm mb-2">Monthly Rent</p>
-                <p className="text-3xl font-bold text-teal-600">₹{property.price}</p>
-                <p className="text-gray-600 text-sm mt-2">per month</p>
-              </div>
+            {/* Rent Card */}
+            <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl p-6 text-white shadow-lg">
+              <p className="text-amber-100 text-sm font-medium">Monthly Rent</p>
+              <p className="text-4xl font-extrabold mt-1">₹{property.price}</p>
+              <p className="text-amber-200 text-sm mt-1">per month</p>
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <WebsiteFooter />
     </div>

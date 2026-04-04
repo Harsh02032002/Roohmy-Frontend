@@ -88,10 +88,11 @@ export default function WebsiteNavbar() {
             <div className="hidden md:flex items-center space-x-6">
               <a href="/website/index" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">Home</a>
               <a href="/website/ourproperty" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">Properties</a>
-              <a href="/website/list" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">List Property</a>
+              
               <a href="/website/faq" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">FAQ</a>
               <a href="/website/about" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">About</a>
               <a href="/website/contact" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">Contact</a>
+              <a href="/website/list" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">List Property</a>
             </div>
 
             <div className="flex items-center space-x-2 md:space-x-4">

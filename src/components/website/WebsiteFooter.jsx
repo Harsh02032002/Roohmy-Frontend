@@ -82,7 +82,7 @@ export default function WebsiteFooter() {
                 className="h-10 w-auto"
               />
             </a>
-            <p className="mt-4 text-sm text-gray-600 max-w-sm">
+            <p className="mt-4 text-sm text-gray-900 max-w-sm">
               Find student housing smarter, simpler, and broker-free.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
@@ -121,7 +121,7 @@ export default function WebsiteFooter() {
                   <ul className="mt-3 space-y-2">
                     {col.links.map((l) => (
                       <li key={l.href}>
-                        <a className="text-sm text-gray-600 hover:text-teal-600 font-medium" href={l.href}>
+                        <a className="text-sm text-gray-900 hover:text-teal-600 font-medium" href={l.href}>
                           {l.label}
                         </a>
                       </li>
@@ -140,17 +140,17 @@ export default function WebsiteFooter() {
               <a
                 key={city.name}
                 href={city.href}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 hover:border-teal-500 hover:text-teal-600 text-sm text-gray-600 rounded-full transition-colors font-medium"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 hover:border-teal-500 hover:text-teal-600 text-sm text-gray-900 rounded-full transition-colors font-medium"
               >
                 <span>{city.name}</span>
-                <span className="text-xs text-gray-400">({city.count})</span>
+                <span className="text-xs text-gray-700">({city.count})</span>
               </a>
             ))}
           </div>
         </div>
 
         <div className="mt-8 pt-5 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-          <div className="text-xs text-gray-500 font-medium">© {year} Roomhy. All rights reserved.</div>
+          <div className="text-xs text-gray-900 font-medium">© {year} Roomhy. All rights reserved.</div>
           <div className="flex flex-wrap items-center gap-4 text-xs">
             <a className="text-gray-600 hover:text-teal-600 font-medium" href="/website/terms">
               Terms
