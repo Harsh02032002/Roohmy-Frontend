@@ -28,14 +28,14 @@ export function useWebsiteLogin() {
         throw new Error(data.message || "Login failed");
       }
       
-      // Store token and user data
+      // Store token and user data (use 'userData' key to match AuthContext)
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("userData", JSON.stringify(data.user));
       localStorage.setItem("userId", data.user.id);
       localStorage.setItem("userEmail", data.user.email);
       
-      // Redirect to home or my stays
-      window.location.href = "/website/mystays";
+      // Redirect to home page
+      window.location.href = "/website/index";
       
     } catch (err) {
       console.error("Login error:", err);

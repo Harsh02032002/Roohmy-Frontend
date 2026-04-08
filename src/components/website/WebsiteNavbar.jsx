@@ -1,13 +1,16 @@
-import { Building2, Users, Search, MapPin, Home } from 'lucide-react';
+import { Building2, Users, Search, MapPin, Home, MessageSquare, User, LogOut, Settings, ChevronDown, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { fetchCities, fetchAreas } from '../../utils/api';
 import LocationMapPicker from './LocationMapPicker';
 
 export default function WebsiteNavbar() {
   const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [selectedCity, setSelectedCity] = useState('');
@@ -72,6 +75,24 @@ export default function WebsiteNavbar() {
     console.log('Selected location:', location);
   };
 
+  const handleLogout = () => {
+    logout();
+    setShowUserDropdown(false);
+    navigate('/website/index');
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserDropdown && !event.target.closest('.user-dropdown')) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserDropdown]);
+
   return (
     <>
       <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -102,12 +123,115 @@ export default function WebsiteNavbar() {
               >
                 <Search className="w-6 h-6 text-gray-700" />
               </button>
-              <a href="/website/fast-bidding" className="bg-orange-500 hover:bg-orange-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg text-sm md:text-base whitespace-nowrap">
-                BidNow
+              <a href="/website/fast-bidding" className="bg-orange-500 hover:bg-orange-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg text-sm md:text-base whitespace-nowrap flex items-center gap-2">
+                <span className="hidden md:inline">Bid</span>
+                Now
               </a>
-              <a href="/login" className="text-gray-700 hover:text-teal-500 transition-colors">
-                <Users className="w-6 h-6" />
-              </a>
+              
+              {isAuthenticated && user ? (
+                <div 
+                  className="relative user-dropdown"
+                  onMouseEnter={() => setShowUserDropdown(true)}
+                  onMouseLeave={() => setShowUserDropdown(false)}
+                >
+                  <button
+                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-semibold">
+                        {user.name?.charAt(0)?.toUpperCase() || user.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <span className="hidden md:inline text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                      {user.name || user.firstName || user.fullName || 'User'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {showUserDropdown && (
+                    <div className="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 overflow-hidden">
+                      {/* User Info Header */}
+                      <div className="px-4 py-3 bg-gradient-to-r from-teal-50 to-blue-50 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-semibold">
+                              {user.name?.charAt(0)?.toUpperCase() || user.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {user.name || user.firstName || user.fullName || 'User'}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {user.email || user.userEmail || user.emailId || user.userId || 'user@roomhy.com'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Menu Items */}
+                      <div className="py-1">
+                        <button
+                          onClick={() => { setShowUserDropdown(false); navigate('/website/profile'); }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <User className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <span className="font-medium">My Profile</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => { setShowUserDropdown(false); navigate('/website/mystays'); }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                            <Home className="w-4 h-4 text-green-600" />
+                          </div>
+                          <span className="font-medium">My Stays</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => { setShowUserDropdown(false); navigate('/website/fav'); }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                            <Heart className="w-4 h-4 text-pink-600" />
+                          </div>
+                          <span className="font-medium">Favorites</span>
+                        </button>
+                        
+                        <div className="border-t border-gray-100 my-1"></div>
+                        
+                        <button
+                          onClick={() => { setShowUserDropdown(false); navigate('/website/settings'); }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <Settings className="w-4 h-4 text-gray-600" />
+                          </div>
+                          <span className="font-medium">Settings</span>
+                        </button>
+                        
+                        <button
+                          onClick={handleLogout}
+                          className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                            <LogOut className="w-4 h-4 text-red-600" />
+                          </div>
+                          <span className="font-medium">Logout</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <a href="/login" className="text-gray-700 hover:text-teal-500 transition-colors">
+                  <Users className="w-6 h-6" />
+                </a>
+              )}
             </div>
           </div>
         </div>

@@ -1,19 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, MapPin, Star, BadgeCheck, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, MapPin, Star, BadgeCheck, TrendingUp, ChevronLeft, ChevronRight, X, Building2, Home, Users, MessageSquare, Gavel } from 'lucide-react';
 import HowRoomhyWorks from './components/website/HowRoomhyWorks';
 import WhyRoomhy from './components/website/WhyRoomhy';
 import FindYourHome from './components/website/FindYourHome';
 import WhyStudentsChooseUs from './components/website/WhyStudentsChooseUs';
 import WebsiteNavbar from './components/website/WebsiteNavbar';
 import WebsiteFooter from './components/website/WebsiteFooter';
-import { fetchCities, fetchPropertyTypes } from './utils/api';
+import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   // State for dynamic data
   const [cities, setCities] = useState([]);
   const [offerings, setOfferings] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Search states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [selectedType, setSelectedType] = useState('');
 
   // Static fallback data
   const staticCities = [
@@ -78,6 +87,23 @@ export default function HomePage() {
     },
   ];
 
+  // Helper function to get city images dynamically
+  const getCityImage = (cityName) => {
+    const cityImages = {
+      'Kota': 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Indore': 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Jaipur': 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Delhi': 'https://images.pexels.com/photos/1008646/pexels-photo-1008646.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Bhopal': 'https://images.pexels.com/photos/1603801/pexels-photo-1603801.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Nagpur': 'https://images.pexels.com/photos/1573236/pexels-photo-1573236.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Sikar': 'https://images.pexels.com/photos/574324/pexels-photo-574324.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Mumbai': 'https://images.pexels.com/photos/1139049/pexels-photo-1139049.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Bangalore': 'https://images.pexels.com/photos/1470143/pexels-photo-1470143.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Pune': 'https://images.pexels.com/photos/2404949/pexels-photo-2404949.jpeg?auto=compress&cs=tinysrgb&w=400'
+    };
+    return cityImages[cityName] || 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400';
+  };
+
   // Fetch dynamic data
   useEffect(() => {
     const loadData = async () => {
@@ -85,11 +111,12 @@ export default function HomePage() {
         // Fetch cities
         const citiesData = await fetchCities();
         if (citiesData && citiesData.length > 0) {
-          // Map API data to component format
+          // Map API data to component format - use imageUrl from backend
           const formattedCities = citiesData.map((city, index) => ({
             name: city.name || city,
             properties: city.propertyCount ? `${city.propertyCount}+` : staticCities[index]?.properties || '1,000+',
-            image: city.image || staticCities[index]?.image || 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400'
+            // Use imageUrl from backend, fallback to static images
+            image: city.imageUrl || city.image || staticCities[index]?.image || getCityImage(city.name)
           }));
           setCities(formattedCities);
         } else {
@@ -115,6 +142,115 @@ export default function HomePage() {
 
     loadData();
   }, []);
+
+  // Search handler - search by city, area, property name, type
+  const handleSearch = async (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const lowerQuery = query.toLowerCase();
+    
+    try {
+      // Fetch all properties for search
+      const allProperties = await fetchProperties();
+      
+      // Filter and categorize results
+      const results = [];
+      
+      // 1. Search by City
+      const cityMatches = cities.filter(city => 
+        city.name?.toLowerCase().includes(lowerQuery)
+      ).map(city => ({
+        type: 'city',
+        title: city.name,
+        subtitle: `${city.properties || '1000+'} properties`,
+        link: `/website/ourproperty?city=${encodeURIComponent(city.name.toLowerCase())}`,
+        icon: 'MapPin'
+      }));
+      results.push(...cityMatches);
+      
+      // 2. Search by Property Name
+      const propertyMatches = allProperties.filter(prop => {
+        const propName = prop.propertyName || prop.property_name || prop.name || '';
+        return propName.toLowerCase().includes(lowerQuery);
+      }).slice(0, 5).map(prop => ({
+        type: 'property',
+        title: prop.propertyName || prop.property_name || prop.name,
+        subtitle: `${prop.city || prop.location || ''} - ${prop.propertyType || prop.type || 'Property'}`,
+        link: `/website/property-details/${prop._id || prop.visitId}`,
+        icon: 'Building2'
+      }));
+      results.push(...propertyMatches);
+      
+      // 3. Search by Property Type
+      const typeMatches = offerings.filter(offering => 
+        offering.title?.toLowerCase().includes(lowerQuery) ||
+        offering.category?.toLowerCase().includes(lowerQuery)
+      ).map(offering => ({
+        type: 'type',
+        title: offering.title,
+        subtitle: `Find ${offering.title} accommodations`,
+        link: `/website/ourproperty?type=${encodeURIComponent(offering.category.toLowerCase())}`,
+        icon: 'Home'
+      }));
+      results.push(...typeMatches);
+      
+      setSearchResults(results.slice(0, 8));
+      setShowSearchDropdown(true);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        handleSearch(searchQuery);
+      }
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Handle search submit
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setHasSearched(true);
+    
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) {
+      params.append('search', searchQuery.trim());
+    }
+    if (selectedType) {
+      params.append('type', selectedType.toLowerCase());
+    }
+    
+    const queryString = params.toString();
+    const navigateUrl = queryString ? `/website/ourproperty?${queryString}` : '/website/ourproperty';
+    
+    navigate(navigateUrl);
+    setShowSearchDropdown(false);
+  };
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showSearchDropdown && !event.target.closest('.search-container')) {
+        setShowSearchDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSearchDropdown]);
 
   const featuredProperties = [
     {
@@ -330,28 +466,67 @@ export default function HomePage() {
               Search verified PGs, hostels & co-living spaces across 50+ Indian cities
             </p>
 
-            <div className="max-w-5xl mx-auto w-full px-4">
-              <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-3 flex flex-col md:flex-row gap-3">
+            <div className="max-w-5xl mx-auto w-full px-4 search-container relative">
+              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-3 flex flex-col md:flex-row gap-3">
                 <div className="relative">
-                  <select className="appearance-none bg-teal-50 text-gray-700 px-6 py-4 pr-12 rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[140px] text-lg">
-                    <option value="PG">PG</option>
-                    <option value="Hostel">Hostel</option>
-                    <option value="Co-living">Co-living</option>
-                    <option value="Apartment">Apartment</option>
+                  <select 
+                    className="appearance-none bg-teal-50 text-gray-700 px-6 py-4 pr-12 rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[140px] text-lg"
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                  >
+                    <option value="">Type</option>
+                    <option value="pg">PG</option>
+                    <option value="hostel">Hostel</option>
+                    <option value="co-living">Co-living</option>
+                    <option value="apartment">Apartment</option>
                   </select>
                 </div>
-                <div className="flex-1 flex items-center px-6 py-4 bg-gray-50 rounded-2xl">
+                <div className="flex-1 flex items-center px-6 py-4 bg-gray-50 rounded-2xl relative">
                   <Search className="w-6 h-6 text-gray-400 mr-4" />
                   <input
                     type="text"
-                    placeholder="Search for PG, Hostel, or City..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search city, area, PG name, hostel..."
                     className="flex-1 bg-transparent outline-none text-gray-700 text-lg"
                   />
+                  {isSearching && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
                 </div>
-                <button className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-12 py-4 rounded-2xl font-bold text-lg transition-all">
+                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-12 py-4 rounded-2xl font-bold text-lg transition-all">
                   Search
                 </button>
-              </div>
+              </form>
+              
+              {/* Search Suggestions Dropdown */}
+              {showSearchDropdown && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-50">
+                  <div className="max-h-80 overflow-y-auto">
+                    {searchResults.map((result, idx) => (
+                      <Link
+                        key={idx}
+                        to={result.link}
+                        onClick={() => setShowSearchDropdown(false)}
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          {result.icon === 'MapPin' && <MapPin className="w-5 h-5 text-teal-600" />}
+                          {result.icon === 'Building2' && <Building2 className="w-5 h-5 text-teal-600" />}
+                          {result.icon === 'Home' && <Home className="w-5 h-5 text-teal-600" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{result.title}</p>
+                          <p className="text-sm text-gray-500">{result.subtitle}</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -440,9 +615,10 @@ export default function HomePage() {
                 };
                 
                 return (
-                  <div
+                  <Link
                     key={offering.title}
-                    className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-all group"
+                    to={`/website/ourproperty?type=${offering.category.toLowerCase()}`}
+                    className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-all group block cursor-pointer"
                   >
                     {/* Main Large Image - with arrows and hover content */}
                     <div className="h-48 overflow-hidden relative">
@@ -487,34 +663,56 @@ export default function HomePage() {
                         {selectedIdx + 1} / {totalImages}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
           </div>
         </section>
 
-        {/* How Roomhy Works - Video Section 
-        <section className="py-16 bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">How Roomhy Works</h2>
-              <p className="text-lg text-white/90">Watch how easy it is to find your perfect stay</p>
-            </div>
-            
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black">
-              <iframe
-                className="w-full h-full"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0"
-                title="How Roomhy Works"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-          </div>
-        </section>
-*/}
+        {/* How Roomhy Works - Video Section */}
+        {/* How Roomhy Works - Improved Section */}
+<section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    {/* Heading */}
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+        How Roomhy Works
+      </h2>
+      <p className="text-lg text-gray-600">
+        Find, compare, and book your perfect stay in just a few steps
+      </p>
+    </div>
+
+    {/* Video Container */}
+    <div className="relative rounded-3xl overflow-hidden shadow-xl group">
+
+      {/* Overlay Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10"></div>
+
+      {/* Video */}
+    <iframe
+  width="100%"
+  height="500"
+  src="https://www.youtube.com/embed/4pFUP0HZwWM"
+  title="YouTube video"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+      {/* Play Badge */}
+      <div className="absolute bottom-5 left-5 z-20 text-white">
+        <h3 className="text-xl font-semibold">Watch Demo</h3>
+        <p className="text-sm text-white/80">See how booking works</p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
         {/* Trending Stays - Carousel with 12 properties */}
         <section className="py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -587,11 +785,121 @@ export default function HomePage() {
 
         {/* Why Choose Roomhy - Combined Section */}
         <WhyRoomhy />
-      </main>
+        
+        {/* Reviews Slider Section - Auto Sliding */}
+        <section className="py-16 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+            <div className="text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">What Students Say</h2>
+              <p className="text-lg text-gray-600">Trusted by 10,000+ students across India</p>
+            </div>
+          </div>
+          
+          {/* Auto-sliding Reviews Carousel */}
+          <div className="relative">
+            <div className="flex animate-scroll-left hover:pause-animation">
+              {/* First set of reviews */}
+              {[...Array(2)].flatMap((_, setIdx) => [
+                {
+                  name: "Rahul Sharma",
+                  role: "IIT Delhi Student",
+                  rating: 5,
+                  text: "Roomhy made finding my hostel so easy! Zero brokerage and the bidding feature helped me get a great deal.",
+                  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
+                },
+                {
+                  name: "Priya Patel",
+                  role: "Medical Student",
+                  rating: 5,
+                  text: "The 24/7 support team helped me find a safe PG near my college. Best platform for students!",
+                  avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face"
+                },
+                {
+                  name: "Amit Kumar",
+                  role: "Engineering Student",
+                  rating: 5,
+                  text: "Found a fully furnished apartment in just 2 days. The direct chat with owners saved so much time.",
+                  avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face"
+                },
+                {
+                  name: "Sneha Gupta",
+                  role: "MBA Student",
+                  rating: 5,
+                  text: "Love the verified listings! No fake photos or hidden charges. Roomhy is a game changer.",
+                  avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face"
+                },
+                {
+                  name: "Vikram Singh",
+                  role: "Law Student",
+                  rating: 4,
+                  text: "The ₹500 booking token is such a smart feature. It shows owners you're serious about renting.",
+                  avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
+                },
+                {
+                  name: "Anjali Mehta",
+                  role: "CA Student",
+                  rating: 5,
+                  text: "Moved to Kota for coaching and found the perfect hostel within a day. Thank you Roomhy!",
+                  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face"
+                }
+              ].map((review, idx) => (
+                <div key={`${setIdx}-${idx}`} className="flex-shrink-0 w-[350px] mx-3">
+                  <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 h-full">
+                    <div className="flex items-center gap-3 mb-4">
+                      <img 
+                        src={review.avatar} 
+                        alt={review.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-teal-100"
+                      />
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{review.name}</h4>
+                        <p className="text-sm text-gray-500">{review.role}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i}
+                          className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-gray-600 text-sm leading-relaxed italic">"{review.text}"</p>
+                  </div>
+                </div>
+              )))}
+            </div>
+          </div>
+          
+          {/* Custom CSS for animation */}
+          <style>{`
+            @keyframes scroll-left {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-scroll-left {
+              animation: scroll-left 30s linear infinite;
+            }
+            .animate-scroll-left:hover {
+              animation-play-state: paused;
+            }
+          `}</style>
+        </section>
 
+      </main>
+            
       <WebsiteFooter />
 
-      {/* Floating BidNow Button - rounded pill shape */}
+      {/* Floating Chat Now Button */}
+      <Link
+        to="/website/chat"
+        className="fixed bottom-48 right-6 z-50 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full font-bold hover:shadow-2xl transition-all flex items-center gap-2 shadow-xl group px-4 py-4 overflow-hidden"
+      >
+        <MessageSquare className="h-5 w-5 flex-shrink-0" />
+        <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">Chat Now</span>
+      </Link>
+
+      {/* Floating BidNow Button */}
       <Link
         to="/website/fast-bidding"
         className="fixed bottom-32 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full font-bold hover:shadow-2xl transition-all flex items-center gap-2 shadow-xl group px-4 py-4 overflow-hidden"

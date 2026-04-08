@@ -78,12 +78,12 @@ export const fetchProperties = async () => {
     const data = await fetchJson('/api/approved-properties/public/approved');
     const properties = Array.isArray(data) ? data : data?.properties || data?.data || [];
     
+    console.log('📊 API returned', properties.length, 'properties');
+    
     // Ensure all required fields are present with fallback values
     return properties
-      .filter(p => p.isLiveOnWebsite === true || p.status === 'live' || p.status === 'approved')
       .map(p => ({
         ...p,
-        // Ensure all required fields exist
         property_name: p.property_name || p.propertyName || p.propertyInfo?.name || 'Property',
         city: p.city || p.propertyInfo?.city || 'Unknown',
         owner_name: p.owner_name || p.ownerName || p.generatedCredentials?.ownerName || p.approvedBy || 'Verified Owner',
@@ -116,9 +116,29 @@ export const fetchStats = async () => {
 };
 
 // Fetch reviews from backend
-export const fetchReviews = async () => {
+export const fetchReviews = async (limit = 10) => {
   try {
-    const data = await fetchJson('/api/reviews/public');
+    const data = await fetchJson(`/api/reviews?limit=${limit}`);
+    return data.data || data || [];
+  } catch (error) {
+    return [];
+  }
+};
+
+// Fetch featured reviews for homepage
+export const fetchFeaturedReviews = async (limit = 6) => {
+  try {
+    const data = await fetchJson(`/api/reviews/featured?limit=${limit}`);
+    return data.data || data || [];
+  } catch (error) {
+    return [];
+  }
+};
+
+// Fetch top rated reviews
+export const fetchTopRatedReviews = async (limit = 6) => {
+  try {
+    const data = await fetchJson(`/api/reviews/top-rated?limit=${limit}`);
     return data.data || data || [];
   } catch (error) {
     return [];
@@ -138,6 +158,44 @@ export const submitBid = async (bidData) => {
   return fetchJson('/api/booking/create', {
     method: 'POST',
     body: JSON.stringify(bidData)
+  });
+};
+
+// Reviews API
+export const getPropertyReviews = async (propertyId) => {
+  try {
+    const data = await fetchJson(`/api/reviews/property/${propertyId}`);
+    return data.data || [];
+  } catch (error) {
+    console.error('Error fetching property reviews:', error);
+    return [];
+  }
+};
+
+export const getPropertyReviewStats = async (propertyId) => {
+  try {
+    const data = await fetchJson(`/api/reviews/property/${propertyId}/stats`);
+    return data.data || { avgRating: 0, totalReviews: 0, ratingBreakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
+  } catch (error) {
+    console.error('Error fetching property review stats:', error);
+    return { avgRating: 0, totalReviews: 0, ratingBreakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
+  }
+};
+
+export const checkUserReview = async (propertyId) => {
+  try {
+    const data = await fetchJson(`/api/reviews/property/${propertyId}/user-review`);
+    return data;
+  } catch (error) {
+    console.error('Error checking user review:', error);
+    return { hasReviewed: false, review: null };
+  }
+};
+
+export const submitReview = async (reviewData) => {
+  return fetchJson('/api/reviews', {
+    method: 'POST',
+    body: JSON.stringify(reviewData)
   });
 };
 
@@ -382,6 +440,21 @@ export const getPriceRangeByType = async (propertyType) => {
   }
 };
 
+// Fetch all colleges for properties from backend
+export const fetchAllCollegesForProperties = async () => {
+  try {
+    const data = await fetchJson('/api/approved-properties/colleges/all');
+    return {
+      colleges: data.colleges || [],
+      allColleges: data.allColleges || [],
+      success: data.success || false
+    };
+  } catch (error) {
+    console.error('Error fetching colleges:', error);
+    return { colleges: [], allColleges: [], success: false };
+  }
+};
+
 // Fetch nearby colleges/institutes from OpenStreetMap API
 export const fetchNearbyColleges = async (latitude, longitude, city = '', radiusKm = 2) => {
   try {
@@ -493,4 +566,46 @@ export const enrichPropertiesWithColleges = async (properties) => {
     console.error('Error enriching properties:', error);
     return properties;
   }
-}
+};
+
+// ============================================================
+// SEPARATE COLLEGES API - Completely independent from properties
+// ============================================================
+
+// Fetch colleges for a single city from backend (calls Overpass API)
+export const fetchCollegesForCity = async (city) => {
+  try {
+    console.log(`🎓 Fetching colleges for city: ${city}`);
+    const data = await fetchJson(`/api/colleges/fetch-nearby?city=${encodeURIComponent(city)}`);
+    
+    if (data.success) {
+      console.log(`✅ Found ${data.count} colleges for ${city}`);
+      return data.colleges || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching colleges for city:', error);
+    return [];
+  }
+};
+
+// Fetch colleges for ALL cities from backend (with delays, takes 20-30 seconds)
+export const fetchAllCollegesFromBackend = async () => {
+  try {
+    console.log('🎓 Fetching all colleges from backend (this may take 20-30 seconds)...');
+    const data = await fetchJson('/api/colleges/fetch-all-cities');
+    
+    if (data.success) {
+      console.log(`✅ Found ${data.totalColleges} colleges across ${data.cityCount} cities`);
+      return {
+        allColleges: data.allColleges || [],
+        cities: data.cities || {},
+        totalColleges: data.totalColleges || 0
+      };
+    }
+    return { allColleges: [], cities: {}, totalColleges: 0 };
+  } catch (error) {
+    console.error('Error fetching all colleges:', error);
+    return { allColleges: [], cities: {}, totalColleges: 0 };
+  }
+};

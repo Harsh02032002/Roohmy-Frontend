@@ -59,12 +59,31 @@ export default function ListYourPropertyPage() {
 
     setLoading(true);
     try {
-      await submitEnquiry({
-        ...formData,
-        enquiryType: 'list_property',
-        status: 'pending',
-        submittedAt: new Date().toISOString()
-      });
+      // Convert field names to match backend requirements
+      const enquiryData = {
+        property_type: formData.propertyType || 'pg',
+        property_name: formData.propertyName,
+        city: formData.city,
+        locality: formData.area || '',
+        address: formData.address || '',
+        pincode: '',
+        description: formData.description || '',
+        amenities: [],
+        gender_suitability: '',
+        rent: parseInt(formData.rent) || 0,
+        deposit: '',
+        owner_name: formData.ownerName,
+        owner_email: formData.email,
+        owner_phone: formData.phone,
+        contact_name: formData.ownerName,
+        country: 'India',
+        tenants_managed: 0,
+        additional_message: formData.description || '',
+        photos: []
+      };
+      
+      console.log('Submitting enquiry with data:', enquiryData);
+      await submitEnquiry(enquiryData);
 
       setShowSuccess(true);
       // Clear form

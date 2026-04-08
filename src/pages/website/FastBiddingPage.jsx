@@ -97,24 +97,55 @@ export default function FastBiddingPage() {
         const minPrice = parseInt(form.minPrice || 0);
         const maxPrice = parseInt(form.maxPrice || 0);
 
-        const filtered = allProperties.filter(prop => {
+        console.log('Filtering properties:', {
+          totalProperties: allProperties.length,
+          areaName,
+          gender,
+          minPrice,
+          maxPrice
+        });
+
+        let rejectionReasons = { area: 0, gender: 0, rent: 0 };
+        
+        const filtered = allProperties.filter((prop, index) => {
+          const propName = prop.propertyName || prop.property_name || `Property ${index}`;
           const propArea = (prop.locality || prop.propertyInfo?.area || '').toString().toLowerCase().trim();
           const areaMatch = areaName ? (propArea.includes(areaName) || areaName.includes(propArea)) : true;
-          if (!areaMatch) return false;
+          
+          if (!areaMatch) {
+            if (index < 3) console.log(`❌ ${propName}: Area mismatch - propArea: "${propArea}", looking for: "${areaName}"`);
+            rejectionReasons.area++;
+            return false;
+          }
 
           if (gender) {
             const propGender = (prop.gender || prop.propertyInfo?.gender || '').toString().toLowerCase();
             const genderMatch = propGender.includes('co-ed') || propGender.includes(gender) || gender.includes(propGender);
-            if (propGender && !genderMatch) return false;
+            if (propGender && !genderMatch) {
+              if (index < 3) console.log(`❌ ${propName}: Gender mismatch - propGender: "${propGender}", looking for: "${gender}"`);
+              rejectionReasons.gender++;
+              return false;
+            }
           }
 
           if (minPrice || maxPrice) {
-            const rent = parseInt(prop.monthlyRent || prop.rent || prop.propertyInfo?.rent || 0);
-            if (minPrice && rent < minPrice) return false;
-            if (maxPrice && maxPrice !== 50000 && rent > maxPrice) return false;
+            const rawRent = prop.monthlyRent || prop.rent || prop.propertyInfo?.rent || 0;
+            const rent = parseInt(rawRent);
+            const rentInRange = (!minPrice || rent >= minPrice) && (!maxPrice || maxPrice === 50000 || rent <= maxPrice);
+            
+            console.log(`${rentInRange ? '✅' : '❌'} ${propName}: Rent ${rent} (raw: ${rawRent}) - Range: ${minPrice}-${maxPrice}`);
+            
+            if (!rentInRange) {
+              rejectionReasons.rent++;
+              return false;
+            }
           }
           return true;
         });
+        
+        console.log('Rejection summary:', rejectionReasons);
+
+        console.log('Filtered properties:', filtered.length);
 
         setProperties(filtered);
       } catch (error) {

@@ -16,6 +16,7 @@ export default function WebsiteList() {
     city: "",
     country: "",
     contact_name: "",
+    phone: "",
     additional_message: ""
   });
   const [submitting, setSubmitting] = useState(false);
@@ -73,15 +74,32 @@ export default function WebsiteList() {
     event.preventDefault();
     setSubmitMessage(null);
 
-    const ownerName = formData.name.trim();
-    const propertyName = formData.property_name.trim();
-    const city = formData.city.trim();
-    const country = formData.country.trim();
-    const contactName = formData.contact_name.trim();
-    const additionalMessage = formData.additional_message.trim();
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('Raw formData:', formData);
+    console.log('API URL:', apiUrl);
+
+    const ownerName = formData.name?.trim() || '';
+    const propertyName = formData.property_name?.trim() || '';
+    const city = formData.city?.trim() || '';
+    const country = formData.country?.trim() || '';
+    const contactName = formData.contact_name?.trim() || '';
+    const phone = formData.phone?.trim() || '';
+    const additionalMessage = formData.additional_message?.trim() || '';
     const tenantsManaged = parseInt(formData.tenants_managed, 10) || 0;
 
-    if (!ownerName || !propertyName || !city || !country || !contactName) {
+    console.log('Processed values:', {
+      ownerName, propertyName, city, country, contactName, phone
+    });
+
+    if (!ownerName || !propertyName || !city || !country || !contactName || !phone) {
+      console.error('Validation failed - missing fields:', {
+        ownerName: !ownerName,
+        propertyName: !propertyName,
+        city: !city,
+        country: !country,
+        contactName: !contactName,
+        phone: !phone
+      });
       setSubmitMessage({ type: "error", text: "Please fill in all required fields." });
       return;
     }
@@ -105,12 +123,21 @@ export default function WebsiteList() {
       deposit: "",
       owner_name: ownerName,
       owner_email: "",
-      owner_phone: "NA",
+      owner_phone: phone,
       contact_name: contactName,
       tenants_managed: tenantsManaged,
       country,
       additional_message: additionalMessage
     };
+
+    // Debug log
+    console.log('Submitting enquiry data:', enquiryData);
+    console.log('Checking required fields:', {
+      property_name: !!propertyName,
+      city: !!city,
+      owner_name: !!ownerName,
+      owner_phone: !!phone
+    });
 
     setSubmitting(true);
     try {
@@ -120,7 +147,10 @@ export default function WebsiteList() {
         body: JSON.stringify(enquiryData)
       });
       const result = await response.json();
+      console.log('Backend response:', result);
+      console.log('Response status:', response.status);
       if (!response.ok) {
+        console.error('Backend error:', result);
         throw new Error(result.message || "Failed to submit enquiry");
       }
       setSubmitMessage({
@@ -134,9 +164,12 @@ export default function WebsiteList() {
         city: "",
         country: "",
         contact_name: "",
+        phone: "",
         additional_message: ""
       });
     } catch (error) {
+      console.error('Submission error:', error);
+      console.error('Error stack:', error.stack);
       setSubmitMessage({ type: "error", text: error.message || "Failed to submit enquiry." });
     } finally {
       setSubmitting(false);
@@ -241,8 +274,6 @@ export default function WebsiteList() {
           )}
 
           <form className="space-y-8" onSubmit={handleSubmit}>
-            <input type="hidden" name="property_type" value="pg" />
-            <input type="hidden" name="owner_phone" value="NA" />
 
             <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
               <div className="flex items-center mb-6 border-b pb-4">
@@ -271,6 +302,10 @@ export default function WebsiteList() {
                     ))}
                     <option value="custom">+ Add Custom Location</option>
                   </select>
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
+                  <input type="tel" id="phone" name="phone" required className="w-full border border-gray-300 rounded-md px-4 py-3" placeholder="Enter your phone number" value={formData.phone} onChange={handleChange} />
                 </div>
                 <div>
                   <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">Country <span className="text-red-500">*</span></label>

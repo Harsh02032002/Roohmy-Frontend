@@ -3,7 +3,7 @@ import WebsiteFooter from "../../components/website/WebsiteFooter";
 import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchNearbyColleges } from "../../utils/api";
+import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend } from "../../utils/api";
 
 export default function OurPropertyPage() {
   const [showFilters, setShowFilters] = useState(true);
@@ -13,19 +13,29 @@ export default function OurPropertyPage() {
   const [institutions, setInstitutions] = useState([]);
   const [nearbyAreas, setNearbyAreas] = useState([]);
   const [allColleges, setAllColleges] = useState([]);
-  const [selectedCollege, setSelectedCollege] = useState(null);
+  const [selectedColleges, setSelectedColleges] = useState([]);
+  const [loadingColleges, setLoadingColleges] = useState(false);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 0, average: 0, count: 0 });
   const [propertyNearbyColleges, setPropertyNearbyColleges] = useState({});
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [propertiesPerPage] = useState(100);
+  const [totalProperties, setTotalProperties] = useState([]);
   
   // Get parameters from URL first (before using them in state)
   const typeFromUrl = searchParams.get('type');
   const cityFromUrl = searchParams.get('city');
+  const areaFromUrl = searchParams.get('area');
+  const searchFromUrl = searchParams.get('search');
   const latitudeFromUrl = searchParams.get('latitude');
   const longitudeFromUrl = searchParams.get('longitude');
   
   // Filter states (after URL params are declared)
   const [selectedCity, setSelectedCity] = useState(cityFromUrl || '');
+  const [selectedArea, setSelectedArea] = useState(areaFromUrl || '');
   const [selectedType, setSelectedType] = useState(typeFromUrl || '');
+  const [searchQuery, setSearchQuery] = useState(searchFromUrl || '');
   const [selectedGender, setSelectedGender] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -40,7 +50,7 @@ export default function OurPropertyPage() {
         let allProperties = [];
         let city = cityFromUrl;
 
-        // If location coordinates provided, search by location
+        // Fast initial fetch - backend now includes nearbyColleges
         if (latitudeFromUrl && longitudeFromUrl) {
           allProperties = await searchPropertiesByLocation(
             parseFloat(latitudeFromUrl),
@@ -48,15 +58,14 @@ export default function OurPropertyPage() {
             typeFromUrl,
             50
           );
-          // Get city from first result if not specified
           if (allProperties.length > 0 && !city) {
             city = allProperties[0].city || allProperties[0].propertyInfo?.city;
           }
         } else {
-          // Regular fetch if no coordinates
           allProperties = await fetchProperties();
         }
         
+        // Format properties - nearbyColleges already included from backend
         const formattedProperties = allProperties.map(p => ({
           id: p._id || p.visitId || p.propertyName,
           name: p.propertyName || p.property_name || p.name || 'Unnamed Property',
@@ -72,27 +81,35 @@ export default function OurPropertyPage() {
           owner: p.owner_name || p.ownerName || p.generatedCredentials?.ownerName || 'Verified Owner',
           beds: p.propertyInfo?.totalSeats || p.beds || 1,
           phone: p.owner_phone || p.contactPhone || p.ownerPhone || 'N/A',
-          nearbyColleges: p.nearbyColleges || [],
-          coordinates: p.propertyInfo?.location?.coordinates || null
+          nearbyColleges: p.nearbyColleges || [], // Already populated by backend
+          latitude: p.latitude || p.propertyInfo?.latitude || p.propertyInfo?.location?.coordinates?.[1] || null,
+          longitude: p.longitude || p.propertyInfo?.longitude || p.propertyInfo?.location?.coordinates?.[0] || null,
         }));
-        
-        // Get colleges from property data (seeded data)
-        const collegesByProperty = {};
-        const uniqueColleges = new Set();
-        
-        formattedProperties.forEach(prop => {
-          collegesByProperty[prop.id] = prop.nearbyColleges || [];
-          prop.nearbyColleges?.forEach(college => uniqueColleges.add(college));
-        });
-        
-        setPropertyNearbyColleges(collegesByProperty);
-        setAllColleges(Array.from(uniqueColleges).sort());
-        
-        // Apply all filters
+
+        // Apply filters quickly
         let filtered = formattedProperties;
         
         if (selectedCity) {
           filtered = filtered.filter(p => p.location?.toLowerCase() === selectedCity.toLowerCase());
+        }
+        
+        if (selectedArea) {
+          filtered = filtered.filter(p => 
+            p.area?.toLowerCase() === selectedArea.toLowerCase() || 
+            p.locality?.toLowerCase() === selectedArea.toLowerCase()
+          );
+        }
+        
+        // Search by property name, city, area, or type
+        if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          filtered = filtered.filter(p => 
+            p.name?.toLowerCase().includes(query) ||
+            p.location?.toLowerCase().includes(query) ||
+            p.area?.toLowerCase().includes(query) ||
+            p.type?.toLowerCase().includes(query) ||
+            p.locality?.toLowerCase().includes(query)
+          );
         }
         
         if (selectedType) {
@@ -111,44 +128,82 @@ export default function OurPropertyPage() {
           filtered = filtered.filter(p => p.price <= parseInt(maxPrice));
         }
         
-        if (selectedRatings.length > 0) {
+        // Multi-college filter - show properties near ANY selected college
+        if (selectedColleges.length > 0) {
           filtered = filtered.filter(p => {
-            const rating = Math.floor(p.rating);
-            return selectedRatings.some(r => {
-              if (r === 5) return rating === 5;
-              if (r === 4) return rating >= 4;
-              if (r === 3) return rating >= 3;
-              return true;
-            });
+            const propColleges = propertyNearbyColleges[p.id] || [];
+            return selectedColleges.some(selectedCollege => 
+              propColleges.some(college => 
+                college.toLowerCase().includes(selectedCollege.toLowerCase()) ||
+                selectedCollege.toLowerCase().includes(college.toLowerCase())
+              )
+            );
           });
         }
         
-        // Filter by selected college if any
-        if (selectedCollege) {
-          filtered = filtered.filter(p => propertyNearbyColleges[p.id]?.includes(selectedCollege));
-        }
+        // Store all filtered properties for pagination
+        setTotalProperties(filtered);
         
-        setProperties(filtered);
-
-        // Fetch additional data for filters
-        if (city) {
-          // Get nearby areas
-          const areas = await getNearbyAreas(
-            parseFloat(latitudeFromUrl) || 0,
-            parseFloat(longitudeFromUrl) || 0,
-            city
-          );
-          setNearbyAreas(areas);
-
-          // Get institutions
-          const insts = await getInstitutions(city);
-          setInstitutions(insts);
+        // Extract colleges from ALL filtered properties (not just current page)
+        const collegesByProperty = {};
+        const allCollegesSet = new Set();
+        
+        filtered.forEach(prop => {
+          if (prop.nearbyColleges && prop.nearbyColleges.length > 0) {
+            collegesByProperty[prop.id] = prop.nearbyColleges.map(c => c.name || c);
+            prop.nearbyColleges.forEach(c => allCollegesSet.add(c.name || c));
+          }
+        });
+        
+        setPropertyNearbyColleges(collegesByProperty);
+        setAllColleges(Array.from(allCollegesSet).sort());
+        
+        // Get current page properties
+        const indexOfLastProperty = currentPage * propertiesPerPage;
+        const indexOfFirstProperty = indexOfLastProperty - propertiesPerPage;
+        const currentProperties = filtered.slice(indexOfFirstProperty, indexOfLastProperty);
+        
+        // Show properties immediately with colleges from backend
+        setProperties(currentProperties);
+        
+        // Get price range quickly
+        if (filtered.length > 0) {
+          const prices = filtered.map(p => p.price);
+          const min = Math.min(...prices);
+          const max = Math.max(...prices);
+          const average = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+          setPriceRange({ min, max, average, count: filtered.length });
         }
 
-        // Get price range for property type
+        // Fetch additional data in background
+        if (city) {
+          setTimeout(async () => {
+            try {
+              const areas = await getNearbyAreas(
+                parseFloat(latitudeFromUrl) || 0,
+                parseFloat(longitudeFromUrl) || 0,
+                city
+              );
+              setNearbyAreas(areas);
+
+              const insts = await getInstitutions(city);
+              setInstitutions(insts);
+            } catch (err) {
+              console.log('Background data fetch failed:', err);
+            }
+          }, 200);
+        }
+
+        // Get price range for property type in background
         if (typeFromUrl) {
-          const range = await getPriceRangeByType(typeFromUrl);
-          setPriceRange(range);
+          setTimeout(async () => {
+            try {
+              const range = await getPriceRangeByType(typeFromUrl);
+              setPriceRange(range);
+            } catch (err) {
+              console.log('Price range fetch failed:', err);
+            }
+          }, 300);
         }
 
       } catch (error) {
@@ -160,7 +215,46 @@ export default function OurPropertyPage() {
     };
     
     loadData();
-  }, [typeFromUrl, cityFromUrl, latitudeFromUrl, longitudeFromUrl, searchParams, selectedCollege, selectedCity, selectedType, selectedGender, minPrice, maxPrice, selectedRatings]);
+  }, [typeFromUrl, cityFromUrl, searchFromUrl, latitudeFromUrl, longitudeFromUrl, currentPage, searchParams, selectedCity, selectedType, selectedGender, minPrice, maxPrice, selectedRatings, selectedColleges]);
+
+  // Separate effect to fetch colleges after properties are loaded
+  useEffect(() => {
+    const loadColleges = async () => {
+      if (totalProperties.length === 0) return;
+      
+      setLoadingColleges(true);
+      try {
+        console.log('🎓 Fetching colleges separately...');
+        const data = await fetchAllCollegesFromBackend();
+        
+        if (data.allColleges && data.allColleges.length > 0) {
+          setAllColleges(data.allColleges);
+          console.log(`✅ Loaded ${data.allColleges.length} colleges for filter`);
+        }
+      } catch (error) {
+        console.error('Error loading colleges:', error);
+      } finally {
+        setLoadingColleges(false);
+      }
+    };
+    
+    // Wait 2 seconds after properties load before fetching colleges
+    const timer = setTimeout(loadColleges, 2000);
+    return () => clearTimeout(timer);
+  }, [totalProperties.length]);
+
+  // Pagination handlers
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // Don't clear cache when changing pages - we want to keep it!
+  };
+
+  const totalPages = Math.ceil(totalProperties.length / propertiesPerPage);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCity, selectedType, selectedGender, minPrice, maxPrice, selectedRatings]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -187,6 +281,13 @@ export default function OurPropertyPage() {
         Our <span className="text-[#C5A059] font-serif italic font-medium">Properties</span>
       </h1>
       <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
+    </div>
+
+    {/* Total Properties Count */}
+    <div className="mt-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-[#C5A059]/20 inline-flex items-center gap-2">
+      <span className="text-sm font-semibold text-[#1A1A1A]">
+        {totalProperties.length > 0 ? totalProperties.length : 'Loading...'} Properties Available
+      </span>
     </div>
 
     {/* SUB-HEADING - Content Unchanged */}
@@ -358,10 +459,6 @@ export default function OurPropertyPage() {
                           className="w-1/2 rounded-lg border border-gray-300 py-3 px-3 text-sm"
                         />
                       </div>
-                      <button className="w-full bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
-                        <Send className="w-4 h-4" />
-                        Bid on All ({properties.length})
-                      </button>
                     </div>
                   </div>
 
@@ -371,29 +468,45 @@ export default function OurPropertyPage() {
                       <BookOpen className="w-4 h-4 text-purple-600" />
                       Nearby Colleges & Institutions
                     </h4>
-                    {allColleges.length > 0 ? (
+                    {loadingColleges ? (
+                      <div className="text-sm text-gray-500 p-4 bg-gray-50 rounded text-center">
+                        <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-purple-600" />
+                        Loading nearby colleges...
+                      </div>
+                    ) : allColleges.length > 0 ? (
                       <>
                         <div className="space-y-2 max-h-64 overflow-y-auto">
                           {allColleges.map((college, idx) => (
-                            <button
+                            <label
                               key={idx}
-                              onClick={() => setSelectedCollege(selectedCollege === college ? null : college)}
-                              className={`w-full text-left text-sm p-2 rounded transition-all flex items-center gap-2 ${
-                                selectedCollege === college
+                              className={`w-full text-left text-sm p-2 rounded transition-all flex items-center gap-2 cursor-pointer ${
+                                selectedColleges.includes(college)
                                   ? 'bg-purple-200 border border-purple-500 text-purple-900'
                                   : 'bg-purple-50 border border-purple-200 text-gray-700 hover:bg-purple-100'
                               }`}
                             >
+                              <input
+                                type="checkbox"
+                                checked={selectedColleges.includes(college)}
+                                onChange={() => {
+                                  if (selectedColleges.includes(college)) {
+                                    setSelectedColleges(selectedColleges.filter(c => c !== college));
+                                  } else {
+                                    setSelectedColleges([...selectedColleges, college]);
+                                  }
+                                }}
+                                className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                              />
                               <span className="truncate">{college}</span>
-                            </button>
+                            </label>
                           ))}
                         </div>
-                        {selectedCollege && (
+                        {selectedColleges.length > 0 && (
                           <button
-                            onClick={() => setSelectedCollege(null)}
+                            onClick={() => setSelectedColleges([])}
                             className="w-full mt-3 text-sm text-purple-600 hover:text-purple-700 font-semibold border border-purple-300 rounded py-2"
                           >
-                            Clear Filter
+                            Clear {selectedColleges.length} Selected
                           </button>
                         )}
                       </>
@@ -429,23 +542,6 @@ export default function OurPropertyPage() {
                       </div>
                     </div>
                   )}
-
-                  {/* Clear Filters */}
-                  <button 
-                    onClick={() => {
-                      setSelectedCity('');
-                      setSelectedType('');
-                      setSelectedGender('');
-                      setMinPrice('');
-                      setMaxPrice('');
-                      setSelectedRatings([]);
-                      setSelectedCollege(null);
-                    }}
-                    className="w-full mt-4 border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 bg-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                    Clear All Filters
-                  </button>
                 </div>
               </aside>
 
@@ -477,9 +573,57 @@ export default function OurPropertyPage() {
                         </div>
                       ))}
                     </>
-                  ) : properties.length > 0 ? properties.map((property) => (
-                    <PropertyCard key={property.id} property={property} nearbyColleges={propertyNearbyColleges[property.id]} />
-                  )) : (
+                  ) : properties.length > 0 ? (
+                    <>
+                      {properties.map((property) => (
+                        <PropertyCard key={property.id} property={property} nearbyColleges={propertyNearbyColleges[property.id]} />
+                      ))}
+                      
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="col-span-full flex justify-center items-center gap-2 mt-8">
+                          <button
+                            onClick={() => paginate(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center gap-1"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            Previous
+                          </button>
+                          
+                          <div className="flex gap-1">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                              <button
+                                key={pageNumber}
+                                onClick={() => paginate(pageNumber)}
+                                className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                                  currentPage === pageNumber
+                                    ? 'bg-teal-500 text-white'
+                                    : 'border border-gray-300 hover:bg-gray-50'
+                                }`}
+                              >
+                                {pageNumber}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <button
+                            onClick={() => paginate(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 flex items-center gap-1"
+                          >
+                            Next
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Results Info */}
+                      <div className="col-span-full text-center text-sm text-gray-600 mt-4">
+                        Showing {((currentPage - 1) * propertiesPerPage) + 1} to {Math.min(currentPage * propertiesPerPage, totalProperties.length)} of {totalProperties.length} properties
+                      </div>
+                    </>
+                  ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <Home className="w-16 h-16 text-gray-300 mb-4" />
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">No Properties Found</h3>
@@ -491,18 +635,7 @@ export default function OurPropertyPage() {
                   )}
                 </div>
 
-                {/* Pagination */}
-                <div className="flex items-center justify-center mt-8 gap-2">
-                  <button className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50">
-                    <ChevronLeft className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <button className="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium">1</button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">2</button>
-                  <button className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-700">3</button>
-                  <button className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50">
-                    <ChevronRight className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
+                
               </div>
             </div>
           </div>
@@ -555,7 +688,10 @@ function PropertyCard({ property, nearbyColleges }) {
               
               {/* Left Arrow - OYO green with hover */}
               <button
-                onClick={() => setSelectedImage(prev => prev === 0 ? displayImages.length - 1 : prev - 1)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImage(prev => prev === 0 ? displayImages.length - 1 : prev - 1);
+                }}
                 className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
               >
                 <ChevronLeft className="w-6 h-6 text-white drop-shadow-lg" />
@@ -563,7 +699,10 @@ function PropertyCard({ property, nearbyColleges }) {
               
               {/* Right Arrow - OYO green with hover */}
               <button
-                onClick={() => setSelectedImage(prev => prev === displayImages.length - 1 ? 0 : prev + 1)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImage(prev => prev === displayImages.length - 1 ? 0 : prev + 1);
+                }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
               >
                 <ChevronRight className="w-6 h-6 text-white drop-shadow-lg" />
@@ -587,7 +726,10 @@ function PropertyCard({ property, nearbyColleges }) {
                 {displayImages.slice(0, 4).map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedImage(idx)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(idx);
+                    }}
                     className={`h-14 lg:h-16 rounded overflow-hidden flex-shrink-0 border-2 transition-all ${
                       selectedImage === idx ? 'border-[#1ab64f] ring-2 ring-[#1ab64f]/30' : 'border-transparent hover:border-gray-300'
                     }`}
@@ -652,7 +794,16 @@ function PropertyCard({ property, nearbyColleges }) {
           {/* Nearby Colleges */}
           {nearbyColleges?.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-semibold text-gray-700 mb-2">Nearby Institutions:</p>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-xs font-semibold text-gray-700">Nearby Institutions:</p>
+                {/* Show warning if API failed */}
+                {property.apiWarning && (
+                  <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-200 flex items-center gap-1">
+                    <span>⚠️</span>
+                    API Limited
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-1">
                 {nearbyColleges.slice(0, 3).map((college, idx) => (
                   <span key={idx} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded border border-blue-100">
@@ -665,6 +816,12 @@ function PropertyCard({ property, nearbyColleges }) {
                   </span>
                 )}
               </div>
+              {property.apiWarning && (
+                <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
+                  <span>ℹ️</span>
+                  College data temporarily unavailable due to API limits
+                </p>
+              )}
             </div>
           )}
 

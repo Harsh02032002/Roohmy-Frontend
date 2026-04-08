@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import HomePage from './HomePage';
 import OurPropertyPage from './pages/website/OurPropertyPage';
 import PropertyDetailsPage from './pages/website/PropertyDetailsPage';
@@ -19,31 +20,33 @@ import WebsiteMystays from './pages/website/WebsiteMystays';
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/website/index" element={<HomePage />} />
-        <Route path="/website/ourproperty" element={<OurPropertyPage />} />
-        <Route path="/website/property-details/:propertyId" element={<PropertyDetailsPage />} />
-        <Route path="/website/fast-bidding" element={<FastBiddingPage />} />
-        <Route path="/website/list" element={<ListYourPropertyPage />} />
-        <Route path="/website/about" element={<AboutPage />} />
-        <Route path="/website/contact" element={<ContactPage />} />
-        <Route path="/website/faq" element={<FAQPage />} />
-        <Route path="/website/cancellation" element={<WebsiteCancellation />} />
-        <Route path="/website/terms" element={<WebsiteTerms />} />
-        <Route path="/website/privacy" element={<WebsitePrivacy />} />
-        <Route path="/website/refund" element={<WebsiteRefund />} />
-        <Route path="/website/refund-request" element={<WebsiteRefundRequest />} />
-        <Route path="/website/login" element={<WebsiteLogin />} />
-        <Route path="/website/signup" element={<WebsiteSignup />} />
-        <Route path="/website/chat" element={<WebsiteChat />} />
-        <Route path="/website/mystays" element={<WebsiteMystays />} />
-        {/* Alias routes */}
-        <Route path="/login" element={<WebsiteLogin />} />
-        <Route path="/signup" element={<WebsiteSignup />} />
-        <Route path="/chat" element={<WebsiteChat />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/website/index" element={<HomePage />} />
+          <Route path="/website/ourproperty" element={<OurPropertyPage />} />
+          <Route path="/website/property-details/:propertyId" element={<PropertyDetailsPage />} />
+          <Route path="/website/fast-bidding" element={<FastBiddingPage />} />
+          <Route path="/website/list" element={<ListYourPropertyPage />} />
+          <Route path="/website/about" element={<AboutPage />} />
+          <Route path="/website/contact" element={<ContactPage />} />
+          <Route path="/website/faq" element={<FAQPage />} />
+          <Route path="/website/cancellation" element={<WebsiteCancellation />} />
+          <Route path="/website/terms" element={<WebsiteTerms />} />
+          <Route path="/website/privacy" element={<WebsitePrivacy />} />
+          <Route path="/website/refund" element={<WebsiteRefund />} />
+          <Route path="/website/refund-request" element={<WebsiteRefundRequest />} />
+          <Route path="/website/login" element={<WebsiteLogin />} />
+          <Route path="/website/signup" element={<WebsiteSignup />} />
+          <Route path="/website/chat" element={<WebsiteChat />} />
+          <Route path="/website/mystays" element={<WebsiteMystays />} />
+          {/* Alias routes */}
+          <Route path="/login" element={<WebsiteLogin />} />
+          <Route path="/signup" element={<WebsiteSignup />} />
+          <Route path="/chat" element={<WebsiteChat />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
