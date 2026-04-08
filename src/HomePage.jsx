@@ -7,6 +7,7 @@ import FindYourHome from './components/website/FindYourHome';
 import WhyStudentsChooseUs from './components/website/WhyStudentsChooseUs';
 import WebsiteNavbar from './components/website/WebsiteNavbar';
 import WebsiteFooter from './components/website/WebsiteFooter';
+import MobileBottomNav from './components/website/MobileBottomNav';
 import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 
 export default function HomePage() {
@@ -440,8 +441,9 @@ export default function HomePage() {
   const canShowPrevTrending = trendingStartIndex > 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-16 md:pb-0">
       <WebsiteNavbar />
+      <MobileBottomNav />
 
       <main className="min-h-screen">
         {/* Hero Section */}
@@ -466,11 +468,11 @@ export default function HomePage() {
               Search verified PGs, hostels & co-living spaces across 50+ Indian cities
             </p>
 
-            <div className="max-w-5xl mx-auto w-full px-4 search-container relative">
-              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-3 flex flex-col md:flex-row gap-3">
-                <div className="relative">
+            <div className="max-w-5xl mx-auto w-full px-4 search-container relative md:px-0">
+              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-2 md:p-3 flex flex-col md:flex-row gap-2 md:gap-3 overflow-x-auto md:overflow-visible">
+                <div className="relative flex-shrink-0">
                   <select 
-                    className="appearance-none bg-teal-50 text-gray-700 px-6 py-4 pr-12 rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[140px] text-lg"
+                    className="appearance-none bg-teal-50 text-gray-700 px-3 md:px-6 py-3 md:py-4 pr-8 md:pr-12 rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[100px] md:min-w-[140px] text-sm md:text-lg"
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
                   >
@@ -481,14 +483,14 @@ export default function HomePage() {
                     <option value="apartment">Apartment</option>
                   </select>
                 </div>
-                <div className="flex-1 flex items-center px-6 py-4 bg-gray-50 rounded-2xl relative">
-                  <Search className="w-6 h-6 text-gray-400 mr-4" />
+                <div className="flex-1 min-w-0 flex items-center px-3 md:px-6 py-3 md:py-4 bg-gray-50 rounded-2xl relative">
+                  <Search className="w-5 md:w-6 h-5 md:h-6 text-gray-400 mr-2 md:mr-4 flex-shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search city, area, PG name, hostel..."
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-lg"
+                    placeholder="Search city, area, PG name..."
+                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm md:text-lg min-w-0"
                   />
                   {isSearching && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">

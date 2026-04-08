@@ -1,4 +1,4 @@
-import { Building2, Users, Search, MapPin, Home, MessageSquare, User, LogOut, Settings, ChevronDown, Heart } from 'lucide-react';
+import { Building2, Users, Search, MapPin, Home, MessageSquare, User, LogOut, Settings, ChevronDown, Heart, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,6 +17,7 @@ export default function WebsiteNavbar() {
   const [selectedArea, setSelectedArea] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const propertyTypes = ['PG', 'Hostel', 'Flat', 'Villa', 'Shared Room', 'Private Room'];
 
@@ -117,6 +118,14 @@ export default function WebsiteNavbar() {
             </div>
 
             <div className="flex items-center space-x-2 md:space-x-4">
+              {/* Mobile Menu Button */}
+              <button 
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Menu className="w-6 h-6 text-gray-700" />
+              </button>
+
               <button 
                 onClick={() => setShowSearch(!showSearch)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -347,6 +356,23 @@ export default function WebsiteNavbar() {
           onClose={() => setShowMapPicker(false)}
         />
       )}
+
+      {/* Mobile Menu Dropdown */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 top-16 bg-black/30 z-30 md:hidden" onClick={() => setShowMobileMenu(false)} />
+      )}
+      <div className={`fixed top-16 left-0 right-0 bg-white shadow-xl transform transition-all duration-300 z-40 md:hidden ${
+        showMobileMenu ? 'translate-y-0' : '-translate-y-full'
+      }`}>
+        <div className="flex flex-col py-4 border-t border-gray-200">
+          <a href="/website/index" className="px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors font-medium border-b border-gray-100">Home</a>
+          <a href="/website/ourproperty" className="px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors font-medium border-b border-gray-100">Properties</a>
+          <a href="/website/faq" className="px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors font-medium border-b border-gray-100">FAQ</a>
+          <a href="/website/about" className="px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors font-medium border-b border-gray-100">About</a>
+          <a href="/website/contact" className="px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors font-medium border-b border-gray-100">Contact</a>
+          <a href="/website/list" className="px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors font-medium">List Property</a>
+        </div>
+      </div>
     </>
   );
 }
