@@ -1,12 +1,14 @@
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
-import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon } from "lucide-react";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
+import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon, X, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend } from "../../utils/api";
 
 export default function OurPropertyPage() {
   const [showFilters, setShowFilters] = useState(true);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ export default function OurPropertyPage() {
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [propertiesPerPage] = useState(100);
+  const [propertiesPerPage] = useState(10);
   const [totalProperties, setTotalProperties] = useState([]);
   
   // Get parameters from URL first (before using them in state)
@@ -302,11 +304,58 @@ export default function OurPropertyPage() {
 
         <section className="py-16 bg-gray-50">
           <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Mobile Filter Trigger */}
+            <div className="lg:hidden mb-4">
+              <button
+                onClick={() => setMobileFilterOpen(true)}
+                className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-lg shadow-sm border border-gray-200 text-gray-700 font-medium"
+              >
+                <Menu className="w-5 h-5" />
+                <span>Filters</span>
+                {(selectedCity || selectedType || minPrice || maxPrice) && (
+                  <span className="ml-1 w-2 h-2 bg-[#1ab64f] rounded-full"></span>
+                )}
+              </button>
+            </div>
+
             <div className="flex flex-col lg:flex-row gap-6">
-              {/* Left Sidebar - Filters */}
-              <aside className="lg:w-72 flex-shrink-0">
-                <div className="bg-white rounded-xl shadow-md p-4 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
-                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+              {/* Left Sidebar - Filters - Desktop: Always visible, Mobile: Overlay */}
+              {/* Mobile Filter Overlay Backdrop */}
+              {mobileFilterOpen && (
+                <div
+                  className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                  onClick={() => setMobileFilterOpen(false)}
+                />
+              )}
+
+              <aside className={`
+                lg:w-72 flex-shrink-0
+                lg:static lg:block
+                fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ease-in-out
+                ${mobileFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+              `}>
+                <div className="bg-white lg:rounded-xl lg:shadow-md p-4 h-full lg:h-auto lg:sticky lg:top-24 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto w-[300px] lg:w-auto overflow-y-auto">
+                  {/* Mobile Filter Header */}
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 lg:hidden">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <Filter className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">Filters</h3>
+                        <p className="text-xs text-gray-500">Refine your search</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setMobileFilterOpen(false)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+
+                  {/* Desktop Filter Header */}
+                  <div className="hidden lg:flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
                     <div className="p-2 bg-blue-600 rounded-lg">
                       <Filter className="w-5 h-5 text-white" />
                     </div>
@@ -643,6 +692,9 @@ export default function OurPropertyPage() {
       </main>
 
       <WebsiteFooter />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
@@ -829,7 +881,8 @@ function PropertyCard({ property, nearbyColleges }) {
           <div className="border-t border-gray-200 my-4"></div>
 
           {/* Price & Action */}
-          <div className="flex items-end justify-between mt-auto">
+          {/* Price & Action */}
+<div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mt-auto gap-3">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl font-bold text-gray-900">₹{property.price.toLocaleString()}</span>
@@ -838,18 +891,18 @@ function PropertyCard({ property, nearbyColleges }) {
               </div>
               <p className="text-xs text-gray-500">+ ₹{Math.round(property.price * 0.12)} taxes & fees per room per month</p>
             </div>
-            <div className="flex gap-2">
-              <a 
-                href={`/website/property-details/${property.id}`}
-                className="px-4 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all flex items-center gap-1"
-              >
-                View Details
-              </a>
-              <button className="px-6 py-2 bg-[#1ab64f] hover:bg-[#159c42] text-white font-semibold rounded-lg transition-all flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                Book Now
-              </button>
-            </div>
+          <div className="flex gap-2">
+  <a 
+    href={`/website/property-details/${property.id}`}
+    className="px-3 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all flex items-center gap-1 text-sm whitespace-nowrap"
+  >
+    View Details
+  </a>
+  <button className="px-4 py-2 bg-[#1ab64f] hover:bg-[#159c42] text-white font-semibold rounded-lg transition-all flex items-center gap-1 text-sm whitespace-nowrap">
+    <Phone className="w-4 h-4" />
+    Book Now
+  </button>
+</div>
           </div>
 
           {/* Booking Count */}

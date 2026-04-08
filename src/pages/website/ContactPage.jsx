@@ -1,6 +1,7 @@
 import { useState } from "react";
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { Mail, Phone, MapPin, Send, Clock, MessageCircle, Headphones } from 'lucide-react';
 
 export default function ContactPage() {
@@ -144,6 +145,9 @@ export default function ContactPage() {
       </section>
 
       <WebsiteFooter />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

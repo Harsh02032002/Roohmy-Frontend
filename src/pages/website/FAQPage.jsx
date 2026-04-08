@@ -1,5 +1,6 @@
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { ChevronDown, HelpCircle } from 'lucide-react';
 
 const faqData = [
@@ -139,6 +140,9 @@ export default function FAQPage() {
       </main>
 
       <WebsiteFooter />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

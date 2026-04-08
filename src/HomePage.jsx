@@ -7,6 +7,9 @@ import FindYourHome from './components/website/FindYourHome';
 import WhyStudentsChooseUs from './components/website/WhyStudentsChooseUs';
 import WebsiteNavbar from './components/website/WebsiteNavbar';
 import WebsiteFooter from './components/website/WebsiteFooter';
+import MobileBottomNav from './components/website/MobileBottomNav';
+import MobileHamburgerMenu from './components/website/MobileHamburgerMenu';
+import MobilePropertiesSection from './components/website/MobilePropertiesSection';
 import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 
 export default function HomePage() {
@@ -445,7 +448,7 @@ export default function HomePage() {
 
       <main className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
+        <div className="relative min-h-[420px] md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
           {heroImages.map((image, index) => (
             <div
               key={index}
@@ -458,19 +461,35 @@ export default function HomePage() {
             </div>
           ))}
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-start pt-16">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight text-center">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-start pt-12 md:pt-16">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-3 md:mb-4 leading-tight text-center">
               Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">Student Stay</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/95 mb-6 max-w-4xl mx-auto leading-relaxed text-center">
+            <p className="text-base sm:text-lg md:text-xl text-white/95 mb-4 md:mb-6 max-w-4xl mx-auto leading-relaxed text-center px-2">
               Search verified PGs, hostels & co-living spaces across 50+ Indian cities
             </p>
 
-            <div className="max-w-5xl mx-auto w-full px-4 search-container relative">
-              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-3 flex flex-col md:flex-row gap-3">
+            {/* Mobile CTA Buttons */}
+            <div className="flex md:hidden gap-3 justify-center mb-4">
+              <Link
+                to="/website/ourproperty"
+                className="bg-[#1ab64f] text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg"
+              >
+                Browse Properties
+              </Link>
+              <Link
+                to="/website/fast-bidding"
+                className="bg-white text-gray-900 px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg"
+              >
+                Bid Now
+              </Link>
+            </div>
+
+            <div className="max-w-5xl mx-auto w-full px-2 md:px-4 search-container relative">
+              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-col md:flex-row gap-2 md:gap-3">
                 <div className="relative">
-                  <select 
-                    className="appearance-none bg-teal-50 text-gray-700 px-6 py-4 pr-12 rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[140px] text-lg"
+                  <select
+                    className="appearance-none bg-teal-50 text-gray-700 px-3 md:px-6 py-3 md:py-4 pr-8 md:pr-12 rounded-xl md:rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[100px] md:min-w-[140px] text-sm md:text-lg w-full md:w-auto"
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
                   >
@@ -481,22 +500,22 @@ export default function HomePage() {
                     <option value="apartment">Apartment</option>
                   </select>
                 </div>
-                <div className="flex-1 flex items-center px-6 py-4 bg-gray-50 rounded-2xl relative">
-                  <Search className="w-6 h-6 text-gray-400 mr-4" />
+                <div className="flex-1 flex items-center px-3 md:px-6 py-3 md:py-4 bg-gray-50 rounded-xl md:rounded-2xl relative">
+                  <Search className="w-5 h-5 md:w-6 md:h-6 text-gray-400 mr-2 md:mr-4 flex-shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search city, area, PG name, hostel..."
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-lg"
+                    placeholder="Search city, area, PG name..."
+                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm md:text-lg min-w-0"
                   />
                   {isSearching && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2">
+                      <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   )}
                 </div>
-                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-12 py-4 rounded-2xl font-bold text-lg transition-all">
+                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 md:px-12 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-lg transition-all w-full md:w-auto">
                   Search
                 </button>
               </form>
@@ -586,8 +605,11 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Mobile-Only Properties Section */}
+        <MobilePropertiesSection />
+
         {/* What We Offer - Multiple images showing rooms */}
-        <section className="py-12 bg-white">
+        <section className="py-12 bg-white hidden md:block">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-gray-900 mb-3">What We Offer</h2>
@@ -890,25 +912,48 @@ export default function HomePage() {
             
       <WebsiteFooter />
 
-      {/* Floating Chat Now Button */}
+      {/* Floating Chat Now Button - Desktop only */}
       <Link
         to="/website/chat"
-        className="fixed bottom-48 right-6 z-50 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full font-bold hover:shadow-2xl transition-all flex items-center gap-2 shadow-xl group px-4 py-4 overflow-hidden"
+        className="hidden md:flex fixed bottom-48 right-6 z-50 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full font-bold hover:shadow-2xl transition-all items-center gap-2 shadow-xl group px-4 py-4 overflow-hidden"
       >
         <MessageSquare className="h-5 w-5 flex-shrink-0" />
         <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">Chat Now</span>
       </Link>
 
-      {/* Floating BidNow Button */}
+      {/* Floating BidNow Button - Desktop */}
       <Link
         to="/website/fast-bidding"
-        className="fixed bottom-32 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full font-bold hover:shadow-2xl transition-all flex items-center gap-2 shadow-xl group px-4 py-4 overflow-hidden"
+        className="hidden md:flex fixed bottom-32 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full font-bold hover:shadow-2xl transition-all items-center gap-2 shadow-xl group px-4 py-4 overflow-hidden"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
         <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">BidNow</span>
       </Link>
+
+      {/* Mobile Chat Now Button - same as desktop */}
+<Link
+  to="/website/chat"
+  className="md:hidden fixed bottom-36 right-6 z-50 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full font-bold shadow-xl flex items-center gap-2 group px-4 py-4 overflow-hidden"
+>
+  <MessageSquare className="h-5 w-5 flex-shrink-0" />
+  <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">Chat Now</span>
+</Link>
+
+{/* Mobile Bid Now Button - same as desktop */}
+<Link
+  to="/website/fast-bidding"
+  className="md:hidden fixed bottom-20 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full font-bold shadow-xl flex items-center gap-2 group px-4 py-4 overflow-hidden"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>
+  <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">BidNow</span>
+</Link>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

@@ -117,26 +117,29 @@ export default function WebsiteNavbar() {
             </div>
 
             <div className="flex items-center space-x-2 md:space-x-4">
-              <button 
+              {/* Search - Desktop only */}
+              <button
                 onClick={() => setShowSearch(!showSearch)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="hidden md:flex p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <Search className="w-6 h-6 text-gray-700" />
               </button>
-              <a href="/website/fast-bidding" className="bg-orange-500 hover:bg-orange-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg text-sm md:text-base whitespace-nowrap flex items-center gap-2">
+
+              {/* Bid Now - Desktop only */}
+              <a href="/website/fast-bidding" className="hidden md:flex bg-orange-500 hover:bg-orange-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg text-sm md:text-base whitespace-nowrap items-center gap-2">
                 <span className="hidden md:inline">Bid</span>
                 Now
               </a>
-              
+
               {isAuthenticated && user ? (
-                <div 
+                <div
                   className="relative user-dropdown"
                   onMouseEnter={() => setShowUserDropdown(true)}
                   onMouseLeave={() => setShowUserDropdown(false)}
                 >
                   <button
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white"
+                    className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white"
                   >
                     <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-semibold">
@@ -146,7 +149,7 @@ export default function WebsiteNavbar() {
                     <span className="hidden md:inline text-sm font-medium text-gray-700 max-w-[100px] truncate">
                       {user.name || user.firstName || user.fullName || 'User'}
                     </span>
-                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform hidden md:block ${showUserDropdown ? 'rotate-180' : ''}`} />
                   </button>
                   
                   {showUserDropdown && (
@@ -228,8 +231,11 @@ export default function WebsiteNavbar() {
                   )}
                 </div>
               ) : (
-                <a href="/login" className="text-gray-700 hover:text-teal-500 transition-colors">
-                  <Users className="w-6 h-6" />
+                <a href="/login" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white">
+                  <div className="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
+                    <Users className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="hidden md:inline text-sm font-medium text-gray-700">Login</span>
                 </a>
               )}
             </div>

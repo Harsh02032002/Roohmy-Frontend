@@ -1,5 +1,6 @@
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { Target, Lightbulb, Rocket, Heart, Zap, Shield, Eye, Handshake, Globe, TrendingUp, Users, Building2, Info } from 'lucide-react';
 
 export default function AboutPage() {
@@ -166,6 +167,9 @@ export default function AboutPage() {
       </section>
 
       <WebsiteFooter />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }

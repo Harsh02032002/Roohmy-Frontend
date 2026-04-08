@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ListPlus, Send, CheckCircle, Loader, ArrowLeft, Building2, User, Mail, Phone, MapPin, Home } from 'lucide-react';
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { submitEnquiry } from '../../utils/api';
 
 export default function ListYourPropertyPage() {
@@ -391,6 +392,9 @@ export default function ListYourPropertyPage() {
       </main>
 
       <WebsiteFooter />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
 
       {/* Success Modal */}
       {showSuccess && (

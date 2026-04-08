@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Zap, ArrowLeft, Send, Loader, Heart, CheckCircle, X, Shield, Info } from 'lucide-react';
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { fetchCities, fetchAreas, fetchProperties, submitBid } from '../../utils/api';
 import { getWebsiteUser, getWebsiteUserId, getWebsiteUserName, getWebsiteUserEmail, isWebsiteLoggedIn } from '../../utils/websiteSession';
 
@@ -486,6 +487,9 @@ export default function FastBiddingPage() {
       <div className="mb-20">
         <WebsiteFooter />
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
 
       {/* Success Modal */}
       {showSuccessModal && (

@@ -1,5 +1,6 @@
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchProperties, getPropertyReviews, getPropertyReviewStats, checkUserReview, submitReview } from "../../utils/api";
@@ -279,24 +280,17 @@ export default function PropertyDetailsPage() {
     }
   };
 
-  // Helper to check if ID is valid MongoDB ObjectId (24 char hex)
-  const isValidObjectId = (id) => {
-    return id && typeof id === 'string' && id.length === 24 && /^[0-9a-fA-F]{24}$/.test(id);
-  };
-
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!newReviewText.trim()) return;
     
-    // Use property.id which should be the MongoDB ObjectId
+    // Use property.id (can be string like DELHI-PG-002)
     const actualPropertyId = property?.id || rawPropertyId;
     console.log('property.id:', property?.id);
-    console.log('rawPropertyId:', rawPropertyId);
     console.log('Using ID:', actualPropertyId);
-    console.log('Is valid ObjectId:', isValidObjectId(actualPropertyId));
     
-    if (!actualPropertyId || !isValidObjectId(actualPropertyId)) {
-      alert('Error: Valid Property ID not found. ID must be 24 character hex string.');
+    if (!actualPropertyId) {
+      alert('Error: Property ID not found');
       return;
     }
     
@@ -730,6 +724,9 @@ export default function PropertyDetailsPage() {
       </div>
 
       <WebsiteFooter />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
