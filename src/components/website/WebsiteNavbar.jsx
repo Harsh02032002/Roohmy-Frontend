@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchCities, fetchAreas } from '../../utils/api';
 import LocationMapPicker from './LocationMapPicker';
+import FloatingBidNowButton from './FloatingBidNowButton';
 
 export default function WebsiteNavbar() {
   const navigate = useNavigate();
@@ -353,6 +354,9 @@ export default function WebsiteNavbar() {
           onClose={() => setShowMapPicker(false)}
         />
       )}
+
+      {/* Floating BidNow Button - Global */}
+      <FloatingBidNowButton />
     </>
   );
 }
