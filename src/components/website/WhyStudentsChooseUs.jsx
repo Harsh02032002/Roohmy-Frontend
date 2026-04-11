@@ -96,9 +96,9 @@ export default function WhyStudentsChooseUs() {
   return (
     <section className="bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Students Choose Us</h2>
-          <p className="text-gray-600 mt-2 text-lg max-w-2xl mx-auto">Here's what makes us the preferred choice for students.</p>
+        <div className="text-center mb-6 md:mb-12">
+          <h2 className="text-lg md:text-4xl font-bold text-gray-900 mb-1 md:mb-4">Why Students Choose Us</h2>
+          <p className="text-xs md:text-lg text-gray-600 mt-1 md:mt-2 max-w-2xl mx-auto">Here's what makes us the preferred choice for students.</p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
@@ -115,9 +115,9 @@ export default function WhyStudentsChooseUs() {
         </div>
 
         <div className="bg-gradient-to-r from-teal-500 to-blue-600 rounded-3xl p-8 md:p-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">What Our Students Say</h2>
-            <p className="text-white/80 text-lg max-w-2xl mx-auto">Real experiences from real students who found their perfect stay</p>
+          <div className="text-center mb-4 md:mb-8">
+            <h2 className="text-lg md:text-4xl font-bold text-white mb-1 md:mb-3">What Our Students Say</h2>
+            <p className="text-white/80 text-xs md:text-lg max-w-2xl mx-auto">Real experiences from real students who found their perfect stay</p>
           </div>
 
           {loadingReviews ? (
@@ -164,9 +164,9 @@ export default function WhyStudentsChooseUs() {
           )}
         </div>
 
-        <div className="mt-12 text-center">
-          <div className="bg-green-500 rounded-xl p-6 max-w-2xl mx-auto">
-            <p className="text-white text-lg font-semibold">Join 50,000+ happy students across India</p>
+        <div className="mt-6 md:mt-12 text-center">
+          <div className="bg-green-500 rounded-xl p-3 md:p-6 max-w-2xl mx-auto">
+            <p className="text-white text-sm md:text-lg font-semibold">Join 50,000+ happy students across India</p>
           </div>
         </div>
       </div>

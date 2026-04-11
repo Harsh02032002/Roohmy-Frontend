@@ -30,6 +30,7 @@ export default function WebsiteSignup() {
   
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
+  const [signupDelivery, setSignupDelivery] = useState({ email: true, whatsapp: false, sms: false, demoOtp: "" });
 
   const showToast = useCallback((message, type = "info") => {
     setToast({ message, type });
@@ -57,7 +58,7 @@ export default function WebsiteSignup() {
         return;
       }
       setLoginCodeSent(true);
-      showToast("Verification code sent to your email", "success");
+      showToast(data.message || "Verification code sent", "success");
     } catch (err) {
       showToast("Unable to send code. Please try again.", "error");
     } finally {
@@ -127,7 +128,13 @@ export default function WebsiteSignup() {
       }
       setPendingPayload(payload);
       setVerificationVisible(true);
-      showToast("Verification code sent to your email", "success");
+      setSignupDelivery({
+        email: data?.channels?.email !== false,
+        whatsapp: Boolean(data?.channels?.whatsapp),
+        sms: Boolean(data?.channels?.sms),
+        demoOtp: data?.demoOtp || ""
+      });
+      showToast(data.message || "Verification code sent", "success");
     } catch (err) {
       showToast(err.message || "Cannot create account now", "error");
     } finally {
@@ -228,7 +235,7 @@ export default function WebsiteSignup() {
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
                       required
                       value={signup.phone}
-                      onChange={(e) => setSignup({ ...signup, phone: e.target.value })}
+                      onChange={(e) => setSignup({ ...signup, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     />
                     <input
                       type="password"
@@ -240,6 +247,15 @@ export default function WebsiteSignup() {
                     />
                     {verificationVisible && (
                       <>
+                        <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                          <p>
+                            Code sent to your email
+                            {signupDelivery.whatsapp ? " and WhatsApp" : signupDelivery.sms ? " and phone" : ""}.
+                          </p>
+                          {signupDelivery.demoOtp ? (
+                            <p className="mt-1 font-semibold">Demo OTP: {signupDelivery.demoOtp}</p>
+                          ) : null}
+                        </div>
                         <input
                           type="text"
                           placeholder="6-digit Verification Code"
@@ -247,7 +263,7 @@ export default function WebsiteSignup() {
                           inputMode="numeric"
                           className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
                           value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
+                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                         />
                         <button
                           type="button"
@@ -297,7 +313,7 @@ export default function WebsiteSignup() {
                         inputMode="numeric"
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
                         value={loginOtp}
-                        onChange={(e) => setLoginOtp(e.target.value)}
+                        onChange={(e) => setLoginOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                       />
                     )}
                     <button

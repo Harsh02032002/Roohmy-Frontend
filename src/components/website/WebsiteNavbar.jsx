@@ -1,4 +1,4 @@
-import { Building2, Users, Search, MapPin, Home, MessageSquare, User, LogOut, Settings, ChevronDown, Heart } from 'lucide-react';
+import { Building2, Users, Search, MapPin, Home, MessageSquare, User, LogOut, Settings, ChevronDown, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -97,12 +97,12 @@ export default function WebsiteNavbar() {
     <>
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-14 md:h-16">
             <div className="flex items-center space-x-2">
-              <Building2 className="w-8 h-8 text-teal-500" />
+              <Building2 className="w-6 h-6 md:w-8 md:h-8 text-teal-500" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">ROOMHY<span className="text-teal-500">.com</span></h1>
-                <p className="text-xs text-gray-500">Discover Your Next Home</p>
+                <h1 className="text-lg md:text-2xl font-bold text-gray-900 leading-none">ROOMHY<span className="text-teal-500">.com</span></h1>
+                <p className="hidden md:block text-xs text-gray-500">Discover Your Next Home</p>
               </div>
             </div>
 
@@ -196,13 +196,13 @@ export default function WebsiteNavbar() {
                         </button>
                         
                         <button
-                          onClick={() => { setShowUserDropdown(false); navigate('/website/fav'); }}
+                          onClick={() => { setShowUserDropdown(false); navigate('/website/reviews'); }}
                           className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
                         >
-                          <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
-                            <Heart className="w-4 h-4 text-pink-600" />
+                          <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                            <Star className="w-4 h-4 text-yellow-600" />
                           </div>
-                          <span className="font-medium">Favorites</span>
+                          <span className="font-medium">My Reviews</span>
                         </button>
                         
                         <div className="border-t border-gray-100 my-1"></div>
@@ -231,8 +231,8 @@ export default function WebsiteNavbar() {
                   )}
                 </div>
               ) : (
-                <a href="/login" className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white">
-                  <div className="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
+                <a href="/login" className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white">
+                  <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
                     <Users className="w-4 h-4 text-white" />
                   </div>
                   <span className="hidden md:inline text-sm font-medium text-gray-700">Login</span>

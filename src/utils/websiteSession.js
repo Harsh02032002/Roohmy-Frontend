@@ -100,6 +100,12 @@ export const clearWebsiteSession = () => {
   }
 };
 
+export const getWebsiteSession = () => {
+  const user = getWebsiteUser();
+  const token = getStoredWebsiteToken();
+  return user && token ? { user, token } : null;
+};
+
 export const isWebsiteLoggedIn = () => {
   const user = getWebsiteUser();
   const token = getStoredWebsiteToken();

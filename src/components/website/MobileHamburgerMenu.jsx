@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { X, Home, Building2, Heart, MessageCircle, User, PlusCircle, Phone, HelpCircle, FileText, Gavel, Menu } from 'lucide-react';
+import { X, Home, Building2, Heart, MessageCircle, User, PlusCircle, HelpCircle, FileText, Gavel, Menu } from 'lucide-react';
 
 export default function MobileHamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +58,6 @@ export default function MobileHamburgerMenu() {
     { icon: Heart, label: 'My Stays', path: '/website/mystays' },
     { icon: MessageCircle, label: 'Chat Support', path: '/website/chat' },
     { icon: User, label: hasUserData ? 'My Account' : 'Login / Signup', path: hasUserData ? '/website/mystays' : '/website/login' },
-    { icon: Phone, label: 'Contact Us', path: '/website/contact' },
     { icon: HelpCircle, label: 'FAQs', path: '/website/faq' },
     { icon: FileText, label: 'Terms & Privacy', path: '/website/terms' },
   ];

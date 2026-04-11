@@ -609,3 +609,160 @@ export const fetchAllCollegesFromBackend = async () => {
     return { allColleges: [], cities: {}, totalColleges: 0 };
   }
 };
+
+// ==================== USER API FUNCTIONS ====================
+
+// Get user profile
+export const getUserProfile = async () => {
+  try {
+    const data = await fetchJson('/api/user/profile');
+    return data;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    throw error;
+  }
+};
+
+// Update user profile
+export const updateUserProfile = async (profileData) => {
+  try {
+    const data = await fetchJson('/api/user/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+    return data;
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+
+// Get user settings
+export const getUserSettings = async () => {
+  try {
+    const data = await fetchJson('/api/user/settings');
+    return data;
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    throw error;
+  }
+};
+
+// Update user settings
+export const updateUserSettings = async (settings) => {
+  try {
+    const data = await fetchJson('/api/user/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
+    return data;
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    throw error;
+  }
+};
+
+// Change password
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const data = await fetchJson('/api/user/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    return data;
+  } catch (error) {
+    console.error('Error changing password:', error);
+    throw error;
+  }
+};
+
+// Get user favourites
+export const getUserFavourites = async () => {
+  try {
+    const data = await fetchJson('/api/user/favourites');
+    return data;
+  } catch (error) {
+    console.error('Error fetching favourites:', error);
+    throw error;
+  }
+};
+
+// Add to favourites
+export const addToFavourites = async (propertyId) => {
+  try {
+    const data = await fetchJson(`/api/user/favourites/${propertyId}`, {
+      method: 'POST'
+    });
+    return data;
+  } catch (error) {
+    console.error('Error adding to favourites:', error);
+    throw error;
+  }
+};
+
+// Remove from favourites
+export const removeFromFavourites = async (propertyId) => {
+  try {
+    const data = await fetchJson(`/api/user/favourites/${propertyId}`, {
+      method: 'DELETE'
+    });
+    return data;
+  } catch (error) {
+    console.error('Error removing from favourites:', error);
+    throw error;
+  }
+};
+
+// Delete account
+export const deleteAccount = async (password) => {
+  try {
+    const data = await fetchJson('/api/user/account', {
+      method: 'DELETE',
+      body: JSON.stringify({ password })
+    });
+    return data;
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    throw error;
+  }
+};
+
+// ==================== REVIEW API FUNCTIONS ====================
+
+// Get user reviews
+export const getUserReviews = async () => {
+  try {
+    const data = await fetchJson('/api/reviews/user/my-reviews');
+    return data;
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    throw error;
+  }
+};
+
+// Update review
+export const updateReview = async (reviewId, reviewData) => {
+  try {
+    const data = await fetchJson(`/api/reviews/${reviewId}`, {
+      method: 'PUT',
+      body: JSON.stringify(reviewData)
+    });
+    return data;
+  } catch (error) {
+    console.error('Error updating review:', error);
+    throw error;
+  }
+};
+
+// Delete review
+export const deleteReview = async (reviewId) => {
+  try {
+    const data = await fetchJson(`/api/reviews/${reviewId}`, {
+      method: 'DELETE'
+    });
+    return data;
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    throw error;
+  }
+};

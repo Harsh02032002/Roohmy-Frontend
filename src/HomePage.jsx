@@ -10,6 +10,7 @@ import WebsiteFooter from './components/website/WebsiteFooter';
 import MobileBottomNav from './components/website/MobileBottomNav';
 import MobileHamburgerMenu from './components/website/MobileHamburgerMenu';
 import MobilePropertiesSection from './components/website/MobilePropertiesSection';
+import MobileVideoSection from './components/website/MobileVideoSection';
 import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 
 export default function HomePage() {
@@ -396,6 +397,7 @@ export default function HomePage() {
   // Cities carousel state
   const [cityStartIndex, setCityStartIndex] = useState(0);
   const citiesPerView = 4;
+  const [mobileCityIndex, setMobileCityIndex] = useState(0); // Mobile: 1 row (4 cities) at a time
 
   // Trending properties carousel state
   const [trendingStartIndex, setTrendingStartIndex] = useState(0);
@@ -403,6 +405,8 @@ export default function HomePage() {
 
   // What We Offer - selected image index for each offering
   const [offeringSelectedImage, setOfferingSelectedImage] = useState({});
+  const [mobileOfferingIndex, setMobileOfferingIndex] = useState(0); // Mobile: 1 offering at a time
+  const [mobileImageIndex, setMobileImageIndex] = useState(0); // Mobile: current image index
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -442,13 +446,21 @@ export default function HomePage() {
   const canShowNextTrending = trendingStartIndex + trendingPerView < featuredProperties.length;
   const canShowPrevTrending = trendingStartIndex > 0;
 
+  // Mobile carousel helpers
+  const canShowNextMobileCity = mobileCityIndex + 4 < cities.length;
+  const canShowPrevMobileCity = mobileCityIndex > 0;
+  const canShowNextMobileOffering = mobileOfferingIndex < offerings.length - 1;
+  const canShowPrevMobileOffering = mobileOfferingIndex > 0;
+  const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
+  const visibleMobileOffering = offerings[mobileOfferingIndex];
+
   return (
     <div className="min-h-screen bg-white">
       <WebsiteNavbar />
 
       <main className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative min-h-[420px] md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
+        <div className="relative min-h-[240px] md:min-h-0 md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
           {heroImages.map((image, index) => (
             <div
               key={index}
@@ -461,25 +473,25 @@ export default function HomePage() {
             </div>
           ))}
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-start pt-12 md:pt-16">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-3 md:mb-4 leading-tight text-center">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-start pt-4 md:pt-16">
+            <h1 className="text-xl sm:text-4xl md:text-6xl font-bold text-white mb-1 md:mb-4 leading-tight text-center">
               Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">Student Stay</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white/95 mb-4 md:mb-6 max-w-4xl mx-auto leading-relaxed text-center px-2">
+            <p className="text-xs sm:text-lg md:text-xl text-white/95 mb-2 md:mb-6 max-w-4xl mx-auto leading-relaxed text-center px-2">
               Search verified PGs, hostels & co-living spaces across 50+ Indian cities
             </p>
 
             {/* Mobile CTA Buttons */}
-            <div className="flex md:hidden gap-3 justify-center mb-4">
+            <div className="flex md:hidden gap-2 justify-center mb-2">
               <Link
                 to="/website/ourproperty"
-                className="bg-[#1ab64f] text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg"
+                className="bg-[#1ab64f] text-white px-4 py-2 rounded-full font-semibold text-xs shadow-lg"
               >
                 Browse Properties
               </Link>
               <Link
                 to="/website/fast-bidding"
-                className="bg-white text-gray-900 px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg"
+                className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold text-xs shadow-lg"
               >
                 Bid Now
               </Link>
@@ -489,7 +501,7 @@ export default function HomePage() {
               <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-col md:flex-row gap-2 md:gap-3">
                 <div className="relative">
                   <select
-                    className="appearance-none bg-teal-50 text-gray-700 px-3 md:px-6 py-3 md:py-4 pr-8 md:pr-12 rounded-xl md:rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[100px] md:min-w-[140px] text-sm md:text-lg w-full md:w-auto"
+                    className="appearance-none bg-teal-50 text-gray-700 px-3 md:px-6 py-2.5 md:py-4 pr-8 md:pr-12 rounded-xl md:rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[100px] md:min-w-[140px] text-xs md:text-lg w-full md:w-auto"
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
                   >
@@ -500,14 +512,14 @@ export default function HomePage() {
                     <option value="apartment">Apartment</option>
                   </select>
                 </div>
-                <div className="flex-1 flex items-center px-3 md:px-6 py-3 md:py-4 bg-gray-50 rounded-xl md:rounded-2xl relative">
-                  <Search className="w-5 h-5 md:w-6 md:h-6 text-gray-400 mr-2 md:mr-4 flex-shrink-0" />
+                <div className="flex-1 flex items-center px-3 md:px-6 py-2.5 md:py-4 bg-gray-50 rounded-xl md:rounded-2xl relative">
+                  <Search className="w-4 h-4 md:w-6 md:h-6 text-gray-400 mr-2 md:mr-4 flex-shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search city, area, PG name..."
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm md:text-lg min-w-0"
+                    className="flex-1 bg-transparent outline-none text-gray-700 text-xs md:text-lg min-w-0"
                   />
                   {isSearching && (
                     <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2">
@@ -515,7 +527,7 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 md:px-12 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-lg transition-all w-full md:w-auto">
+                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 md:px-12 py-2.5 md:py-4 rounded-xl md:rounded-2xl font-bold text-xs md:text-lg transition-all w-full md:w-auto">
                   Search
                 </button>
               </form>
@@ -551,29 +563,30 @@ export default function HomePage() {
         </div>
 
         {/* Popular Cities - Carousel with 4 items */}
-        <section className="py-12 bg-gray-50">
+        <section className="py-3 md:py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-2 md:mb-8">
               <div className="flex-1">
-                <h2 className="text-3xl font-bold text-gray-900">Popular Cities</h2>
-                <p className="text-lg text-gray-600 mt-1">Explore top cities for student accommodation</p>
+                <h2 className="text-xl md:text-3xl font-bold text-gray-900">Popular Cities</h2>
+                <p className="text-xs md:text-lg text-gray-600 mt-1">Explore top cities for student accommodation</p>
               </div>
             </div>
-            
-            <div className="relative">
+
+            {/* Desktop Grid - Hidden on mobile */}
+            <div className="hidden md:block relative">
               {/* Left Arrow - positioned on the side */}
               {cities.length > citiesPerView && canShowPrevCities && (
-                <button 
+                <button
                   onClick={prevCities}
                   className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
                 >
                   <ChevronLeft className="w-5 h-5 text-gray-600" />
                 </button>
               )}
-              
+
               {/* Right Arrow - positioned on the side */}
               {cities.length > citiesPerView && canShowNextCities && (
-                <button 
+                <button
                   onClick={nextCities}
                   className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
                 >
@@ -581,86 +594,124 @@ export default function HomePage() {
                 </button>
               )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {visibleCities.map((city) => (
-                <Link
-                  key={city.name}
-                  to={`/website/ourproperty?city=${city.name}`}
-                  className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 block h-48"
-                >
-                  <img
-                    src={city.image}
-                    alt={city.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="text-xl font-bold text-white">{city.name}</h3>
-                    <p className="text-sm text-white/90">{city.properties} Properties</p>
-                  </div>
-                </Link>
-              ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {visibleCities.map((city) => (
+                  <Link
+                    key={city.name}
+                    to={`/website/ourproperty?city=${city.name}`}
+                    className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 block h-48"
+                  >
+                    <img
+                      src={city.image}
+                      alt={city.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <h3 className="text-xl font-bold text-white">{city.name}</h3>
+                      <p className="text-sm text-white/90">{city.properties} Properties</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
+
+            {/* Mobile Carousel - 1 row (4 cities) per view with arrows */}
+            <div className="md:hidden relative">
+              {/* Left Arrow */}
+              {canShowPrevMobileCity && (
+                <button
+                  onClick={() => setMobileCityIndex(prev => prev - 4)}
+                  className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center"
+                >
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
+              )}
+
+              {/* Right Arrow */}
+              {canShowNextMobileCity && (
+                <button
+                  onClick={() => setMobileCityIndex(prev => prev + 4)}
+                  className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center"
+                >
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                </button>
+              )}
+
+              <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+                {visibleMobileCities.map((city) => (
+                  <Link
+                    key={city.name}
+                    to={`/website/ourproperty?city=${city.name}`}
+                    className="flex flex-col items-center text-center"
+                  >
+                    <div className="h-16 w-16 rounded-2xl overflow-hidden shadow-md ring-1 ring-black/5">
+                      <img src={city.image} alt={city.name} className="h-full w-full object-cover" />
+                    </div>
+                    <span className="mt-1.5 text-[11px] font-semibold text-gray-800 leading-tight">{city.name}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Mobile-Only Properties Section */}
-        <MobilePropertiesSection />
+       
 
-        {/* What We Offer - Multiple images showing rooms */}
-        <section className="py-12 bg-white hidden md:block">
+        {/* What We Offer - Desktop & Mobile Responsive */}
+        <section className="py-3 md:py-12 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">What We Offer</h2>
-              <p className="text-lg text-gray-600">Choose from a variety of accommodation types tailored for students</p>
+            <div className="text-center mb-2 md:mb-10">
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-3">What We Offer</h2>
+              <p className="text-xs md:text-lg text-gray-600">Choose from a variety of accommodation types tailored for students</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Desktop Grid - Hidden on mobile */}
+            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {offerings.map((offering) => {
                 const selectedIdx = offeringSelectedImage[offering.title] || 0;
                 const allImages = offering.images;
                 const totalImages = allImages.length;
-                
+
                 const nextImage = () => {
-                  setOfferingSelectedImage(prev => ({ 
-                    ...prev, 
-                    [offering.title]: (selectedIdx + 1) % totalImages 
+                  setOfferingSelectedImage(prev => ({
+                    ...prev,
+                    [offering.title]: (selectedIdx + 1) % totalImages
                   }));
                 };
-                
+
                 const prevImage = () => {
-                  setOfferingSelectedImage(prev => ({ 
-                    ...prev, 
-                    [offering.title]: (selectedIdx - 1 + totalImages) % totalImages 
+                  setOfferingSelectedImage(prev => ({
+                    ...prev,
+                    [offering.title]: (selectedIdx - 1 + totalImages) % totalImages
                   }));
                 };
-                
+
                 return (
                   <Link
                     key={offering.title}
                     to={`/website/ourproperty?type=${offering.category.toLowerCase()}`}
                     className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-all group block cursor-pointer"
                   >
-                    {/* Main Large Image - with arrows and hover content */}
-                    <div className="h-48 overflow-hidden relative">
+                    {/* Main Image - with arrows */}
+                    <div className="h-36 overflow-hidden relative">
                       <img
                         src={allImages[selectedIdx]}
                         alt={offering.title}
                         className="w-full h-full object-cover transition-all duration-300"
                       />
-                      
+
                       {/* Title always visible at TOP */}
-                      <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/50 to-transparent">
-                        <h3 className="text-lg font-bold text-white drop-shadow-md">{offering.title}</h3>
-                      </div>
-                      
-                      {/* Description on hover - from bottom */}
-                      <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <p className="text-sm text-white drop-shadow-md line-clamp-2">{offering.description}</p>
+                      <div className="absolute top-0 left-0 right-0 p-2 bg-gradient-to-b from-black/50 to-transparent">
+                        <h3 className="text-base font-bold text-white drop-shadow-md">{offering.title}</h3>
                       </div>
 
-                      {/* Left Arrow - transparent bg */}
+                      {/* Description on hover */}
+                      <div className="absolute bottom-0 left-0 right-0 p-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <p className="text-xs text-white drop-shadow-md line-clamp-2">{offering.description}</p>
+                      </div>
+
+                      {/* Left Arrow */}
                       {totalImages > 1 && (
                         <button
                           onClick={(e) => { e.stopPropagation(); prevImage(); }}
@@ -670,7 +721,7 @@ export default function HomePage() {
                         </button>
                       )}
 
-                      {/* Right Arrow - transparent bg */}
+                      {/* Right Arrow */}
                       {totalImages > 1 && (
                         <button
                           onClick={(e) => { e.stopPropagation(); nextImage(); }}
@@ -689,12 +740,147 @@ export default function HomePage() {
                 );
               })}
             </div>
+
+            {/* Mobile Carousel - 1 item per view with image navigation */}
+            <div className="md:hidden relative px-1">
+              {/* Offering Navigation - Top arrows for switching offerings */}
+              <div className="flex items-center justify-between mb-2">
+                {canShowPrevMobileOffering ? (
+                  <button
+                    onClick={() => {
+                      setMobileOfferingIndex(prev => prev - 1);
+                      setMobileImageIndex(0); // Reset image when changing offering
+                    }}
+                    className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  </button>
+                ) : <div className="w-8" />}
+
+                <span className="text-sm font-medium text-gray-600">
+                  {mobileOfferingIndex + 1} / {offerings.length}
+                </span>
+
+                {canShowNextMobileOffering ? (
+                  <button
+                    onClick={() => {
+                      setMobileOfferingIndex(prev => prev + 1);
+                      setMobileImageIndex(0); // Reset image when changing offering
+                    }}
+                    className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+                  >
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                  </button>
+                ) : <div className="w-8" />}
+              </div>
+
+              {/* Single Offering Card */}
+              <div className="flex justify-center">
+                {visibleMobileOffering && (
+                  <Link
+                    to={`/website/ourproperty?type=${visibleMobileOffering.category.toLowerCase()}`}
+                    className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg block"
+                  >
+                    <div className="h-44 overflow-hidden relative group">
+                      {/* Current Image */}
+                      <img
+                        src={visibleMobileOffering.images[mobileImageIndex]}
+                        alt={visibleMobileOffering.title}
+                        className="w-full h-full object-cover"
+                      />
+
+                      {/* Title always visible at TOP */}
+                      <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/50 to-transparent">
+                        <h3 className="text-xl font-bold text-white drop-shadow-md">{visibleMobileOffering.title}</h3>
+                      </div>
+
+                      {/* Description on hover/tap */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent transform translate-y-full group-hover:translate-y-0 group-active:translate-y-0 transition-transform duration-300">
+                        <p className="text-sm text-white drop-shadow-md line-clamp-2">{visibleMobileOffering.description}</p>
+                      </div>
+
+                      {/* Image Navigation Arrows - Inside image */}
+                      {visibleMobileOffering.images.length > 1 && (
+                        <>
+                          {/* Left Image Arrow */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMobileImageIndex(prev =>
+                                prev === 0 ? visibleMobileOffering.images.length - 1 : prev - 1
+                              );
+                            }}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center"
+                          >
+                            <ChevronLeft className="w-5 h-5 text-white" />
+                          </button>
+
+                          {/* Right Image Arrow */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMobileImageIndex(prev =>
+                                prev === visibleMobileOffering.images.length - 1 ? 0 : prev + 1
+                              );
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center"
+                          >
+                            <ChevronRight className="w-5 h-5 text-white" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Image Counter */}
+                      <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                        {mobileImageIndex + 1} / {visibleMobileOffering.images.length}
+                      </div>
+                    </div>
+                  </Link>
+                )}
+              </div>
+
+              {/* Image Dots - Below card */}
+              {visibleMobileOffering && visibleMobileOffering.images.length > 1 && (
+                <div className="flex justify-center gap-2 mt-3">
+                  {visibleMobileOffering.images.map((_, imgIdx) => (
+                    <button
+                      key={imgIdx}
+                      onClick={() => setMobileImageIndex(imgIdx)}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        imgIdx === mobileImageIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Offering Dots Indicator */}
+              <div className="flex justify-center gap-2 mt-3">
+                {offerings.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setMobileOfferingIndex(index);
+                      setMobileImageIndex(0);
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === mobileOfferingIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
+        {/* Mobile Trending Stays - Same as Desktop, 1 item per row */}
+        <MobilePropertiesSection />
+
+        <MobileVideoSection />
+
         {/* How Roomhy Works - Video Section */}
         {/* How Roomhy Works - Improved Section */}
-<section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+<section className="hidden md:block py-20 bg-gradient-to-b from-gray-50 to-white">
   <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
     {/* Heading */}
@@ -734,9 +920,10 @@ export default function HomePage() {
 
   </div>
 </section>
+ 
 
-        {/* Trending Stays - Carousel with 12 properties */}
-        <section className="py-12 bg-gray-50">
+        {/* Trending Stays - Carousel with 12 properties - DESKTOP ONLY */}
+        <section className="hidden md:block py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-10">
               <div className="text-center flex-1">
@@ -769,31 +956,31 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {visibleTrending.map((property) => (
                 <div key={property.name} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative h-44">
+                  <div className="relative h-32">
                     <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
                     {property.verified && (
-                      <div className="absolute top-3 right-3 bg-white rounded-full px-2 py-1 flex items-center">
-                        <BadgeCheck className="w-4 h-4 text-teal-600 mr-1" />
-                        <span className="text-xs font-bold">Verified</span>
+                      <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
+                        <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
+                        <span className="text-[10px] font-bold">Verified</span>
                       </div>
                     )}
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg">{property.name}</h3>
-                    <div className="flex items-center text-gray-600 text-sm mb-2">
-                      <MapPin className="w-4 h-4 mr-1" />
+                  <div className="p-3">
+                    <h3 className="font-bold text-base">{property.name}</h3>
+                    <div className="flex items-center text-gray-600 text-xs mb-2">
+                      <MapPin className="w-3 h-3 mr-1" />
                       {property.location}
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-teal-600">{property.price}</span>
+                      <span className="text-lg font-bold text-teal-600">{property.price}</span>
                       <div className="flex items-center">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                        <span className="font-semibold">{property.rating}</span>
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-1" />
+                        <span className="font-semibold text-sm">{property.rating}</span>
                       </div>
                     </div>
                     <Link 
                       to="/website/fast-bidding"
-                      className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-bold text-center block transition-colors"
+                      className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-sm"
                     >
                       Book Now
                     </Link>
@@ -809,11 +996,11 @@ export default function HomePage() {
         <WhyRoomhy />
         
         {/* Reviews Slider Section - Auto Sliding */}
-        <section className="py-16 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+        <section className="py-3 md:py-16 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 md:mb-10">
             <div className="text-center">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">What Students Say</h2>
-              <p className="text-lg text-gray-600">Trusted by 10,000+ students across India</p>
+              <h2 className="text-lg md:text-4xl font-bold text-gray-900 mb-1 md:mb-3">What Students Say</h2>
+              <p className="text-xs md:text-lg text-gray-600">Trusted by 10,000+ students across India</p>
             </div>
           </div>
           
@@ -865,28 +1052,28 @@ export default function HomePage() {
                   avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face"
                 }
               ].map((review, idx) => (
-                <div key={`${setIdx}-${idx}`} className="flex-shrink-0 w-[350px] mx-3">
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 h-full">
-                    <div className="flex items-center gap-3 mb-4">
+                <div key={`${setIdx}-${idx}`} className="flex-shrink-0 w-[280px] mx-2">
+                  <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 h-full">
+                    <div className="flex items-center gap-2 mb-3">
                       <img 
                         src={review.avatar} 
                         alt={review.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-teal-100"
+                        className="w-10 h-10 rounded-full object-cover border-2 border-teal-100"
                       />
                       <div>
-                        <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                        <p className="text-sm text-gray-500">{review.role}</p>
+                        <h4 className="font-semibold text-gray-900 text-sm">{review.name}</h4>
+                        <p className="text-xs text-gray-500">{review.role}</p>
                       </div>
                     </div>
-                    <div className="flex gap-1 mb-3">
+                    <div className="flex gap-1 mb-2">
                       {[...Array(5)].map((_, i) => (
                         <Star 
                           key={i}
-                          className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                          className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                         />
                       ))}
                     </div>
-                    <p className="text-gray-600 text-sm leading-relaxed italic">"{review.text}"</p>
+                    <p className="text-gray-600 text-xs leading-relaxed italic">"{review.text}"</p>
                   </div>
                 </div>
               )))}
@@ -932,24 +1119,15 @@ export default function HomePage() {
         <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">BidNow</span>
       </Link>
 
-      {/* Mobile Chat Now Button - same as desktop */}
-<Link
-  to="/website/chat"
-  className="md:hidden fixed bottom-36 right-6 z-50 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full font-bold shadow-xl flex items-center gap-2 group px-4 py-4 overflow-hidden"
->
-  <MessageSquare className="h-5 w-5 flex-shrink-0" />
-  <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">Chat Now</span>
-</Link>
-
-{/* Mobile Bid Now Button - same as desktop */}
+{/* Mobile Bid Now Button */}
 <Link
   to="/website/fast-bidding"
-  className="md:hidden fixed bottom-20 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full font-bold shadow-xl flex items-center gap-2 group px-4 py-4 overflow-hidden"
+  className="md:hidden fixed bottom-20 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full font-bold shadow-xl flex items-center gap-2 group px-4 py-4 overflow-hidden active:scale-95 transition-all"
 >
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
   </svg>
-  <span className="max-w-0 group-hover:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">BidNow</span>
+  <span className="max-w-0 group-active:max-w-xs overflow-hidden transition-all duration-300 whitespace-nowrap">BidNow</span>
 </Link>
 
       {/* Mobile Bottom Navigation */}

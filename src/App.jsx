@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { TranslationProvider } from './contexts/TranslationContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import HomePage from './HomePage';
 import OurPropertyPage from './pages/website/OurPropertyPage';
 import PropertyDetailsPage from './pages/website/PropertyDetailsPage';
@@ -17,12 +19,18 @@ import WebsiteLogin from './pages/website/WebsiteLogin';
 import WebsiteSignup from './pages/website/WebsiteSignup';
 import WebsiteChat from './pages/website/WebsiteChat';
 import WebsiteMystays from './pages/website/WebsiteMystays';
+import ProfilePage from './pages/website/ProfilePage';
+import SettingsPage from './pages/website/SettingsPage';
+import FavouritesPage from './pages/website/FavouritesPage';
+import ReviewsPage from './pages/website/ReviewsPage';
 
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
+      <TranslationProvider>
+        <ThemeProvider>
+          <Router>
+            <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/website/index" element={<HomePage />} />
           <Route path="/website/ourproperty" element={<OurPropertyPage />} />
@@ -41,12 +49,18 @@ export default function App() {
           <Route path="/website/signup" element={<WebsiteSignup />} />
           <Route path="/website/chat" element={<WebsiteChat />} />
           <Route path="/website/mystays" element={<WebsiteMystays />} />
+          <Route path="/website/profile" element={<ProfilePage />} />
+          <Route path="/website/settings" element={<SettingsPage />} />
+          <Route path="/website/fav" element={<FavouritesPage />} />
+          <Route path="/website/reviews" element={<ReviewsPage />} />
           {/* Alias routes */}
           <Route path="/login" element={<WebsiteLogin />} />
           <Route path="/signup" element={<WebsiteSignup />} />
           <Route path="/chat" element={<WebsiteChat />} />
         </Routes>
-      </Router>
+          </Router>
+        </ThemeProvider>
+      </TranslationProvider>
     </AuthProvider>
   );
 }

@@ -1,18 +1,81 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Star, ArrowRight, Bed, Wifi, Home } from 'lucide-react';
+import { MapPin, Star, BadgeCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchProperties } from '../../utils/api';
 
+// Same featured properties as desktop
+const featuredProperties = [
+  {
+    name: "Sunshine PG",
+    location: "Koramangala, Bangalore",
+    price: "₹8,500",
+    rating: 4.8,
+    verified: true,
+    image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=800"
+  },
+  {
+    name: "Student Hub",
+    location: "Powai, Mumbai",
+    price: "₹12,000",
+    rating: 4.9,
+    verified: true,
+    image: "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=800"
+  },
+  {
+    name: "Campus Stay",
+    location: "Vijay Nagar, Delhi",
+    price: "₹7,500",
+    rating: 4.7,
+    verified: true,
+    image: "https://images.pexels.com/photos/1571453/pexels-photo-1571453.jpeg?auto=compress&cs=tinysrgb&w=800"
+  },
+  {
+    name: "Scholar's Den",
+    location: "Aundh, Pune",
+    price: "₹9,000",
+    rating: 4.6,
+    verified: true,
+    image: "https://images.pexels.com/photos/1571467/pexels-photo-1571467.jpeg?auto=compress&cs=tinysrgb&w=800"
+  },
+  {
+    name: "Study Nest",
+    location: "Madivala, Bangalore",
+    price: "₹8,000",
+    rating: 4.5,
+    verified: true,
+    image: "https://images.pexels.com/photos/1571470/pexels-photo-1571470.jpeg?auto=compress&cs=tinysrgb&w=800"
+  },
+  {
+    name: "Academic Homes",
+    location: "T-Nagar, Chennai",
+    price: "₹10,500",
+    rating: 4.8,
+    verified: true,
+    image: "https://images.pexels.com/photos/1571462/pexels-photo-1571462.jpeg?auto=compress&cs=tinysrgb&w=800"
+  }
+];
+
 export default function MobilePropertiesSection() {
-  const [properties, setProperties] = useState([]);
+  const [properties, setProperties] = useState(featuredProperties);
   const [loading, setLoading] = useState(true);
+  const [startIndex, setStartIndex] = useState(0);
+  const itemsPerView = 1; // Show 1 card at a time on mobile
 
   useEffect(() => {
     const loadProperties = async () => {
       try {
         const allProperties = await fetchProperties();
-        // Take first 6 properties for mobile view
-        setProperties(allProperties.slice(0, 6));
+        if (allProperties && allProperties.length > 0) {
+          const mapped = allProperties.slice(0, 6).map(p => ({
+            name: p.propertyName,
+            location: `${p.propertyInfo?.area || p.city}, ${p.city}`,
+            price: `₹${p.propertyInfo?.rent || p.monthlyRent || '8,500'}`,
+            rating: 4.5 + Math.random() * 0.5,
+            verified: true,
+            image: p.propertyInfo?.photos?.[0] || p.propertyImage || featuredProperties[0].image
+          }));
+          setProperties(mapped);
+        }
       } catch (error) {
         console.error('Error loading properties:', error);
       } finally {
@@ -22,104 +85,115 @@ export default function MobilePropertiesSection() {
     loadProperties();
   }, []);
 
+  const canShowPrev = startIndex > 0;
+  const canShowNext = startIndex < properties.length - itemsPerView;
+
+  const next = () => {
+    if (canShowNext) {
+      setStartIndex(startIndex + 1);
+    }
+  };
+
+  const prev = () => {
+    if (canShowPrev) {
+      setStartIndex(startIndex - 1);
+    }
+  };
+
+  const visibleProperties = properties.slice(startIndex, startIndex + itemsPerView);
+
   if (loading) {
     return (
-      <section className="md:hidden bg-gray-50 py-8 px-4">
-        <div className="animate-pulse space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl h-48"></div>
-          ))}
+      <section className="md:hidden bg-gray-50 py-5 px-4">
+        <div className="animate-pulse">
+          <div className="bg-white rounded-xl h-64 mx-auto max-w-sm"></div>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="md:hidden bg-gray-50 py-6 px-4">
-      {/* Section Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Trending Properties</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Handpicked for you</p>
-        </div>
-        <Link 
-          to="/website/ourproperty" 
-          className="text-[#1ab64f] text-sm font-medium flex items-center gap-1"
-        >
-          View All
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+    <section className="md:hidden bg-gray-50 py-3">
+      {/* Section Header - Same as Desktop */}
+      <div className="px-4 mb-2">
+        <h2 className="text-lg font-bold text-gray-900 mb-1">Trending Stays This Week</h2>
+        <p className="text-xs text-gray-600">Most popular properties among students</p>
       </div>
 
-      {/* Properties Grid - Horizontal Scroll */}
-      <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-        {properties.map((property) => (
-          <Link
-            key={property._id || property.visitId}
-            to={`/website/property-details/${property._id || property.visitId || property.propertyName}`}
-            className="flex-shrink-0 w-[280px] bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100"
+      {/* Carousel with Navigation Arrows - Like Popular Cities */}
+      <div className="relative px-4">
+        {/* Left Arrow */}
+        {canShowPrev && (
+          <button
+            onClick={prev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
           >
-            {/* Property Image */}
-            <div className="relative h-40 bg-gray-200">
-              <img
-                src={property.propertyInfo?.photos?.[0] || property.propertyImage || 'https://via.placeholder.com/400x300?text=Property'}
-                alt={property.propertyName}
-                className="w-full h-full object-cover"
-              />
-              {/* Rating Badge */}
-              <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg flex items-center gap-1">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs font-semibold">4.5</span>
-              </div>
-              {/* Property Type Badge */}
-              <div className="absolute bottom-2 left-2 bg-[#1ab64f] text-white text-xs px-2 py-1 rounded">
-                {property.propertyInfo?.propertyType || 'PG'}
-              </div>
-            </div>
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
+          </button>
+        )}
 
-            {/* Property Info */}
-            <div className="p-3">
-              <h3 className="font-semibold text-gray-900 text-sm truncate">
-                {property.propertyName}
-              </h3>
-              <div className="flex items-center gap-1 text-gray-500 text-xs mt-1">
-                <MapPin className="w-3 h-3" />
-                <span className="truncate">{property.propertyInfo?.area || property.city}</span>
-              </div>
+        {/* Right Arrow */}
+        {canShowNext && (
+          <button
+            onClick={next}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-600" />
+          </button>
+        )}
 
-              {/* Amenities Icons */}
-              <div className="flex items-center gap-3 mt-2 text-gray-400">
-                <Bed className="w-4 h-4" />
-                <Wifi className="w-4 h-4" />
-                <Home className="w-4 h-4" />
+        {/* Cards Container - Show 1 card centered */}
+        <div className="flex justify-center">
+          {visibleProperties.map((property) => (
+            <div key={property.name} className="w-full max-w-sm bg-white rounded-2xl shadow-lg overflow-hidden">
+              {/* Property Image */}
+              <div className="relative h-40">
+                <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
+                {property.verified && (
+                  <div className="absolute top-3 right-3 bg-white rounded-full px-2 py-1 flex items-center">
+                    <BadgeCheck className="w-4 h-4 text-teal-600 mr-1" />
+                    <span className="text-xs font-bold">Verified</span>
+                  </div>
+                )}
               </div>
 
-              {/* Price & CTA */}
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                <div>
-                  <span className="text-lg font-bold text-gray-900">₹{property.propertyInfo?.rent || property.monthlyRent}</span>
-                  <span className="text-xs text-gray-500">/mo</span>
+              {/* Property Info */}
+              <div className="p-3.5">
+                <h3 className="font-bold text-base">{property.name}</h3>
+                <div className="flex items-center text-gray-600 text-sm mb-2">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {property.location}
                 </div>
-                <button className="bg-[#1ab64f] text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                  View
-                </button>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-teal-600">{property.price}</span>
+                  <div className="flex items-center">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+                    <span className="font-semibold">{property.rating.toFixed(1)}</span>
+                  </div>
+                </div>
+                <Link
+                  to="/website/fast-bidding"
+                  className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-bold text-center block transition-colors"
+                >
+                  Book Now
+                </Link>
               </div>
             </div>
-          </Link>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Quick Filters */}
-      <div className="flex gap-2 mt-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-        {['PG', 'Hostel', 'Flat', 'Coliving'].map((type) => (
-          <Link
-            key={type}
-            to={`/website/ourproperty?type=${type}`}
-            className="flex-shrink-0 bg-white border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-full"
-          >
-            {type}
-          </Link>
-        ))}
+        {/* Dots Indicator */}
+        <div className="flex justify-center gap-2 mt-4">
+          {properties.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setStartIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === startIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

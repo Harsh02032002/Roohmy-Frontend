@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Building2, HelpCircle, Info, Phone, ListPlus } from 'lucide-react';
+import { Home, Building2, HelpCircle, Info, MessageCircle, ListPlus } from 'lucide-react';
 
 export default function MobileBottomNav() {
   const location = useLocation();
@@ -51,7 +51,7 @@ export default function MobileBottomNav() {
     { icon: Building2, path: '/website/ourproperty', label: 'Properties' },
     { icon: HelpCircle, path: '/website/faq', label: 'FAQ' },
     { icon: Info, path: '/website/about', label: 'About' },
-    { icon: Phone, path: '/website/contact', label: 'Contact' },
+    { icon: MessageCircle, path: '/website/chat', label: 'Chat' },
     { icon: ListPlus, path: '/website/list', label: 'List' },
   ];
 

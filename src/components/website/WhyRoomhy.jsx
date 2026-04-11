@@ -1,3 +1,5 @@
+import { useRef, useState } from 'react';
+
 const allPoints = [
   // Why Roomhy points (first 3)
   {
@@ -34,42 +36,68 @@ const allPoints = [
 ];
 
 export default function WhyRoomhy() {
+  const [zoomedCard, setZoomedCard] = useState(null);
+  const [previewCard, setPreviewCard] = useState(null);
+  const lastTapRef = useRef({ index: -1, time: 0 });
+
+  const handleMobileTap = (index, point) => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) return;
+
+    const now = Date.now();
+    const isDoubleTap = lastTapRef.current.index === index && now - lastTapRef.current.time < 280;
+
+    if (isDoubleTap) {
+      setPreviewCard(point);
+      lastTapRef.current = { index: -1, time: 0 };
+      return;
+    }
+
+    setZoomedCard((current) => (current === index ? null : index));
+    lastTapRef.current = { index, time: now };
+  };
+
   return (
-    <section className="bg-white py-8">
+    <section className="bg-white py-6 md:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-3 md:mb-12">
+          <h2 className="text-lg md:text-4xl font-bold text-gray-900 mb-1 md:mb-4">
             Why Choose Roomhy?
           </h2>
-          <p className="text-gray-600 mt-2 text-lg max-w-2xl mx-auto">
+          <p className="text-xs md:text-lg text-gray-600 mt-1 md:mt-2 max-w-2xl mx-auto">
             Built by students, for students. Here's why thousands trust us.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
 
           {allPoints.map((point, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-5 border border-gray-100"
+              onClick={() => handleMobileTap(index, point)}
+              onDoubleClick={() => setPreviewCard(point)}
+              className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer p-2.5 sm:p-5 ${
+                zoomedCard === index ? 'scale-105 shadow-xl ring-2 ring-teal-300' : ''
+              }`}
             >
-              <div className="relative mb-4">
+              <div className="relative mb-2 sm:mb-4">
                 <img
                   src={point.image}
                   alt={point.title}
-                  className="rounded-lg h-40 w-full object-cover"
+                  className="rounded-lg h-20 sm:h-40 w-full object-cover"
                 />
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-teal-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold border-4 border-white">
+                <div className="absolute -bottom-3 sm:-bottom-4 left-1/2 -translate-x-1/2 bg-teal-500 text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold border-2 sm:border-4 border-white text-[10px] sm:text-sm">
                   {index + 1}
                 </div>
               </div>
 
-              <h3 className="font-bold text-lg text-gray-900 text-center">
+              <h3 className="font-bold text-[11px] leading-tight sm:text-lg text-gray-900 text-center mt-4 sm:mt-0">
                 {point.title}
               </h3>
 
-              <p className="text-gray-900 mt-2 text-sm leading-relaxed text-center">
+              <p className={`text-gray-900 mt-2 leading-relaxed text-center text-[10px] sm:text-sm ${
+                zoomedCard === index ? 'block' : 'hidden sm:block'
+              }`}>
                 {point.description}
               </p>
             </div>
@@ -77,13 +105,38 @@ export default function WhyRoomhy() {
 
         </div>
 
-        <div className="mt-12 text-center">
-          <div className="bg-teal-500 rounded-xl p-6 max-w-2xl mx-auto">
-            <p className="text-white text-lg font-semibold">
+        <div className="mt-6 md:mt-12 text-center">
+          <div className="bg-teal-500 rounded-xl p-3 md:p-6 max-w-2xl mx-auto">
+            <p className="text-white text-sm md:text-lg font-semibold">
               Join 50,000+ students who found their perfect home with Roomhy
             </p>
           </div>
         </div>
+
+        {previewCard ? (
+          <div
+            className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center px-4 md:hidden"
+            onClick={() => setPreviewCard(null)}
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl bg-white overflow-hidden shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <img src={previewCard.image} alt={previewCard.title} className="h-56 w-full object-cover" />
+              <div className="p-4">
+                <h3 className="text-lg font-bold text-gray-900">{previewCard.title}</h3>
+                <p className="mt-2 text-sm text-gray-600 leading-relaxed">{previewCard.description}</p>
+                <button
+                  type="button"
+                  onClick={() => setPreviewCard(null)}
+                  className="mt-4 w-full rounded-xl bg-teal-500 py-2.5 text-sm font-semibold text-white"
+                >
+                  Close Preview
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
       </div>
     </section>

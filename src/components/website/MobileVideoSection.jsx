@@ -5,20 +5,23 @@ export default function MobileVideoSection() {
   const [showVideo, setShowVideo] = useState(false);
 
   return (
-    <section className="md:hidden bg-gradient-to-br from-gray-900 to-gray-800 py-8 px-4">
+    <section className="md:hidden bg-gradient-to-b from-gray-50 to-white py-3 px-4">
       <div className="max-w-lg mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            See How Roomhy Works
+        {/* Section Header - Same as Desktop */}
+        <div className="text-center mb-3">
+          <h2 className="text-lg font-bold text-gray-900 mb-1">
+            How Roomhy Works
           </h2>
-          <p className="text-gray-400 text-sm">
-            Your perfect stay is just a few taps away
+          <p className="text-gray-600 text-xs">
+            Find, compare, and book your perfect stay in just a few steps
           </p>
         </div>
 
-        {/* Video Thumbnail / Player */}
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+        {/* Video Container - Smaller for mobile */}
+        <div className="relative rounded-2xl overflow-hidden shadow-xl group">
+          {/* Overlay Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10"></div>
+
           {!showVideo ? (
             <>
               {/* Thumbnail Image */}
@@ -29,51 +32,49 @@ export default function MobileVideoSection() {
                   className="w-full h-full object-cover opacity-60"
                 />
                 {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center z-20">
                   <button
                     onClick={() => setShowVideo(true)}
-                    className="w-16 h-16 bg-[#1ab64f] rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                    className="w-12 h-12 bg-[#1ab64f] rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
                   >
-                    <Play className="w-7 h-7 text-white fill-white ml-1" />
+                    <Play className="w-5 h-5 text-white fill-white ml-1" />
                   </button>
                 </div>
                 {/* Duration Badge */}
-                <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded z-20">
                   0:45
+                </div>
+                {/* Watch Demo Badge - Like Desktop */}
+                <div className="absolute bottom-2 left-2 z-20 text-white">
+                  <h3 className="text-sm font-semibold">Watch Demo</h3>
+                  <p className="text-[10px] text-white/80">See how booking works</p>
                 </div>
               </div>
             </>
           ) : (
             <>
-              {/* Video Player Placeholder */}
+              {/* Video Player */}
               <div className="aspect-video bg-black flex items-center justify-center relative">
-                <p className="text-gray-400 text-sm">Video Player</p>
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src="https://www.youtube.com/embed/4pFUP0HZwWM?autoplay=1"
+                  title="Roomhy demo video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 h-full w-full"
+                ></iframe>
                 {/* Close Button */}
                 <button
                   onClick={() => setShowVideo(false)}
-                  className="absolute top-3 right-3 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
+                  className="absolute top-2 right-2 w-7 h-7 bg-white/20 rounded-full flex items-center justify-center z-30"
                 >
                   <X className="w-4 h-4 text-white" />
                 </button>
               </div>
             </>
           )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="flex justify-around mt-6">
-          <div className="text-center">
-            <p className="text-xl font-bold text-[#1ab64f]">50K+</p>
-            <p className="text-xs text-gray-400">Happy Students</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-[#1ab64f]">10K+</p>
-            <p className="text-xs text-gray-400">Properties</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-[#1ab64f]">25+</p>
-            <p className="text-xs text-gray-400">Cities</p>
-          </div>
         </div>
       </div>
     </section>

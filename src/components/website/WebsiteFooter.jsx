@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchCities, fetchAreas } from "../../utils/api.js";
 
 const footerColumns = [
@@ -50,6 +51,8 @@ export default function WebsiteFooter() {
   const year = new Date().getFullYear();
   const [cityLinks, setCityLinks] = useState(staticCityLinks);
   const [expandedCity, setExpandedCity] = useState(null);
+  const [mobileCityIndex, setMobileCityIndex] = useState(0);
+  const [mobileAreaIndex, setMobileAreaIndex] = useState({});
 
   useEffect(() => {
     const loadCitiesAndAreas = async () => {
@@ -71,7 +74,7 @@ export default function WebsiteFooter() {
             }
           });
           
-          const transformedCities = cities.slice(0, 7).map(city => {
+          const transformedCities = cities.map(city => {
             const cityName = city.name || city.city || city;
             const cityAreas = areasByCity[cityName] || areasByCity[cityName.toLowerCase()] || [];
             
@@ -95,9 +98,9 @@ export default function WebsiteFooter() {
 
   return (
     <footer className="mt-auto bg-gray-50 border-t border-gray-200 text-gray-700">
-      <div className="container mx-auto px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          <div className="md:col-span-4">
+      <div className="container mx-auto px-4 sm:px-6 py-6 md:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8">
+          <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
             <a href="/website/index" className="inline-flex items-center gap-3">
               <img
                 src="https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png"
@@ -105,10 +108,10 @@ export default function WebsiteFooter() {
                 className="h-10 w-auto"
               />
             </a>
-            <p className="mt-4 text-sm text-gray-900 max-w-sm">
+            <p className="mt-2 md:mt-4 text-sm text-gray-900 max-w-sm">
               Find student housing smarter, simpler, and broker-free.
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+            <div className="mt-3 md:mt-5 flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm">
               <a className="text-gray-700 hover:text-teal-600 font-medium" href="/website/contact">
                 Help & Support
               </a>
@@ -117,7 +120,7 @@ export default function WebsiteFooter() {
                 hello@roomhy.com
               </a>
             </div>
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-3 md:mt-6 flex items-center justify-center md:justify-start gap-3">
               <a 
                 href="#" 
                 title="Facebook" 
@@ -172,14 +175,14 @@ export default function WebsiteFooter() {
           </div>
 
           <div className="md:col-span-8">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="grid grid-cols-4 gap-4 md:gap-6">
               {footerColumns.map((col) => (
                 <div key={col.title}>
-                  <div className="text-sm font-bold text-gray-900">{col.title}</div>
-                  <ul className="mt-3 space-y-2">
+                  <div className="text-xs md:text-sm font-bold text-gray-900">{col.title}</div>
+                  <ul className="mt-2 md:mt-3 space-y-1 md:space-y-2">
                     {col.links.map((l) => (
                       <li key={l.href}>
-                        <a className="text-sm text-gray-900 hover:text-teal-600 font-medium" href={l.href}>
+                        <a className="text-[10px] md:text-sm text-gray-900 hover:text-teal-600 font-medium" href={l.href}>
                           {l.label}
                         </a>
                       </li>
@@ -192,9 +195,11 @@ export default function WebsiteFooter() {
         </div>
 
         {/* Cities with Areas */}
-        <div className="mt-8 pt-5 border-t border-gray-200">
-          <h4 className="text-sm font-bold text-gray-900 mb-4">Top Cities & Areas</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-4 md:mt-8 pt-3 md:pt-5 border-t border-gray-200">
+          <h4 className="text-sm font-bold text-gray-900 mb-2 md:mb-4">Top Cities & Areas</h4>
+          
+          {/* Desktop Grid - Hidden on mobile */}
+          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {cityLinks.map((city) => (
               <div key={city.name} className="bg-white rounded-lg border border-gray-200 p-3">
                 <a
@@ -222,9 +227,129 @@ export default function WebsiteFooter() {
               </div>
             ))}
           </div>
+
+          {/* Mobile Carousel - 1 city at a time with areas navigation */}
+          <div className="md:hidden relative">
+            {/* City Navigation Arrows */}
+            {mobileCityIndex > 0 && (
+              <button
+                onClick={() => {
+                  setMobileCityIndex(prev => prev - 1);
+                  setMobileAreaIndex(prev => ({ ...prev, [mobileCityIndex - 1]: 0 }));
+                }}
+                className="absolute -left-2 top-8 z-10 w-7 h-7 rounded-full bg-white shadow-lg flex items-center justify-center"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-600" />
+              </button>
+            )}
+
+            {mobileCityIndex < cityLinks.length - 1 && (
+              <button
+                onClick={() => {
+                  setMobileCityIndex(prev => prev + 1);
+                  setMobileAreaIndex(prev => ({ ...prev, [mobileCityIndex + 1]: 0 }));
+                }}
+                className="absolute -right-2 top-8 z-10 w-7 h-7 rounded-full bg-white shadow-lg flex items-center justify-center"
+              >
+                <ChevronRight className="w-4 h-4 text-gray-600" />
+              </button>
+            )}
+
+            {cityLinks[mobileCityIndex] && (
+              <div className="bg-white rounded-lg border border-gray-200 p-3">
+                <a
+                  href={cityLinks[mobileCityIndex].href}
+                  className="flex items-center justify-between hover:text-teal-600 transition-colors"
+                >
+                  <span className="font-semibold text-gray-900">{cityLinks[mobileCityIndex].name}</span>
+                  <span className="text-xs text-gray-500">({cityLinks[mobileCityIndex].count})</span>
+                </a>
+                
+                {/* Areas Navigation for current city */}
+                {cityLinks[mobileCityIndex].areas && cityLinks[mobileCityIndex].areas.length > 0 && (
+                  <div className="mt-3 relative">
+                    {/* Area Navigation Arrows */}
+                    {(mobileAreaIndex[mobileCityIndex] || 0) > 0 && (
+                      <button
+                        onClick={() => {
+                          setMobileAreaIndex(prev => ({
+                            ...prev,
+                            [mobileCityIndex]: Math.max(0, (prev[mobileCityIndex] || 0) - 1)
+                          }));
+                        }}
+                        className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-gray-100 shadow flex items-center justify-center"
+                      >
+                        <ChevronLeft className="w-3 h-3 text-gray-600" />
+                      </button>
+                    )}
+
+                    {(mobileAreaIndex[mobileCityIndex] || 0) < cityLinks[mobileCityIndex].areas.length - 1 && (
+                      <button
+                        onClick={() => {
+                          setMobileAreaIndex(prev => ({
+                            ...prev,
+                            [mobileCityIndex]: Math.min(
+                              cityLinks[mobileCityIndex].areas.length - 1,
+                              (prev[mobileCityIndex] || 0) + 1
+                            )
+                          }));
+                        }}
+                        className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-gray-100 shadow flex items-center justify-center"
+                      >
+                        <ChevronRight className="w-3 h-3 text-gray-600" />
+                      </button>
+                    )}
+
+                    {/* Single Area Display */}
+                    <div className="flex justify-center px-6">
+                      <a
+                        href={`/website/ourproperty?city=${encodeURIComponent(cityLinks[mobileCityIndex].name.toLowerCase())}&area=${encodeURIComponent(cityLinks[mobileCityIndex].areas[mobileAreaIndex[mobileCityIndex] || 0].toLowerCase())}`}
+                        className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-teal-50 hover:text-teal-600 rounded text-gray-600 transition-colors text-center"
+                      >
+                        {cityLinks[mobileCityIndex].areas[mobileAreaIndex[mobileCityIndex] || 0]}
+                      </a>
+                    </div>
+
+                    {/* Area Dots Indicator */}
+                    <div className="flex justify-center gap-1 mt-2">
+                      {cityLinks[mobileCityIndex].areas.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setMobileAreaIndex(prev => ({ ...prev, [mobileCityIndex]: idx }));
+                          }}
+                          className={`w-1.5 h-1.5 rounded-full transition-all ${
+                            idx === (mobileAreaIndex[mobileCityIndex] || 0) ? 'bg-teal-500 w-3' : 'bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* City Dots Indicator */}
+            <div className="flex justify-center gap-1.5 mt-3">
+              {cityLinks.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setMobileCityIndex(idx);
+                    if (!mobileAreaIndex[idx]) {
+                      setMobileAreaIndex(prev => ({ ...prev, [idx]: 0 }));
+                    }
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    idx === mobileCityIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-8 pt-5 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div className="mt-4 md:mt-8 pt-3 md:pt-5 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
           <div className="text-xs text-gray-900 font-medium">© {year} Roomhy. All rights reserved.</div>
           
         </div>
