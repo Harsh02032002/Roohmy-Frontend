@@ -688,10 +688,10 @@ export default function HomePage() {
                 };
 
                 return (
-                  <Link
+                  <div
                     key={offering.title}
-                    to={`/website/ourproperty?type=${offering.category.toLowerCase()}`}
-                    className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-all group block cursor-pointer"
+                    onClick={() => navigate(`/website/ourproperty?type=${offering.category.toLowerCase()}`)}
+                    className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-all group cursor-pointer"
                   >
                     {/* Main Image - with arrows */}
                     <div className="h-36 overflow-hidden relative">
@@ -714,8 +714,8 @@ export default function HomePage() {
                       {/* Left Arrow */}
                       {totalImages > 1 && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                          onClick={(e) => { e.stopPropagation(); e.preventDefault(); prevImage(); }}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10"
                         >
                           <ChevronLeft className="w-6 h-6 text-white drop-shadow-lg" />
                         </button>
@@ -724,8 +724,8 @@ export default function HomePage() {
                       {/* Right Arrow */}
                       {totalImages > 1 && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                          onClick={(e) => { e.stopPropagation(); e.preventDefault(); nextImage(); }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10"
                         >
                           <ChevronRight className="w-6 h-6 text-white drop-shadow-lg" />
                         </button>
@@ -736,7 +736,7 @@ export default function HomePage() {
                         {selectedIdx + 1} / {totalImages}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
@@ -777,9 +777,9 @@ export default function HomePage() {
               {/* Single Offering Card */}
               <div className="flex justify-center">
                 {visibleMobileOffering && (
-                  <Link
-                    to={`/website/ourproperty?type=${visibleMobileOffering.category.toLowerCase()}`}
-                    className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg block"
+                  <div
+                    onClick={() => navigate(`/website/ourproperty?type=${visibleMobileOffering.category.toLowerCase()}`)}
+                    className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer"
                   >
                     <div className="h-44 overflow-hidden relative group">
                       {/* Current Image */}
@@ -806,11 +806,12 @@ export default function HomePage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              e.preventDefault();
                               setMobileImageIndex(prev =>
                                 prev === 0 ? visibleMobileOffering.images.length - 1 : prev - 1
                               );
                             }}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center z-10"
                           >
                             <ChevronLeft className="w-5 h-5 text-white" />
                           </button>
@@ -819,11 +820,12 @@ export default function HomePage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              e.preventDefault();
                               setMobileImageIndex(prev =>
                                 prev === visibleMobileOffering.images.length - 1 ? 0 : prev + 1
                               );
                             }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center z-10"
                           >
                             <ChevronRight className="w-5 h-5 text-white" />
                           </button>
@@ -835,7 +837,7 @@ export default function HomePage() {
                         {mobileImageIndex + 1} / {visibleMobileOffering.images.length}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 )}
               </div>
 
