@@ -78,10 +78,13 @@ export const fetchProperties = async () => {
     const data = await fetchJson('/api/approved-properties/public/approved');
     const properties = Array.isArray(data) ? data : data?.properties || data?.data || [];
     
-    console.log('📊 API returned', properties.length, 'properties');
+    // Get total count from API (new field) or fallback to properties length
+    const totalCount = data?.total || properties.length;
+    
+    console.log('📊 API returned', properties.length, 'properties (Total:', totalCount + ')');
     
     // Ensure all required fields are present with fallback values
-    return properties
+    const formattedProperties = properties
       .map(p => ({
         ...p,
         property_name: p.property_name || p.propertyName || p.propertyInfo?.name || 'Property',
@@ -92,6 +95,11 @@ export const fetchProperties = async () => {
         propertyType: p.propertyType || p.property_type || p.propertyInfo?.propertyType || 'PG',
         monthlyRent: p.monthlyRent || p.rent || p.propertyInfo?.rent || 5000
       }));
+    
+    // Attach total count to the array for access by components
+    formattedProperties.total = totalCount;
+    
+    return formattedProperties;
   } catch (error) {
     console.error('Error fetching properties:', error);
     return [];
@@ -307,6 +315,9 @@ export const searchPropertiesByLocation = async (latitude, longitude, propertyTy
   try {
     const properties = await fetchProperties();
     
+    // Store total count from API before filtering
+    const totalCount = properties.total || properties.length;
+    
     // Calculate distance between two coordinates (Haversine formula)
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
       const R = 6371; // Earth radius in km
@@ -331,7 +342,7 @@ export const searchPropertiesByLocation = async (latitude, longitude, propertyTy
       'Bangalore': { lat: 12.9716, lon: 77.5946 }
     };
 
-    let filtered = properties;
+    let filtered = [...properties];
 
     // Filter by distance if coordinates provided
     if (latitude && longitude) {
@@ -361,6 +372,11 @@ export const searchPropertiesByLocation = async (latitude, longitude, propertyTy
       return distA - distB;
     });
 
+    // Preserve total count on the filtered array
+    filtered.total = totalCount;
+    
+    console.log('📍 Location search:', filtered.length, 'nearby of', totalCount, 'total');
+    
     return filtered;
   } catch (error) {
     console.error('Error searching properties by location:', error);

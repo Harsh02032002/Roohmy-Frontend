@@ -24,6 +24,7 @@ export default function OurPropertyPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [propertiesPerPage] = useState(10);
   const [totalProperties, setTotalProperties] = useState([]);
+  const [totalCount, setTotalCount] = useState(0); // Total from API
   
   // Get parameters from URL first (before using them in state)
   const typeFromUrl = searchParams.get('type');
@@ -145,6 +146,10 @@ export default function OurPropertyPage() {
         
         // Store all filtered properties for pagination
         setTotalProperties(filtered);
+        
+        // Use the total from API (if available) or fallback to filtered length
+        const apiTotal = allProperties.total || allProperties.length;
+        setTotalCount(apiTotal);
         
         // Extract colleges from ALL filtered properties (not just current page)
         const collegesByProperty = {};
@@ -288,7 +293,7 @@ export default function OurPropertyPage() {
     {/* Total Properties Count */}
     <div className="mt-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-[#C5A059]/20 inline-flex items-center gap-2">
       <span className="text-sm font-semibold text-[#1A1A1A]">
-        {totalProperties.length > 0 ? totalProperties.length : 'Loading...'} Properties Available
+        {totalCount > 0 ? totalCount : (totalProperties.length > 0 ? totalProperties.length : 'Loading...')} Properties Available
       </span>
     </div>
 
@@ -597,7 +602,9 @@ export default function OurPropertyPage() {
               {/* Right Content - Properties */}
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">{properties.length} Properties Found</h2>
+                  <div className="text-sm text-gray-600">
+                    Showing {((currentPage - 1) * propertiesPerPage) + 1} to {Math.min(currentPage * propertiesPerPage, totalCount)} of {totalCount} properties
+                  </div>
                   <select className="rounded-lg border-gray-300 border py-2 px-4 bg-white text-sm">
                     <option>Sort by: Featured</option>
                     <option>Price: Low to High</option>
@@ -666,11 +673,6 @@ export default function OurPropertyPage() {
                           </button>
                         </div>
                       )}
-                      
-                      {/* Results Info */}
-                      <div className="col-span-full text-center text-sm text-gray-600 mt-4">
-                        Showing {((currentPage - 1) * propertiesPerPage) + 1} to {Math.min(currentPage * propertiesPerPage, totalProperties.length)} of {totalProperties.length} properties
-                      </div>
                     </>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
