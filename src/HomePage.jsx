@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, Star, BadgeCheck, TrendingUp, ChevronLeft, ChevronRight, X, Building2, Home, Users, MessageSquare, Gavel } from 'lucide-react';
 import HowRoomhyWorks from './components/website/HowRoomhyWorks';
@@ -407,6 +407,11 @@ export default function HomePage() {
   const [offeringSelectedImage, setOfferingSelectedImage] = useState({});
   const [mobileOfferingIndex, setMobileOfferingIndex] = useState(0); // Mobile: 1 offering at a time
   const [mobileImageIndex, setMobileImageIndex] = useState(0); // Mobile: current image index
+  
+  // Touch/swipe handling refs
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const offeringContainerRef = useRef(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -453,6 +458,34 @@ export default function HomePage() {
   const canShowPrevMobileOffering = mobileOfferingIndex > 0;
   const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
   const visibleMobileOffering = offerings[mobileOfferingIndex];
+
+  // Touch/swipe handlers for mobile offerings
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe && canShowNextMobileOffering) {
+      setMobileOfferingIndex(prev => prev + 1);
+      setMobileImageIndex(0);
+    } else if (isRightSwipe && canShowPrevMobileOffering) {
+      setMobileOfferingIndex(prev => prev - 1);
+      setMobileImageIndex(0);
+    }
+    
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -741,8 +774,14 @@ export default function HomePage() {
               })}
             </div>
 
-            {/* Mobile Carousel - 1 item per view with image navigation */}
-            <div className="md:hidden relative px-1">
+            {/* Mobile Carousel - Swipeable cards */}
+            <div 
+              className="md:hidden relative px-1"
+              ref={offeringContainerRef}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               {/* Offering Navigation - Top arrows for switching offerings */}
               <div className="flex items-center justify-between mb-2">
                 {canShowPrevMobileOffering ? (
@@ -774,12 +813,12 @@ export default function HomePage() {
                 ) : <div className="w-8" />}
               </div>
 
-              {/* Single Offering Card */}
+              {/* Single Offering Card - Swipeable */}
               <div className="flex justify-center">
                 {visibleMobileOffering && (
                   <div
                     onClick={() => navigate(`/website/ourproperty?type=${visibleMobileOffering.category.toLowerCase()}`)}
-                    className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer"
+                    className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-300 hover:scale-105"
                   >
                     <div className="h-44 overflow-hidden relative group">
                       {/* Current Image */}
@@ -798,39 +837,6 @@ export default function HomePage() {
                       <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent transform translate-y-full group-hover:translate-y-0 group-active:translate-y-0 transition-transform duration-300">
                         <p className="text-sm text-white drop-shadow-md line-clamp-2">{visibleMobileOffering.description}</p>
                       </div>
-
-                      {/* Image Navigation Arrows - Inside image */}
-                      {visibleMobileOffering.images.length > 1 && (
-                        <>
-                          {/* Left Image Arrow */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              setMobileImageIndex(prev =>
-                                prev === 0 ? visibleMobileOffering.images.length - 1 : prev - 1
-                              );
-                            }}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center z-10"
-                          >
-                            <ChevronLeft className="w-5 h-5 text-white" />
-                          </button>
-
-                          {/* Right Image Arrow */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              setMobileImageIndex(prev =>
-                                prev === visibleMobileOffering.images.length - 1 ? 0 : prev + 1
-                              );
-                            }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center z-10"
-                          >
-                            <ChevronRight className="w-5 h-5 text-white" />
-                          </button>
-                        </>
-                      )}
 
                       {/* Image Counter */}
                       <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
@@ -870,6 +876,11 @@ export default function HomePage() {
                     }`}
                   />
                 ))}
+              </div>
+              
+              {/* Swipe hint text */}
+              <div className="text-center mt-2 text-xs text-gray-500">
+                ← Swipe to navigate →
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Star, BadgeCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchProperties } from '../../utils/api';
@@ -59,7 +59,12 @@ export default function MobilePropertiesSection() {
   const [properties, setProperties] = useState(featuredProperties);
   const [loading, setLoading] = useState(true);
   const [startIndex, setStartIndex] = useState(0);
-  const itemsPerView = 1; // Show 1 card at a time on mobile
+  const itemsPerView = 1; // Show 1 card at a time for better swipe experience
+  
+  // Touch/swipe handling refs
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const containerRef = useRef(null); // Show 1 card at a time on mobile
 
   useEffect(() => {
     const loadProperties = async () => {
@@ -102,6 +107,32 @@ export default function MobilePropertiesSection() {
 
   const visibleProperties = properties.slice(startIndex, startIndex + itemsPerView);
 
+  // Touch/swipe handlers
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe && canShowNext) {
+      next();
+    } else if (isRightSwipe && canShowPrev) {
+      prev();
+    }
+    
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
   if (loading) {
     return (
       <section className="md:hidden bg-gray-50 py-5 px-4">
@@ -121,7 +152,13 @@ export default function MobilePropertiesSection() {
       </div>
 
       {/* Carousel with Navigation Arrows - Like Popular Cities */}
-      <div className="relative px-4">
+      <div 
+        className="relative px-4"
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Left Arrow */}
         {canShowPrev && (
           <button
@@ -142,10 +179,13 @@ export default function MobilePropertiesSection() {
           </button>
         )}
 
-        {/* Cards Container - Show 1 card centered */}
+        {/* Cards Container - Show 1 card centered with swipe animation */}
         <div className="flex justify-center">
           {visibleProperties.map((property) => (
-            <div key={property.name} className="w-full max-w-sm bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div 
+              key={property.name} 
+              className="w-full max-w-sm bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105"
+            >
               {/* Property Image */}
               <div className="relative h-40">
                 <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
@@ -193,6 +233,11 @@ export default function MobilePropertiesSection() {
               }`}
             />
           ))}
+        </div>
+        
+        {/* Swipe hint text */}
+        <div className="text-center mt-2 text-xs text-gray-500">
+          ← Swipe to navigate →
         </div>
       </div>
     </section>

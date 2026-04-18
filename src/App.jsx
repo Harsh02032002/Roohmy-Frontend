@@ -1,28 +1,129 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { Suspense, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext';
 import { TranslationProvider } from './contexts/TranslationContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import HomePage from './HomePage';
-import OurPropertyPage from './pages/website/OurPropertyPage';
-import PropertyDetailsPage from './pages/website/PropertyDetailsPage';
-import FastBiddingPage from './pages/website/FastBiddingPage';
-import ListYourPropertyPage from './pages/website/ListYourPropertyPage';
-import AboutPage from './pages/website/AboutPage';
-import ContactPage from './pages/website/ContactPage';
-import FAQPage from './pages/website/FAQPage';
-import WebsiteCancellation from './pages/website/WebsiteCancellation';
-import WebsiteTerms from './pages/website/WebsiteTerms';
-import WebsitePrivacy from './pages/website/WebsitePrivacy';
-import WebsiteRefund from './pages/website/WebsiteRefund';
-import WebsiteRefundRequest from './pages/website/WebsiteRefundRequest';
-import WebsiteLogin from './pages/website/WebsiteLogin';
-import WebsiteSignup from './pages/website/WebsiteSignup';
-import WebsiteChat from './pages/website/WebsiteChat';
-import WebsiteMystays from './pages/website/WebsiteMystays';
-import ProfilePage from './pages/website/ProfilePage';
-import SettingsPage from './pages/website/SettingsPage';
-import FavouritesPage from './pages/website/FavouritesPage';
-import ReviewsPage from './pages/website/ReviewsPage';
+import routes from "./routes";
+import { getOwnerSession } from "./utils/ownerSession";
+
+const wrapWithShell = (path, element) => {
+  const wrappedElement = (
+    <Suspense
+      fallback={
+        <div className="min-h-[40vh] flex items-center justify-center px-4 py-12 text-sm text-slate-500">
+          Loading page...
+        </div>
+      }
+    >
+      {element}
+    </Suspense>
+  );
+
+  // No shell wrapping for website pages - direct render
+  if (path.startsWith("/website/")) return wrappedElement;
+  
+  // No shell for digital checkin
+  if (path.startsWith("/digital-checkin/")) return wrappedElement;
+  
+  // Return wrapped element for other panels (they have their own layouts)
+  return wrappedElement;
+};
+
+const renderRoutes = (items) =>
+  items.map((route) => (
+    <Route
+      key={route.path}
+      path={route.path}
+      element={wrapWithShell(route.path, route.element)}
+    />
+  ));
+
+const resolveHostHome = () => {
+  if (typeof window === "undefined") return "/website/index";
+  const host = (window.location.hostname || "").toLowerCase();
+
+  const readStoredUser = () => {
+    const keys = ["manager_user", "staff_user", "user"];
+    for (const key of keys) {
+      try {
+        const sessionValue = sessionStorage.getItem(key);
+        if (sessionValue) return JSON.parse(sessionValue);
+      } catch (_) {
+        // ignore bad storage values
+      }
+      try {
+        const localValue = localStorage.getItem(key);
+        if (localValue) return JSON.parse(localValue);
+      } catch (_) {
+        // ignore bad storage values
+      }
+    }
+    return null;
+  };
+
+  const staffUser = readStoredUser();
+  const role = String(staffUser?.role || "").toLowerCase();
+  const owner = getOwnerSession();
+
+  if (host === "admin.roomhy.com" || host === "www.admin.roomhy.com") {
+    if (role === "superadmin" || role === "admin") return "/superadmin/superadmin";
+    if (role === "areamanager" || role === "manager" || role === "employee") return "/employee/areaadmin";
+    return "/superadmin/index";
+  }
+  if (host === "app.roomhy.com" || host === "www.app.roomhy.com") {
+    if (owner?.loginId) return "/propertyowner/admin";
+    return "/propertyowner/index";
+  }
+  return "/website/index";
+};
+
+const HtmlRedirectOrHome = () => {
+  const location = useLocation();
+  const path = location.pathname || "";
+  if (path.endsWith(".html")) {
+    const clean = path.replace(/\.html$/i, "");
+    return <Navigate to={clean || "/"} replace />;
+  }
+  return <Navigate to={resolveHostHome()} replace />;
+};
+
+const RouteChromeCleanup = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname || "";
+    if (!path.startsWith("/tenant/")) return;
+
+    const cleanup = () => {
+      document.querySelectorAll(".shared-shell").forEach((shell) => {
+        shell.querySelectorAll(".shared-sidebar, .shared-header").forEach((node) => node.remove());
+
+        const content = shell.querySelector(".shared-content");
+        if (content) {
+          content.style.padding = "0";
+          content.style.minHeight = "100vh";
+        }
+
+        shell.setAttribute("data-tenant-cleanup", "1");
+        shell.style.display = "block";
+        shell.style.background = "transparent";
+        shell.style.minHeight = "auto";
+      });
+    };
+
+    cleanup();
+    const timer = window.setTimeout(cleanup, 50);
+    const observer = new MutationObserver(() => cleanup());
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      window.clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [location.pathname]);
+
+  return null;
+};
 
 export default function App() {
   return (
@@ -30,34 +131,17 @@ export default function App() {
       <TranslationProvider>
         <ThemeProvider>
           <Router>
+            <RouteChromeCleanup />
             <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/website/index" element={<HomePage />} />
-          <Route path="/website/ourproperty" element={<OurPropertyPage />} />
-          <Route path="/website/property-details/:propertyId" element={<PropertyDetailsPage />} />
-          <Route path="/website/fast-bidding" element={<FastBiddingPage />} />
-          <Route path="/website/list" element={<ListYourPropertyPage />} />
-          <Route path="/website/about" element={<AboutPage />} />
-          <Route path="/website/contact" element={<ContactPage />} />
-          <Route path="/website/faq" element={<FAQPage />} />
-          <Route path="/website/cancellation" element={<WebsiteCancellation />} />
-          <Route path="/website/terms" element={<WebsiteTerms />} />
-          <Route path="/website/privacy" element={<WebsitePrivacy />} />
-          <Route path="/website/refund" element={<WebsiteRefund />} />
-          <Route path="/website/refund-request" element={<WebsiteRefundRequest />} />
-          <Route path="/website/login" element={<WebsiteLogin />} />
-          <Route path="/website/signup" element={<WebsiteSignup />} />
-          <Route path="/website/chat" element={<WebsiteChat />} />
-          <Route path="/website/mystays" element={<WebsiteMystays />} />
-          <Route path="/website/profile" element={<ProfilePage />} />
-          <Route path="/website/settings" element={<SettingsPage />} />
-          <Route path="/website/fav" element={<FavouritesPage />} />
-          <Route path="/website/reviews" element={<ReviewsPage />} />
-          {/* Alias routes */}
-          <Route path="/login" element={<WebsiteLogin />} />
-          <Route path="/signup" element={<WebsiteSignup />} />
-          <Route path="/chat" element={<WebsiteChat />} />
-        </Routes>
+              {renderRoutes(routes)}
+              <Route path="/" element={<Navigate to={resolveHostHome()} replace />} />
+              <Route path="/superadmin" element={<Navigate to="/superadmin/index" replace />} />
+              <Route path="/employee" element={<Navigate to="/employee/areaadmin" replace />} />
+              <Route path="/employee/superadmin" element={<Navigate to="/employee/areaadmin" replace />} />
+              <Route path="/propertyowner" element={<Navigate to="/propertyowner/index" replace />} />
+              <Route path="/website" element={<Navigate to="/website/index" replace />} />
+              <Route path="*" element={<HtmlRedirectOrHome />} />
+            </Routes>
           </Router>
         </ThemeProvider>
       </TranslationProvider>
