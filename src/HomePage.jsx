@@ -408,10 +408,18 @@ export default function HomePage() {
   const [mobileOfferingIndex, setMobileOfferingIndex] = useState(0); // Mobile: 1 offering at a time
   const [mobileImageIndex, setMobileImageIndex] = useState(0); // Mobile: current image index
   
-  // Touch/swipe handling refs
+  // Touch/swipe handling refs for smooth scrolling
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const offeringScrollContainerRef = useRef(null);
   const offeringContainerRef = useRef(null);
+  const trendingScrollContainerRef = useRef(null);
+  const citiesScrollContainerRef = useRef(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -451,41 +459,71 @@ export default function HomePage() {
   const canShowNextTrending = trendingStartIndex + trendingPerView < featuredProperties.length;
   const canShowPrevTrending = trendingStartIndex > 0;
 
-  // Mobile carousel helpers
-  const canShowNextMobileCity = mobileCityIndex + 4 < cities.length;
-  const canShowPrevMobileCity = mobileCityIndex > 0;
-  const canShowNextMobileOffering = mobileOfferingIndex + 3 < offerings.length;
-  const canShowPrevMobileOffering = mobileOfferingIndex > 0;
-  const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
-  const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
+// Mobile carousel helpers
+const canShowNextMobileCity = mobileCityIndex + 4 < cities.length;
+const canShowPrevMobileCity = mobileCityIndex > 0;
+const canShowNextMobileOffering = mobileOfferingIndex + 3 < offerings.length;
+const canShowPrevMobileOffering = mobileOfferingIndex > 0;
+const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
+const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
 
-  // Touch/swipe handlers for mobile offerings
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.targetTouches[0].clientX;
-  };
+// Smooth drag scrolling handlers for mobile offerings
+const handleMouseDown = (e) => {
+if (!offeringScrollContainerRef.current) return;
+isDragging.current = true;
+startX.current = e.pageX - offeringScrollContainerRef.current.offsetLeft;
+scrollLeft.current = offeringScrollContainerRef.current.scrollLeft;
+offeringScrollContainerRef.current.style.cursor = 'grabbing';
+e.preventDefault();
+};
 
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.targetTouches[0].clientX;
-  };
+const handleMouseMove = (e) => {
+if (!isDragging.current || !offeringScrollContainerRef.current) return;
+e.preventDefault();
+const x = e.pageX - offeringScrollContainerRef.current.offsetLeft;
+const walk = (x - startX.current) * 2; // Scroll speed multiplier
+offeringScrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+};
 
-  const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
-    
-    const distance = touchStartX.current - touchEndX.current;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-    
-    if (isLeftSwipe && canShowNextMobileOffering) {
-      setMobileOfferingIndex(prev => prev + 3);
-      setMobileImageIndex(0);
-    } else if (isRightSwipe && canShowPrevMobileOffering) {
-      setMobileOfferingIndex(prev => prev - 3);
-      setMobileImageIndex(0);
-    }
-    
-    touchStartX.current = 0;
-    touchEndX.current = 0;
-  };
+const handleMouseUp = () => {
+if (!offeringScrollContainerRef.current) return;
+isDragging.current = false;
+offeringScrollContainerRef.current.style.cursor = 'grab';
+};
+
+const handleTouchStart = (e) => {
+if (!offeringScrollContainerRef.current) return;
+touchStartX.current = e.targetTouches[0].clientX;
+touchStartY.current = e.targetTouches[0].clientY;
+scrollLeft.current = offeringScrollContainerRef.current.scrollLeft;
+};
+
+const handleTouchMove = (e) => {
+if (!offeringScrollContainerRef.current) return;
+const x = e.targetTouches[0].clientX;
+const y = e.targetTouches[0].clientY;
+const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
+offeringScrollContainerRef.current.scrollLeft = scrollLeft.current + walk;
+};
+
+const handleTouchEnd = () => {
+if (!offeringScrollContainerRef.current) return;
+
+// Snap to nearest card group after drag ends
+const cardWidth = offeringScrollContainerRef.current.children[0]?.offsetWidth || 0;
+const scrollPosition = offeringScrollContainerRef.current.scrollLeft;
+const cardIndex = Math.round(scrollPosition / (cardWidth * 3)); // 3 cards per group
+const targetScroll = cardIndex * (cardWidth * 3);
+
+offeringScrollContainerRef.current.scrollTo({
+  left: targetScroll,
+  behavior: 'smooth'
+});
+
+// Update state to match scroll position
+setMobileOfferingIndex(Math.min(cardIndex * 3, offerings.length - 3));
+setMobileImageIndex(0);
+};
 
   return (
     <div className="min-h-screen bg-white">
@@ -647,49 +685,119 @@ export default function HomePage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </div> 
 
-            {/* Mobile Carousel - 1 row (4 cities) per view with arrows */}
-            <div className="md:hidden relative">
-              {/* Left Arrow */}
-              {canShowPrevMobileCity && (
+            {/* Mobile Carousel - Smooth horizontal scroll */}
+            <div className="md:hidden">
+              {/* Cities Navigation - Top arrows */}
+              <div className="flex items-center justify-between mb-2">
                 <button
-                  onClick={() => setMobileCityIndex(prev => prev - 4)}
-                  className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center"
+                  onClick={() => {
+                    if (citiesScrollContainerRef.current) {
+                      citiesScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
                 >
                   <ChevronLeft className="w-4 h-4 text-gray-600" />
                 </button>
-              )}
 
-              {/* Right Arrow */}
-              {canShowNextMobileCity && (
+                <span className="text-sm font-medium text-gray-600">
+                  Popular Cities
+                </span>
+
                 <button
-                  onClick={() => setMobileCityIndex(prev => prev + 4)}
-                  className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center"
+                  onClick={() => {
+                    if (citiesScrollContainerRef.current) {
+                      citiesScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
                 >
                   <ChevronRight className="w-4 h-4 text-gray-600" />
                 </button>
-              )}
+              </div>
 
-              <div className="grid grid-cols-4 gap-x-3 gap-y-4">
-                {visibleMobileCities.map((city) => (
-                  <Link
-                    key={city.name}
-                    to={`/website/ourproperty?city=${city.name}`}
-                    className="flex flex-col items-center text-center"
-                  >
-                    <div className="h-16 w-16 rounded-2xl overflow-hidden shadow-md ring-1 ring-black/5">
-                      <img src={city.image} alt={city.name} className="h-full w-full object-cover" />
-                    </div>
-                    <span className="mt-1.5 text-[11px] font-semibold text-gray-800 leading-tight">{city.name}</span>
-                  </Link>
-                ))}
+              {/* Smooth Horizontal Scroll Container */}
+              <div 
+                ref={citiesScrollContainerRef}
+                className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
+                onMouseDown={(e) => {
+                  if (!citiesScrollContainerRef.current) return;
+                  isDragging.current = true;
+                  startX.current = e.pageX - citiesScrollContainerRef.current.offsetLeft;
+                  scrollLeft.current = citiesScrollContainerRef.current.scrollLeft;
+                  citiesScrollContainerRef.current.style.cursor = 'grabbing';
+                  e.preventDefault();
+                }}
+                onMouseMove={(e) => {
+                  if (!isDragging.current || !citiesScrollContainerRef.current) return;
+                  e.preventDefault();
+                  const x = e.pageX - citiesScrollContainerRef.current.offsetLeft;
+                  const walk = (x - startX.current) * 2; // Scroll speed multiplier
+                  citiesScrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+                }}
+                onMouseUp={() => {
+                  if (!citiesScrollContainerRef.current) return;
+                  isDragging.current = false;
+                  citiesScrollContainerRef.current.style.cursor = 'grab';
+                }}
+                onMouseLeave={() => {
+                  if (!citiesScrollContainerRef.current) return;
+                  isDragging.current = false;
+                  citiesScrollContainerRef.current.style.cursor = 'grab';
+                }}
+                onTouchStart={(e) => {
+                  if (!citiesScrollContainerRef.current) return;
+                  touchStartX.current = e.targetTouches[0].clientX;
+                  touchStartY.current = e.targetTouches[0].clientY;
+                  scrollLeft.current = citiesScrollContainerRef.current.scrollLeft;
+                }}
+                onTouchMove={(e) => {
+                  if (!citiesScrollContainerRef.current) return;
+                  const x = e.targetTouches[0].clientX;
+                  const y = e.targetTouches[0].clientY;
+                  const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
+                  citiesScrollContainerRef.current.scrollLeft = scrollLeft.current + walk;
+                }}
+                onTouchEnd={() => {
+                  if (!citiesScrollContainerRef.current) return;
+                  
+                  // Snap to nearest city group after drag ends
+                  const cityWidth = citiesScrollContainerRef.current.children[0]?.children[0]?.offsetWidth || 0;
+                  const scrollPosition = citiesScrollContainerRef.current.scrollLeft;
+                  const cityIndex = Math.round(scrollPosition / (cityWidth + 12)); // 12px gap
+                  const targetScroll = cityIndex * (cityWidth + 12);
+                  
+                  citiesScrollContainerRef.current.scrollTo({
+                    left: targetScroll,
+                    behavior: 'smooth'
+                  });
+                }}
+              >
+                <div className="flex gap-3" style={{ width: `${cities.length * 80}px` }}>
+                  {cities.map((city) => (
+                    <Link
+                      key={city.name}
+                      to={`/website/ourproperty?city=${city.name}`}
+                      className="flex flex-col items-center text-center flex-shrink-0"
+                    >
+                      <div className="h-16 w-16 rounded-2xl overflow-hidden shadow-md ring-1 ring-black/5">
+                        <img src={city.image} alt={city.name} className="h-full w-full object-cover" />
+                      </div>
+                      <span className="mt-1.5 text-[11px] font-semibold text-gray-800 leading-tight">{city.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Swipe hint text */}
+              <div className="text-center mt-2 text-xs text-gray-500">
+                ← Drag to scroll →
               </div>
             </div>
           </div>
         </section>
-
-       
 
         {/* What We Offer - Desktop & Mobile Responsive */}
         <section className="py-3 md:py-12 bg-white">
@@ -774,101 +882,86 @@ export default function HomePage() {
               })}
             </div>
 
-            {/* Mobile Carousel - Swipeable cards */}
-            <div 
-              className="md:hidden relative px-1"
-              ref={offeringContainerRef}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
+            {/* Mobile Carousel - Smooth horizontal scroll */}
+            <div className="md:hidden">
               {/* Offering Navigation - Top arrows for switching offerings */}
               <div className="flex items-center justify-between mb-2">
-                {canShowPrevMobileOffering ? (
-                  <button
-                    onClick={() => {
-                      setMobileOfferingIndex(prev => prev - 3);
-                      setMobileImageIndex(0); // Reset image when changing offering
-                    }}
-                    className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                  </button>
-                ) : <div className="w-8" />}
+                <button
+                  onClick={() => {
+                    if (offeringScrollContainerRef.current) {
+                      offeringScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+                >
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
 
                 <span className="text-sm font-medium text-gray-600">
-                  {Math.floor(mobileOfferingIndex / 3) + 1} / {Math.ceil(offerings.length / 3)}
+                  What We Offer
                 </span>
 
-                {canShowNextMobileOffering ? (
-                  <button
-                    onClick={() => {
-                      setMobileOfferingIndex(prev => prev + 3);
-                      setMobileImageIndex(0); // Reset image when changing offering
-                    }}
-                    className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-                  >
-                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                  </button>
-                ) : <div className="w-8" />}
+                <button
+                  onClick={() => {
+                    if (offeringScrollContainerRef.current) {
+                      offeringScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+                >
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                </button>
               </div>
 
-              {/* 3 Cards Grid - Swipeable */}
-              <div className="grid grid-cols-3 gap-2">
-                {visibleMobileOfferings.map((offering) => (
-                  <div
-                    key={offering.title}
-                    onClick={() => navigate(`/website/ourproperty?type=${offering.category.toLowerCase()}`)}
-                    className="bg-white rounded-lg overflow-hidden shadow cursor-pointer transform transition-transform duration-300 hover:scale-105"
-                  >
-                    <div className="h-24 overflow-hidden relative group">
-                      {/* Current Image */}
-                      <img
-                        src={offering.images[0]}
-                        alt={offering.title}
-                        className="w-full h-full object-cover"
-                      />
+              {/* Smooth Horizontal Scroll Container */}
+              <div 
+                ref={offeringScrollContainerRef}
+                className="overflow-x-auto md:scrollbar-hide cursor-grab active:cursor-grabbing"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                <div className="flex gap-2" style={{ width: `${offerings.length * 110}px` }}>
+                  {offerings.map((offering) => (
+                    <div
+                      key={offering.title}
+                      onClick={() => navigate(`/website/ourproperty?type=${offering.category.toLowerCase()}`)}
+                      className="flex-shrink-0 w-32 bg-white rounded-lg overflow-hidden shadow cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                    >
+                      <div className="h-24 overflow-hidden relative group">
+                        {/* Current Image */}
+                        <img
+                          src={offering.images[0]}
+                          alt={offering.title}
+                          className="w-full h-full object-cover"
+                        />
 
-                      {/* Title always visible at TOP */}
-                      <div className="absolute top-0 left-0 right-0 p-1 bg-gradient-to-b from-black/50 to-transparent">
-                        <h3 className="text-xs font-bold text-white drop-shadow-md truncate">{offering.title}</h3>
-                      </div>
+                        {/* Title always visible at TOP */}
+                        <div className="absolute top-0 left-0 right-0 p-1 bg-gradient-to-b from-black/50 to-transparent">
+                          <h3 className="text-xs font-bold text-white drop-shadow-md truncate">{offering.title}</h3>
+                        </div>
 
-                      {/* Description on hover/tap */}
-                      <div className="absolute bottom-0 left-0 right-0 p-1 bg-gradient-to-t from-black/70 to-transparent transform translate-y-full group-hover:translate-y-0 group-active:translate-y-0 transition-transform duration-300">
-                        <p className="text-[8px] text-white drop-shadow-md line-clamp-2">{offering.description}</p>
+                        {/* Description on hover/tap */}
+                        <div className="absolute bottom-0 left-0 right-0 p-1 bg-gradient-to-t from-black/70 to-transparent transform translate-y-full group-hover:translate-y-0 group-active:translate-y-0 transition-transform duration-300">
+                          <p className="text-[8px] text-white drop-shadow-md line-clamp-2">{offering.description}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Offering Dots Indicator - Show pages instead of individual cards */}
-              <div className="flex justify-center gap-2 mt-3">
-                {Array.from({ length: Math.ceil(offerings.length / 3) }).map((_, pageIndex) => (
-                  <button
-                    key={pageIndex}
-                    onClick={() => {
-                      setMobileOfferingIndex(pageIndex * 3);
-                      setMobileImageIndex(0);
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      Math.floor(mobileOfferingIndex / 3) === pageIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
-                    }`}
-                  />
-                ))}
+                  ))}
+                </div>
               </div>
               
               {/* Swipe hint text */}
               <div className="text-center mt-2 text-xs text-gray-500">
-                ← Swipe to navigate →
+                ← Drag to scroll →
               </div>
             </div>
           </div>
         </section>
-
-        {/* Mobile Trending Stays - Same as Desktop, 1 item per row */}
-        <MobilePropertiesSection />
 
         <MobileVideoSection />
 
@@ -986,6 +1079,148 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Mobile Trending Stays - Smooth horizontal scroll */}
+        <section className="md:hidden py-3 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Heading - Same as Desktop */}
+            <div className="text-center mb-3">
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Trending Stays This Week</h2>
+              <p className="text-xs text-gray-600">Most popular properties among students</p>
+            </div>
+
+            {/* Trending Navigation - Top arrows */}
+            <div className="flex items-center justify-between mb-2">
+              <button
+                onClick={() => {
+                  if (trendingScrollContainerRef.current) {
+                    trendingScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                  }
+                }}
+                className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-600" />
+              </button>
+
+              <span className="text-sm font-medium text-gray-600">
+                Trending Stays
+              </span>
+
+              <button
+                onClick={() => {
+                  if (trendingScrollContainerRef.current) {
+                    trendingScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                  }
+                }}
+                className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+              >
+                <ChevronRight className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Smooth Horizontal Scroll Container */}
+            <div 
+              ref={trendingScrollContainerRef}
+              className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
+              onMouseDown={(e) => {
+                if (!trendingScrollContainerRef.current) return;
+                isDragging.current = true;
+                startX.current = e.pageX - trendingScrollContainerRef.current.offsetLeft;
+                scrollLeft.current = trendingScrollContainerRef.current.scrollLeft;
+                trendingScrollContainerRef.current.style.cursor = 'grabbing';
+                e.preventDefault();
+              }}
+              onMouseMove={(e) => {
+                if (!isDragging.current || !trendingScrollContainerRef.current) return;
+                e.preventDefault();
+                const x = e.pageX - trendingScrollContainerRef.current.offsetLeft;
+                const walk = (x - startX.current) * 2; // Scroll speed multiplier
+                trendingScrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+              }}
+              onMouseUp={() => {
+                if (!trendingScrollContainerRef.current) return;
+                isDragging.current = false;
+                trendingScrollContainerRef.current.style.cursor = 'grab';
+              }}
+              onMouseLeave={() => {
+                if (!trendingScrollContainerRef.current) return;
+                isDragging.current = false;
+                trendingScrollContainerRef.current.style.cursor = 'grab';
+              }}
+              onTouchStart={(e) => {
+                if (!trendingScrollContainerRef.current) return;
+                touchStartX.current = e.targetTouches[0].clientX;
+                touchStartY.current = e.targetTouches[0].clientY;
+                scrollLeft.current = trendingScrollContainerRef.current.scrollLeft;
+              }}
+              onTouchMove={(e) => {
+                if (!trendingScrollContainerRef.current) return;
+                const x = e.targetTouches[0].clientX;
+                const y = e.targetTouches[0].clientY;
+                const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
+                trendingScrollContainerRef.current.scrollLeft = scrollLeft.current + walk;
+              }}
+              onTouchEnd={() => {
+                if (!trendingScrollContainerRef.current) return;
+                
+                // Snap to nearest card after drag ends
+                const cardWidth = trendingScrollContainerRef.current.children[0]?.children[0]?.offsetWidth || 0;
+                const scrollPosition = trendingScrollContainerRef.current.scrollLeft;
+                const cardIndex = Math.round(scrollPosition / (cardWidth + 24)); // 24px gap
+                const targetScroll = cardIndex * (cardWidth + 24);
+                
+                trendingScrollContainerRef.current.scrollTo({
+                  left: targetScroll,
+                  behavior: 'smooth'
+                });
+              }}
+            >
+              <div className="flex gap-6" style={{ width: `${featuredProperties.length * 160}px` }}>
+                {featuredProperties.map((property) => (
+                  <div
+                    key={property.name}
+                    className="flex-shrink-0 w-40 bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  >
+                    <div className="relative h-32">
+                      <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
+                      {property.verified && (
+                        <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
+                          <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
+                          <span className="text-[10px] font-bold">Verified</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-bold text-sm">{property.name}</h3>
+                      <div className="flex items-center text-gray-600 text-xs mb-2">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {property.location}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-teal-600">{property.price}</span>
+                        <div className="flex items-center">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-1" />
+                          <span className="font-semibold text-xs">{property.rating}</span>
+                        </div>
+                      </div>
+                      <Link 
+                        to="/website/fast-bidding"
+                        className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-xs"
+                      >
+                        Book Now
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Swipe hint text */}
+            <div className="text-center mt-2 text-xs text-gray-500">
+              ← Drag to scroll →
+            </div>
+          </div>
+        </section>
+
         {/* Why Choose Roomhy - Combined Section */}
         <WhyRoomhy />
         
@@ -1074,7 +1309,7 @@ export default function HomePage() {
             </div>
           </div>
           
-          {/* Custom CSS for animation */}
+          {/* Custom CSS for animation and scrollbar hiding */}
           <style>{`
             @keyframes scroll-left {
               0% { transform: translateX(0); }
@@ -1085,6 +1320,13 @@ export default function HomePage() {
             }
             .animate-scroll-left:hover {
               animation-play-state: paused;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+            }
+            .scrollbar-hide {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
             }
           `}</style>
         </section>
