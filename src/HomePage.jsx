@@ -418,6 +418,7 @@ export default function HomePage() {
   // What We Offer drag state
   const isDraggingOffering = useRef(false);
   const startXOffering = useRef(0);
+  const startYOffering = useRef(0);
   const scrollLeftOffering = useRef(0);
   
   // Trending drag state
@@ -509,8 +510,8 @@ offeringScrollContainerRef.current.style.cursor = 'grab';
 
 const handleTouchStart = (e) => {
 if (!offeringScrollContainerRef.current) return;
-touchStartX.current = e.targetTouches[0].clientX;
-touchStartY.current = e.targetTouches[0].clientY;
+startXOffering.current = e.targetTouches[0].clientX;
+startYOffering.current = e.targetTouches[0].clientY;
 scrollLeftOffering.current = offeringScrollContainerRef.current.scrollLeft;
 };
 
@@ -518,7 +519,7 @@ const handleTouchMove = (e) => {
 if (!offeringScrollContainerRef.current) return;
 const x = e.targetTouches[0].clientX;
 const y = e.targetTouches[0].clientY;
-const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
+const walk = (startXOffering.current - x) * 2; // Scroll speed multiplier
 offeringScrollContainerRef.current.scrollLeft = scrollLeftOffering.current + walk;
 };
 
