@@ -454,10 +454,10 @@ export default function HomePage() {
   // Mobile carousel helpers
   const canShowNextMobileCity = mobileCityIndex + 4 < cities.length;
   const canShowPrevMobileCity = mobileCityIndex > 0;
-  const canShowNextMobileOffering = mobileOfferingIndex < offerings.length - 1;
+  const canShowNextMobileOffering = mobileOfferingIndex + 3 < offerings.length;
   const canShowPrevMobileOffering = mobileOfferingIndex > 0;
   const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
-  const visibleMobileOffering = offerings[mobileOfferingIndex];
+  const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
 
   // Touch/swipe handlers for mobile offerings
   const handleTouchStart = (e) => {
@@ -476,10 +476,10 @@ export default function HomePage() {
     const isRightSwipe = distance < -50;
     
     if (isLeftSwipe && canShowNextMobileOffering) {
-      setMobileOfferingIndex(prev => prev + 1);
+      setMobileOfferingIndex(prev => prev + 3);
       setMobileImageIndex(0);
     } else if (isRightSwipe && canShowPrevMobileOffering) {
-      setMobileOfferingIndex(prev => prev - 1);
+      setMobileOfferingIndex(prev => prev - 3);
       setMobileImageIndex(0);
     }
     
@@ -787,7 +787,7 @@ export default function HomePage() {
                 {canShowPrevMobileOffering ? (
                   <button
                     onClick={() => {
-                      setMobileOfferingIndex(prev => prev - 1);
+                      setMobileOfferingIndex(prev => prev - 3);
                       setMobileImageIndex(0); // Reset image when changing offering
                     }}
                     className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
@@ -797,13 +797,13 @@ export default function HomePage() {
                 ) : <div className="w-8" />}
 
                 <span className="text-sm font-medium text-gray-600">
-                  {mobileOfferingIndex + 1} / {offerings.length}
+                  {Math.floor(mobileOfferingIndex / 3) + 1} / {Math.ceil(offerings.length / 3)}
                 </span>
 
                 {canShowNextMobileOffering ? (
                   <button
                     onClick={() => {
-                      setMobileOfferingIndex(prev => prev + 1);
+                      setMobileOfferingIndex(prev => prev + 3);
                       setMobileImageIndex(0); // Reset image when changing offering
                     }}
                     className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
@@ -813,66 +813,47 @@ export default function HomePage() {
                 ) : <div className="w-8" />}
               </div>
 
-              {/* Single Offering Card - Swipeable */}
-              <div className="flex justify-center">
-                {visibleMobileOffering && (
+              {/* 3 Cards Grid - Swipeable */}
+              <div className="grid grid-cols-3 gap-2">
+                {visibleMobileOfferings.map((offering) => (
                   <div
-                    onClick={() => navigate(`/website/ourproperty?type=${visibleMobileOffering.category.toLowerCase()}`)}
-                    className="w-full max-w-sm bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                    key={offering.title}
+                    onClick={() => navigate(`/website/ourproperty?type=${offering.category.toLowerCase()}`)}
+                    className="bg-white rounded-lg overflow-hidden shadow cursor-pointer transform transition-transform duration-300 hover:scale-105"
                   >
-                    <div className="h-44 overflow-hidden relative group">
+                    <div className="h-24 overflow-hidden relative group">
                       {/* Current Image */}
                       <img
-                        src={visibleMobileOffering.images[mobileImageIndex]}
-                        alt={visibleMobileOffering.title}
+                        src={offering.images[0]}
+                        alt={offering.title}
                         className="w-full h-full object-cover"
                       />
 
                       {/* Title always visible at TOP */}
-                      <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/50 to-transparent">
-                        <h3 className="text-xl font-bold text-white drop-shadow-md">{visibleMobileOffering.title}</h3>
+                      <div className="absolute top-0 left-0 right-0 p-1 bg-gradient-to-b from-black/50 to-transparent">
+                        <h3 className="text-xs font-bold text-white drop-shadow-md truncate">{offering.title}</h3>
                       </div>
 
                       {/* Description on hover/tap */}
-                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent transform translate-y-full group-hover:translate-y-0 group-active:translate-y-0 transition-transform duration-300">
-                        <p className="text-sm text-white drop-shadow-md line-clamp-2">{visibleMobileOffering.description}</p>
-                      </div>
-
-                      {/* Image Counter */}
-                      <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
-                        {mobileImageIndex + 1} / {visibleMobileOffering.images.length}
+                      <div className="absolute bottom-0 left-0 right-0 p-1 bg-gradient-to-t from-black/70 to-transparent transform translate-y-full group-hover:translate-y-0 group-active:translate-y-0 transition-transform duration-300">
+                        <p className="text-[8px] text-white drop-shadow-md line-clamp-2">{offering.description}</p>
                       </div>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
 
-              {/* Image Dots - Below card */}
-              {visibleMobileOffering && visibleMobileOffering.images.length > 1 && (
-                <div className="flex justify-center gap-2 mt-3">
-                  {visibleMobileOffering.images.map((_, imgIdx) => (
-                    <button
-                      key={imgIdx}
-                      onClick={() => setMobileImageIndex(imgIdx)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        imgIdx === mobileImageIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Offering Dots Indicator */}
+              {/* Offering Dots Indicator - Show pages instead of individual cards */}
               <div className="flex justify-center gap-2 mt-3">
-                {offerings.map((_, index) => (
+                {Array.from({ length: Math.ceil(offerings.length / 3) }).map((_, pageIndex) => (
                   <button
-                    key={index}
+                    key={pageIndex}
                     onClick={() => {
-                      setMobileOfferingIndex(index);
+                      setMobileOfferingIndex(pageIndex * 3);
                       setMobileImageIndex(0);
                     }}
                     className={`w-2 h-2 rounded-full transition-all ${
-                      index === mobileOfferingIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
+                      Math.floor(mobileOfferingIndex / 3) === pageIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
                     }`}
                   />
                 ))}

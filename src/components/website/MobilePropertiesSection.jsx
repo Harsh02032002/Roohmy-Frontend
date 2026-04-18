@@ -59,12 +59,12 @@ export default function MobilePropertiesSection() {
   const [properties, setProperties] = useState(featuredProperties);
   const [loading, setLoading] = useState(true);
   const [startIndex, setStartIndex] = useState(0);
-  const itemsPerView = 1; // Show 1 card at a time for better swipe experience
+  const itemsPerView = 3; // Show 3 cards at a time like OYO
   
   // Touch/swipe handling refs
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-  const containerRef = useRef(null); // Show 1 card at a time on mobile
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const loadProperties = async () => {
@@ -91,17 +91,17 @@ export default function MobilePropertiesSection() {
   }, []);
 
   const canShowPrev = startIndex > 0;
-  const canShowNext = startIndex < properties.length - itemsPerView;
+  const canShowNext = startIndex + itemsPerView < properties.length;
 
   const next = () => {
     if (canShowNext) {
-      setStartIndex(startIndex + 1);
+      setStartIndex(startIndex + itemsPerView);
     }
   };
 
   const prev = () => {
     if (canShowPrev) {
-      setStartIndex(startIndex - 1);
+      setStartIndex(startIndex - itemsPerView);
     }
   };
 
@@ -179,41 +179,41 @@ export default function MobilePropertiesSection() {
           </button>
         )}
 
-        {/* Cards Container - Show 1 card centered with swipe animation */}
-        <div className="flex justify-center">
+        {/* Cards Container - Show 3 cards in grid with swipe animation - OYO Style */}
+        <div className="grid grid-cols-3 gap-2">
           {visibleProperties.map((property) => (
             <div 
               key={property.name} 
-              className="w-full max-w-sm bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105"
+              className="bg-white rounded-lg shadow overflow-hidden transform transition-all duration-300 hover:scale-105"
             >
-              {/* Property Image */}
-              <div className="relative h-40">
+              {/* Property Image - Smaller */}
+              <div className="relative h-20">
                 <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
                 {property.verified && (
-                  <div className="absolute top-3 right-3 bg-white rounded-full px-2 py-1 flex items-center">
-                    <BadgeCheck className="w-4 h-4 text-teal-600 mr-1" />
-                    <span className="text-xs font-bold">Verified</span>
+                  <div className="absolute top-1 right-1 bg-white rounded-full px-1 py-0.5 flex items-center">
+                    <BadgeCheck className="w-2 h-2 text-teal-600 mr-0.5" />
+                    <span className="text-[7px] font-bold">Verified</span>
                   </div>
                 )}
               </div>
 
-              {/* Property Info */}
-              <div className="p-3.5">
-                <h3 className="font-bold text-base">{property.name}</h3>
-                <div className="flex items-center text-gray-600 text-sm mb-2">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {property.location}
+              {/* Property Info - Compact OYO Style */}
+              <div className="p-2">
+                <h3 className="font-bold text-xs mb-1 truncate">{property.name}</h3>
+                <div className="flex items-center text-gray-600 text-[8px] mb-1">
+                  <MapPin className="w-2 h-2 mr-0.5" />
+                  <span className="truncate">{property.location}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-teal-600">{property.price}</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-teal-600">{property.price}</span>
                   <div className="flex items-center">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                    <span className="font-semibold">{property.rating.toFixed(1)}</span>
+                    <Star className="w-2 h-2 fill-yellow-400 text-yellow-400 mr-0.5" />
+                    <span className="text-[8px] font-semibold">{property.rating.toFixed(1)}</span>
                   </div>
                 </div>
                 <Link
                   to="/website/fast-bidding"
-                  className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-bold text-center block transition-colors"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-1 rounded font-bold text-center block transition-colors text-[8px]"
                 >
                   Book Now
                 </Link>
@@ -222,14 +222,14 @@ export default function MobilePropertiesSection() {
           ))}
         </div>
 
-        {/* Dots Indicator */}
+        {/* Dots Indicator - Show pages instead of individual cards */}
         <div className="flex justify-center gap-2 mt-4">
-          {properties.map((_, index) => (
+          {Array.from({ length: Math.ceil(properties.length / itemsPerView) }).map((_, pageIndex) => (
             <button
-              key={index}
-              onClick={() => setStartIndex(index)}
+              key={pageIndex}
+              onClick={() => setStartIndex(pageIndex * itemsPerView)}
               className={`w-2 h-2 rounded-full transition-all ${
-                index === startIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
+                Math.floor(startIndex / itemsPerView) === pageIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
               }`}
             />
           ))}
