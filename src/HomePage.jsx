@@ -408,33 +408,8 @@ export default function HomePage() {
   const [mobileOfferingIndex, setMobileOfferingIndex] = useState(0); // Mobile: 1 offering at a time
   const [mobileImageIndex, setMobileImageIndex] = useState(0); // Mobile: current image index
   
-  // Touch/swipe handling refs for smooth scrolling
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const touchEndY = useRef(0);
-  
-  // Separate drag state for each section to prevent interference
-  // What We Offer drag state
-  const isDraggingOffering = useRef(false);
-  const startXOffering = useRef(0);
-  const startYOffering = useRef(0);
-  const scrollLeftOffering = useRef(0);
-  
-  // Trending drag state
-  const isDraggingTrending = useRef(false);
-  const startXTrending = useRef(0);
-  const scrollLeftTrending = useRef(0);
-  
-  // Cities drag state
-  const isDraggingCities = useRef(false);
-  const startXCities = useRef(0);
-  const startYCities = useRef(0);
-  const scrollLeftCities = useRef(0);
-  
   // Refs for scroll containers
   const offeringScrollContainerRef = useRef(null);
-  const offeringContainerRef = useRef(null);
   const trendingScrollContainerRef = useRef(null);
   const citiesScrollContainerRef = useRef(null);
 
@@ -484,63 +459,7 @@ const canShowPrevMobileOffering = mobileOfferingIndex > 0;
 const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
 const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
 
-// Smooth drag scrolling handlers for mobile offerings
-const handleMouseDown = (e) => {
-if (!offeringScrollContainerRef.current) return;
-isDraggingOffering.current = true;
-startXOffering.current = e.pageX - offeringScrollContainerRef.current.offsetLeft;
-scrollLeftOffering.current = offeringScrollContainerRef.current.scrollLeft;
-offeringScrollContainerRef.current.style.cursor = 'grabbing';
-e.preventDefault();
-};
 
-const handleMouseMove = (e) => {
-if (!isDraggingOffering.current || !offeringScrollContainerRef.current) return;
-e.preventDefault();
-const x = e.pageX - offeringScrollContainerRef.current.offsetLeft;
-const walk = (x - startXOffering.current) * 2; // Scroll speed multiplier
-offeringScrollContainerRef.current.scrollLeft = scrollLeftOffering.current - walk;
-};
-
-const handleMouseUp = () => {
-if (!offeringScrollContainerRef.current) return;
-isDraggingOffering.current = false;
-offeringScrollContainerRef.current.style.cursor = 'grab';
-};
-
-const handleTouchStart = (e) => {
-if (!offeringScrollContainerRef.current) return;
-startXOffering.current = e.targetTouches[0].clientX;
-startYOffering.current = e.targetTouches[0].clientY;
-scrollLeftOffering.current = offeringScrollContainerRef.current.scrollLeft;
-};
-
-const handleTouchMove = (e) => {
-if (!offeringScrollContainerRef.current) return;
-const x = e.targetTouches[0].clientX;
-const y = e.targetTouches[0].clientY;
-const walk = (startXOffering.current - x) * 2; // Scroll speed multiplier
-offeringScrollContainerRef.current.scrollLeft = scrollLeftOffering.current + walk;
-};
-
-const handleTouchEnd = () => {
-if (!offeringScrollContainerRef.current) return;
-
-// Snap to nearest card after drag ends (like cities section)
-const cardWidth = offeringScrollContainerRef.current.children[0]?.children[0]?.offsetWidth || 0;
-const scrollPosition = offeringScrollContainerRef.current.scrollLeft;
-const cardIndex = Math.round(scrollPosition / (cardWidth + 8)); // 8px gap
-const targetScroll = cardIndex * (cardWidth + 8);
-
-offeringScrollContainerRef.current.scrollTo({
-  left: targetScroll,
-  behavior: 'smooth'
-});
-
-// Update state to match scroll position
-setMobileOfferingIndex(Math.min(cardIndex * 3, offerings.length - 3));
-setMobileImageIndex(0);
-};
 
   return (
     <div className="min-h-screen bg-white">
@@ -718,60 +637,8 @@ setMobileImageIndex(0);
               <div 
                 ref={citiesScrollContainerRef}
                 className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
-                onMouseDown={(e) => {
-                  if (!citiesScrollContainerRef.current) return;
-                  isDraggingCities.current = true;
-                  startXCities.current = e.pageX - citiesScrollContainerRef.current.offsetLeft;
-                  scrollLeftCities.current = citiesScrollContainerRef.current.scrollLeft;
-                  citiesScrollContainerRef.current.style.cursor = 'grabbing';
-                  e.preventDefault();
-                }}
-                onMouseMove={(e) => {
-                  if (!isDraggingCities.current || !citiesScrollContainerRef.current) return;
-                  e.preventDefault();
-                  const x = e.pageX - citiesScrollContainerRef.current.offsetLeft;
-                  const walk = (x - startXCities.current) * 2; // Scroll speed multiplier
-                  citiesScrollContainerRef.current.scrollLeft = scrollLeftCities.current - walk;
-                }}
-                onMouseUp={() => {
-                  if (!citiesScrollContainerRef.current) return;
-                  isDraggingCities.current = false;
-                  citiesScrollContainerRef.current.style.cursor = 'grab';
-                }}
-                onMouseLeave={() => {
-                  if (!citiesScrollContainerRef.current) return;
-                  isDraggingCities.current = false;
-                  citiesScrollContainerRef.current.style.cursor = 'grab';
-                }}
-                onTouchStart={(e) => {
-                  if (!citiesScrollContainerRef.current) return;
-                  startXCities.current = e.targetTouches[0].clientX;
-                  startYCities.current = e.targetTouches[0].clientY;
-                  scrollLeftCities.current = citiesScrollContainerRef.current.scrollLeft;
-                }}
-                onTouchMove={(e) => {
-                  if (!citiesScrollContainerRef.current) return;
-                  const x = e.targetTouches[0].clientX;
-                  const y = e.targetTouches[0].clientY;
-                  const walk = (startXCities.current - x) * 2; // Scroll speed multiplier
-                  citiesScrollContainerRef.current.scrollLeft = scrollLeftCities.current + walk;
-                }}
-                onTouchEnd={() => {
-                  if (!citiesScrollContainerRef.current) return;
-                  
-                  // Snap to nearest city group after drag ends
-                  const cityWidth = citiesScrollContainerRef.current.children[0]?.children[0]?.offsetWidth || 0;
-                  const scrollPosition = citiesScrollContainerRef.current.scrollLeft;
-                  const cityIndex = Math.round(scrollPosition / (cityWidth + 12)); // 12px gap
-                  const targetScroll = cityIndex * (cityWidth + 12);
-                  
-                  citiesScrollContainerRef.current.scrollTo({
-                    left: targetScroll,
-                    behavior: 'smooth'
-                  });
-                }}
               >
-                <div className="flex gap-3" style={{ width: `${cities.length * 80}px` }}>
+                <div className="flex gap-3 w-max py-2">
                   {cities.map((city) => (
                     <Link
                       key={city.name}
@@ -903,16 +770,9 @@ setMobileImageIndex(0);
               {/* Smooth Horizontal Scroll Container */}
               <div 
                 ref={offeringScrollContainerRef}
-                className="overflow-x-auto md:scrollbar-hide cursor-grab active:cursor-grabbing"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
+                className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
               >
-                <div className="flex gap-2" style={{ width: `${offerings.length * 110}px` }}>
+                <div className="flex gap-3 w-max py-2">
                   {offerings.map((offering) => (
                     <div
                       key={offering.title}
@@ -1101,7 +961,7 @@ setMobileImageIndex(0);
     ref={trendingScrollContainerRef}
     className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
   >
-    <div className="flex gap-4" style={{ width: `${featuredProperties.length * 160}px` }}>
+    <div className="flex gap-4 w-max py-2">
       {featuredProperties.map((property) => (
         <div
           key={property.name}
