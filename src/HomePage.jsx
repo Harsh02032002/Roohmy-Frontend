@@ -413,9 +413,24 @@ export default function HomePage() {
   const touchStartY = useRef(0);
   const touchEndX = useRef(0);
   const touchEndY = useRef(0);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
+  
+  // Separate drag state for each section to prevent interference
+  // What We Offer drag state
+  const isDraggingOffering = useRef(false);
+  const startXOffering = useRef(0);
+  const scrollLeftOffering = useRef(0);
+  
+  // Trending drag state
+  const isDraggingTrending = useRef(false);
+  const startXTrending = useRef(0);
+  const scrollLeftTrending = useRef(0);
+  
+  // Cities drag state
+  const isDraggingCities = useRef(false);
+  const startXCities = useRef(0);
+  const scrollLeftCities = useRef(0);
+  
+  // Refs for scroll containers
   const offeringScrollContainerRef = useRef(null);
   const offeringContainerRef = useRef(null);
   const trendingScrollContainerRef = useRef(null);
@@ -470,24 +485,24 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
 // Smooth drag scrolling handlers for mobile offerings
 const handleMouseDown = (e) => {
 if (!offeringScrollContainerRef.current) return;
-isDragging.current = true;
-startX.current = e.pageX - offeringScrollContainerRef.current.offsetLeft;
-scrollLeft.current = offeringScrollContainerRef.current.scrollLeft;
+isDraggingOffering.current = true;
+startXOffering.current = e.pageX - offeringScrollContainerRef.current.offsetLeft;
+scrollLeftOffering.current = offeringScrollContainerRef.current.scrollLeft;
 offeringScrollContainerRef.current.style.cursor = 'grabbing';
 e.preventDefault();
 };
 
 const handleMouseMove = (e) => {
-if (!isDragging.current || !offeringScrollContainerRef.current) return;
+if (!isDraggingOffering.current || !offeringScrollContainerRef.current) return;
 e.preventDefault();
 const x = e.pageX - offeringScrollContainerRef.current.offsetLeft;
-const walk = (x - startX.current) * 2; // Scroll speed multiplier
-offeringScrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+const walk = (x - startXOffering.current) * 2; // Scroll speed multiplier
+offeringScrollContainerRef.current.scrollLeft = scrollLeftOffering.current - walk;
 };
 
 const handleMouseUp = () => {
 if (!offeringScrollContainerRef.current) return;
-isDragging.current = false;
+isDraggingOffering.current = false;
 offeringScrollContainerRef.current.style.cursor = 'grab';
 };
 
@@ -495,7 +510,7 @@ const handleTouchStart = (e) => {
 if (!offeringScrollContainerRef.current) return;
 touchStartX.current = e.targetTouches[0].clientX;
 touchStartY.current = e.targetTouches[0].clientY;
-scrollLeft.current = offeringScrollContainerRef.current.scrollLeft;
+scrollLeftOffering.current = offeringScrollContainerRef.current.scrollLeft;
 };
 
 const handleTouchMove = (e) => {
@@ -503,7 +518,7 @@ if (!offeringScrollContainerRef.current) return;
 const x = e.targetTouches[0].clientX;
 const y = e.targetTouches[0].clientY;
 const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
-offeringScrollContainerRef.current.scrollLeft = scrollLeft.current + walk;
+offeringScrollContainerRef.current.scrollLeft = scrollLeftOffering.current + walk;
 };
 
 const handleTouchEnd = () => {
@@ -531,7 +546,7 @@ setMobileImageIndex(0);
 
       <main className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative min-h-[240px] md:min-h-0 md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
+        <div className="relative min-h-[180px] md:min-h-0 md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
           {heroImages.map((image, index) => (
             <div
               key={index}
@@ -552,27 +567,11 @@ setMobileImageIndex(0);
               Search verified PGs, hostels & co-living spaces across 50+ Indian cities
             </p>
 
-            {/* Mobile CTA Buttons */}
-            <div className="flex md:hidden gap-2 justify-center mb-2">
-              <Link
-                to="/website/ourproperty"
-                className="bg-[#1ab64f] text-white px-4 py-2 rounded-full font-semibold text-xs shadow-lg"
-              >
-                Browse Properties
-              </Link>
-              <Link
-                to="/website/fast-bidding"
-                className="bg-white text-gray-900 px-4 py-2 rounded-full font-semibold text-xs shadow-lg"
-              >
-                Bid Now
-              </Link>
-            </div>
-
             <div className="max-w-5xl mx-auto w-full px-2 md:px-4 search-container relative">
-              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-col md:flex-row gap-2 md:gap-3">
-                <div className="relative">
+              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-row gap-2 md:gap-3 items-center">
+                <div className="relative flex-shrink-0">
                   <select
-                    className="appearance-none bg-teal-50 text-gray-700 px-3 md:px-6 py-2.5 md:py-4 pr-8 md:pr-12 rounded-xl md:rounded-2xl font-medium focus:outline-none cursor-pointer min-w-[100px] md:min-w-[140px] text-xs md:text-lg w-full md:w-auto"
+                    className="appearance-none bg-teal-50 text-gray-700 px-2 md:px-6 py-2 md:py-4 pr-6 md:pr-12 rounded-lg md:rounded-2xl font-medium focus:outline-none cursor-pointer w-[70px] md:w-[140px] text-[10px] md:text-lg"
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
                   >
@@ -583,14 +582,14 @@ setMobileImageIndex(0);
                     <option value="apartment">Apartment</option>
                   </select>
                 </div>
-                <div className="flex-1 flex items-center px-3 md:px-6 py-2.5 md:py-4 bg-gray-50 rounded-xl md:rounded-2xl relative">
-                  <Search className="w-4 h-4 md:w-6 md:h-6 text-gray-400 mr-2 md:mr-4 flex-shrink-0" />
+                <div className="flex-1 flex items-center px-2 md:px-6 py-2 md:py-4 bg-gray-50 rounded-lg md:rounded-2xl relative min-w-0">
+                  <Search className="w-3 h-3 md:w-6 md:h-6 text-gray-400 mr-1 md:mr-4 flex-shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search city, area, PG name..."
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-xs md:text-lg min-w-0"
+                    placeholder="Search..."
+                    className="flex-1 bg-transparent outline-none text-gray-700 text-[10px] md:text-lg min-w-0 w-full"
                   />
                   {isSearching && (
                     <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2">
@@ -598,7 +597,7 @@ setMobileImageIndex(0);
                     </div>
                   )}
                 </div>
-                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 md:px-12 py-2.5 md:py-4 rounded-xl md:rounded-2xl font-bold text-xs md:text-lg transition-all w-full md:w-auto">
+                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-3 md:px-12 py-2 md:py-4 rounded-lg md:rounded-2xl font-bold text-[10px] md:text-lg transition-all flex-shrink-0 whitespace-nowrap">
                   Search
                 </button>
               </form>
@@ -634,7 +633,7 @@ setMobileImageIndex(0);
         </div>
 
         {/* Popular Cities - Carousel with 4 items */}
-        <section className="py-3 md:py-12 bg-gray-50">
+        <section className="py-1 md:py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-2 md:mb-8">
               <div className="flex-1">
@@ -688,35 +687,30 @@ setMobileImageIndex(0);
             </div> 
 
             {/* Mobile Carousel - Smooth horizontal scroll */}
-            <div className="md:hidden">
-              {/* Cities Navigation - Top arrows */}
-              <div className="flex items-center justify-between mb-2">
-                <button
-                  onClick={() => {
-                    if (citiesScrollContainerRef.current) {
-                      citiesScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                    }
-                  }}
-                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-                >
-                  <ChevronLeft className="w-4 h-4 text-gray-600" />
-                </button>
+            <div className="md:hidden relative px-8">
+              {/* Left Arrow - positioned on left side of cards */}
+              <button
+                onClick={() => {
+                  if (citiesScrollContainerRef.current) {
+                    citiesScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                  }
+                }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-600" />
+              </button>
 
-                <span className="text-sm font-medium text-gray-600">
-                  Popular Cities
-                </span>
-
-                <button
-                  onClick={() => {
-                    if (citiesScrollContainerRef.current) {
-                      citiesScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-                    }
-                  }}
-                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-                >
-                  <ChevronRight className="w-4 h-4 text-gray-600" />
-                </button>
-              </div>
+              {/* Right Arrow - positioned on right side of cards */}
+              <button
+                onClick={() => {
+                  if (citiesScrollContainerRef.current) {
+                    citiesScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                  }
+                }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+              >
+                <ChevronRight className="w-4 h-4 text-gray-600" />
+              </button>
 
               {/* Smooth Horizontal Scroll Container */}
               <div 
@@ -724,41 +718,41 @@ setMobileImageIndex(0);
                 className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
                 onMouseDown={(e) => {
                   if (!citiesScrollContainerRef.current) return;
-                  isDragging.current = true;
-                  startX.current = e.pageX - citiesScrollContainerRef.current.offsetLeft;
-                  scrollLeft.current = citiesScrollContainerRef.current.scrollLeft;
+                  isDraggingCities.current = true;
+                  startXCities.current = e.pageX - citiesScrollContainerRef.current.offsetLeft;
+                  scrollLeftCities.current = citiesScrollContainerRef.current.scrollLeft;
                   citiesScrollContainerRef.current.style.cursor = 'grabbing';
                   e.preventDefault();
                 }}
                 onMouseMove={(e) => {
-                  if (!isDragging.current || !citiesScrollContainerRef.current) return;
+                  if (!isDraggingCities.current || !citiesScrollContainerRef.current) return;
                   e.preventDefault();
                   const x = e.pageX - citiesScrollContainerRef.current.offsetLeft;
-                  const walk = (x - startX.current) * 2; // Scroll speed multiplier
-                  citiesScrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+                  const walk = (x - startXCities.current) * 2; // Scroll speed multiplier
+                  citiesScrollContainerRef.current.scrollLeft = scrollLeftCities.current - walk;
                 }}
                 onMouseUp={() => {
                   if (!citiesScrollContainerRef.current) return;
-                  isDragging.current = false;
+                  isDraggingCities.current = false;
                   citiesScrollContainerRef.current.style.cursor = 'grab';
                 }}
                 onMouseLeave={() => {
                   if (!citiesScrollContainerRef.current) return;
-                  isDragging.current = false;
+                  isDraggingCities.current = false;
                   citiesScrollContainerRef.current.style.cursor = 'grab';
                 }}
                 onTouchStart={(e) => {
                   if (!citiesScrollContainerRef.current) return;
                   touchStartX.current = e.targetTouches[0].clientX;
                   touchStartY.current = e.targetTouches[0].clientY;
-                  scrollLeft.current = citiesScrollContainerRef.current.scrollLeft;
+                  scrollLeftCities.current = citiesScrollContainerRef.current.scrollLeft;
                 }}
                 onTouchMove={(e) => {
                   if (!citiesScrollContainerRef.current) return;
                   const x = e.targetTouches[0].clientX;
                   const y = e.targetTouches[0].clientY;
                   const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
-                  citiesScrollContainerRef.current.scrollLeft = scrollLeft.current + walk;
+                  citiesScrollContainerRef.current.scrollLeft = scrollLeftCities.current + walk;
                 }}
                 onTouchEnd={() => {
                   if (!citiesScrollContainerRef.current) return;
@@ -791,16 +785,12 @@ setMobileImageIndex(0);
                 </div>
               </div>
               
-              {/* Swipe hint text */}
-              <div className="text-center mt-2 text-xs text-gray-500">
-                ← Drag to scroll →
-              </div>
             </div>
           </div>
         </section>
 
         {/* What We Offer - Desktop & Mobile Responsive */}
-        <section className="py-3 md:py-12 bg-white">
+        <section className="py-1 md:py-12 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-2 md:mb-10">
               <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-3">What We Offer</h2>
@@ -883,35 +873,30 @@ setMobileImageIndex(0);
             </div>
 
             {/* Mobile Carousel - Smooth horizontal scroll */}
-            <div className="md:hidden">
-              {/* Offering Navigation - Top arrows for switching offerings */}
-              <div className="flex items-center justify-between mb-2">
-                <button
-                  onClick={() => {
-                    if (offeringScrollContainerRef.current) {
-                      offeringScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                    }
-                  }}
-                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-                >
-                  <ChevronLeft className="w-4 h-4 text-gray-600" />
-                </button>
+            <div className="md:hidden relative px-8">
+              {/* Left Arrow - positioned on left side of cards */}
+              <button
+                onClick={() => {
+                  if (offeringScrollContainerRef.current) {
+                    offeringScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                  }
+                }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-600" />
+              </button>
 
-                <span className="text-sm font-medium text-gray-600">
-                  What We Offer
-                </span>
-
-                <button
-                  onClick={() => {
-                    if (offeringScrollContainerRef.current) {
-                      offeringScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-                    }
-                  }}
-                  className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-                >
-                  <ChevronRight className="w-4 h-4 text-gray-600" />
-                </button>
-              </div>
+              {/* Right Arrow - positioned on right side of cards */}
+              <button
+                onClick={() => {
+                  if (offeringScrollContainerRef.current) {
+                    offeringScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                  }
+                }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+              >
+                <ChevronRight className="w-4 h-4 text-gray-600" />
+              </button>
 
               {/* Smooth Horizontal Scroll Container */}
               <div 
@@ -956,9 +941,7 @@ setMobileImageIndex(0);
               </div>
               
               {/* Swipe hint text */}
-              <div className="text-center mt-2 text-xs text-gray-500">
-                ← Drag to scroll →
-              </div>
+              
             </div>
           </div>
         </section>
@@ -989,7 +972,8 @@ setMobileImageIndex(0);
       {/* Video */}
     <iframe
   width="100%"
-  height="500"
+  height="300"
+  className="max-h-[250px] md:max-h-[350px]"
   src="https://www.youtube.com/embed/4pFUP0HZwWM"
   title="YouTube video"
   frameBorder="0"
@@ -1080,7 +1064,7 @@ setMobileImageIndex(0);
         </section>
 
         {/* Mobile Trending Stays - Smooth horizontal scroll */}
-        <section className="md:hidden py-3 bg-gray-50">
+        <section className="md:hidden py-1 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Heading - Same as Desktop */}
             <div className="text-center mb-3">
@@ -1088,136 +1072,74 @@ setMobileImageIndex(0);
               <p className="text-xs text-gray-600">Most popular properties among students</p>
             </div>
 
-            {/* Trending Navigation - Top arrows */}
-            <div className="flex items-center justify-between mb-2">
-              <button
-                onClick={() => {
-                  if (trendingScrollContainerRef.current) {
-                    trendingScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                  }
-                }}
-                className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-              >
-                <ChevronLeft className="w-4 h-4 text-gray-600" />
-              </button>
+          <div className="relative px-8">
 
-              <span className="text-sm font-medium text-gray-600">
-                Trending Stays
-              </span>
+  {/* LEFT */}
+  <button
+    onClick={() => {
+      trendingScrollContainerRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
+    }}
+    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+  >
+    <ChevronLeft className="w-4 h-4 text-gray-600" />
+  </button>
 
-              <button
-                onClick={() => {
-                  if (trendingScrollContainerRef.current) {
-                    trendingScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-                  }
-                }}
-                className="w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-              >
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-              </button>
+  {/* RIGHT */}
+  <button
+    onClick={() => {
+      trendingScrollContainerRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
+    }}
+    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
+  >
+    <ChevronRight className="w-4 h-4 text-gray-600" />
+  </button>
+
+  {/* SCROLL (IMPORTANT: yahin hona chahiye) */}
+  <div 
+    ref={trendingScrollContainerRef}
+    className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
+  >
+    <div className="flex gap-4" style={{ width: `${featuredProperties.length * 160}px` }}>
+      {featuredProperties.map((property) => (
+        <div
+          key={property.name}
+          className="flex-shrink-0 w-40 bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+        >
+          <div className="relative h-32">
+            <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
+            {property.verified && (
+              <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
+                <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
+                <span className="text-[10px] font-bold">Verified</span>
+              </div>
+            )}
+          </div>
+          <div className="p-3">
+            <h3 className="font-bold text-sm">{property.name}</h3>
+            <div className="flex items-center text-gray-600 text-xs mb-2">
+              <MapPin className="w-3 h-3 mr-1" />
+              {property.location}
             </div>
-
-            {/* Smooth Horizontal Scroll Container */}
-            <div 
-              ref={trendingScrollContainerRef}
-              className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
-              onMouseDown={(e) => {
-                if (!trendingScrollContainerRef.current) return;
-                isDragging.current = true;
-                startX.current = e.pageX - trendingScrollContainerRef.current.offsetLeft;
-                scrollLeft.current = trendingScrollContainerRef.current.scrollLeft;
-                trendingScrollContainerRef.current.style.cursor = 'grabbing';
-                e.preventDefault();
-              }}
-              onMouseMove={(e) => {
-                if (!isDragging.current || !trendingScrollContainerRef.current) return;
-                e.preventDefault();
-                const x = e.pageX - trendingScrollContainerRef.current.offsetLeft;
-                const walk = (x - startX.current) * 2; // Scroll speed multiplier
-                trendingScrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
-              }}
-              onMouseUp={() => {
-                if (!trendingScrollContainerRef.current) return;
-                isDragging.current = false;
-                trendingScrollContainerRef.current.style.cursor = 'grab';
-              }}
-              onMouseLeave={() => {
-                if (!trendingScrollContainerRef.current) return;
-                isDragging.current = false;
-                trendingScrollContainerRef.current.style.cursor = 'grab';
-              }}
-              onTouchStart={(e) => {
-                if (!trendingScrollContainerRef.current) return;
-                touchStartX.current = e.targetTouches[0].clientX;
-                touchStartY.current = e.targetTouches[0].clientY;
-                scrollLeft.current = trendingScrollContainerRef.current.scrollLeft;
-              }}
-              onTouchMove={(e) => {
-                if (!trendingScrollContainerRef.current) return;
-                const x = e.targetTouches[0].clientX;
-                const y = e.targetTouches[0].clientY;
-                const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
-                trendingScrollContainerRef.current.scrollLeft = scrollLeft.current + walk;
-              }}
-              onTouchEnd={() => {
-                if (!trendingScrollContainerRef.current) return;
-                
-                // Snap to nearest card after drag ends
-                const cardWidth = trendingScrollContainerRef.current.children[0]?.children[0]?.offsetWidth || 0;
-                const scrollPosition = trendingScrollContainerRef.current.scrollLeft;
-                const cardIndex = Math.round(scrollPosition / (cardWidth + 24)); // 24px gap
-                const targetScroll = cardIndex * (cardWidth + 24);
-                
-                trendingScrollContainerRef.current.scrollTo({
-                  left: targetScroll,
-                  behavior: 'smooth'
-                });
-              }}
-            >
-              <div className="flex gap-6" style={{ width: `${featuredProperties.length * 160}px` }}>
-                {featuredProperties.map((property) => (
-                  <div
-                    key={property.name}
-                    className="flex-shrink-0 w-40 bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-                  >
-                    <div className="relative h-32">
-                      <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
-                      {property.verified && (
-                        <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
-                          <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
-                          <span className="text-[10px] font-bold">Verified</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-bold text-sm">{property.name}</h3>
-                      <div className="flex items-center text-gray-600 text-xs mb-2">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        {property.location}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-teal-600">{property.price}</span>
-                        <div className="flex items-center">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-1" />
-                          <span className="font-semibold text-xs">{property.rating}</span>
-                        </div>
-                      </div>
-                      <Link 
-                        to="/website/fast-bidding"
-                        className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-xs"
-                      >
-                        Book Now
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-bold text-teal-600">{property.price}</span>
+              <div className="flex items-center">
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-1" />
+                <span className="font-semibold text-xs">{property.rating}</span>
               </div>
             </div>
-            
-            {/* Swipe hint text */}
-            <div className="text-center mt-2 text-xs text-gray-500">
-              ← Drag to scroll →
-            </div>
+            <Link 
+              to="/website/fast-bidding"
+              className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-xs"
+            >
+              Book Now
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+</div>
           </div>
         </section>
 
@@ -1225,7 +1147,7 @@ setMobileImageIndex(0);
         <WhyRoomhy />
         
         {/* Reviews Slider Section - Auto Sliding */}
-        <section className="py-3 md:py-16 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+        <section className="py-1 md:py-16 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 md:mb-10">
             <div className="text-center">
               <h2 className="text-lg md:text-4xl font-bold text-gray-900 mb-1 md:mb-3">What Students Say</h2>

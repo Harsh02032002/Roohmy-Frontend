@@ -18,7 +18,7 @@ export default function MobileVideoSection() {
         </div>
 
         {/* Video Container - Smaller for mobile */}
-        <div className="relative rounded-2xl overflow-hidden shadow-xl group">
+        <div className="relative rounded-2xl overflow-hidden shadow-xl group max-w-xs mx-auto">
           {/* Overlay Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10"></div>
 
