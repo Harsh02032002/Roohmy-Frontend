@@ -428,6 +428,7 @@ export default function HomePage() {
   // Cities drag state
   const isDraggingCities = useRef(false);
   const startXCities = useRef(0);
+  const startYCities = useRef(0);
   const scrollLeftCities = useRef(0);
   
   // Refs for scroll containers
@@ -524,11 +525,11 @@ offeringScrollContainerRef.current.scrollLeft = scrollLeftOffering.current + wal
 const handleTouchEnd = () => {
 if (!offeringScrollContainerRef.current) return;
 
-// Snap to nearest card group after drag ends
-const cardWidth = offeringScrollContainerRef.current.children[0]?.offsetWidth || 0;
+// Snap to nearest card after drag ends (like cities section)
+const cardWidth = offeringScrollContainerRef.current.children[0]?.children[0]?.offsetWidth || 0;
 const scrollPosition = offeringScrollContainerRef.current.scrollLeft;
-const cardIndex = Math.round(scrollPosition / (cardWidth * 3)); // 3 cards per group
-const targetScroll = cardIndex * (cardWidth * 3);
+const cardIndex = Math.round(scrollPosition / (cardWidth + 8)); // 8px gap
+const targetScroll = cardIndex * (cardWidth + 8);
 
 offeringScrollContainerRef.current.scrollTo({
   left: targetScroll,
@@ -743,15 +744,15 @@ setMobileImageIndex(0);
                 }}
                 onTouchStart={(e) => {
                   if (!citiesScrollContainerRef.current) return;
-                  touchStartX.current = e.targetTouches[0].clientX;
-                  touchStartY.current = e.targetTouches[0].clientY;
+                  startXCities.current = e.targetTouches[0].clientX;
+                  startYCities.current = e.targetTouches[0].clientY;
                   scrollLeftCities.current = citiesScrollContainerRef.current.scrollLeft;
                 }}
                 onTouchMove={(e) => {
                   if (!citiesScrollContainerRef.current) return;
                   const x = e.targetTouches[0].clientX;
                   const y = e.targetTouches[0].clientY;
-                  const walk = (touchStartX.current - x) * 2; // Scroll speed multiplier
+                  const walk = (startXCities.current - x) * 2; // Scroll speed multiplier
                   citiesScrollContainerRef.current.scrollLeft = scrollLeftCities.current + walk;
                 }}
                 onTouchEnd={() => {
