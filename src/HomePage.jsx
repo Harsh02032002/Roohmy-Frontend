@@ -13,6 +13,205 @@ import MobilePropertiesSection from './components/website/MobilePropertiesSectio
 import MobileVideoSection from './components/website/MobileVideoSection';
 import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 
+// Static fallback data - moved outside to prevent re-renders
+const staticCities = [
+  { name: 'Kota', properties: '2,500+', image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Indore', properties: '1,800+', image: 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Jaipur', properties: '3,200+', image: 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Delhi', properties: '5,000+', image: 'https://images.pexels.com/photos/789380/pexels-photo-789380.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Bhopal', properties: '1,200+', image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Nagpur', properties: '980+', image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Jodhpur', properties: '850+', image: 'https://images.pexels.com/photos/1007426/pexels-photo-1007426.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Mumbai', properties: '4,500+', image: 'https://images.pexels.com/photos/189349/pexels-photo-189349.jpeg?auto=compress&cs=tinysrgb&w=400' },
+];
+
+const staticOfferings = [
+  {
+    title: 'PG',
+    category: 'PG',
+    description: 'Comfortable paying guest accommodations with all amenities',
+    images: [
+      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
+  },
+  {
+    title: 'Hostel',
+    category: 'Hostel',
+    description: 'Affordable hostel living for students and working professionals',
+    images: [
+      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
+  },
+  {
+    title: 'Co-living',
+    category: 'Co-living',
+    description: 'Modern co-living spaces with community and facilities',
+    images: [
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
+  },
+  {
+    title: 'Apartment/Flats',
+    category: 'Apartment',
+    description: 'Private apartments for individuals and small groups',
+    images: [
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
+  },
+];
+
+const featuredProperties = [
+  {
+    name: 'Sunrise PG',
+    location: 'Kota, Rajasthan',
+    price: '₹6,500',
+    rating: 4.8,
+    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Elite Hostel',
+    location: 'Indore, MP',
+    price: '₹5,200',
+    rating: 4.6,
+    image: 'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Urban Co-Space',
+    location: 'Jaipur, Rajasthan',
+    price: '₹8,900',
+    rating: 4.9,
+    image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Campus View PG',
+    location: 'Delhi NCR',
+    price: '₹7,800',
+    rating: 4.7,
+    image: 'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Royal Residency',
+    location: 'Mumbai, Maharashtra',
+    price: '₹12,500',
+    rating: 4.5,
+    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Smart Stay PG',
+    location: 'Bhopal, MP',
+    price: '₹5,800',
+    rating: 4.4,
+    image: 'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Grand Hostel',
+    location: 'Nagpur, Maharashtra',
+    price: '₹4,800',
+    rating: 4.3,
+    image: 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'City Center PG',
+    location: 'Jodhpur, Rajasthan',
+    price: '₹6,200',
+    rating: 4.6,
+    image: 'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Premium Co-Living',
+    location: 'Pune, Maharashtra',
+    price: '₹10,500',
+    rating: 4.8,
+    image: 'https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Student Hub',
+    location: 'Lucknow, UP',
+    price: '₹5,500',
+    rating: 4.2,
+    image: 'https://images.pexels.com/photos/1743228/pexels-photo-1743228.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Comfort Inn PG',
+    location: 'Chandigarh',
+    price: '₹7,200',
+    rating: 4.5,
+    image: 'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Metro Hostel',
+    location: 'Bangalore, Karnataka',
+    price: '₹8,000',
+    rating: 4.7,
+    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+];
+
+const liveBiddingProperties = [
+  {
+    name: 'Sunrise PG',
+    location: 'Kota',
+    price: '₹6,500',
+    currentBid: '₹6,200',
+    timeLeft: '2h 15m',
+    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Elite Hostel',
+    location: 'Indore',
+    price: '₹5,200',
+    currentBid: '₹5,100',
+    timeLeft: '45m',
+    image: 'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true
+  },
+  {
+    name: 'Urban Co-Space',
+    location: 'Jaipur',
+    price: '₹8,900',
+    currentBid: '₹8,500',
+    timeLeft: '1h 30m',
+    image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+    verified: true,
+    girlsOnly: true
+  },
+];
+
+const heroImages = [
+  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1980&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1494203484021-3c454daf695d?q=80&w=2070&auto=format&fit=crop'
+];
+
 export default function HomePage() {
   const navigate = useNavigate();
   // State for dynamic data
@@ -28,68 +227,8 @@ export default function HomePage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedType, setSelectedType] = useState('');
 
-  // Static fallback data
-  const staticCities = [
-    { name: 'Kota', properties: '2,500+', image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { name: 'Indore', properties: '1,800+', image: 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { name: 'Jaipur', properties: '3,200+', image: 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { name: 'Delhi', properties: '5,000+', image: 'https://images.pexels.com/photos/789380/pexels-photo-789380.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { name: 'Bhopal', properties: '1,200+', image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { name: 'Nagpur', properties: '980+', image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { name: 'Jodhpur', properties: '850+', image: 'https://images.pexels.com/photos/1007426/pexels-photo-1007426.jpeg?auto=compress&cs=tinysrgb&w=400' },
-    { name: 'Mumbai', properties: '4,500+', image: 'https://images.pexels.com/photos/189349/pexels-photo-189349.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  ];
-
-  const staticOfferings = [
-    {
-      title: 'PG',
-      category: 'PG',
-      description: 'Comfortable paying guest accommodations with all amenities',
-      images: [
-        'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600'
-      ]
-    },
-    {
-      title: 'Hostel',
-      category: 'Hostel',
-      description: 'Affordable hostel living for students and working professionals',
-      images: [
-        'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600'
-      ]
-    },
-    {
-      title: 'Co-living',
-      category: 'Co-living',
-      description: 'Modern co-living spaces with community and facilities',
-      images: [
-        'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
-      ]
-    },
-    {
-      title: 'Apartment/Flats',
-      category: 'Apartment',
-      description: 'Private apartments for individuals and small groups',
-      images: [
-        'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-        'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
-      ]
-    },
-  ];
+  // Hero image slideshow state
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Helper function to get city images dynamically
   const getCityImage = (cityName) => {
@@ -256,143 +395,7 @@ export default function HomePage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSearchDropdown]);
 
-  const featuredProperties = [
-    {
-      name: 'Sunrise PG',
-      location: 'Kota, Rajasthan',
-      price: '₹6,500',
-      rating: 4.8,
-      image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Elite Hostel',
-      location: 'Indore, MP',
-      price: '₹5,200',
-      rating: 4.6,
-      image: 'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Urban Co-Space',
-      location: 'Jaipur, Rajasthan',
-      price: '₹8,900',
-      rating: 4.9,
-      image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Campus View PG',
-      location: 'Delhi NCR',
-      price: '₹7,800',
-      rating: 4.7,
-      image: 'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Royal Residency',
-      location: 'Mumbai, Maharashtra',
-      price: '₹12,500',
-      rating: 4.5,
-      image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Smart Stay PG',
-      location: 'Bhopal, MP',
-      price: '₹5,800',
-      rating: 4.4,
-      image: 'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Grand Hostel',
-      location: 'Nagpur, Maharashtra',
-      price: '₹4,800',
-      rating: 4.3,
-      image: 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'City Center PG',
-      location: 'Jodhpur, Rajasthan',
-      price: '₹6,200',
-      rating: 4.6,
-      image: 'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Premium Co-Living',
-      location: 'Pune, Maharashtra',
-      price: '₹10,500',
-      rating: 4.8,
-      image: 'https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Student Hub',
-      location: 'Lucknow, UP',
-      price: '₹5,500',
-      rating: 4.2,
-      image: 'https://images.pexels.com/photos/1743228/pexels-photo-1743228.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Comfort Inn PG',
-      location: 'Chandigarh',
-      price: '₹7,200',
-      rating: 4.5,
-      image: 'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Metro Hostel',
-      location: 'Bangalore, Karnataka',
-      price: '₹8,000',
-      rating: 4.7,
-      image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-  ];
 
-  const liveBiddingProperties = [
-    {
-      name: 'Sunrise PG',
-      location: 'Kota',
-      price: '₹6,500',
-      currentBid: '₹6,200',
-      timeLeft: '2h 15m',
-      image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Elite Hostel',
-      location: 'Indore',
-      price: '₹5,200',
-      currentBid: '₹5,100',
-      timeLeft: '45m',
-      image: 'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true
-    },
-    {
-      name: 'Urban Co-Space',
-      location: 'Jaipur',
-      price: '₹8,900',
-      currentBid: '₹8,500',
-      timeLeft: '1h 30m',
-      image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-      verified: true,
-      girlsOnly: true
-    },
-  ];
-
-  // Hero image slideshow state
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const heroImages = [
-    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1980&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1494203484021-3c454daf695d?q=80&w=2070&auto=format&fit=crop'
-  ];
 
   // Cities carousel state
   const [cityStartIndex, setCityStartIndex] = useState(0);
@@ -638,7 +641,7 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
                 ref={citiesScrollContainerRef}
                 className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
               >
-                <div className="flex gap-3 w-max py-2">
+                <div className="flex gap-4 w-max px-4 py-3">
                   {cities.map((city) => (
                     <Link
                       key={city.name}
@@ -772,12 +775,12 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
                 ref={offeringScrollContainerRef}
                 className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
               >
-                <div className="flex gap-3 w-max py-2">
+                <div className="flex gap-4 w-max px-4 py-3">
                   {offerings.map((offering) => (
                     <div
                       key={offering.title}
                       onClick={() => navigate(`/website/ourproperty?type=${offering.category.toLowerCase()}`)}
-                      className="flex-shrink-0 w-32 bg-white rounded-lg overflow-hidden shadow cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                      className="flex-shrink-0 w-32 bg-white rounded-lg overflow-hidden shadow cursor-pointer"
                     >
                       <div className="h-24 overflow-hidden relative group">
                         {/* Current Image */}
@@ -961,7 +964,7 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
     ref={trendingScrollContainerRef}
     className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
   >
-    <div className="flex gap-4 w-max py-2">
+    <div className="flex gap-4 w-max px-4 py-3">
       {featuredProperties.map((property) => (
         <div
           key={property.name}
