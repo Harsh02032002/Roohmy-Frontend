@@ -1,7 +1,7 @@
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
-import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon, X, Menu, Heart } from "lucide-react";
+import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon, X, Menu, Heart, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend } from "../../utils/api";
@@ -43,6 +43,8 @@ export default function OurPropertyPage() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [selectedRatings, setSelectedRatings] = useState([]);
+  const [sortBy, setSortBy] = useState('Featured');
+  const [showSort, setShowSort] = useState(false);
   
   // Fetch properties and related data dynamically
   useEffect(() => {
@@ -317,12 +319,33 @@ export default function OurPropertyPage() {
                 )}
               </button>
               
-              <select className="flex-1 rounded-lg border-gray-200 border py-2.5 px-3 bg-white text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                <option>Sort: Featured</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest First</option>
-              </select>
+              {/* Custom Sort Dropdown */}
+              <div className="flex-1 relative">
+                <button 
+                  onClick={() => setShowSort(!showSort)}
+                  className="w-full flex items-center justify-between gap-2 bg-white px-4 py-2.5 rounded-lg shadow-sm border border-gray-200 text-gray-700 font-medium"
+                >
+                  <span className="truncate">Sort: {sortBy}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showSort ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showSort && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-[100] py-1 animate-in">
+                    {['Featured', 'Price: Low to High', 'Price: High to Low', 'Newest First'].map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => {
+                          setSortBy(option);
+                          setShowSort(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${sortBy === option ? 'text-blue-600 font-bold bg-blue-50/50' : 'text-gray-700'}`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-6">
@@ -607,12 +630,33 @@ export default function OurPropertyPage() {
                   <div className="hidden md:block text-sm text-gray-600">
                     Showing {((currentPage - 1) * propertiesPerPage) + 1} to {Math.min(currentPage * propertiesPerPage, totalCount)} of {totalCount} properties
                   </div>
-                  <select className="hidden md:block rounded-lg border-gray-300 border py-2 px-4 bg-white text-sm">
-                    <option>Sort by: Featured</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
-                    <option>Newest First</option>
-                  </select>
+                  {/* Desktop Custom Sort */}
+                  <div className="hidden md:block relative min-w-[200px]">
+                    <button 
+                      onClick={() => setShowSort(!showSort)}
+                      className="w-full flex items-center justify-between gap-3 bg-white px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:border-gray-400 transition-colors"
+                    >
+                      <span>Sort by: {sortBy}</span>
+                      <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showSort ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {showSort && (
+                      <div className="absolute top-full right-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-[100] py-1 animate-in">
+                        {['Featured', 'Price: Low to High', 'Price: High to Low', 'Newest First'].map((option) => (
+                          <button
+                            key={option}
+                            onClick={() => {
+                              setSortBy(option);
+                              setShowSort(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${sortBy === option ? 'text-blue-600 font-bold bg-blue-50' : 'text-gray-700'}`}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-0 md:gap-4 bg-gray-100 md:bg-transparent pb-16 md:pb-0">
