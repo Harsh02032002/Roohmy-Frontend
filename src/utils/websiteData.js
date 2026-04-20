@@ -124,7 +124,7 @@ export const loadTopSpaces = async () => {
 
   const topCity = validResults.reduce((max, current) => (current.count > max.count ? current : max));
   const spaces = (topCity.enquiries || []).slice(0, 4).map((enq) => ({
-    img: enq.photos && enq.photos.length > 0 ? enq.photos[0] : "https://via.placeholder.com/300x200?text=Property",
+    img: enq.photos && enq.photos.length > 0 ? enq.photos[0] : `https://picsum.photos/300/200?random=${Math.floor(Math.random() * 100)}`,
     title: enq.property_name,
     location: `${enq.locality || ""}, ${enq.city}`.trim(),
     price: enq.rent || "Contact",

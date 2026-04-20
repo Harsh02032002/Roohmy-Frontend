@@ -189,7 +189,7 @@ export default function FavouritesPage() {
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={property.images?.[0] || property.image || 'https://via.placeholder.com/600x400?text=No+Image'}
+                      src={property.images?.[0] || property.image || `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`}
                       alt={property.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
@@ -298,7 +298,7 @@ export default function FavouritesPage() {
                       {/* Property Info */}
                       <div className="flex items-start gap-3 mb-3">
                         <img
-                          src={review.propertyImage || 'https://via.placeholder.com/100?text=Property'}
+                          src={review.propertyImage || `https://picsum.photos/100/100?random=${Math.floor(Math.random() * 100)}`}
                           alt={review.propertyName}
                           className="w-16 h-16 rounded-lg object-cover"
                         />

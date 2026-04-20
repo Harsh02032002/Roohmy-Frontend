@@ -526,8 +526,8 @@ export default function PropertyDetailsPage() {
             ownerEmail: foundProperty.ownerEmail || "",
             
             // Image fields - prioritize new fields
-            image: foundProperty.featuredImage || foundProperty.propertyInfo?.photos?.[0] || foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property",
-            images: foundProperty.images || foundProperty.propertyInfo?.photos || foundProperty.propertyImages || [foundProperty.featuredImage || foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property"],
+            image: foundProperty.featuredImage || foundProperty.propertyInfo?.photos?.[0] || foundProperty.propertyImage || foundProperty.image || `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`,
+            images: foundProperty.images || foundProperty.propertyInfo?.photos || foundProperty.propertyImages || [foundProperty.featuredImage || foundProperty.propertyImage || foundProperty.image || `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`],
             
             // Description and basic info
             description: foundProperty.description || "No description provided",

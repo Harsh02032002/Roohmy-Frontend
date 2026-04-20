@@ -510,8 +510,6 @@ export default function HomePage() {
   const canShowPrevMobileOffering = mobileOfferingIndex > 0;
   const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
   const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
-const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
-const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
 
 
 

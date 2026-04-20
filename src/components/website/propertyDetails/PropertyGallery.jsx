@@ -7,7 +7,7 @@ export default function PropertyGallery({ images = [], propertyName = "", onBack
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
 
-  const validImages = images.length > 0 ? images : ["https://via.placeholder.com/800x600?text=Property"];
+  const validImages = images.length > 0 ? images : [`https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`];
 
   const nextImage = useCallback(() => {
     setSelectedImage((prev) => (prev + 1) % validImages.length);
@@ -67,6 +67,9 @@ export default function PropertyGallery({ images = [], propertyName = "", onBack
             alt={propertyName}
             className="w-full h-full object-cover transition-opacity duration-300"
             loading="eager"
+            onError={(e) => {
+              e.target.src = `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`;
+            }}
           />
           
           {/* Gradient overlays */}
@@ -137,7 +140,14 @@ export default function PropertyGallery({ images = [], propertyName = "", onBack
                     : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                <img 
+                  src={img} 
+                  alt="" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = `https://picsum.photos/72/54?random=${Math.floor(Math.random() * 100)}`;
+                  }}
+                />
               </button>
             ))}
           </div>
@@ -169,6 +179,9 @@ export default function PropertyGallery({ images = [], propertyName = "", onBack
               src={validImages[selectedImage]}
               alt={propertyName}
               className="max-w-full max-h-full object-contain rounded-lg"
+              onError={(e) => {
+                e.target.src = `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`;
+              }}
             />
             {validImages.length > 1 && (
               <>
