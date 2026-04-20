@@ -15,15 +15,25 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
     setShowDetailedGallery(true);
   };
 
-  // Use propertyViews if available, otherwise fallback to images array
-  const currentView = propertyViews[selectedView];
-  const currentImages = currentView?.images || images;
-  const viewLabels = propertyViews.map(view => view.label) || ['Gallery'];
+  // Fallback: If no propertyViews (categories) provided by DB, create a default 'Photos' view
+  const galleryViews = (propertyViews && propertyViews.length > 0) 
+    ? propertyViews 
+    : (images && images.length > 0)
+      ? [{ label: 'Photos', images: images }]
+      : [];
 
-  console.log('PropertyViewsGallery - currentView:', currentView);
-  console.log('PropertyViewsGallery - currentImages:', currentImages);
+  const currentView = galleryViews[selectedView];
+  const currentImages = currentView?.images || images || [];
+  const viewLabels = galleryViews.map(view => view.label);
+
+  console.log('🖼️ Gallery Data Check:', { 
+    viewCount: galleryViews.length, 
+    currentView: viewLabels[selectedView], 
+    imageCount: currentImages.length 
+  });
 
   const handleViewChange = (viewIndex) => {
+    console.log('🔄 Switching to view:', viewLabels[viewIndex]);
     setSelectedView(viewIndex);
     setSelectedImageIndex(0);
   };
@@ -104,7 +114,7 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
             <div className="flex items-end justify-between">
               {/* Category Thumbnails (Facade, Reception, etc.) */}
               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                {propertyViews.map((view, index) => (
+                {galleryViews.map((view, index) => (
                   <button
                     key={index}
                     onClick={(e) => { e.stopPropagation(); openDetailedGallery(index); }}
@@ -175,7 +185,7 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
 
           {/* Category Tabs */}
           <div className="bg-white px-4 flex gap-6 overflow-x-auto no-scrollbar border-b border-gray-100">
-            {propertyViews.map((view, index) => (
+            {galleryViews.map((view, index) => (
               <button
                 key={index}
                 onClick={() => handleViewChange(index)}

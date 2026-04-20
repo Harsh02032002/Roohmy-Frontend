@@ -35,7 +35,8 @@ const AMENITY_ICONS = {
 };
 
 function getAmenityIcon(amenity) {
-  const lower = amenity.toLowerCase();
+  const name = typeof amenity === 'string' ? amenity : (amenity?.name || amenity?.icon || "");
+  const lower = name.toLowerCase();
   for (const [key, icon] of Object.entries(AMENITY_ICONS)) {
     if (lower.includes(key)) return icon;
   }
@@ -90,15 +91,18 @@ export default function DescriptionSection({ description, amenities = [], beds, 
         <div className="mt-6">
           <h3 className="text-base font-bold text-gray-900 mb-3">Most Popular For</h3>
           <div className="flex flex-wrap gap-2">
-            {amenities.map((amenity, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-700 hover:bg-amber-50 hover:border-amber-100 transition-colors"
-              >
-                <span>{getAmenityIcon(amenity)}</span>
-                <span className="font-medium">{amenity}</span>
-              </div>
-            ))}
+            {amenities.map((amenity, idx) => {
+              const amenityName = typeof amenity === 'string' ? amenity : amenity.name;
+              return (
+                <div
+                  key={idx}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-700 hover:bg-amber-50 hover:border-amber-100 transition-colors"
+                >
+                  <span>{getAmenityIcon(amenity)}</span>
+                  <span className="font-medium">{amenityName}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
