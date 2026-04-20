@@ -78,6 +78,7 @@ const staticOfferings = [
 
 const featuredProperties = [
   {
+    _id: 'static1',
     name: 'Sunrise PG',
     location: 'Kota, Rajasthan',
     price: '₹6,500',
@@ -86,6 +87,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static2',
     name: 'Elite Hostel',
     location: 'Indore, MP',
     price: '₹5,200',
@@ -94,6 +96,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static3',
     name: 'Urban Co-Space',
     location: 'Jaipur, Rajasthan',
     price: '₹8,900',
@@ -102,6 +105,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static4',
     name: 'Campus View PG',
     location: 'Delhi NCR',
     price: '₹7,800',
@@ -110,6 +114,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static8',
     name: 'Royal Residency',
     location: 'Mumbai, Maharashtra',
     price: '₹12,500',
@@ -118,6 +123,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static5',
     name: 'Smart Stay PG',
     location: 'Bhopal, MP',
     price: '₹5,800',
@@ -126,6 +132,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static6',
     name: 'Grand Hostel',
     location: 'Nagpur, Maharashtra',
     price: '₹4,800',
@@ -134,6 +141,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static7',
     name: 'City Center PG',
     location: 'Jodhpur, Rajasthan',
     price: '₹6,200',
@@ -142,6 +150,7 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static9',
     name: 'Premium Co-Living',
     location: 'Pune, Maharashtra',
     price: '₹10,500',
@@ -150,29 +159,14 @@ const featuredProperties = [
     verified: true
   },
   {
+    _id: 'static10',
     name: 'Student Hub',
     location: 'Lucknow, UP',
     price: '₹5,500',
     rating: 4.2,
     image: 'https://picsum.photos/600/400?random=38',
     verified: true
-  },
-  {
-    name: 'Comfort Inn PG',
-    location: 'Chandigarh',
-    price: '₹7,200',
-    rating: 4.5,
-    image: 'https://picsum.photos/600/400?random=39',
-    verified: true
-  },
-  {
-    name: 'Metro Hostel',
-    location: 'Bangalore, Karnataka',
-    price: '₹8,000',
-    rating: 4.7,
-    image: 'https://picsum.photos/600/400?random=40',
-    verified: true
-  },
+  }
 ];
 
 const liveBiddingProperties = [
@@ -944,7 +938,11 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {visibleTrending.map((property) => (
-                <div key={property.name} className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow">
+                <Link 
+                  key={property.name} 
+                  to={`/website/property-details/${property._id}`}
+                  className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 block"
+                >
                   <div className="relative h-48">
                     <img 
                       src={property.image} 
@@ -975,7 +973,7 @@ export default function HomePage() {
                     <span className="text-base font-bold text-gray-900">{property.price}</span>
                     <span className="text-xs text-gray-400 ml-1">/month</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
             </div>
@@ -1000,9 +998,10 @@ export default function HomePage() {
   >
     <div className="flex gap-3 w-max px-2 py-3">
       {featuredProperties.map((property) => (
-        <div
+        <Link
           key={property.name}
-          className="flex-shrink-0 w-36"
+          to={`/website/property-details/${property._id}`}
+          className="flex-shrink-0 w-36 block active:scale-95 transition-transform"
         >
           {/* Standalone image with rating badge */}
           <div className="relative h-24 rounded-2xl overflow-hidden shadow-md mb-2">
@@ -1031,7 +1030,7 @@ export default function HomePage() {
             <span className="text-[10px] text-gray-500 line-through">₹9,999</span>
             <span className="text-[10px] font-semibold text-teal-600">30% off</span>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   </div>
