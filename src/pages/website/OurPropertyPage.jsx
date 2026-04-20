@@ -304,18 +304,25 @@ export default function OurPropertyPage() {
 
         <section className="py-2 md:py-16 bg-white md:bg-gray-50 px-3 md:px-0">
           <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Mobile Filter Trigger */}
-            <div className="lg:hidden mb-4">
+            {/* Mobile Filter & Sort Trigger */}
+            <div className="lg:hidden flex items-center justify-between gap-2 mb-4">
               <button
                 onClick={() => setMobileFilterOpen(true)}
-                className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-lg shadow-sm border border-gray-200 text-gray-700 font-medium"
+                className="flex-1 flex items-center justify-center gap-2 bg-white px-4 py-2.5 rounded-lg shadow-sm border border-gray-200 text-gray-700 font-medium"
               >
-                <Menu className="w-5 h-5" />
+                <Filter className="w-4 h-4" />
                 <span>Filters</span>
                 {(selectedCity || selectedType || minPrice || maxPrice) && (
                   <span className="ml-1 w-2 h-2 bg-[#1ab64f] rounded-full"></span>
                 )}
               </button>
+              
+              <select className="flex-1 rounded-lg border-gray-200 border py-2.5 px-3 bg-white text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <option>Sort: Featured</option>
+                <option>Price: Low to High</option>
+                <option>Price: High to Low</option>
+                <option>Newest First</option>
+              </select>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-6">
@@ -597,10 +604,10 @@ export default function OurPropertyPage() {
               {/* Right Content - Properties */}
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-6">
-                  <div className="text-sm text-gray-600">
+                  <div className="hidden md:block text-sm text-gray-600">
                     Showing {((currentPage - 1) * propertiesPerPage) + 1} to {Math.min(currentPage * propertiesPerPage, totalCount)} of {totalCount} properties
                   </div>
-                  <select className="rounded-lg border-gray-300 border py-2 px-4 bg-white text-sm">
+                  <select className="hidden md:block rounded-lg border-gray-300 border py-2 px-4 bg-white text-sm">
                     <option>Sort by: Featured</option>
                     <option>Price: Low to High</option>
                     <option>Price: High to Low</option>
