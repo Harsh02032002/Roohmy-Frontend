@@ -551,18 +551,20 @@ export default function HomePage() {
 
       <main className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative min-h-[180px] md:min-h-0 md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
-          {heroImages.map((image, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-              style={{ backgroundImage: `url(${image})` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
-            </div>
-          ))}
+        <div className="relative min-h-[180px] md:min-h-0 md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 z-10">
+          <div className="absolute inset-0 overflow-hidden">
+            {heroImages.map((image, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{ backgroundImage: `url(${image})` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
+              </div>
+            ))}
+          </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-start pt-4 md:pt-16">
             <h1 className="text-xl sm:text-4xl md:text-6xl font-bold text-white mb-1 md:mb-4 leading-tight text-center">
@@ -572,8 +574,8 @@ export default function HomePage() {
               Search verified PGs, hostels & co-living spaces across 50+ Indian cities
             </p>
 
-            <div className="max-w-5xl mx-auto w-full px-2 md:px-4 search-container relative">
-              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-row gap-2 md:gap-3 items-center">
+            <div className="max-w-5xl mx-auto w-full px-2 md:px-4 search-container relative z-50">
+              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-row gap-2 md:gap-3 items-center relative z-20">
                 <div className="relative flex-shrink-0" ref={typeDropdownRef}>
                   <div
                     onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
@@ -708,14 +710,14 @@ export default function HomePage() {
             </div> 
 
             {/* Mobile Carousel - Smooth horizontal scroll */}
-            <div className="md:hidden relative px-0">
+            <div className="md:hidden relative -mx-4">
 
               {/* Smooth Horizontal Scroll Container */}
               <div 
                 ref={citiesScrollContainerRef}
                 className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
               >
-                <div className="flex gap-4 w-max px-4 py-3">
+                <div className="flex gap-4 w-max px-2 py-3">
                   {cities.map((city) => (
                     <Link
                       key={city.name}
@@ -819,14 +821,14 @@ export default function HomePage() {
             </div>
 
             {/* Mobile Carousel - Smooth horizontal scroll */}
-            <div className="md:hidden relative px-0">
+            <div className="md:hidden relative -mx-4">
 
               {/* Smooth Horizontal Scroll Container */}
               <div 
                 ref={offeringScrollContainerRef}
                 className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
               >
-                <div className="flex gap-4 w-max px-4 py-3">
+                <div className="flex gap-4 w-max px-2 py-3">
                   {offerings.map((offering) => (
                     <div
                       key={offering.title}
@@ -1003,7 +1005,7 @@ export default function HomePage() {
           className="flex-shrink-0 w-36"
         >
           {/* Standalone image with rating badge */}
-          <div className="relative h-32 rounded-2xl overflow-hidden shadow-md mb-2">
+          <div className="relative h-24 rounded-2xl overflow-hidden shadow-md mb-2">
             <img 
               src={property.image} 
               alt={property.name} 
@@ -1097,7 +1099,7 @@ export default function HomePage() {
                       className="flex-shrink-0 w-36"
                     >
                       {/* Standalone image with rating badge */}
-                      <div className="relative h-32 rounded-2xl overflow-hidden shadow-md mb-2">
+                      <div className="relative h-24 rounded-2xl overflow-hidden shadow-md mb-2">
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                         {/* Rating badge - bottom left on image */}
                         <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur rounded-md px-1.5 py-0.5 flex items-center gap-1 shadow-sm">
