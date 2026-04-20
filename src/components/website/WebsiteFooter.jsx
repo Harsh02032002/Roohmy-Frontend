@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, Search } from "lucide-react";
 import { fetchCities, fetchAreas } from "../../utils/api.js";
 
 const footerColumns = [
@@ -50,9 +50,8 @@ const staticCityLinks = [
 export default function WebsiteFooter() {
   const year = new Date().getFullYear();
   const [cityLinks, setCityLinks] = useState(staticCityLinks);
-  const [expandedCity, setExpandedCity] = useState(null);
-  const [mobileCityIndex, setMobileCityIndex] = useState(0);
-  const [mobileAreaIndex, setMobileAreaIndex] = useState({});
+  const [showAllCities, setShowAllCities] = useState(false);
+  const [mobileExpandedCity, setMobileExpandedCity] = useState(null);
 
   useEffect(() => {
     const loadCitiesAndAreas = async () => {
@@ -101,15 +100,19 @@ export default function WebsiteFooter() {
       <div className="container mx-auto px-4 sm:px-6 py-6 md:py-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8">
           <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
-            <a href="/website/index" className="inline-flex items-center gap-3">
+            <a href="/website/index" className="inline-flex items-center gap-3 transition-transform hover:scale-105">
               <img
-                src="https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png"
-                alt="Roomhy"
+                src="/website/images/logoroomhy.jpg"
+                alt="Roohmy"
                 className="h-10 w-auto"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png';
+                }}
               />
             </a>
             <p className="mt-2 md:mt-4 text-sm text-gray-900 max-w-sm">
-              Find student housing smarter, simpler, and broker-free.
+              Find student housing smarter, simpler, and broker-free with Roohmy.
             </p>
             <div className="mt-3 md:mt-5 flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm">
               <a className="text-gray-700 hover:text-teal-600 font-medium" href="/website/contact">
@@ -128,7 +131,7 @@ export default function WebsiteFooter() {
                 aria-label="Facebook"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83cc-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </a>
               <a 
@@ -228,123 +231,71 @@ export default function WebsiteFooter() {
             ))}
           </div>
 
-          {/* Mobile Carousel - 1 city at a time with areas navigation */}
-          <div className="md:hidden relative">
-            {/* City Navigation Arrows */}
-            {mobileCityIndex > 0 && (
-              <button
-                onClick={() => {
-                  setMobileCityIndex(prev => prev - 1);
-                  setMobileAreaIndex(prev => ({ ...prev, [mobileCityIndex - 1]: 0 }));
-                }}
-                className="absolute -left-2 top-8 z-10 w-7 h-7 rounded-full bg-white shadow-lg flex items-center justify-center"
-              >
-                <ChevronLeft className="w-4 h-4 text-gray-600" />
-              </button>
-            )}
-
-            {mobileCityIndex < cityLinks.length - 1 && (
-              <button
-                onClick={() => {
-                  setMobileCityIndex(prev => prev + 1);
-                  setMobileAreaIndex(prev => ({ ...prev, [mobileCityIndex + 1]: 0 }));
-                }}
-                className="absolute -right-2 top-8 z-10 w-7 h-7 rounded-full bg-white shadow-lg flex items-center justify-center"
-              >
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-              </button>
-            )}
-
-            {cityLinks[mobileCityIndex] && (
-              <div className="bg-white rounded-lg border border-gray-200 p-3">
-                <a
-                  href={cityLinks[mobileCityIndex].href}
-                  className="flex items-center justify-between hover:text-teal-600 transition-colors"
-                >
-                  <span className="font-semibold text-gray-900">{cityLinks[mobileCityIndex].name}</span>
-                  <span className="text-xs text-gray-500">({cityLinks[mobileCityIndex].count})</span>
-                </a>
+          {/* Mobile UI - Horizontal Scrolling Chips with Revealable Areas */}
+          <div className="md:hidden mt-4">
+            <div className="flex flex-col gap-4">
+              <div className={`overflow-x-auto scrollbar-hide flex gap-2 pb-2 ${showAllCities ? 'flex-wrap' : 'flex-nowrap'}`}>
+                {cityLinks.slice(0, showAllCities ? cityLinks.length : 6).map((city) => (
+                  <button
+                    key={city.name}
+                    onClick={() => setMobileExpandedCity(mobileExpandedCity === city.name ? null : city.name)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                      mobileExpandedCity === city.name 
+                        ? 'bg-teal-600 text-white border-teal-600 shadow-md' 
+                        : 'bg-white text-gray-700 border-gray-200 shadow-sm'
+                    }`}
+                  >
+                    {city.name} <span className="text-[10px] font-normal opacity-70">({city.count})</span>
+                  </button>
+                ))}
                 
-                {/* Areas Navigation for current city */}
-                {cityLinks[mobileCityIndex].areas && cityLinks[mobileCityIndex].areas.length > 0 && (
-                  <div className="mt-3 relative">
-                    {/* Area Navigation Arrows */}
-                    {(mobileAreaIndex[mobileCityIndex] || 0) > 0 && (
-                      <button
-                        onClick={() => {
-                          setMobileAreaIndex(prev => ({
-                            ...prev,
-                            [mobileCityIndex]: Math.max(0, (prev[mobileCityIndex] || 0) - 1)
-                          }));
-                        }}
-                        className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-gray-100 shadow flex items-center justify-center"
-                      >
-                        <ChevronLeft className="w-3 h-3 text-gray-600" />
-                      </button>
-                    )}
-
-                    {(mobileAreaIndex[mobileCityIndex] || 0) < cityLinks[mobileCityIndex].areas.length - 1 && (
-                      <button
-                        onClick={() => {
-                          setMobileAreaIndex(prev => ({
-                            ...prev,
-                            [mobileCityIndex]: Math.min(
-                              cityLinks[mobileCityIndex].areas.length - 1,
-                              (prev[mobileCityIndex] || 0) + 1
-                            )
-                          }));
-                        }}
-                        className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-gray-100 shadow flex items-center justify-center"
-                      >
-                        <ChevronRight className="w-3 h-3 text-gray-600" />
-                      </button>
-                    )}
-
-                    {/* Single Area Display */}
-                    <div className="flex justify-center px-6">
-                      <a
-                        href={`/website/ourproperty?city=${encodeURIComponent(cityLinks[mobileCityIndex].name.toLowerCase())}&area=${encodeURIComponent(cityLinks[mobileCityIndex].areas[mobileAreaIndex[mobileCityIndex] || 0].toLowerCase())}`}
-                        className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-teal-50 hover:text-teal-600 rounded text-gray-600 transition-colors text-center"
-                      >
-                        {cityLinks[mobileCityIndex].areas[mobileAreaIndex[mobileCityIndex] || 0]}
-                      </a>
-                    </div>
-
-                    {/* Area Dots Indicator */}
-                    <div className="flex justify-center gap-1 mt-2">
-                      {cityLinks[mobileCityIndex].areas.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setMobileAreaIndex(prev => ({ ...prev, [mobileCityIndex]: idx }));
-                          }}
-                          className={`w-1.5 h-1.5 rounded-full transition-all ${
-                            idx === (mobileAreaIndex[mobileCityIndex] || 0) ? 'bg-teal-500 w-3' : 'bg-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                {!showAllCities && cityLinks.length > 6 && (
+                  <button
+                    onClick={() => setShowAllCities(true)}
+                    className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-black text-teal-600 bg-teal-50 border border-teal-100 flex items-center gap-1 shadow-sm"
+                  >
+                    All Cities <ChevronDown className="w-3 h-3" />
+                  </button>
                 )}
               </div>
-            )}
 
-            {/* City Dots Indicator */}
-            <div className="flex justify-center gap-1.5 mt-3">
-              {cityLinks.map((_, idx) => (
+              {/* Panel for Areas - Appears when a city is selected */}
+              {mobileExpandedCity && (
+                <div className="bg-white rounded-2xl p-5 border-2 border-teal-50 shadow-md animate-in slide-in-from-top-4 duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <h5 className="text-sm font-black text-gray-900">Explore Locations in {mobileExpandedCity}</h5>
+                    <button onClick={() => setMobileExpandedCity(null)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                      <ChevronDown className="w-5 h-5 text-gray-400 rotate-180" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {cityLinks.find(c => c.name === mobileExpandedCity)?.areas.map((area) => (
+                      <a
+                        key={area}
+                        href={`/website/ourproperty?city=${encodeURIComponent(mobileExpandedCity.toLowerCase())}&area=${encodeURIComponent(area.toLowerCase())}`}
+                        className="text-[11px] p-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 font-bold hover:bg-teal-50 hover:text-teal-600 hover:border-teal-200 transition-all text-center"
+                      >
+                        {area}
+                      </a>
+                    ))}
+                    <a 
+                      href={cityLinks.find(c => c.name === mobileExpandedCity)?.href}
+                      className="col-span-2 text-xs p-3 bg-gray-900 text-white rounded-xl font-black flex items-center justify-center gap-2 mt-2 shadow-lg active:scale-95 transition-transform"
+                    >
+                      View All in {mobileExpandedCity} <ChevronRight className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {showAllCities && (
                 <button
-                  key={idx}
-                  onClick={() => {
-                    setMobileCityIndex(idx);
-                    if (!mobileAreaIndex[idx]) {
-                      setMobileAreaIndex(prev => ({ ...prev, [idx]: 0 }));
-                    }
-                  }}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    idx === mobileCityIndex ? 'bg-teal-500 w-4' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
+                  onClick={() => setShowAllCities(false)}
+                  className="mx-auto text-xs font-bold text-gray-400 hover:text-teal-600 underline decoration-dotted"
+                >
+                  Show Less
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -357,4 +308,3 @@ export default function WebsiteFooter() {
     </footer>
   );
 }
-  

@@ -17,8 +17,8 @@ import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 const staticCities = [
   { name: 'Kota', properties: '2,500+', image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400' },
   { name: 'Indore', properties: '1,800+', image: 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  { name: 'Jaipur', properties: '3,200+', image: 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  { name: 'Delhi', properties: '5,000+', image: 'https://images.pexels.com/photos/789380/pexels-photo-789380.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Jaipur', properties: '3,200+', image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=400' },
+  { name: 'Delhi', properties: '5,000+', image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=400' },
   { name: 'Bhopal', properties: '1,200+', image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=400' },
   { name: 'Nagpur', properties: '980+', image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=400' },
   { name: 'Jodhpur', properties: '850+', image: 'https://images.pexels.com/photos/1007426/pexels-photo-1007426.jpeg?auto=compress&cs=tinysrgb&w=400' },
@@ -230,13 +230,62 @@ export default function HomePage() {
   // Hero image slideshow state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Floating Search State for Mobile
+  const [isFloatingSearchVisible, setIsFloatingSearchVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerWidth < 768) { // Mobile only
+        setIsFloatingSearchVisible(window.scrollY > 350);
+      } else {
+        setIsFloatingSearchVisible(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Recently Viewed Properties
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
+
+  useEffect(() => {
+    const loadRecentlyViewed = () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        
+        // Filter out items older than 24 hours
+        const validItems = stored.filter(item => (now - item.timestamp) < oneDay);
+        
+        // Sort by timestamp descending
+        validItems.sort((a, b) => b.timestamp - a.timestamp);
+        
+        setRecentlyViewed(validItems);
+        
+        // Update storage with cleaned items
+        if (validItems.length !== stored.length) {
+          localStorage.setItem('recentlyViewed', JSON.stringify(validItems));
+        }
+      } catch (err) {
+        console.error('Error loading recently viewed:', err);
+      }
+    };
+    
+    loadRecentlyViewed();
+    
+    // Check every hour for expiration
+    const interval = setInterval(loadRecentlyViewed, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Helper function to get city images dynamically
   const getCityImage = (cityName) => {
     const cityImages = {
       'Kota': 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400',
       'Indore': 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Jaipur': 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Delhi': 'https://images.pexels.com/photos/1008646/pexels-photo-1008646.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'Jaipur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=400',
+      'Delhi': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=400',
       'Bhopal': 'https://images.pexels.com/photos/1603801/pexels-photo-1603801.jpeg?auto=compress&cs=tinysrgb&w=400',
       'Nagpur': 'https://images.pexels.com/photos/1573236/pexels-photo-1573236.jpeg?auto=compress&cs=tinysrgb&w=400',
       'Sikar': 'https://images.pexels.com/photos/574324/pexels-photo-574324.jpeg?auto=compress&cs=tinysrgb&w=400',
@@ -468,6 +517,32 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
     <div className="min-h-screen bg-white">
       <WebsiteNavbar />
 
+      {/* Floating Search Bar for Mobile - Fixed at top on scroll */}
+      <div 
+        className={`md:hidden fixed top-0 left-0 right-0 z-[60] p-3 transition-all duration-300 transform ${
+          isFloatingSearchVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        }`}
+      >
+        <div 
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+              const searchInput = document.querySelector('.search-container input');
+              if (searchInput) searchInput.focus();
+            }, 400);
+          }}
+          className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 px-4 py-2.5 flex items-center gap-3 active:scale-95 transition-transform"
+        >
+          <div className="w-8 h-8 rounded-xl bg-teal-500 flex items-center justify-center flex-shrink-0">
+            <Search className="w-4 h-4 text-white" />
+          </div>
+          <p className="text-gray-400 text-sm font-medium flex-1">Search for PG, Hostels...</p>
+          <div className="px-2 py-1 bg-gray-50 rounded-lg text-[10px] font-bold text-gray-400 border border-gray-100">
+            Search
+          </div>
+        </div>
+      </div>
+
       <main className="min-h-screen">
         {/* Hero Section */}
         <div className="relative min-h-[180px] md:min-h-0 md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 overflow-hidden">
@@ -611,30 +686,7 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
             </div> 
 
             {/* Mobile Carousel - Smooth horizontal scroll */}
-            <div className="md:hidden relative px-8">
-              {/* Left Arrow - positioned on left side of cards */}
-              <button
-                onClick={() => {
-                  if (citiesScrollContainerRef.current) {
-                    citiesScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                  }
-                }}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-              >
-                <ChevronLeft className="w-4 h-4 text-gray-600" />
-              </button>
-
-              {/* Right Arrow - positioned on right side of cards */}
-              <button
-                onClick={() => {
-                  if (citiesScrollContainerRef.current) {
-                    citiesScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-                  }
-                }}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-              >
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-              </button>
+            <div className="md:hidden relative px-0">
 
               {/* Smooth Horizontal Scroll Container */}
               <div 
@@ -745,30 +797,7 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
             </div>
 
             {/* Mobile Carousel - Smooth horizontal scroll */}
-            <div className="md:hidden relative px-8">
-              {/* Left Arrow - positioned on left side of cards */}
-              <button
-                onClick={() => {
-                  if (offeringScrollContainerRef.current) {
-                    offeringScrollContainerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                  }
-                }}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-              >
-                <ChevronLeft className="w-4 h-4 text-gray-600" />
-              </button>
-
-              {/* Right Arrow - positioned on right side of cards */}
-              <button
-                onClick={() => {
-                  if (offeringScrollContainerRef.current) {
-                    offeringScrollContainerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-                  }
-                }}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-              >
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-              </button>
+            <div className="md:hidden relative px-0">
 
               {/* Smooth Horizontal Scroll Container */}
               <div 
@@ -937,27 +966,7 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
               <p className="text-xs text-gray-600">Most popular properties among students</p>
             </div>
 
-          <div className="relative px-8">
-
-  {/* LEFT */}
-  <button
-    onClick={() => {
-      trendingScrollContainerRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
-    }}
-    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-  >
-    <ChevronLeft className="w-4 h-4 text-gray-600" />
-  </button>
-
-  {/* RIGHT */}
-  <button
-    onClick={() => {
-      trendingScrollContainerRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
-    }}
-    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow flex items-center justify-center"
-  >
-    <ChevronRight className="w-4 h-4 text-gray-600" />
-  </button>
+          <div className="relative px-0">
 
   {/* SCROLL (IMPORTANT: yahin hona chahiye) */}
   <div 
@@ -1007,6 +1016,94 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
 </div>
           </div>
         </section>
+
+        {/* Recently Viewed Properties - Desktop & Mobile */}
+        {recentlyViewed.length > 0 && (
+          <section className="py-8 md:py-12 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* Heading - Matched with Trending Section */}
+              <div className="text-center md:text-left mb-6 md:mb-10">
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                  <TrendingUp className="w-5 h-5 text-teal-600" />
+                  <h2 className="text-xl md:text-3xl font-bold text-gray-900">Recently Viewed</h2>
+                </div>
+                <p className="text-xs md:text-lg text-gray-600">Pick up where you left off</p>
+              </div>
+
+              {/* Desktop Grid */}
+              <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {recentlyViewed.map((item) => (
+                  <Link 
+                    key={item.id} 
+                    to={`/website/property/${item.id}`}
+                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl transition-all"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                      />
+                      <div className="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur rounded-lg shadow-sm">
+                        <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider">{item.type}</span>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-gray-900 group-hover:text-teal-600 transition-colors line-clamp-1">{item.name}</h3>
+                      <div className="flex items-center text-gray-500 text-xs mt-1">
+                        <MapPin className="w-3 h-3 mr-1 text-teal-500" />
+                        {item.location}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-lg font-black text-gray-900">₹{item.price}</span>
+                        <span className="text-[10px] px-2 py-1 bg-gray-50 text-gray-400 rounded-md font-medium">Viewed Recently</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Mobile Swipe Carousel - EXACTLY match Trending Stays Section */}
+              <div className="md:hidden -mx-4 overflow-x-auto scrollbar-hide">
+                <div className="flex gap-4 px-4 pb-4 w-max">
+                  {recentlyViewed.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex-shrink-0 w-40 bg-white rounded-2xl shadow-lg overflow-hidden"
+                    >
+                      <div className="relative h-32">
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur rounded-full px-2 py-0.5 flex items-center">
+                          <span className="text-[8px] font-bold text-teal-600">Recently Viewed</span>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-bold text-sm truncate">{item.name}</h3>
+                        <div className="flex items-center text-gray-600 text-xs mb-2">
+                          <MapPin className="w-3 h-3 mr-1 text-teal-500" />
+                          <span className="truncate">{item.location}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-teal-600">₹{item.price}</span>
+                          <div className="flex items-center">
+                            <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400 mr-1" />
+                            <span className="font-semibold text-[10px]">4.5</span>
+                          </div>
+                        </div>
+                        <Link 
+                          to={`/website/property/${item.id}`}
+                          className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-xs"
+                        >
+                          View Again
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Why Choose Roomhy - Combined Section */}
         <WhyRoomhy />

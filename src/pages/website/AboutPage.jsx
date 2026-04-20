@@ -145,23 +145,44 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Goals */}
+      {/* Our Team Section */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-amber-600 font-semibold text-sm uppercase tracking-wider mb-2">Where We're Headed</p>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Our Goals</h2>
+          <div className="text-center mb-16">
+            <p className="text-amber-600 font-semibold text-sm uppercase tracking-wider mb-2">The Minds Behind Roohmy</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Our Leadership</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {goals.map((item, index) => (
-              <div key={index} className="bg-gray-50 rounded-3xl p-8 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-white mb-5 group-hover:scale-110 transition-transform`}>
-                  <item.icon size={24} />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+            {/* CEO 1 */}
+            <div className="flex flex-col items-center group">
+              <div className="relative w-48 h-48 mb-6">
+                <div className="absolute inset-0 bg-amber-500 rounded-3xl rotate-6 transition-transform group-hover:rotate-12 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gray-900 rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+                  <img src="/website/images/ceo1.png" alt="Founder" className="w-full h-full object-cover transition-all duration-500" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                <p className="text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
-            ))}
+              <h3 className="text-2xl font-bold text-gray-900">Resham Singh</h3>
+              <p className="text-amber-600 font-semibold mb-3">Founder & CEO</p>
+              <p className="text-gray-500 text-center text-sm max-w-xs">
+                With a vision to transform India's student housing sector into a transparent, tech-driven ecosystem.
+              </p>
+            </div>
+
+            {/* CEO 2 */}
+            <div className="flex flex-col items-center group">
+              <div className="relative w-48 h-48 mb-6">
+                <div className="absolute inset-0 bg-teal-500 rounded-3xl -rotate-6 transition-transform group-hover:-rotate-12 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gray-900 rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+                  <img src="/website/images/ceo2.png" alt="Co-Founder" className="w-full h-full object-cover transition-all duration-500" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">Anushka Sharma</h3>
+              <p className="text-teal-600 font-semibold mb-3">Founder & CEO</p>
+              <p className="text-gray-500 text-center text-sm max-w-xs">
+                Dedicated to making room rentals fair, affordable, and accessible for students across the nation.
+              </p>
+            </div>
           </div>
         </div>
       </section>

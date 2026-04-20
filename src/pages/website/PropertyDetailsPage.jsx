@@ -8,6 +8,302 @@ import {
   ChevronLeft, MapPin, Users, Bed, Wifi, Wind, Droplet,
   Phone, Mail, Star, Share2, GraduationCap, Navigation, ExternalLink
 } from "lucide-react";
+import {
+  PropertyGallery,
+  PropertyHeader,
+  HighlightsSection,
+  DescriptionSection,
+  OffersSection,
+  ReviewsSection,
+  NearbySection,
+  CompareSection,
+  StickyCTA,
+  PricingBreakdown,
+} from "../../components/website/propertyDetails";
+import PropertyViewsGallery from "../../components/website/propertyDetails/PropertyViewsGallery";
+import AmenitiesSection from "../../components/website/propertyDetails/AmenitiesSection";
+import ExclusiveBenefitsSection from "../../components/website/propertyDetails/ExclusiveBenefitsSection";
+
+// Static sample data for Vercel deployment - 10 Properties
+const staticPropertiesData = [
+  {
+    _id: "static1",
+    title: "Roomhy Boys PG - Kota",
+    description: "Premium paying guest accommodation for boys near coaching centers with all modern amenities. Spacious rooms with study tables, high-speed WiFi, and nutritious food.",
+    address: "Talwandi, Kota, Rajasthan 324005",
+    locationCode: "KOT",
+    latitude: 25.2138,
+    longitude: 75.8648,
+    ownerLoginId: "KOT001",
+    status: "active",
+    isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Air Conditioning", icon: "wind", category: "comfort" },
+      { name: "Study Table", icon: "check", category: "basic" },
+      { name: "Power Backup", icon: "zap", category: "comfort" },
+      { name: "Laundry Service", icon: "droplet", category: "luxury" }
+    ],
+    exclusiveBenefits: [
+      { title: "Free First Month Maintenance", description: "No maintenance charges", icon: "gift" },
+      { title: "Discounted Coaching Fees", description: "10% discount on partners", icon: "star" }
+    ],
+    propertyViews: [
+      { label: "Facade", images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"], description: "Beautiful exterior" },
+      { label: "Room", images: ["https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg"], description: "Spacious rooms" }
+    ],
+    propertyType: "pg", gender: "male", monthlyRent: 8000, totalRooms: 20, bedsPerRoom: 2,
+    facilities: { wifi: true, ac: true, food: true, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
+    name: "Roomhy Boys PG - Kota", price: 8000, beds: 40
+  },
+  {
+    _id: "static2",
+    title: "Roomhy Girls Hostel - Indore",
+    description: "Safe and secure girls hostel with 24/7 security and homely atmosphere. Located in Vijay Nagar with easy access to colleges.",
+    address: "Vijay Nagar, Indore, Madhya Pradesh 452010",
+    locationCode: "IND",
+    latitude: 22.7196, longitude: 75.8577,
+    ownerLoginId: "IND001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Air Conditioning", icon: "wind", category: "comfort" },
+      { name: "Security Guard", icon: "shield", category: "basic" },
+      { name: "RO Water", icon: "droplet", category: "basic" },
+      { name: "CCTV Surveillance", icon: "shield", category: "comfort" }
+    ],
+    exclusiveBenefits: [
+      { title: "Free Pick-up Service", description: "From railway station", icon: "gift" },
+      { title: "Parent Lounge", description: "For visiting parents", icon: "heart" }
+    ],
+    propertyViews: [
+      { label: "Building", images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"], description: "Modern building" },
+      { label: "Room", images: ["https://images.pexels.com/photos/271643/pexels-photo-271643.jpeg"], description: "Comfortable rooms" }
+    ],
+    propertyType: "hostel", gender: "female", monthlyRent: 10000, totalRooms: 15, bedsPerRoom: 3,
+    facilities: { wifi: true, ac: true, food: true, laundry: true, parking: false, gym: false, tv: true, powerBackup: true },
+    name: "Roomhy Girls Hostel - Indore", price: 10000, beds: 45
+  },
+  {
+    _id: "static3",
+    title: "Roomhy Co-living - Jaipur",
+    description: "Modern co-living space for professionals and students with fully furnished rooms and community areas.",
+    address: "Malviya Nagar, Jaipur, Rajasthan 302017",
+    locationCode: "JAI",
+    latitude: 26.9124, longitude: 75.7873,
+    ownerLoginId: "JAI001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Fully Furnished", icon: "check", category: "basic" },
+      { name: "Community Kitchen", icon: "coffee", category: "comfort" },
+      { name: "Recreation Room", icon: "tv", category: "luxury" },
+      { name: "Housekeeping", icon: "check", category: "comfort" }
+    ],
+    exclusiveBenefits: [
+      { title: "Weekly Events", description: "Community activities", icon: "star" },
+      { title: "Free Housekeeping", description: "Twice a week", icon: "gift" }
+    ],
+    propertyViews: [
+      { label: "Exterior", images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"], description: "Modern architecture" },
+      { label: "Living Area", images: ["https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg"], description: "Common areas" }
+    ],
+    propertyType: "co-living", gender: "any", monthlyRent: 12000, totalRooms: 25, bedsPerRoom: 2,
+    facilities: { wifi: true, ac: true, food: false, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
+    name: "Roomhy Co-living - Jaipur", price: 12000, beds: 50
+  },
+  {
+    _id: "static4",
+    title: "Roomhy Apartments - Delhi",
+    description: "Premium 2BHK and 3BHK apartments for families and working professionals with modern amenities.",
+    address: "Dwarka, New Delhi, Delhi 110075",
+    locationCode: "DEL",
+    latitude: 28.6139, longitude: 77.2090,
+    ownerLoginId: "DEL001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Modular Kitchen", icon: "coffee", category: "basic" },
+      { name: "Power Backup", icon: "zap", category: "comfort" },
+      { name: "Lift", icon: "check", category: "basic" },
+      { name: "Reserved Parking", icon: "car", category: "luxury" }
+    ],
+    exclusiveBenefits: [
+      { title: "No Brokerage", description: "Direct booking discount", icon: "star" },
+      { title: "Free Maintenance", description: "First 3 months", icon: "gift" }
+    ],
+    propertyViews: [
+      { label: "Building", images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"], description: "Premium apartments" },
+      { label: "Kitchen", images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"], description: "Modern kitchen" }
+    ],
+    propertyType: "apartment", gender: "any", monthlyRent: 25000, totalRooms: 10, bedsPerRoom: 4,
+    facilities: { wifi: true, ac: true, food: false, laundry: false, parking: true, gym: true, tv: false, powerBackup: true },
+    name: "Roomhy Apartments - Delhi", price: 25000, beds: 40
+  },
+  {
+    _id: "static5",
+    title: "Roomhy Student PG - Bhopal",
+    description: "Affordable PG for students with study-friendly environment and proximity to educational institutions.",
+    address: "MP Nagar, Bhopal, Madhya Pradesh 462016",
+    locationCode: "BHO",
+    latitude: 23.2599, longitude: 77.4126,
+    ownerLoginId: "BHO001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Study Room", icon: "check", category: "basic" },
+      { name: "Mess Facility", icon: "coffee", category: "basic" },
+      { name: "Water Purifier", icon: "droplet", category: "comfort" },
+      { name: "Locker Facility", icon: "shield", category: "basic" }
+    ],
+    exclusiveBenefits: [
+      { title: "Study Groups", description: "Free group study sessions", icon: "star" },
+      { title: "Library Access", description: "24/7 study room", icon: "gift" }
+    ],
+    propertyViews: [
+      { label: "Entrance", images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"], description: "Main entrance" },
+      { label: "Study Room", images: ["https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg"], description: "Study area" }
+    ],
+    propertyType: "pg", gender: "male", monthlyRent: 6000, totalRooms: 30, bedsPerRoom: 3,
+    facilities: { wifi: true, ac: false, food: true, laundry: false, parking: false, gym: false, tv: true, powerBackup: true },
+    name: "Roomhy Student PG - Bhopal", price: 6000, beds: 90
+  },
+  {
+    _id: "static6",
+    title: "Roomhy Luxury PG - Nagpur",
+    description: "Luxury PG with premium amenities, AC rooms, and personalized services for executives and professionals.",
+    address: "Civil Lines, Nagpur, Maharashtra 440001",
+    locationCode: "NAG",
+    latitude: 21.1458, longitude: 79.0882,
+    ownerLoginId: "NAG001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Air Conditioning", icon: "wind", category: "comfort" },
+      { name: "Mini Fridge", icon: "check", category: "luxury" },
+      { name: "TV in Room", icon: "tv", category: "luxury" },
+      { name: "Room Service", icon: "coffee", category: "luxury" }
+    ],
+    exclusiveBenefits: [
+      { title: "Premium Amenities", description: "Luxury facilities", icon: "star" },
+      { title: "Concierge Service", description: "Personal assistance", icon: "gift" }
+    ],
+    propertyViews: [
+      { label: "Lobby", images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"], description: "Luxury lobby" },
+      { label: "Premium Room", images: ["https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg"], description: "Premium rooms" }
+    ],
+    propertyType: "pg", gender: "male", monthlyRent: 15000, totalRooms: 12, bedsPerRoom: 2,
+    facilities: { wifi: true, ac: true, food: true, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
+    name: "Roomhy Luxury PG - Nagpur", price: 15000, beds: 24
+  },
+  {
+    _id: "static7",
+    title: "Roomhy Working Women PG - Jodhpur",
+    description: "Safe and comfortable PG for working women with modern amenities and convenient location.",
+    address: "Paota, Jodhpur, Rajasthan 342001",
+    locationCode: "JOD",
+    latitude: 26.2389, longitude: 73.0243,
+    ownerLoginId: "JOD001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Air Conditioning", icon: "wind", category: "comfort" },
+      { name: "Security", icon: "shield", category: "basic" },
+      { name: "Power Backup", icon: "zap", category: "comfort" },
+      { name: "Laundry Service", icon: "droplet", category: "luxury" }
+    ],
+    exclusiveBenefits: [
+      { title: "Transport Facility", description: "Drop to office", icon: "gift" },
+      { title: "Flexible Timings", description: "No entry restrictions", icon: "star" }
+    ],
+    propertyViews: [
+      { label: "Building", images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"], description: "Safe building" },
+      { label: "Room", images: ["https://images.pexels.com/photos/271643/pexels-photo-271643.jpeg"], description: "Comfortable rooms" }
+    ],
+    propertyType: "pg", gender: "female", monthlyRent: 9000, totalRooms: 18, bedsPerRoom: 2,
+    facilities: { wifi: true, ac: true, food: true, laundry: true, parking: false, gym: false, tv: true, powerBackup: true },
+    name: "Roomhy Working Women PG - Jodhpur", price: 9000, beds: 36
+  },
+  {
+    _id: "static8",
+    title: "Roomhy Budget PG - Mumbai",
+    description: "Affordable PG accommodation in Mumbai with basic amenities and good connectivity to local transport.",
+    address: "Andheri, Mumbai, Maharashtra 400053",
+    locationCode: "MUM",
+    latitude: 19.0760, longitude: 72.8777,
+    ownerLoginId: "MUM001", status: "active", isPublished: true,
+    amenities: [
+      { name: "WiFi", icon: "wifi", category: "basic" },
+      { name: "Common Kitchen", icon: "coffee", category: "basic" },
+      { name: "Water Supply", icon: "droplet", category: "basic" },
+      { name: "Locker", icon: "shield", category: "basic" }
+    ],
+    exclusiveBenefits: [
+      { title: "Best Price", description: "Affordable rates", icon: "star" },
+      { title: "No Hidden Charges", description: "Transparent pricing", icon: "gift" }
+    ],
+    propertyViews: [
+      { label: "Entrance", images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"], description: "Main entrance" },
+      { label: "Room", images: ["https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg"], description: "Budget rooms" }
+    ],
+    propertyType: "pg", gender: "male", monthlyRent: 7000, totalRooms: 25, bedsPerRoom: 4,
+    facilities: { wifi: true, ac: false, food: false, laundry: false, parking: false, gym: false, tv: false, powerBackup: false },
+    name: "Roomhy Budget PG - Mumbai", price: 7000, beds: 100
+  },
+  {
+    _id: "static9",
+    title: "Roomhy Executive Hostel - Bangalore",
+    description: "Premium hostel for executives with business amenities, conference rooms, and networking opportunities.",
+    address: "Electronic City, Bangalore, Karnataka 560100",
+    locationCode: "BLR",
+    latitude: 12.8444, longitude: 77.6631,
+    ownerLoginId: "BLR001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Conference Room", icon: "check", category: "luxury" },
+      { name: "Business Center", icon: "tv", category: "luxury" },
+      { name: "Gym", icon: "dumbbell", category: "comfort" },
+      { name: "Cafeteria", icon: "coffee", category: "basic" }
+    ],
+    exclusiveBenefits: [
+      { title: "Networking Events", description: "Monthly meetups", icon: "star" },
+      { title: "Business Support", description: "Office facilities", icon: "gift" }
+    ],
+    propertyViews: [
+      { label: "Campus", images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"], description: "Executive campus" },
+      { label: "Conference", images: ["https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg"], description: "Business facilities" }
+    ],
+    propertyType: "hostel", gender: "male", monthlyRent: 18000, totalRooms: 20, bedsPerRoom: 2,
+    facilities: { wifi: true, ac: true, food: true, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
+    name: "Roomhy Executive Hostel - Bangalore", price: 18000, beds: 40
+  },
+  {
+    _id: "static10",
+    title: "Roomhy Family PG - Chennai",
+    description: "Family-friendly PG accommodation suitable for small families and couples with home-like atmosphere.",
+    address: "T Nagar, Chennai, Tamil Nadu 600017",
+    locationCode: "CHE",
+    latitude: 13.0827, longitude: 80.2707,
+    ownerLoginId: "CHE001", status: "active", isPublished: true,
+    amenities: [
+      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
+      { name: "Family Rooms", icon: "check", category: "basic" },
+      { name: "Kitchen Access", icon: "coffee", category: "basic" },
+      { name: "Children Play Area", icon: "check", category: "comfort" },
+      { name: "Power Backup", icon: "zap", category: "comfort" }
+    ],
+    exclusiveBenefits: [
+      { title: "Family Friendly", description: "Safe for families", icon: "heart" },
+      { title: "Flexible Stay", description: "Short/long term", icon: "star" }
+    ],
+    propertyViews: [
+      { label: "Building", images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"], description: "Family building" },
+      { label: "Family Room", images: ["https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg"], description: "Spacious family rooms" }
+    ],
+    propertyType: "pg", gender: "any", monthlyRent: 13000, totalRooms: 15, bedsPerRoom: 4,
+    facilities: { wifi: true, ac: true, food: false, laundry: true, parking: true, gym: false, tv: true, powerBackup: true },
+    name: "Roomhy Family PG - Chennai", price: 13000, beds: 60
+  }
+];
+
+// Helper function to get property by ID
+const getStaticPropertyById = (id) => {
+  return staticPropertiesData.find(p => p._id === id) || staticPropertiesData[0];
+};
 
 export default function PropertyDetailsPage() {
   const { propertyId } = useParams();
@@ -184,7 +480,21 @@ export default function PropertyDetailsPage() {
     const loadPropertyDetails = async () => {
       try {
         setLoading(true);
-        const allProperties = await fetchProperties();
+        
+        // Try to fetch from API first
+        let allProperties = [];
+        try {
+          allProperties = await fetchProperties();
+        } catch (apiError) {
+          console.warn('API failed, using static data:', apiError.message);
+          // Use static data as fallback - get specific property by ID
+          const staticProperty = getStaticPropertyById(propertyId);
+          setProperty(staticProperty);
+          setRawPropertyId(staticProperty._id);
+          setLoading(false);
+          return;
+        }
+        
         const foundProperty = allProperties.find(
           (p) => p._id === propertyId || p.visitId === propertyId || p.propertyName === propertyId
         );
@@ -222,7 +532,14 @@ export default function PropertyDetailsPage() {
             latitude: foundProperty.latitude || foundProperty.propertyInfo?.latitude || foundProperty.propertyInfo?.location?.coordinates?.[1] || null,
             longitude: foundProperty.longitude || foundProperty.propertyInfo?.longitude || foundProperty.propertyInfo?.location?.coordinates?.[0] || null,
             address: foundProperty.address || foundProperty.propertyAddress || "",
-            nearbyColleges: foundProperty.nearbyColleges || []
+            nearbyColleges: foundProperty.nearbyColleges || [],
+            // New fields for upgraded UI (backward-compatible)
+            highlights: foundProperty.highlights || [],
+            benefits: foundProperty.benefits || [],
+            offers: foundProperty.offers || [],
+            roomVariants: foundProperty.roomVariants || [],
+            pricingDetails: foundProperty.pricingDetails || null,
+            originalPrice: foundProperty.originalPrice || null,
           };
 
           setProperty(formatted);
@@ -243,17 +560,51 @@ export default function PropertyDetailsPage() {
             setNearbyInstitutes(institutes);
           }
         } else {
-          setProperty(null);
+          console.log('Property not found, using static data');
+          const staticProperty = getStaticPropertyById(propertyId);
+          setProperty(staticProperty);
+          setRawPropertyId(staticProperty._id);
         }
       } catch (error) {
         console.error("Error fetching property details:", error);
-        setProperty(null);
+        console.log('Using static data as fallback');
+        const staticProperty = getStaticPropertyById(propertyId);
+        setProperty(staticProperty);
+        setRawPropertyId(staticProperty._id);
       } finally {
         setLoading(false);
       }
     };
     loadPropertyDetails();
   }, [propertyId]);
+
+  // Track Recently Viewed Properties
+  useEffect(() => {
+    if (property) {
+      try {
+        const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+        
+        // Prepare new entry
+        const newEntry = {
+          id: property.id,
+          name: property.name,
+          location: property.location,
+          price: property.price,
+          image: property.image,
+          type: property.type,
+          timestamp: Date.now()
+        };
+
+        // Remove duplicates and add to start
+        const filtered = recentlyViewed.filter(item => item.id !== property.id);
+        const updated = [newEntry, ...filtered].slice(0, 10); // Keep top 10
+        
+        localStorage.setItem('recentlyViewed', JSON.stringify(updated));
+      } catch (err) {
+        console.error('Error updating recently viewed:', err);
+      }
+    }
+  }, [property]);
 
   // Load reviews when property loads
   useEffect(() => {
@@ -313,26 +664,31 @@ export default function PropertyDetailsPage() {
     }
   };
 
+  // ==================== LOADING STATE ====================
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <WebsiteNavbar />
         <div className="flex flex-col items-center justify-center h-96">
-          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-[#EE4266] border-t-transparent rounded-full animate-spin"></div>
           <p className="mt-4 text-gray-500 font-medium">Loading property details...</p>
         </div>
       </div>
     );
   }
 
+  // ==================== NOT FOUND STATE ====================
   if (!property) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <WebsiteNavbar />
         <div className="flex flex-col items-center justify-center h-96">
+          <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <span className="text-3xl">🏠</span>
+          </div>
           <h2 className="text-2xl font-bold text-gray-800">Property Not Found</h2>
           <p className="text-gray-500 mt-2">The property you're looking for doesn't exist.</p>
-          <button onClick={() => navigate("/website/ourproperty")} className="mt-6 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold transition-colors">
+          <button onClick={() => navigate("/website/ourproperty")} className="mt-6 px-6 py-3 bg-[#EE4266] hover:bg-[#d63a5b] text-white rounded-xl font-semibold transition-colors">
             Back to Properties
           </button>
         </div>
@@ -343,390 +699,177 @@ export default function PropertyDetailsPage() {
 
   const hasCoordinates = property.latitude && property.longitude;
 
+  // ==================== MAIN RENDER ====================
   return (
-    <div className="min-h-screen bg-gray-50">
-      <WebsiteNavbar />
+    <div className="min-h-screen bg-white">
+      {/* Navbar — hidden on mobile for immersive gallery, shown on desktop */}
+      <div className="hidden md:block">
+        <WebsiteNavbar />
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/website/ourproperty")}
-          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 font-semibold mb-6 group"
-        >
-          <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          Back to Properties
-        </button>
+      {/* ==================== TWO-COLUMN LAYOUT ==================== */}
+      <div className="max-w-7xl mx-auto md:px-6 lg:px-8 md:py-6">
+        <div className="md:grid md:grid-cols-3 md:gap-8">
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* ==================== LEFT COLUMN (3/5) ==================== */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Image Gallery */}
-            <div className="rounded-3xl overflow-hidden shadow-lg">
-              <div className="relative aspect-[16/10]">
-                <img src={property.images[selectedImage]} alt={property.name} className="w-full h-full object-cover" />
-                <div className="absolute top-4 left-4 flex gap-2">
-                  {property.type && (
-                    <span className="px-3 py-1.5 bg-amber-500 text-white text-sm font-bold rounded-xl">{property.type}</span>
-                  )}
-                  {property.verified && (
-                    <span className="px-3 py-1.5 bg-emerald-500 text-white text-sm font-bold rounded-xl">✓ Verified</span>
-                  )}
-                </div>
-              </div>
-              {property.images.length > 1 && (
-                <div className="flex gap-2 p-3 bg-white overflow-x-auto">
-                  {property.images.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImage(idx)}
-                      className={`flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                        selectedImage === idx ? "border-amber-500 scale-105" : "border-transparent opacity-60 hover:opacity-100"
-                      }`}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
+          {/* ==================== LEFT / MAIN CONTENT ==================== */}
+          <div className="md:col-span-2">
+            
+            {/* 1. Property Views Gallery - OYO Style */}
+            <div className="md:rounded-2xl md:overflow-hidden">
+              <PropertyViewsGallery
+                propertyViews={property.propertyViews}
+                images={property.images}
+              />
             </div>
 
-            {/* Property Title & Rating */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">{property.name}</h1>
-                  <p className="text-gray-500 flex items-center gap-1 mt-1">
-                    <MapPin size={16} className="text-amber-500" />
-                    {property.location}{property.area && `, ${property.area}`}
-                  </p>
-                  {property.address && (
-                    <p className="text-gray-400 text-sm mt-1">{property.address}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 rounded-xl">
-                  <Star size={16} className="fill-amber-500 text-amber-500" />
-                  <span className="font-bold text-gray-800">{property.rating}</span>
-                </div>
+            {/* Content Sections */}
+            <div className="mt-0 md:mt-0">
+              
+              {/* 2. Property Header */}
+              <div className="pt-4 pb-4 border-b border-gray-100">
+                <PropertyHeader property={property} reviewStats={reviewStats} />
               </div>
 
-              {/* Quick Info Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-                {[
-                  { label: "Bedrooms", value: property.beds, icon: Bed },
-                  { label: "For", value: property.gender, icon: Users },
-                  { label: "Monthly Rent", value: `₹${property.price}`, icon: null },
-                  { label: "Status", value: "Available", icon: null },
-                ].map((item) => (
-                  <div key={item.label} className="text-center p-3 bg-gray-50 rounded-2xl">
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">{item.label}</p>
-                    <p className="text-gray-900 font-bold text-lg mt-1">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+              {/* 3. Highlights */}
+              <HighlightsSection property={property} />
 
-            {/* Description */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-3">Description</h2>
-              <p className="text-gray-600 leading-relaxed">{property.description}</p>
-            </div>
+              {/* 4. Description + Features */}
+              <DescriptionSection
+                description={property.description}
+                amenities={property.amenities}
+                beds={property.beds}
+                gender={property.gender}
+                price={property.price}
+              />
 
-            {/* Amenities */}
-            {property.amenities?.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Amenities</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {property.amenities.map((amenity, idx) => (
-                    <div key={idx} className="flex items-center gap-2 p-3 bg-amber-50 rounded-xl">
-                      <div className="w-2 h-2 rounded-full bg-amber-500" />
-                      <span className="text-gray-700 text-sm font-medium">{amenity}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Reviews & Ratings Section */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                    <Star size={20} className="text-amber-500" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">Reviews & Ratings</h2>
-                    <p className="text-gray-400 text-sm">{reviewStats.totalReviews} reviews • {reviewStats.avgRating > 0 ? `${reviewStats.avgRating}★` : 'No ratings yet'}</p>
-                  </div>
-                </div>
-                {!hasReviewed && !showReviewForm && (
-                  <button 
-                    onClick={() => setShowReviewForm(true)}
-                    className="px-4 py-2 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition-colors"
-                  >
-                    Write a Review
-                  </button>
-                )}
+              {/* 5. Amenities Section - Dynamic */}
+              <div className="mt-6">
+                <AmenitiesSection
+                  amenities={property.amenities}
+                  facilities={property.facilities}
+                />
               </div>
 
-              {/* Rating Breakdown */}
-              {reviewStats.totalReviews > 0 && (
-                <div className="mb-6 space-y-2">
-                  {[5, 4, 3, 2, 1].map((star) => {
-                    const count = reviewStats.ratingBreakdown[star] || 0;
-                    const percentage = reviewStats.totalReviews > 0 ? (count / reviewStats.totalReviews) * 100 : 0;
-                    return (
-                      <div key={star} className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-gray-600 w-8">{star}★</span>
-                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-amber-500 rounded-full transition-all duration-500"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-400 w-8 text-right">{count}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              {/* 6. Exclusive Benefits Section - Dynamic */}
+              <div className="mt-6">
+                <ExclusiveBenefitsSection
+                  exclusiveBenefits={property.exclusiveBenefits}
+                />
+              </div>
 
-              {/* Review Form */}
-              {showReviewForm && !hasReviewed && (
-                <form onSubmit={handleSubmitReview} className="mb-6 p-4 bg-gray-50 rounded-2xl">
-                  <h3 className="font-bold text-gray-900 mb-4">Write Your Review</h3>
-                  <div className="mb-4">
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Rating</label>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setNewRating(star)}
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                            star <= newRating ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-400'
-                          }`}
-                        >
-                          <Star size={18} fill={star <= newRating ? 'currentColor' : 'none'} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Your Review</label>
-                    <textarea
-                      value={newReviewText}
-                      onChange={(e) => setNewReviewText(e.target.value)}
-                      placeholder="Share your experience with this property..."
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 min-h-[100px]"
-                      maxLength={500}
+              {/* 7. Offers/Benefits (Legacy) */}
+              <OffersSection
+                offers={property.exclusiveBenefits?.map(b => b.title)}
+                benefits={property.benefits}
+              />
+
+              {/* 6. Nearby Places */}
+              <NearbySection
+                nearbyInstitutes={nearbyInstitutes}
+                loading={loadingInstitutes}
+                hasCoordinates={hasCoordinates}
+              />
+
+              {/* 7. Map (Mobile Only) */}
+              {hasCoordinates && (
+                <div className="md:hidden px-4 py-5 border-b border-gray-100">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <Navigation size={16} className="text-[#EE4266]" />
+                    Property Location
+                  </h2>
+                  <div className="rounded-2xl overflow-hidden border border-gray-200" style={{ height: '250px' }}>
+                    <iframe
+                      src={`https://www.google.com/maps?q=${property.latitude},${property.longitude}&z=14&output=embed`}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Property Location"
                     />
-                    <p className="text-xs text-gray-400 mt-1">{newReviewText.length}/500 characters</p>
                   </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="submit"
-                      disabled={submittingReview || !newReviewText.trim()}
-                      className="px-4 py-2 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                    >
-                      {submittingReview ? 'Submitting...' : 'Submit Review'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowReviewForm(false)}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* User's Existing Review */}
-              {hasReviewed && userReview && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-2xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-green-700">Your Review</span>
-                    <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Submitted</span>
-                  </div>
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className={i < userReview.rating ? 'text-amber-500 fill-amber-500' : 'text-gray-300'} />
-                    ))}
-                  </div>
-                  <p className="text-gray-700">{userReview.review}</p>
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 mt-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    <Navigation size={14} /> Get Directions
+                  </a>
                 </div>
               )}
 
-              {/* Reviews List */}
-              <div className="space-y-4">
-                {reviews.length === 0 ? (
-                  <p className="text-gray-400 text-center py-8">No reviews yet. Be the first to review this property!</p>
-                ) : (
-                  reviews.slice(0, 5).map((review, idx) => (
-                    <div key={idx} className="p-4 border border-gray-100 rounded-2xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold">
-                            {review.name?.charAt(0)?.toUpperCase() || 'U'}
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{review.name || 'Anonymous'}</p>
-                            <p className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Star size={14} className="text-amber-500 fill-amber-500" />
-                          <span className="font-medium text-gray-900">{review.rating}</span>
-                        </div>
-                      </div>
-                      <p className="text-gray-700 text-sm">{review.review}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+              {/* 8. Pricing Breakdown (Mobile) */}
+              <PricingBreakdown property={property} />
 
-            {/* Nearby Educational Institutions */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <GraduationCap size={20} className="text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Nearby Colleges, Universities & Schools</h2>
-                  <p className="text-gray-400 text-sm">Within 2.5 km radius</p>
+              {/* 9. Reviews */}
+              <ReviewsSection
+                reviews={reviews}
+                reviewStats={reviewStats}
+                hasReviewed={hasReviewed}
+                userReview={userReview}
+                showReviewForm={showReviewForm}
+                setShowReviewForm={setShowReviewForm}
+                newRating={newRating}
+                setNewRating={setNewRating}
+                newReviewText={newReviewText}
+                setNewReviewText={setNewReviewText}
+                submittingReview={submittingReview}
+                handleSubmitReview={handleSubmitReview}
+              />
+
+              {/* 10. Compare with Similar */}
+              <CompareSection currentProperty={property} />
+
+              {/* 11. Owner Info (Mobile Only) */}
+              <div className="md:hidden px-4 py-5 border-b border-gray-100">
+                <h2 className="text-lg font-bold text-gray-900 mb-3">Owner Information</h2>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wider">Owner Name</p>
+                    <p className="text-sm text-gray-900 font-semibold">{property.owner}</p>
+                  </div>
+                  {property.ownerPhone && (
+                    <a
+                      href={`tel:${property.ownerPhone}`}
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#EE4266] text-white rounded-xl font-semibold text-sm hover:bg-[#d63a5b] transition-colors"
+                    >
+                      <Phone size={16} /> Call Owner
+                    </a>
+                  )}
+                  {property.ownerEmail && (
+                    <a
+                      href={`mailto:${property.ownerEmail}`}
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:border-[#EE4266] hover:text-[#EE4266] transition-colors"
+                    >
+                      <Mail size={16} /> Send Email
+                    </a>
+                  )}
                 </div>
               </div>
-
-              {!hasCoordinates ? (
-                <p className="text-gray-400 text-sm py-4">Location coordinates not available for this property.</p>
-              ) : loadingInstitutes ? (
-                <div className="flex items-center gap-3 py-6">
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-gray-500">Searching nearby educational institutions...</span>
-                </div>
-              ) : nearbyInstitutes.length === 0 ? (
-                <p className="text-gray-400 text-sm py-4">No educational institutions found within 2.5 km.</p>
-              ) : (
-                <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
-                  {nearbyInstitutes.map((inst) => (
-                    <Link
-                      key={inst.id}
-                      to={`/website/ourproperty?lat=${inst.lat}&lng=${inst.lng}&radius=2.5&near=${encodeURIComponent(inst.name)}`}
-                      className="flex items-center justify-between p-3 rounded-2xl hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all group cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                          inst.type === 'university' ? 'bg-purple-100 text-purple-600' :
-                          inst.type === 'college' ? 'bg-blue-100 text-blue-600' :
-                          'bg-green-100 text-green-600'
-                        }`}>
-                          {inst.type === 'university' ? 'U' : inst.type === 'college' ? 'C' : 'S'}
-                        </div>
-                        <div>
-                          <p className="text-gray-800 font-medium text-sm group-hover:text-blue-600 transition-colors">{inst.name}</p>
-                          <p className="text-gray-400 text-xs capitalize">{inst.type} • {inst.distance.toFixed(1)} km away</p>
-                        </div>
-                      </div>
-                      <ExternalLink size={14} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
-          {/* ==================== RIGHT COLUMN (2/5) ==================== */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Map */}
-            {hasCoordinates && (
-              <div className="bg-white rounded-3xl overflow-hidden shadow-sm">
-                <div className="p-4 border-b border-gray-100">
-                  <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                    <Navigation size={16} className="text-amber-500" />
-                    Property Location
-                  </h3>
-                </div>
-                <div className="h-[400px]">
-                  <iframe
-                    src={`https://www.google.com/maps?q=${property.latitude},${property.longitude}&z=14&output=embed`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Property Location"
-                  />
-                </div>
-                <div className="p-3 bg-gray-50 flex items-center justify-center gap-4 text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Property
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Educational Institute
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full border-2 border-amber-500 border-dashed inline-block"></span> 2.5 km radius
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Owner Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Owner Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-400 text-xs uppercase tracking-wider">Owner Name</p>
-                  <p className="text-gray-900 font-semibold">{property.owner}</p>
-                </div>
-                {property.ownerPhone && (
-                  <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">Phone Number</p>
-                    <a href={`tel:${property.ownerPhone}`} className="text-amber-600 font-semibold hover:underline flex items-center gap-2">
-                      <Phone size={14} /> {property.ownerPhone}
-                    </a>
-                  </div>
-                )}
-                {property.ownerEmail && (
-                  <div>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">Email</p>
-                    <a href={`mailto:${property.ownerEmail}`} className="text-amber-600 font-semibold hover:underline flex items-center gap-2">
-                      <Mail size={14} /> {property.ownerEmail}
-                    </a>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-6 space-y-3">
-                {property.ownerPhone && (
-                  <a href={`tel:${property.ownerPhone}`} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-semibold transition-all">
-                    <Phone size={16} /> Call Owner
-                  </a>
-                )}
-                {property.ownerEmail && (
-                  <a href={`mailto:${property.ownerEmail}`} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-amber-500 text-amber-600 hover:bg-amber-50 rounded-xl font-semibold transition-all">
-                    <Mail size={16} /> Send Email
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* Rent Card */}
-            <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl p-6 text-white shadow-lg">
-              <p className="text-amber-100 text-sm font-medium">Monthly Rent</p>
-              <p className="text-4xl font-extrabold mt-1">₹{property.price}</p>
-              <p className="text-amber-200 text-sm mt-1">per month</p>
-            </div>
+          {/* ==================== RIGHT SIDEBAR (Desktop) ==================== */}
+          <div className="hidden md:block md:col-span-1">
+            <StickyCTA property={property} />
           </div>
         </div>
       </div>
 
-      <WebsiteFooter />
+      {/* Footer */}
+      <div className="pb-32 md:pb-0">
+        <WebsiteFooter />
+      </div>
 
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
+      {/* Mobile Sticky Bottom CTA */}
+      <div className="md:hidden">
+        <StickyCTA property={property} />
+      </div>
+
+      {/* Mobile Bottom Navigation — pushed up by sticky CTA */}
+      {/* Note: MobileBottomNav is replaced by StickyCTA on this page */}
     </div>
   );
 }

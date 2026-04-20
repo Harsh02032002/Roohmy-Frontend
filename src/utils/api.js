@@ -72,6 +72,180 @@ export const fetchAreas = async () => {
   }
 };
 
+// Static properties for Vercel deployment
+const staticPropertiesList = [
+  {
+    _id: "static1",
+    property_name: "Roomhy Boys PG - Kota",
+    propertyName: "Roomhy Boys PG - Kota",
+    city: "Kota",
+    address: "Talwandi, Kota, Rajasthan 324005",
+    propertyType: "pg",
+    monthlyRent: 8000,
+    rent: 8000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000001",
+    gender: "male",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"
+  },
+  {
+    _id: "static2",
+    property_name: "Roomhy Girls Hostel - Indore",
+    propertyName: "Roomhy Girls Hostel - Indore",
+    city: "Indore",
+    address: "Vijay Nagar, Indore, Madhya Pradesh 452010",
+    propertyType: "hostel",
+    monthlyRent: 10000,
+    rent: 10000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000002",
+    gender: "female",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+  },
+  {
+    _id: "static3",
+    property_name: "Roomhy Co-living - Jaipur",
+    propertyName: "Roomhy Co-living - Jaipur",
+    city: "Jaipur",
+    address: "Malviya Nagar, Jaipur, Rajasthan 302017",
+    propertyType: "co-living",
+    monthlyRent: 12000,
+    rent: 12000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000003",
+    gender: "any",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"
+  },
+  {
+    _id: "static4",
+    property_name: "Roomhy Apartments - Delhi",
+    propertyName: "Roomhy Apartments - Delhi",
+    city: "Delhi",
+    address: "Dwarka, New Delhi, Delhi 110075",
+    propertyType: "apartment",
+    monthlyRent: 25000,
+    rent: 25000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000004",
+    gender: "any",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"
+  },
+  {
+    _id: "static5",
+    property_name: "Roomhy Student PG - Bhopal",
+    propertyName: "Roomhy Student PG - Bhopal",
+    city: "Bhopal",
+    address: "MP Nagar, Bhopal, Madhya Pradesh 462016",
+    propertyType: "pg",
+    monthlyRent: 6000,
+    rent: 6000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000005",
+    gender: "male",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"
+  },
+  {
+    _id: "static6",
+    property_name: "Roomhy Luxury PG - Nagpur",
+    propertyName: "Roomhy Luxury PG - Nagpur",
+    city: "Nagpur",
+    address: "Civil Lines, Nagpur, Maharashtra 440001",
+    propertyType: "pg",
+    monthlyRent: 15000,
+    rent: 15000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000006",
+    gender: "male",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"
+  },
+  {
+    _id: "static7",
+    property_name: "Roomhy Working Women PG - Jodhpur",
+    propertyName: "Roomhy Working Women PG - Jodhpur",
+    city: "Jodhpur",
+    address: "Paota, Jodhpur, Rajasthan 342001",
+    propertyType: "pg",
+    monthlyRent: 9000,
+    rent: 9000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000007",
+    gender: "female",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+  },
+  {
+    _id: "static8",
+    property_name: "Roomhy Budget PG - Mumbai",
+    propertyName: "Roomhy Budget PG - Mumbai",
+    city: "Mumbai",
+    address: "Andheri, Mumbai, Maharashtra 400053",
+    propertyType: "pg",
+    monthlyRent: 7000,
+    rent: 7000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000008",
+    gender: "male",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"
+  },
+  {
+    _id: "static9",
+    property_name: "Roomhy Executive Hostel - Bangalore",
+    propertyName: "Roomhy Executive Hostel - Bangalore",
+    city: "Bangalore",
+    address: "Electronic City, Bangalore, Karnataka 560100",
+    propertyType: "hostel",
+    monthlyRent: 18000,
+    rent: 18000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000009",
+    gender: "male",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"
+  },
+  {
+    _id: "static10",
+    property_name: "Roomhy Family PG - Chennai",
+    propertyName: "Roomhy Family PG - Chennai",
+    city: "Chennai",
+    address: "T Nagar, Chennai, Tamil Nadu 600017",
+    propertyType: "pg",
+    monthlyRent: 13000,
+    rent: 13000,
+    owner_name: "Verified Owner",
+    owner_phone: "9000000010",
+    gender: "any",
+    status: "active",
+    isPublished: true,
+    images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"],
+    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+  }
+];
+
 // Fetch properties from backend
 export const fetchProperties = async () => {
   try {
@@ -101,8 +275,20 @@ export const fetchProperties = async () => {
     
     return formattedProperties;
   } catch (error) {
-    console.error('Error fetching properties:', error);
-    return [];
+    console.error('Error fetching properties, using static data:', error);
+    // Return static properties as fallback
+    const staticFormatted = staticPropertiesList.map(p => ({
+      ...p,
+      property_name: p.property_name,
+      city: p.city,
+      owner_name: p.owner_name,
+      owner_phone: p.owner_phone,
+      propertyName: p.propertyName,
+      propertyType: p.propertyType,
+      monthlyRent: p.monthlyRent
+    }));
+    staticFormatted.total = staticPropertiesList.length;
+    return staticFormatted;
   }
 };
 

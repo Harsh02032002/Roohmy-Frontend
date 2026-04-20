@@ -1,6 +1,6 @@
 import { Building2, Users, Search, MapPin, Home, MessageSquare, User, LogOut, Settings, ChevronDown, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchCities, fetchAreas } from '../../utils/api';
 import LocationMapPicker from './LocationMapPicker';
@@ -99,13 +99,17 @@ export default function WebsiteNavbar() {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 md:h-16">
-            <div className="flex items-center space-x-2">
-              <Building2 className="w-6 h-6 md:w-8 md:h-8 text-teal-500" />
-              <div>
-                <h1 className="text-lg md:text-2xl font-bold text-gray-900 leading-none">ROOMHY<span className="text-teal-500">.com</span></h1>
-                <p className="hidden md:block text-xs text-gray-500">Discover Your Next Home</p>
-              </div>
-            </div>
+            <Link to="/website/index" className="flex items-center space-x-2 group">
+              <img 
+                src="/website/images/logoroomhy.jpg" 
+                alt="Roohmy Logo" 
+                className="h-8 md:h-10 w-auto transition-transform group-hover:scale-105"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png';
+                }}
+              />
+            </Link>
 
             <div className="hidden md:flex items-center space-x-6">
               <a href="/website/index" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">Home</a>
