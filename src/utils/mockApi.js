@@ -52,7 +52,13 @@ const mockProperties = [
     isLiveOnWebsite: true,
     nearbyColleges: ['Allen', 'FIITJEE', 'Bansal'],
     generatedCredentials: { loginId: 'kota_pg_001', ownerName: 'Rajesh Singh' },
-    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600'
+    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+    professionalPhotos: [
+      'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
   },
   {
     _id: 'KOTA-002',
@@ -77,7 +83,13 @@ const mockProperties = [
     isLiveOnWebsite: true,
     nearbyColleges: ['Resonance', 'FIITJEE', 'Allen'],
     generatedCredentials: { loginId: 'kota_hostel_001', ownerName: 'Priya Sharma' },
-    image: 'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600'
+    image: 'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+    professionalPhotos: [
+      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
   },
   {
     _id: 'INDORE-001',
@@ -102,7 +114,13 @@ const mockProperties = [
     isLiveOnWebsite: true,
     nearbyColleges: ['IIT-Indore', 'MITS', 'Devi Ahilya'],
     generatedCredentials: { loginId: 'indore_pg_001', ownerName: 'Anjali Patel' },
-    image: 'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
+    image: 'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
+    professionalPhotos: [
+      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/271647/pexels-photo-271647.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
   },
   {
     _id: 'JAIPUR-001',
@@ -127,7 +145,13 @@ const mockProperties = [
     isLiveOnWebsite: true,
     nearbyColleges: ['MNIT', 'RTU', 'Manipal'],
     generatedCredentials: { loginId: 'jaipur_pg_001', ownerName: 'Neha Singh' },
-    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600'
+    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
+    professionalPhotos: [
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
   },
   {
     _id: 'DELHI-001',
@@ -152,7 +176,13 @@ const mockProperties = [
     isLiveOnWebsite: true,
     nearbyColleges: ['Delhi University', 'NSIT', 'IIT-Delhi'],
     generatedCredentials: { loginId: 'delhi_pg_001', ownerName: 'Priya Gupta' },
-    image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600'
+    image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+    professionalPhotos: [
+      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/2082087/pexels-photo-2082087.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=600',
+      'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600'
+    ]
   }
 ];
 

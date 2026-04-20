@@ -88,8 +88,13 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=1"],
-    featuredImage: "https://picsum.photos/800/600?random=1"
+    images: [
+      "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static2",
@@ -105,8 +110,13 @@ const staticPropertiesList = [
     gender: "female",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=2"],
-    featuredImage: "https://picsum.photos/800/600?random=2"
+    images: [
+      "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static3",
@@ -122,8 +132,13 @@ const staticPropertiesList = [
     gender: "any",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=3"],
-    featuredImage: "https://picsum.photos/800/600?random=3"
+    images: [
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static4",
@@ -139,8 +154,13 @@ const staticPropertiesList = [
     gender: "any",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=4"],
-    featuredImage: "https://picsum.photos/800/600?random=4"
+    images: [
+      "https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static5",
@@ -156,8 +176,13 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=5"],
-    featuredImage: "https://picsum.photos/800/600?random=5"
+    images: [
+      "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static6",
@@ -173,8 +198,13 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=6"],
-    featuredImage: "https://picsum.photos/800/600?random=6"
+    images: [
+      "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static7",
@@ -190,8 +220,13 @@ const staticPropertiesList = [
     gender: "female",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=7"],
-    featuredImage: "https://picsum.photos/800/600?random=7"
+    images: [
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/2360673/pexels-photo-2360673.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static8",
@@ -207,8 +242,13 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=8"],
-    featuredImage: "https://picsum.photos/800/600?random=8"
+    images: [
+      "https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static9",
@@ -224,8 +264,13 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=9"],
-    featuredImage: "https://picsum.photos/800/600?random=9"
+    images: [
+      "https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
   {
     _id: "static10",
@@ -241,8 +286,13 @@ const staticPropertiesList = [
     gender: "any",
     status: "active",
     isPublished: true,
-    images: ["https://picsum.photos/800/600?random=10"],
-    featuredImage: "https://picsum.photos/800/600?random=10"
+    images: [
+      "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600"
+    ],
+    featuredImage: "https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600"
   }
 ];
 
