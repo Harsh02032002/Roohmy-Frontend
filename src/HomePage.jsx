@@ -230,6 +230,9 @@ export default function HomePage() {
   // Hero image slideshow state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+  const typeDropdownRef = useRef(null);
+
   // Floating Search State for Mobile
   const [isFloatingSearchVisible, setIsFloatingSearchVisible] = useState(false);
 
@@ -438,6 +441,9 @@ export default function HomePage() {
       if (showSearchDropdown && !event.target.closest('.search-container')) {
         setShowSearchDropdown(false);
       }
+      if (isTypeDropdownOpen && typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
+        setIsTypeDropdownOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -568,18 +574,34 @@ export default function HomePage() {
 
             <div className="max-w-5xl mx-auto w-full px-2 md:px-4 search-container relative">
               <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-row gap-2 md:gap-3 items-center">
-                <div className="relative flex-shrink-0">
-                  <select
-                    className="appearance-none bg-teal-50 text-gray-700 px-2 md:px-6 py-2 md:py-4 pr-6 md:pr-12 rounded-lg md:rounded-2xl font-medium focus:outline-none cursor-pointer w-[70px] md:w-[140px] text-[10px] md:text-lg"
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
+                <div className="relative flex-shrink-0" ref={typeDropdownRef}>
+                  <div
+                    onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+                    className="flex items-center justify-between bg-teal-50 text-gray-700 px-2 md:px-6 py-2 md:py-4 rounded-lg md:rounded-2xl font-medium focus:outline-none cursor-pointer w-[70px] md:w-[150px] text-[10px] md:text-lg transition-all border border-teal-100/50"
                   >
-                    <option value="">Type</option>
-                    <option value="pg">PG</option>
-                    <option value="hostel">Hostel</option>
-                    <option value="co-living">Co-living</option>
-                    <option value="apartment">Apartment</option>
-                  </select>
+                    <span className="truncate">{selectedType || 'Type'}</span>
+                    <ChevronLeft className={`w-3 h-3 md:w-5 md:h-5 text-teal-600 transition-transform duration-300 ${isTypeDropdownOpen ? '-rotate-90' : '-rotate-180'}`} style={{ transform: isTypeDropdownOpen ? 'rotate(90deg)' : 'rotate(270deg)' }} />
+                  </div>
+
+                  {isTypeDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-2 w-[120px] md:w-[200px] bg-white rounded-xl md:rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200">
+                      {['PG', 'Hostel', 'Co-living', 'Apartment'].map((type) => (
+                        <div
+                          key={type}
+                          onClick={() => {
+                            setSelectedType(type.toLowerCase());
+                            setIsTypeDropdownOpen(false);
+                          }}
+                          className={`px-3 md:px-6 py-2 md:py-4 text-[10px] md:text-lg cursor-pointer transition-colors hover:bg-teal-50 flex items-center justify-between ${
+                            selectedType === type.toLowerCase() ? 'bg-teal-50 text-teal-600 font-bold' : 'text-gray-600'
+                          }`}
+                        >
+                          {type}
+                          {selectedType === type.toLowerCase() && <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-teal-500"></div>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 flex items-center px-2 md:px-6 py-2 md:py-4 bg-gray-50 rounded-lg md:rounded-2xl relative min-w-0">
                   <Search className="w-3 h-3 md:w-6 md:h-6 text-gray-400 mr-1 md:mr-4 flex-shrink-0" />
@@ -920,8 +942,8 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {visibleTrending.map((property) => (
-                <div key={property.name} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative h-32">
+                <div key={property.name} className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow">
+                  <div className="relative h-48">
                     <img 
                       src={property.image} 
                       alt={property.name} 
@@ -930,6 +952,11 @@ export default function HomePage() {
                         e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
                       }}
                     />
+                    {/* Rating badge on image - bottom left */}
+                    <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 flex items-center gap-1 shadow">
+                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      <span className="text-xs font-bold text-gray-800">{property.rating}</span>
+                    </div>
                     {property.verified && (
                       <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
                         <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
@@ -937,25 +964,14 @@ export default function HomePage() {
                       </div>
                     )}
                   </div>
-                  <div className="p-3">
-                    <h3 className="font-bold text-base">{property.name}</h3>
-                    <div className="flex items-center text-gray-600 text-xs mb-2">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {property.location}
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{property.name}</h3>
+                    <div className="flex items-center text-gray-500 text-xs mb-2">
+                      <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                      <span className="line-clamp-1">{property.location}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-teal-600">{property.price}</span>
-                      <div className="flex items-center">
-                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-1" />
-                        <span className="font-semibold text-sm">{property.rating}</span>
-                      </div>
-                    </div>
-                    <Link 
-                      to="/website/fast-bidding"
-                      className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-sm"
-                    >
-                      Book Now
-                    </Link>
+                    <span className="text-base font-bold text-gray-900">{property.price}</span>
+                    <span className="text-xs text-gray-400 ml-1">/month</span>
                   </div>
                 </div>
               ))}
@@ -973,20 +989,21 @@ export default function HomePage() {
               <p className="text-xs text-gray-600">Most popular properties among students</p>
             </div>
 
-          <div className="relative px-0">
+          <div className="relative -mx-4">
 
   {/* SCROLL (IMPORTANT: yahin hona chahiye) */}
   <div 
     ref={trendingScrollContainerRef}
     className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
   >
-    <div className="flex gap-4 w-max px-4 py-3">
+    <div className="flex gap-3 w-max px-2 py-3">
       {featuredProperties.map((property) => (
         <div
           key={property.name}
-          className="flex-shrink-0 w-40 bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+          className="flex-shrink-0 w-36"
         >
-          <div className="relative h-32">
+          {/* Standalone image with rating badge */}
+          <div className="relative h-32 rounded-2xl overflow-hidden shadow-md mb-2">
             <img 
               src={property.image} 
               alt={property.name} 
@@ -995,32 +1012,22 @@ export default function HomePage() {
                 e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
               }}
             />
-            {property.verified && (
-              <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
-                <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
-                <span className="text-[10px] font-bold">Verified</span>
-              </div>
-            )}
+            {/* Rating badge - bottom left on image */}
+            <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur rounded-md px-1.5 py-0.5 flex items-center gap-1 shadow-sm">
+              <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
+              <span className="text-[10px] font-bold text-gray-800">{property.rating}</span>
+            </div>
           </div>
-          <div className="p-3">
-            <h3 className="font-bold text-sm">{property.name}</h3>
-            <div className="flex items-center text-gray-600 text-xs mb-2">
-              <MapPin className="w-3 h-3 mr-1" />
-              {property.location}
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-teal-600">{property.price}</span>
-              <div className="flex items-center">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 mr-1" />
-                <span className="font-semibold text-xs">{property.rating}</span>
-              </div>
-            </div>
-            <Link 
-              to="/website/fast-bidding"
-              className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-xs"
-            >
-              Book Now
-            </Link>
+          {/* Plain text below image — no card box */}
+          <h3 className="font-bold text-gray-900 text-sm mb-0 line-clamp-1">{property.name}</h3>
+          <div className="flex items-center text-gray-600 font-medium text-[10px] mb-0">
+            <MapPin className="w-2.5 h-2.5 mr-0.5 flex-shrink-0" />
+            <span className="line-clamp-1">{property.location}</span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-sm font-bold text-gray-900">{property.price}</span>
+            <span className="text-[10px] text-gray-500 line-through">₹9,999</span>
+            <span className="text-[10px] font-semibold text-teal-600">30% off</span>
           </div>
         </div>
       ))}
@@ -1033,7 +1040,7 @@ export default function HomePage() {
 
         {/* Recently Viewed Properties - Desktop & Mobile */}
         {recentlyViewed.length > 0 && (
-          <section className="py-8 md:py-12 bg-white">
+          <section className="py-1 md:py-12 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               {/* Heading - Matched with Trending Section */}
               <div className="text-center md:text-left mb-6 md:mb-10">
@@ -1050,68 +1057,66 @@ export default function HomePage() {
                   <Link 
                     key={item.id} 
                     to={`/website/property/${item.id}`}
-                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl transition-all"
+                    className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
                   >
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-48">
                       <img 
                         src={item.image} 
                         alt={item.name} 
-                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                        className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur rounded-lg shadow-sm">
                         <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider">{item.type}</span>
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="font-bold text-gray-900 group-hover:text-teal-600 transition-colors line-clamp-1">{item.name}</h3>
-                      <div className="flex items-center text-gray-500 text-xs mt-1">
-                        <MapPin className="w-3 h-3 mr-1 text-teal-500" />
+                      <h3 className="font-bold text-gray-900 text-sm mb-2 line-clamp-1">{item.name}</h3>
+                      <div className="flex items-center text-gray-600 text-xs mb-2">
+                        <MapPin className="w-3 h-3 mr-1" />
                         {item.location}
                       </div>
-                      <div className="mt-3 flex items-center justify-between">
-                        <span className="text-lg font-black text-gray-900">₹{item.price}</span>
-                        <span className="text-[10px] px-2 py-1 bg-gray-50 text-gray-400 rounded-md font-medium">Viewed Recently</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold text-gray-900">₹{item.price}</span>
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+                          <span className="font-semibold text-sm text-gray-700">4.5</span>
+                        </div>
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
 
-              {/* Mobile Swipe Carousel - EXACTLY match Trending Stays Section */}
+              {/* Mobile Swipe Carousel */}
               <div className="md:hidden -mx-4 overflow-x-auto scrollbar-hide">
-                <div className="flex gap-4 px-4 pb-4 w-max">
+                <div className="flex gap-3 px-2 pb-4 w-max">
                   {recentlyViewed.map((item) => (
-                    <div
+                    <Link
                       key={item.id}
-                      className="flex-shrink-0 w-40 bg-white rounded-2xl shadow-lg overflow-hidden"
+                      to={`/website/property-details/${item.id}`}
+                      className="flex-shrink-0 w-36"
                     >
-                      <div className="relative h-32">
+                      {/* Standalone image with rating badge */}
+                      <div className="relative h-32 rounded-2xl overflow-hidden shadow-md mb-2">
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur rounded-full px-2 py-0.5 flex items-center">
-                          <span className="text-[8px] font-bold text-teal-600">Recently Viewed</span>
+                        {/* Rating badge - bottom left on image */}
+                        <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur rounded-md px-1.5 py-0.5 flex items-center gap-1 shadow-sm">
+                          <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
+                          <span className="text-[10px] font-bold text-gray-800">4.5</span>
                         </div>
                       </div>
-                      <div className="p-3">
-                        <h3 className="font-bold text-sm truncate">{item.name}</h3>
-                        <div className="flex items-center text-gray-600 text-xs mb-2">
-                          <MapPin className="w-3 h-3 mr-1 text-teal-500" />
-                          <span className="truncate">{item.location}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-bold text-teal-600">₹{item.price}</span>
-                          <div className="flex items-center">
-                            <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400 mr-1" />
-                            <span className="font-semibold text-[10px]">4.5</span>
-                          </div>
-                        </div>
-                        <Link 
-                          to={`/website/property/${item.id}`}
-                          className="w-full mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg font-bold text-center block transition-colors text-xs"
-                        >
-                          View Again
-                        </Link>
+                      {/* Plain text below image — no card box */}
+                      <h3 className="font-bold text-gray-900 text-sm mb-0 line-clamp-1">{item.name}</h3>
+                      <div className="flex items-center text-gray-600 font-medium text-[10px] mb-0">
+                        <MapPin className="w-2.5 h-2.5 mr-0.5 flex-shrink-0" />
+                        <span className="line-clamp-1">{item.location}</span>
                       </div>
-                    </div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm font-bold text-gray-900">₹{item.price}</span>
+                        <span className="text-[10px] text-gray-500 line-through">₹{Math.round(item.price * 1.3)}</span>
+                        <span className="text-[10px] font-semibold text-teal-600">30% off</span>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               </div>

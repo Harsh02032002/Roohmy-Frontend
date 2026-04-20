@@ -57,7 +57,7 @@ export default function WhyRoomhy() {
   };
 
   return (
-    <section className="bg-white py-6 md:py-8">
+    <section className="bg-white py-1 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
         <div className="text-center mb-3 md:mb-12">
