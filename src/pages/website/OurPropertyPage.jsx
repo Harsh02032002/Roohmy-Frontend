@@ -302,7 +302,7 @@ export default function OurPropertyPage() {
   </div>
 </div>
 
-        <section className="py-2 md:py-16 bg-white md:bg-gray-50 px-3 md:px-0">
+        <section className="pt-1 pb-4 md:py-16 bg-white md:bg-gray-50 px-3 md:px-0">
           <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             {/* Mobile Filter & Sort Trigger */}
             <div className="lg:hidden flex items-center justify-between gap-2 mb-4">
@@ -603,7 +603,7 @@ export default function OurPropertyPage() {
 
               {/* Right Content - Properties */}
               <div className="flex-1">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between md:mb-6 mb-0">
                   <div className="hidden md:block text-sm text-gray-600">
                     Showing {((currentPage - 1) * propertiesPerPage) + 1} to {Math.min(currentPage * propertiesPerPage, totalCount)} of {totalCount} properties
                   </div>
@@ -718,7 +718,7 @@ function PropertyCard({ property }) {
         
         {/* Horizontal Slider with Peek Effect */}
         <div className="relative w-full md:w-[300px] lg:w-[380px] flex-shrink-0 group">
-          <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-[145px] md:h-[220px] gap-1 px-1 py-1">
+          <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-[135px] md:h-[220px] gap-1 px-1 py-1">
             {displayImages.map((img, idx) => (
               <div key={idx} className="flex-shrink-0 w-[48%] md:w-full h-full snap-start rounded-md overflow-hidden">
                 <img
@@ -747,12 +747,12 @@ function PropertyCard({ property }) {
           <Link to={`/website/property-details/${property.id}`} className="block">
             <div>
               <h3 className="font-bold text-[16px] md:text-xl text-gray-900 leading-tight mb-0.5 truncate">{property.name}</h3>
-              <p className="text-gray-500 text-[12px] mb-1.5 font-medium">
+              <p className="text-gray-500 text-[11px] mb-1 font-medium">
                 {property.area && `${property.area}, `}{property.location}
               </p>
               
               {/* Activity Indicator (Very small) */}
-              <div className="flex items-center gap-1 text-[#d48900] text-[10px] font-bold mb-1.5">
+              <div className="flex items-center gap-1 text-[#d48900] text-[10px] font-bold mb-1">
                 <Zap className="w-2.5 h-2.5 fill-[#d48900]" />
                 <span className="uppercase">Highly Rated Property</span>
               </div>
