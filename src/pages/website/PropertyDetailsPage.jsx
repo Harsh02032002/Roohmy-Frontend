@@ -49,8 +49,8 @@ const staticPropertiesData = [
       { title: "Discounted Coaching Fees", description: "10% discount on partners", icon: "star" }
     ],
     propertyViews: [
-      { label: "Facade", images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"], description: "Beautiful exterior" },
-      { label: "Room", images: ["https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg"], description: "Spacious rooms" }
+      { label: "Facade", images: ["https://picsum.photos/800/600?random=1"], description: "Beautiful exterior" },
+      { label: "Room", images: ["https://picsum.photos/800/600?random=2"], description: "Spacious rooms" }
     ],
     propertyType: "pg", gender: "male", monthlyRent: 8000, totalRooms: 20, bedsPerRoom: 2,
     facilities: { wifi: true, ac: true, food: true, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
@@ -76,8 +76,8 @@ const staticPropertiesData = [
       { title: "Parent Lounge", description: "For visiting parents", icon: "heart" }
     ],
     propertyViews: [
-      { label: "Building", images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"], description: "Modern building" },
-      { label: "Room", images: ["https://images.pexels.com/photos/271643/pexels-photo-271643.jpeg"], description: "Comfortable rooms" }
+      { label: "Building", images: ["https://picsum.photos/800/600?random=3"], description: "Modern building" },
+      { label: "Room", images: ["https://picsum.photos/800/600?random=4"], description: "Comfortable rooms" }
     ],
     propertyType: "hostel", gender: "female", monthlyRent: 10000, totalRooms: 15, bedsPerRoom: 3,
     facilities: { wifi: true, ac: true, food: true, laundry: true, parking: false, gym: false, tv: true, powerBackup: true },
@@ -103,8 +103,8 @@ const staticPropertiesData = [
       { title: "Free Housekeeping", description: "Twice a week", icon: "gift" }
     ],
     propertyViews: [
-      { label: "Exterior", images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"], description: "Modern architecture" },
-      { label: "Living Area", images: ["https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg"], description: "Common areas" }
+      { label: "Exterior", images: ["https://picsum.photos/800/600?random=5"], description: "Modern architecture" },
+      { label: "Living Area", images: ["https://picsum.photos/800/600?random=6"], description: "Common areas" }
     ],
     propertyType: "co-living", gender: "any", monthlyRent: 12000, totalRooms: 25, bedsPerRoom: 2,
     facilities: { wifi: true, ac: true, food: false, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
@@ -130,8 +130,8 @@ const staticPropertiesData = [
       { title: "Free Maintenance", description: "First 3 months", icon: "gift" }
     ],
     propertyViews: [
-      { label: "Building", images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"], description: "Premium apartments" },
-      { label: "Kitchen", images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"], description: "Modern kitchen" }
+      { label: "Building", images: ["https://picsum.photos/800/600?random=7"], description: "Premium apartments" },
+      { label: "Kitchen", images: ["https://picsum.photos/800/600?random=8"], description: "Modern kitchen" }
     ],
     propertyType: "apartment", gender: "any", monthlyRent: 25000, totalRooms: 10, bedsPerRoom: 4,
     facilities: { wifi: true, ac: true, food: false, laundry: false, parking: true, gym: true, tv: false, powerBackup: true },
@@ -157,8 +157,8 @@ const staticPropertiesData = [
       { title: "Library Access", description: "24/7 study room", icon: "gift" }
     ],
     propertyViews: [
-      { label: "Entrance", images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"], description: "Main entrance" },
-      { label: "Study Room", images: ["https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg"], description: "Study area" }
+      { label: "Entrance", images: ["https://picsum.photos/800/600?random=9"], description: "Main entrance" },
+      { label: "Study Room", images: ["https://picsum.photos/800/600?random=10"], description: "Study area" }
     ],
     propertyType: "pg", gender: "male", monthlyRent: 6000, totalRooms: 30, bedsPerRoom: 3,
     facilities: { wifi: true, ac: false, food: true, laundry: false, parking: false, gym: false, tv: true, powerBackup: true },
@@ -184,8 +184,8 @@ const staticPropertiesData = [
       { title: "Concierge Service", description: "Personal assistance", icon: "gift" }
     ],
     propertyViews: [
-      { label: "Lobby", images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"], description: "Luxury lobby" },
-      { label: "Premium Room", images: ["https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg"], description: "Premium rooms" }
+      { label: "Lobby", images: ["https://picsum.photos/800/600?random=11"], description: "Luxury lobby" },
+      { label: "Premium Room", images: ["https://picsum.photos/800/600?random=12"], description: "Premium rooms" }
     ],
     propertyType: "pg", gender: "male", monthlyRent: 15000, totalRooms: 12, bedsPerRoom: 2,
     facilities: { wifi: true, ac: true, food: true, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
@@ -211,8 +211,8 @@ const staticPropertiesData = [
       { title: "Flexible Timings", description: "No entry restrictions", icon: "star" }
     ],
     propertyViews: [
-      { label: "Building", images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"], description: "Safe building" },
-      { label: "Room", images: ["https://images.pexels.com/photos/271643/pexels-photo-271643.jpeg"], description: "Comfortable rooms" }
+      { label: "Building", images: ["https://picsum.photos/800/600?random=13"], description: "Safe building" },
+      { label: "Room", images: ["https://picsum.photos/800/600?random=14"], description: "Comfortable rooms" }
     ],
     propertyType: "pg", gender: "female", monthlyRent: 9000, totalRooms: 18, bedsPerRoom: 2,
     facilities: { wifi: true, ac: true, food: true, laundry: true, parking: false, gym: false, tv: true, powerBackup: true },
@@ -237,8 +237,8 @@ const staticPropertiesData = [
       { title: "No Hidden Charges", description: "Transparent pricing", icon: "gift" }
     ],
     propertyViews: [
-      { label: "Entrance", images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"], description: "Main entrance" },
-      { label: "Room", images: ["https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg"], description: "Budget rooms" }
+      { label: "Entrance", images: ["https://picsum.photos/800/600?random=15"], description: "Main entrance" },
+      { label: "Room", images: ["https://picsum.photos/800/600?random=16"], description: "Budget rooms" }
     ],
     propertyType: "pg", gender: "male", monthlyRent: 7000, totalRooms: 25, bedsPerRoom: 4,
     facilities: { wifi: true, ac: false, food: false, laundry: false, parking: false, gym: false, tv: false, powerBackup: false },
@@ -264,8 +264,8 @@ const staticPropertiesData = [
       { title: "Business Support", description: "Office facilities", icon: "gift" }
     ],
     propertyViews: [
-      { label: "Campus", images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"], description: "Executive campus" },
-      { label: "Conference", images: ["https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg"], description: "Business facilities" }
+      { label: "Campus", images: ["https://picsum.photos/800/600?random=17"], description: "Executive campus" },
+      { label: "Conference", images: ["https://picsum.photos/800/600?random=18"], description: "Business facilities" }
     ],
     propertyType: "hostel", gender: "male", monthlyRent: 18000, totalRooms: 20, bedsPerRoom: 2,
     facilities: { wifi: true, ac: true, food: true, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
@@ -291,8 +291,8 @@ const staticPropertiesData = [
       { title: "Flexible Stay", description: "Short/long term", icon: "star" }
     ],
     propertyViews: [
-      { label: "Building", images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"], description: "Family building" },
-      { label: "Family Room", images: ["https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg"], description: "Spacious family rooms" }
+      { label: "Building", images: ["https://picsum.photos/800/600?random=19"], description: "Family building" },
+      { label: "Family Room", images: ["https://picsum.photos/800/600?random=20"], description: "Spacious family rooms" }
     ],
     propertyType: "pg", gender: "any", monthlyRent: 13000, totalRooms: 15, bedsPerRoom: 4,
     facilities: { wifi: true, ac: true, food: false, laundry: true, parking: true, gym: false, tv: true, powerBackup: true },

@@ -103,12 +103,12 @@ const staticPropertyData = {
   propertyViews: [
     {
       label: "Facade",
-      images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=800"],
+      images: ["https://picsum.photos/800/600?random=1"],
       description: "Beautiful exterior"
     },
     {
       label: "Room",
-      images: ["https://images.pexels.com/photos/1642128/pexels-photo-1642128.jpeg?auto=compress&cs=tinysrgb&w=800"],
+      images: ["https://picsum.photos/800/600?random=2"],
       description: "Spacious rooms"
     }
   ],

@@ -88,8 +88,8 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"
+    images: ["https://picsum.photos/800/600?random=1"],
+    featuredImage: "https://picsum.photos/800/600?random=1"
   },
   {
     _id: "static2",
@@ -105,8 +105,8 @@ const staticPropertiesList = [
     gender: "female",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+    images: ["https://picsum.photos/800/600?random=2"],
+    featuredImage: "https://picsum.photos/800/600?random=2"
   },
   {
     _id: "static3",
@@ -122,8 +122,8 @@ const staticPropertiesList = [
     gender: "any",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"
+    images: ["https://picsum.photos/800/600?random=3"],
+    featuredImage: "https://picsum.photos/800/600?random=3"
   },
   {
     _id: "static4",
@@ -139,8 +139,8 @@ const staticPropertiesList = [
     gender: "any",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"
+    images: ["https://picsum.photos/800/600?random=4"],
+    featuredImage: "https://picsum.photos/800/600?random=4"
   },
   {
     _id: "static5",
@@ -156,8 +156,8 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"
+    images: ["https://picsum.photos/800/600?random=5"],
+    featuredImage: "https://picsum.photos/800/600?random=5"
   },
   {
     _id: "static6",
@@ -173,8 +173,8 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg"
+    images: ["https://picsum.photos/800/600?random=6"],
+    featuredImage: "https://picsum.photos/800/600?random=6"
   },
   {
     _id: "static7",
@@ -190,8 +190,8 @@ const staticPropertiesList = [
     gender: "female",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+    images: ["https://picsum.photos/800/600?random=7"],
+    featuredImage: "https://picsum.photos/800/600?random=7"
   },
   {
     _id: "static8",
@@ -207,8 +207,8 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg"
+    images: ["https://picsum.photos/800/600?random=8"],
+    featuredImage: "https://picsum.photos/800/600?random=8"
   },
   {
     _id: "static9",
@@ -224,8 +224,8 @@ const staticPropertiesList = [
     gender: "male",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg"
+    images: ["https://picsum.photos/800/600?random=9"],
+    featuredImage: "https://picsum.photos/800/600?random=9"
   },
   {
     _id: "static10",
@@ -241,8 +241,8 @@ const staticPropertiesList = [
     gender: "any",
     status: "active",
     isPublished: true,
-    images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"],
-    featuredImage: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+    images: ["https://picsum.photos/800/600?random=10"],
+    featuredImage: "https://picsum.photos/800/600?random=10"
   }
 ];
 
