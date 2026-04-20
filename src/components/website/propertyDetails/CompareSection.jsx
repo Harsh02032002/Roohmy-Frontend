@@ -53,43 +53,40 @@ export default function CompareSection({ currentProperty }) {
   if (loading || similarProperties.length === 0) return null;
 
   return (
-    <div className="py-5 border-b border-gray-100">
+    <div className="py-6 border-b border-gray-100 bg-white">
       <div className="px-4 md:px-0 mb-4">
         <h2 className="text-lg font-bold text-gray-900">Compare with similar properties</h2>
-        <p className="text-gray-500 text-xs mt-0.5">Find the perfect stay for you</p>
+        <p className="text-gray-500 text-[11px] mt-0.5">Find the perfect stay for you</p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto px-4 md:px-0 pb-4 scrollbar-hide">
-        {/* Current Property — Fixed/Sticky first card */}
-        <div className="sticky left-0 z-10 flex-shrink-0 w-[220px] rounded-2xl border-2 border-[#EE4266] bg-white overflow-hidden shadow-md relative translate-x-[-2px] md:translate-x-0">
-          <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-[#EE4266] text-white text-[10px] font-bold rounded-full">
-            Current
-          </div>
-          <div className="h-[130px] bg-gray-100">
-            <img
-              src={currentProperty?.image || `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`}
-              alt={currentProperty?.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
-              }}
-            />
-          </div>
-          <div className="p-3 bg-white">
-            <p className="text-sm font-bold text-gray-900 line-clamp-1">{currentProperty?.name}</p>
-            <div className="flex items-center gap-1 mt-1">
-              <Star size={11} className="fill-amber-500 text-amber-500" />
-              <span className="text-xs font-medium text-gray-700">{currentProperty?.rating || "—"}</span>
+      <div className="flex gap-4 overflow-x-auto px-4 md:px-0 pb-4 no-scrollbar">
+        {/* Current Property - Sticky Left */}
+        <div className="sticky left-0 z-20 flex-shrink-0 w-[165px] md:w-[220px] bg-white shadow-[8px_0_15px_-5px_rgba(0,0,0,0.1)] pr-3">
+          <div className="relative rounded-xl overflow-hidden">
+            <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-[#EE4266] text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
+              Current
             </div>
-            <div className="flex items-center gap-1 mt-1">
-              <MapPin size={11} className="text-gray-400" />
-              <span className="text-xs text-gray-500">{currentProperty?.location}</span>
+            <div className="h-[110px] md:h-[150px] bg-gray-100">
+              <img
+                src={currentProperty?.image || `https://picsum.photos/600/400?random=1`}
+                alt={currentProperty?.name}
+                className="w-full h-full object-cover"
+              />
             </div>
-            <p className="text-base font-extrabold text-gray-900 mt-2">
-              ₹{currentProperty?.price}
-              <span className="text-[10px] text-gray-400 font-normal">/mo</span>
-            </p>
-            <div className="mt-2 py-2 text-center bg-[#EE4266]/10 text-[#EE4266] text-xs font-bold rounded-lg border border-[#EE4266]/20">
+            {/* Rating Overlay */}
+            <div className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm text-gray-900 px-1 py-0.5 rounded shadow-sm flex items-center gap-0.5 z-10 border border-gray-100">
+              <Star size={10} className="fill-black text-black" />
+              <span className="text-[10px] font-bold">{currentProperty?.rating || "4.5"}</span>
+            </div>
+          </div>
+          <div className="py-2.5">
+            <p className="text-[13px] font-bold text-gray-900 line-clamp-1 leading-tight">{currentProperty?.name}</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">{currentProperty?.location}</p>
+            <div className="mt-2 flex items-baseline gap-1">
+              <span className="text-sm font-extrabold text-gray-900">₹{currentProperty?.price}</span>
+              <span className="text-[9px] text-gray-400 font-medium">/mo</span>
+            </div>
+            <div className="mt-2 py-1.5 text-center bg-[#EE4266]/10 text-[#EE4266] text-[10px] font-bold rounded-lg border border-[#EE4266]/20">
               Selected
             </div>
           </div>
@@ -100,34 +97,34 @@ export default function CompareSection({ currentProperty }) {
           <Link
             key={prop.id}
             to={`/website/property-details/${prop.id}`}
-            className="flex-shrink-0 w-[200px] rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+            className="flex-shrink-0 w-[155px] md:w-[220px] transition-all"
           >
-            <div className="h-[120px] bg-gray-100">
-              <img
-                src={prop.image}
-                alt={prop.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
-                }}
-              />
+            <div className="relative rounded-xl overflow-hidden mb-2">
+              <div className="h-[110px] md:h-[150px] bg-gray-100">
+                <img
+                  src={prop.image}
+                  alt={prop.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
+                  }}
+                />
+              </div>
+              {/* Rating Overlay */}
+              <div className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm text-gray-900 px-1 py-0.5 rounded shadow-sm flex items-center gap-0.5 z-10 border border-gray-100">
+                <Star size={10} className="fill-black text-black" />
+                <span className="text-[10px] font-bold">{prop.rating}</span>
+              </div>
             </div>
-            <div className="p-3">
-              <p className="text-sm font-bold text-gray-900 line-clamp-1">{prop.name}</p>
-              <div className="flex items-center gap-1 mt-1">
-                <Star size={11} className="fill-amber-500 text-amber-500" />
-                <span className="text-xs font-medium text-gray-700">{prop.rating}</span>
+            <div className="py-1">
+              <p className="text-[13px] font-bold text-gray-900 line-clamp-1 leading-tight">{prop.name}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">{prop.location}</p>
+              <div className="mt-2 flex items-baseline gap-1">
+                <span className="text-sm font-extrabold text-gray-900">₹{prop.price}</span>
+                <span className="text-[9px] text-gray-400 font-medium">/mo</span>
               </div>
-              <div className="flex items-center gap-1 mt-1">
-                <MapPin size={11} className="text-gray-400" />
-                <span className="text-xs text-gray-500">{prop.location}</span>
-              </div>
-              <p className="text-base font-extrabold text-gray-900 mt-2">
-                ₹{prop.price}
-                <span className="text-[10px] text-gray-400 font-normal">/mo</span>
-              </p>
-              <div className="mt-2 py-1.5 text-center bg-gray-100 text-gray-600 text-xs font-semibold rounded-lg hover:bg-[#EE4266] hover:text-white transition-colors">
-                Select
+              <div className="mt-2 py-1.5 text-center bg-gray-50 text-gray-600 text-[10px] font-semibold rounded-lg hover:bg-[#EE4266] hover:text-white transition-colors border border-gray-200">
+                View Stay
               </div>
             </div>
           </Link>

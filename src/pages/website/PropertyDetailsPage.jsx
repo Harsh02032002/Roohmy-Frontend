@@ -29,86 +29,70 @@ const staticPropertiesData = [
   {
     _id: "static1",
     title: "Roomhy Boys PG - Kota",
+    name: "Roomhy Boys PG - Kota",
     description: "Premium paying guest accommodation for boys near coaching centers with all modern amenities. Spacious rooms with study tables, high-speed WiFi, and nutritious food.",
     address: "Talwandi, Kota, Rajasthan 324005",
     locationCode: "KOT",
     latitude: 25.2138,
     longitude: 75.8648,
-    ownerLoginId: "KOT001",
-    status: "active",
-    isPublished: true,
+    propertyType: "pg", gender: "male", monthlyRent: 8000, totalRooms: 20, bedsPerRoom: 2, price: 8000,
+    rating: 4.5,
+    location: "Kota",
+    propertyViews: [
+      { label: "Facade", images: ["https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Modern Building Exterior" },
+      { label: "Reception", images: ["https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Welcoming Lobby Area" },
+      { label: "Bedroom", images: ["https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Spacious Student Rooms" },
+      { label: "Kitchen", images: ["https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Clean & Modern Kitchen" }
+    ],
     amenities: [
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
       { name: "Air Conditioning", icon: "wind", category: "comfort" },
-      { name: "Study Table", icon: "check", category: "basic" },
-      { name: "Power Backup", icon: "zap", category: "comfort" },
-      { name: "Laundry Service", icon: "droplet", category: "luxury" }
+      { name: "Study Table", icon: "check", category: "basic" }
     ],
     exclusiveBenefits: [
-      { title: "Free First Month Maintenance", description: "No maintenance charges", icon: "gift" },
-      { title: "Discounted Coaching Fees", description: "10% discount on partners", icon: "star" }
+      { title: "Free Maintenance", description: "No maintenance charges", icon: "gift" }
     ],
-    propertyViews: [
-      { label: "Facade", images: ["https://picsum.photos/800/600?random=1"], description: "Beautiful exterior" },
-      { label: "Room", images: ["https://picsum.photos/800/600?random=2"], description: "Spacious rooms" }
-    ],
-    propertyType: "pg", gender: "male", monthlyRent: 8000, totalRooms: 20, bedsPerRoom: 2,
-    facilities: { wifi: true, ac: true, food: true, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
-    name: "Roomhy Boys PG - Kota", price: 8000, beds: 40
+    facilities: { wifi: true, ac: true, food: true, laundry: true }
   },
   {
     _id: "static2",
     title: "Roomhy Girls Hostel - Indore",
+    name: "Roomhy Girls Hostel - Indore",
     description: "Safe and secure girls hostel with 24/7 security and homely atmosphere. Located in Vijay Nagar with easy access to colleges.",
     address: "Vijay Nagar, Indore, Madhya Pradesh 452010",
     locationCode: "IND",
     latitude: 22.7196, longitude: 75.8577,
-    ownerLoginId: "IND001", status: "active", isPublished: true,
-    amenities: [
-      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
-      { name: "Air Conditioning", icon: "wind", category: "comfort" },
-      { name: "Security Guard", icon: "shield", category: "basic" },
-      { name: "RO Water", icon: "droplet", category: "basic" },
-      { name: "CCTV Surveillance", icon: "shield", category: "comfort" }
-    ],
-    exclusiveBenefits: [
-      { title: "Free Pick-up Service", description: "From railway station", icon: "gift" },
-      { title: "Parent Lounge", description: "For visiting parents", icon: "heart" }
-    ],
+    propertyType: "hostel", gender: "female", monthlyRent: 10000, price: 10000,
+    rating: 4.8,
+    location: "Indore",
     propertyViews: [
-      { label: "Building", images: ["https://picsum.photos/800/600?random=3"], description: "Modern building" },
-      { label: "Room", images: ["https://picsum.photos/800/600?random=4"], description: "Comfortable rooms" }
+      { label: "Facade", images: ["https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Main Entrance" },
+      { label: "Reception", images: ["https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "24/7 Managed Reception" },
+      { label: "Bedroom", images: ["https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Comfortable Girls Dorm" },
+      { label: "Kitchen", images: ["https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Hygienic Dining Area" }
     ],
-    propertyType: "hostel", gender: "female", monthlyRent: 10000, totalRooms: 15, bedsPerRoom: 3,
-    facilities: { wifi: true, ac: true, food: true, laundry: true, parking: false, gym: false, tv: true, powerBackup: true },
-    name: "Roomhy Girls Hostel - Indore", price: 10000, beds: 45
+    amenities: [
+      { name: "CCTV", icon: "shield", category: "basic" },
+      { name: "RO Water", icon: "droplet", category: "basic" }
+    ]
   },
   {
     _id: "static3",
     title: "Roomhy Co-living - Jaipur",
+    name: "Roomhy Co-living - Jaipur",
     description: "Modern co-living space for professionals and students with fully furnished rooms and community areas.",
     address: "Malviya Nagar, Jaipur, Rajasthan 302017",
     locationCode: "JAI",
     latitude: 26.9124, longitude: 75.7873,
-    ownerLoginId: "JAI001", status: "active", isPublished: true,
-    amenities: [
-      { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
-      { name: "Fully Furnished", icon: "check", category: "basic" },
-      { name: "Community Kitchen", icon: "coffee", category: "comfort" },
-      { name: "Recreation Room", icon: "tv", category: "luxury" },
-      { name: "Housekeeping", icon: "check", category: "comfort" }
-    ],
-    exclusiveBenefits: [
-      { title: "Weekly Events", description: "Community activities", icon: "star" },
-      { title: "Free Housekeeping", description: "Twice a week", icon: "gift" }
-    ],
+    propertyType: "co-living", gender: "any", monthlyRent: 12000, price: 12000,
+    rating: 4.2,
+    location: "Jaipur",
     propertyViews: [
-      { label: "Exterior", images: ["https://picsum.photos/800/600?random=5"], description: "Modern architecture" },
-      { label: "Living Area", images: ["https://picsum.photos/800/600?random=6"], description: "Common areas" }
-    ],
-    propertyType: "co-living", gender: "any", monthlyRent: 12000, totalRooms: 25, bedsPerRoom: 2,
-    facilities: { wifi: true, ac: true, food: false, laundry: true, parking: true, gym: true, tv: true, powerBackup: true },
-    name: "Roomhy Co-living - Jaipur", price: 12000, beds: 50
+      { label: "Facade", images: ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Modern Co-living Exterior" },
+      { label: "Lobby", images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Community Chill Zone" },
+      { label: "Bedroom", images: ["https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Sleek Private Rooms" },
+      { label: "Kitchen", images: ["https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Shared Kitchen" }
+    ]
   },
   {
     _id: "static4",
