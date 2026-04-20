@@ -3,7 +3,7 @@ import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon, X, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend } from "../../utils/api";
 
 export default function OurPropertyPage() {
@@ -268,8 +268,8 @@ export default function OurPropertyPage() {
       <WebsiteNavbar />
 
       <main className="min-h-screen">
-        {/* --- COMPACT & STYLISH PROPERTIES HEADER --- */}
-<div className="relative w-full py-10 px-6 overflow-hidden border-b border-stone-200/50" 
+{/* --- COMPACT & STYLISH PROPERTIES HEADER --- */}
+<div className="relative w-full py-2 md:py-10 px-4 md:px-6 overflow-hidden border-b border-stone-200/50" 
      style={{
        background: 'linear-gradient(135deg, #FFFAF5 0%, #FDFCFB 50%, #F5F7FA 100%)'
      }}>
@@ -282,32 +282,27 @@ export default function OurPropertyPage() {
   <div className="relative max-w-7xl mx-auto flex flex-col items-center text-center">
     
     {/* MAIN HEADING - "Our Properties" */}
-    <div className="flex items-center gap-4 mb-2">
-      <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
-      <h1 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] tracking-tight">
+    <div className="flex items-center gap-4 mb-1">
+      <div className="h-[1px] w-6 bg-[#C5A059]/40 hidden md:block"></div>
+      <h1 className="text-xl md:text-4xl font-bold text-[#1A1A1A] tracking-tight">
         Our <span className="text-[#C5A059] font-serif italic font-medium">Properties</span>
       </h1>
-      <div className="h-[1px] w-8 bg-[#C5A059]/40 hidden md:block"></div>
+      <div className="h-[1px] w-6 bg-[#C5A059]/40 hidden md:block"></div>
     </div>
 
     {/* Total Properties Count */}
-    <div className="mt-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-[#C5A059]/20 inline-flex items-center gap-2">
-      <span className="text-sm font-semibold text-[#1A1A1A]">
-        {totalCount > 0 ? totalCount : (totalProperties.length > 0 ? totalProperties.length : 'Loading...')} Properties Available
+    <div className="mt-1 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full border border-[#C5A059]/20 inline-flex items-center gap-2">
+      <span className="text-[11px] md:text-sm font-semibold text-[#1A1A1A]">
+        {totalCount > 0 ? totalCount : (totalProperties.length > 0 ? totalProperties.length : 'Loading...')} Properties
       </span>
     </div>
 
-    {/* SUB-HEADING - Content Unchanged */}
-    <p className="text-base md:text-lg text-stone-500 font-normal opacity-90 max-w-xl mx-auto">
-      Find your perfect stay from our verified listings
-    </p>
-
     {/* Bottom Accent Dot */}
-    <div className="mt-4 w-1.5 h-1.5 rounded-full bg-[#C5A059]/30"></div>
+    <div className="mt-2 w-1 h-1 rounded-full bg-[#C5A059]/30 md:block hidden"></div>
   </div>
 </div>
 
-        <section className="py-16 bg-gray-50">
+        <section className="py-2 md:py-16 bg-white md:bg-gray-50 px-3 md:px-0">
           <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             {/* Mobile Filter Trigger */}
             <div className="lg:hidden mb-4">
@@ -613,7 +608,7 @@ export default function OurPropertyPage() {
                   </select>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-0 md:gap-4 bg-gray-100 md:bg-transparent pb-16 md:pb-0">
                   {loading ? (
                     // Skeleton Loaders while loading
                     <>
@@ -695,223 +690,87 @@ export default function OurPropertyPage() {
 
       <WebsiteFooter />
 
-      {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
     </div>
   );
 }
 
 // Property Card Component - OYO Style
-function PropertyCard({ property, nearbyColleges }) {
-  const [selectedImage, setSelectedImage] = useState(0);
-  
-  // Get all images from property (up to 4)
+function PropertyCard({ property }) {
+  // Get all images from property
   const allImages = property.images || [property.image];
-  const displayImages = allImages.slice(0, 4);
-  if (displayImages.length === 0) {
-    displayImages.push('https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600');
-  }
-
-  // Sample amenities for display
-  const amenities = [
-    { icon: <Wifi className="w-4 h-4" />, label: 'Free WiFi' },
-    { icon: <Utensils className="w-4 h-4" />, label: 'Food' },
-    { icon: <Car className="w-4 h-4" />, label: 'Parking' },
-    { icon: <Dumbbell className="w-4 h-4" />, label: 'Gym' },
-    { icon: <Tv className="w-4 h-4" />, label: 'TV' },
-    { icon: <Wind className="w-4 h-4" />, label: 'AC' },
-  ];
+  const displayImages = allImages.length > 0 ? allImages : ['https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600'];
 
   // Calculate fake discount
   const originalPrice = Math.round(property.price * 1.3);
   const discountPercent = Math.round(((originalPrice - property.price) / originalPrice) * 100);
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow border border-gray-100">
-      <div className="flex flex-col lg:flex-row">
-        {/* Left Side - Image Gallery OYO Style */}
-        <div className="lg:w-[520px] xl:w-[580px] flex-shrink-0">
-          <div className="flex gap-2 p-2">
-            {/* Main Image with Arrows */}
-            <div className="relative flex-1 h-56 lg:h-72 overflow-hidden rounded-lg bg-gray-100 group">
-              <img
-                src={displayImages[selectedImage]}
-                alt={property.name}
-                className="w-full h-full object-cover"
-              />
-              
-              {/* Left Arrow - OYO green with hover */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedImage(prev => prev === 0 ? displayImages.length - 1 : prev - 1);
-                }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
-              >
-                <ChevronLeft className="w-6 h-6 text-white drop-shadow-lg" />
-              </button>
-              
-              {/* Right Arrow - OYO green with hover */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedImage(prev => prev === displayImages.length - 1 ? 0 : prev + 1);
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-transparent hover:bg-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
-              >
-                <ChevronRight className="w-6 h-6 text-white drop-shadow-lg" />
-              </button>
-
-              {/* Badges */}
-              <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
-                <Building2 className="w-3 h-3 text-[#1ab64f]" />
-                {property.type}
-              </div>
-              
-              {/* Image Counter */}
-              <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2 py-1 rounded text-xs">
-                {selectedImage + 1} / {displayImages.length}
-              </div>
-            </div>
-
-            {/* Right Side Thumbnails - 4 images vertical with conditional arrows */}
-            {displayImages.length > 1 && (
-              <div className="flex flex-col gap-1 w-24 lg:w-28">
-                {displayImages.slice(0, 4).map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedImage(idx);
-                    }}
-                    className={`h-14 lg:h-16 rounded overflow-hidden flex-shrink-0 border-2 transition-all ${
-                      selectedImage === idx ? 'border-[#1ab64f] ring-2 ring-[#1ab64f]/30' : 'border-transparent hover:border-gray-300'
-                    }`}
-                  >
-                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Side - Details */}
-        <div className="flex-1 p-5 flex flex-col">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex-1">
-              <h3 className="font-bold text-xl text-gray-900 mb-1">{property.name}</h3>
-              <div className="flex items-center gap-2 text-gray-600 text-sm">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <span>{property.location}{property.area && `, ${property.area}`}</span>
-              </div>
-            </div>
-            {/* Rating Badge */}
-            <div className="flex flex-col items-end">
-              <div className="flex items-center gap-1 bg-[#1ab64f] px-2 py-1 rounded">
-                <Star className="w-4 h-4 text-white fill-white" />
-                <span className="font-bold text-white">{property.rating}</span>
-              </div>
-              <span className="text-xs text-gray-500 mt-1">({Math.floor(Math.random() * 2000) + 100} Ratings)</span>
-            </div>
-          </div>
-
-          {/* Owner Info */}
-          <div className="flex items-center gap-2 text-gray-500 text-sm mb-3">
-            <span className="font-medium">By {property.owner}</span>
-          </div>
-
-          {/* Amenities */}
-          <div className="flex flex-wrap gap-3 mb-4">
-            {amenities.slice(0, 6).map((amenity, idx) => (
-              <div key={idx} className="flex items-center gap-1 text-gray-600 text-sm">
-                <span className="text-gray-400">{amenity.icon}</span>
-                <span>{amenity.label}</span>
+    <div className="bg-white md:rounded-xl md:shadow-md overflow-hidden hover:shadow-xl transition-all md:border md:border-gray-200 mb-1.5 md:mb-0">
+      <div className="flex flex-col md:flex-row">
+        
+        {/* Horizontal Slider with Peek Effect */}
+        <div className="relative w-full md:w-[300px] lg:w-[380px] flex-shrink-0 group">
+          <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-[145px] md:h-[220px] gap-1 px-1 py-1">
+            {displayImages.map((img, idx) => (
+              <div key={idx} className="flex-shrink-0 w-[85%] md:w-full h-full snap-start rounded-md overflow-hidden">
+                <img
+                  src={img}
+                  alt={`${property.name} ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
-            <span className="text-sm text-[#1ab64f] font-medium cursor-pointer hover:underline">+ 22 more</span>
+          </div>
+          
+          {/* Rating Badge (Inside first image view) */}
+          <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm text-gray-900 px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 z-10 border border-gray-100">
+            <Star className="w-2.5 h-2.5 text-black fill-black" />
+            <span className="text-[11px] font-bold">{property.rating}</span>
+            <span className="text-[10px] text-gray-500 ml-0.5">({100 + Math.floor(Math.random() * 500)})</span>
           </div>
 
-          {/* Gender & Beds */}
-          <div className="flex items-center gap-4 mb-3 text-sm">
-            <div className="flex items-center gap-1 text-gray-600">
-              <Users className="w-4 h-4 text-gray-400" />
-              <span>{property.gender}</span>
-            </div>
-            <div className="flex items-center gap-1 text-gray-600">
-              <span className="text-gray-400">🛏️</span>
-              <span>{property.beds} Beds Available</span>
-            </div>
-          </div>
-
-          {/* Nearby Colleges */}
-          {nearbyColleges?.length > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <p className="text-xs font-semibold text-gray-700">Nearby Institutions:</p>
-                {/* Show warning if API failed */}
-                {property.apiWarning && (
-                  <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-200 flex items-center gap-1">
-                    <span>⚠️</span>
-                    API Limited
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {nearbyColleges.slice(0, 3).map((college, idx) => (
-                  <span key={idx} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded border border-blue-100">
-                    {college}
-                  </span>
-                ))}
-                {nearbyColleges.length > 3 && (
-                  <span className="bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">
-                    +{nearbyColleges.length - 3} more
-                  </span>
-                )}
-              </div>
-              {property.apiWarning && (
-                <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
-                  <span>ℹ️</span>
-                  College data temporarily unavailable due to API limits
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Divider */}
-          <div className="border-t border-gray-200 my-4"></div>
-
-          {/* Price & Action */}
-          {/* Price & Action */}
-<div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mt-auto gap-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl font-bold text-gray-900">₹{property.price.toLocaleString()}</span>
-                <span className="text-sm text-gray-500 line-through">₹{originalPrice.toLocaleString()}</span>
-                <span className="text-sm font-semibold text-[#1ab64f]">{discountPercent}% off</span>
-              </div>
-              <p className="text-xs text-gray-500">+ ₹{Math.round(property.price * 0.12)} taxes & fees per room per month</p>
-            </div>
-          <div className="flex gap-2">
-  <a 
-    href={`/website/property-details/${property.id}`}
-    className="px-3 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all flex items-center gap-1 text-sm whitespace-nowrap"
-  >
-    View Details
-  </a>
-  <button className="px-4 py-2 bg-[#1ab64f] hover:bg-[#159c42] text-white font-semibold rounded-lg transition-all flex items-center gap-1 text-sm whitespace-nowrap">
-    <Phone className="w-4 h-4" />
-    Book Now
-  </button>
-</div>
-          </div>
-
-          {/* Booking Count */}
-          <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
-            <span className="font-semibold">🔥 {Math.floor(Math.random() * 20) + 5} people</span> booked this property today
-          </p>
+          {/* Heart Button */}
+          <button className="absolute top-4 right-[16%] md:right-4 p-1.5 rounded-full bg-black/10 backdrop-blur-sm z-10">
+             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
         </div>
+
+        {/* Compact Details Section */}
+        <div className="px-3 pb-3 md:p-4 flex-1 flex flex-col justify-between">
+          <Link to={`/website/property-details/${property.id}`} className="block">
+            <div>
+              <h3 className="font-bold text-[16px] md:text-xl text-gray-900 leading-tight mb-0.5 truncate">{property.name}</h3>
+              <p className="text-gray-500 text-[12px] mb-1.5 font-medium">
+                {property.area && `${property.area}, `}{property.location}
+              </p>
+              
+              {/* Activity Indicator (Very small) */}
+              <div className="flex items-center gap-1 text-[#d48900] text-[10px] font-bold mb-1.5">
+                <Zap className="w-2.5 h-2.5 fill-[#d48900]" />
+                <span className="uppercase">Highly Rated Property</span>
+              </div>
+
+              {/* Pricing section */}
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-lg font-extrabold text-gray-950">₹{property.price.toLocaleString()}</span>
+                <span className="text-[12px] text-gray-400 font-medium line-through">₹{originalPrice.toLocaleString()}</span>
+                <span className="text-[12px] font-bold text-[#1ab64f]">{discountPercent}% off</span>
+              </div>
+              <p className="text-[10px] text-gray-400 font-medium">+ taxes & fees</p>
+            </div>
+          </Link>
+
+          {/* Desktop Only Extra Badges */}
+          <div className="hidden md:flex mt-3 pt-2 border-t border-gray-100 justify-between items-center text-[10px]">
+             <div className="flex gap-2">
+               <span className="px-2 py-0.5 bg-gray-50 text-gray-600 font-bold rounded border border-gray-200 uppercase">{property.gender}</span>
+               <span className="px-2 py-0.5 bg-gray-50 text-gray-600 font-bold rounded border border-gray-200 uppercase">{property.type}</span>
+             </div>
+             <span className="font-bold text-blue-600">View Details</span>
+          </div>
+        </div>
+        
       </div>
     </div>
   );
