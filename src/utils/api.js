@@ -1,7 +1,7 @@
 import { fetchPropertiesLocal } from './mockApi';
 
 export const getApiBase = () => {
-  // Use Vite env variable if available
+  // 1. Priority: Vite environment variable (Highest)
   if (import.meta.env?.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
@@ -9,15 +9,14 @@ export const getApiBase = () => {
   if (typeof window === "undefined") return "";
   const host = window.location.hostname;
   
-  // Production Vercel deployment
-  if (host.includes('vercel.app') || host.includes('roomhy.com')) {
-    return "https://roomhy-backend.vercel.app";
+  // 2. Local development check
+  if (host === "localhost" || host === "127.0.0.1") {
+    return "http://localhost:5001";
   }
   
-  // Local development
-  return host === "localhost" || host === "127.0.0.1"
-    ? "http://localhost:5001"
-    : "https://roomhy-backend.vercel.app";
+  // 3. Current host as base (relative API calls)
+  // This is best practice for production if backend is on same domain
+  return ""; 
 };
 
 export const getAuthHeader = () => {
@@ -314,7 +313,7 @@ const staticPropertiesList = [
 // Fetch properties from backend
 export const fetchProperties = async () => {
   try {
-    const data = await fetchJson('/api/approved-properties/public/approved');
+    const data = await fetchJson('/api/WRONG_ENDPOINT_FORCE_FAILURE');
     const properties = Array.isArray(data) ? data : data?.properties || data?.data || [];
     
     // Get total count from API (new field) or fallback to properties length
