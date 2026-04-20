@@ -713,7 +713,7 @@ function PropertyCard({ property }) {
         <div className="relative w-full md:w-[300px] lg:w-[380px] flex-shrink-0 group">
           <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-[145px] md:h-[220px] gap-1 px-1 py-1">
             {displayImages.map((img, idx) => (
-              <div key={idx} className="flex-shrink-0 w-[85%] md:w-full h-full snap-start rounded-md overflow-hidden">
+              <div key={idx} className="flex-shrink-0 w-[48%] md:w-full h-full snap-start rounded-md overflow-hidden">
                 <img
                   src={img}
                   alt={`${property.name} ${idx + 1}`}
@@ -724,15 +724,14 @@ function PropertyCard({ property }) {
           </div>
           
           {/* Rating Badge (Inside first image view) */}
-          <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm text-gray-900 px-1.5 py-0.5 rounded shadow-sm flex items-center gap-1 z-10 border border-gray-100">
+          <div className="absolute bottom-4 left-3 bg-white/95 backdrop-blur-sm text-gray-900 px-1 py-0.5 rounded shadow-sm flex items-center gap-0.5 z-10 border border-gray-100">
             <Star className="w-2.5 h-2.5 text-black fill-black" />
-            <span className="text-[11px] font-bold">{property.rating}</span>
-            <span className="text-[10px] text-gray-500 ml-0.5">({100 + Math.floor(Math.random() * 500)})</span>
+            <span className="text-[10px] font-bold">{property.rating}</span>
           </div>
 
           {/* Heart Button */}
-          <button className="absolute top-4 right-[16%] md:right-4 p-1.5 rounded-full bg-black/10 backdrop-blur-sm z-10">
-             <Heart className="w-4 h-4 text-white" />
+          <button className="absolute top-4 right-[55%] md:right-4 p-1.5 rounded-full bg-black/10 backdrop-blur-sm z-10">
+             <Heart className="w-3.5 h-3.5 text-white" />
           </button>
         </div>
 
