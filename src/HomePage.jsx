@@ -15,14 +15,14 @@ import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 
 // Static fallback data - moved outside to prevent re-renders
 const staticCities = [
-  { name: 'Kota', properties: '2,500+', image: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  { name: 'Indore', properties: '1,800+', image: 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  { name: 'Jaipur', properties: '3,200+', image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=400' },
-  { name: 'Delhi', properties: '5,000+', image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=400' },
-  { name: 'Bhopal', properties: '1,200+', image: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  { name: 'Nagpur', properties: '980+', image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  { name: 'Jodhpur', properties: '850+', image: 'https://images.pexels.com/photos/1007426/pexels-photo-1007426.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  { name: 'Mumbai', properties: '4,500+', image: 'https://images.pexels.com/photos/189349/pexels-photo-189349.jpeg?auto=compress&cs=tinysrgb&w=400' },
+  { name: 'Kota', properties: '2,500+', image: 'https://picsum.photos/600/400?random=1' },
+  { name: 'Indore', properties: '1,800+', image: 'https://picsum.photos/600/400?random=2' },
+  { name: 'Jaipur', properties: '3,200+', image: 'https://picsum.photos/600/400?random=3' },
+  { name: 'Delhi', properties: '5,000+', image: 'https://picsum.photos/600/400?random=4' },
+  { name: 'Bhopal', properties: '1,200+', image: 'https://picsum.photos/600/400?random=5' },
+  { name: 'Nagpur', properties: '980+', image: 'https://picsum.photos/600/400?random=6' },
+  { name: 'Jodhpur', properties: '850+', image: 'https://picsum.photos/600/400?random=7' },
+  { name: 'Mumbai', properties: '4,500+', image: 'https://picsum.photos/600/400?random=8' },
 ];
 
 const staticOfferings = [
@@ -31,11 +31,11 @@ const staticOfferings = [
     category: 'PG',
     description: 'Comfortable paying guest accommodations with all amenities',
     images: [
-      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600'
+      'https://picsum.photos/600/400?random=9',
+      'https://picsum.photos/600/400?random=10',
+      'https://picsum.photos/600/400?random=11',
+      'https://picsum.photos/600/400?random=12',
+      'https://picsum.photos/600/400?random=13'
     ]
   },
   {
@@ -43,11 +43,11 @@ const staticOfferings = [
     category: 'Hostel',
     description: 'Affordable hostel living for students and working professionals',
     images: [
-      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600'
+      'https://picsum.photos/600/400?random=14',
+      'https://picsum.photos/600/400?random=15',
+      'https://picsum.photos/600/400?random=16',
+      'https://picsum.photos/600/400?random=17',
+      'https://picsum.photos/600/400?random=18'
     ]
   },
   {
@@ -55,11 +55,11 @@ const staticOfferings = [
     category: 'Co-living',
     description: 'Modern co-living spaces with community and facilities',
     images: [
-      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
+      'https://picsum.photos/600/400?random=19',
+      'https://picsum.photos/600/400?random=20',
+      'https://picsum.photos/600/400?random=21',
+      'https://picsum.photos/600/400?random=22',
+      'https://picsum.photos/600/400?random=23'
     ]
   },
   {
@@ -67,11 +67,11 @@ const staticOfferings = [
     category: 'Apartment',
     description: 'Private apartments for individuals and small groups',
     images: [
-      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
-      'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
+      'https://picsum.photos/600/400?random=24',
+      'https://picsum.photos/600/400?random=25',
+      'https://picsum.photos/600/400?random=26',
+      'https://picsum.photos/600/400?random=27',
+      'https://picsum.photos/600/400?random=28'
     ]
   },
 ];
@@ -82,7 +82,7 @@ const featuredProperties = [
     location: 'Kota, Rajasthan',
     price: '₹6,500',
     rating: 4.8,
-    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=29',
     verified: true
   },
   {
@@ -90,7 +90,7 @@ const featuredProperties = [
     location: 'Indore, MP',
     price: '₹5,200',
     rating: 4.6,
-    image: 'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=30',
     verified: true
   },
   {
@@ -98,7 +98,7 @@ const featuredProperties = [
     location: 'Jaipur, Rajasthan',
     price: '₹8,900',
     rating: 4.9,
-    image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=31',
     verified: true
   },
   {
@@ -106,7 +106,7 @@ const featuredProperties = [
     location: 'Delhi NCR',
     price: '₹7,800',
     rating: 4.7,
-    image: 'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=32',
     verified: true
   },
   {
@@ -114,7 +114,7 @@ const featuredProperties = [
     location: 'Mumbai, Maharashtra',
     price: '₹12,500',
     rating: 4.5,
-    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=33',
     verified: true
   },
   {
@@ -122,7 +122,7 @@ const featuredProperties = [
     location: 'Bhopal, MP',
     price: '₹5,800',
     rating: 4.4,
-    image: 'https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=34',
     verified: true
   },
   {
@@ -130,7 +130,7 @@ const featuredProperties = [
     location: 'Nagpur, Maharashtra',
     price: '₹4,800',
     rating: 4.3,
-    image: 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=35',
     verified: true
   },
   {
@@ -138,7 +138,7 @@ const featuredProperties = [
     location: 'Jodhpur, Rajasthan',
     price: '₹6,200',
     rating: 4.6,
-    image: 'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=36',
     verified: true
   },
   {
@@ -146,7 +146,7 @@ const featuredProperties = [
     location: 'Pune, Maharashtra',
     price: '₹10,500',
     rating: 4.8,
-    image: 'https://images.pexels.com/photos/1648771/pexels-photo-1648771.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=37',
     verified: true
   },
   {
@@ -154,7 +154,7 @@ const featuredProperties = [
     location: 'Lucknow, UP',
     price: '₹5,500',
     rating: 4.2,
-    image: 'https://images.pexels.com/photos/1743228/pexels-photo-1743228.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=38',
     verified: true
   },
   {
@@ -162,7 +162,7 @@ const featuredProperties = [
     location: 'Chandigarh',
     price: '₹7,200',
     rating: 4.5,
-    image: 'https://images.pexels.com/photos/1457847/pexels-photo-1457847.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=39',
     verified: true
   },
   {
@@ -170,7 +170,7 @@ const featuredProperties = [
     location: 'Bangalore, Karnataka',
     price: '₹8,000',
     rating: 4.7,
-    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=40',
     verified: true
   },
 ];
@@ -182,7 +182,7 @@ const liveBiddingProperties = [
     price: '₹6,500',
     currentBid: '₹6,200',
     timeLeft: '2h 15m',
-    image: 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=41',
     verified: true
   },
   {
@@ -191,7 +191,7 @@ const liveBiddingProperties = [
     price: '₹5,200',
     currentBid: '₹5,100',
     timeLeft: '45m',
-    image: 'https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=42',
     verified: true
   },
   {
@@ -200,7 +200,7 @@ const liveBiddingProperties = [
     price: '₹8,900',
     currentBid: '₹8,500',
     timeLeft: '1h 30m',
-    image: 'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
+    image: 'https://picsum.photos/600/400?random=43',
     verified: true,
     girlsOnly: true
   },
@@ -282,18 +282,18 @@ export default function HomePage() {
   // Helper function to get city images dynamically
   const getCityImage = (cityName) => {
     const cityImages = {
-      'Kota': 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Indore': 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Jaipur': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=400',
-      'Delhi': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=400',
-      'Bhopal': 'https://images.pexels.com/photos/1603801/pexels-photo-1603801.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Nagpur': 'https://images.pexels.com/photos/1573236/pexels-photo-1573236.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Sikar': 'https://images.pexels.com/photos/574324/pexels-photo-574324.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Mumbai': 'https://images.pexels.com/photos/1139049/pexels-photo-1139049.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Bangalore': 'https://images.pexels.com/photos/1470143/pexels-photo-1470143.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'Pune': 'https://images.pexels.com/photos/2404949/pexels-photo-2404949.jpeg?auto=compress&cs=tinysrgb&w=400'
+      'Kota': 'https://picsum.photos/600/400?random=1',
+      'Indore': 'https://picsum.photos/600/400?random=2',
+      'Jaipur': 'https://picsum.photos/600/400?random=3',
+      'Delhi': 'https://picsum.photos/600/400?random=4',
+      'Bhopal': 'https://picsum.photos/600/400?random=5',
+      'Nagpur': 'https://picsum.photos/600/400?random=6',
+      'Sikar': 'https://picsum.photos/600/400?random=7',
+      'Mumbai': 'https://picsum.photos/600/400?random=8',
+      'Bangalore': 'https://picsum.photos/600/400?random=9',
+      'Pune': 'https://picsum.photos/600/400?random=10'
     };
-    return cityImages[cityName] || 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400';
+    return cityImages[cityName] || 'https://picsum.photos/600/400?random=1';
   };
 
   // Fetch dynamic data
@@ -503,11 +503,13 @@ export default function HomePage() {
   const canShowNextTrending = trendingStartIndex + trendingPerView < featuredProperties.length;
   const canShowPrevTrending = trendingStartIndex > 0;
 
-// Mobile carousel helpers
-const canShowNextMobileCity = mobileCityIndex + 4 < cities.length;
-const canShowPrevMobileCity = mobileCityIndex > 0;
-const canShowNextMobileOffering = mobileOfferingIndex + 3 < offerings.length;
-const canShowPrevMobileOffering = mobileOfferingIndex > 0;
+  // Mobile carousel helpers
+  const canShowNextMobileCity = mobileCityIndex + 4 < cities.length;
+  const canShowPrevMobileCity = mobileCityIndex > 0;
+  const canShowNextMobileOffering = mobileOfferingIndex + 3 < offerings.length;
+  const canShowPrevMobileOffering = mobileOfferingIndex > 0;
+  const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
+  const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
 const visibleMobileCities = cities.slice(mobileCityIndex, mobileCityIndex + 4);
 const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferingIndex + 3);
 
@@ -922,7 +924,14 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
               {visibleTrending.map((property) => (
                 <div key={property.name} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                   <div className="relative h-32">
-                    <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
+                    <img 
+                      src={property.image} 
+                      alt={property.name} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
+                      }}
+                    />
                     {property.verified && (
                       <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
                         <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
@@ -980,7 +989,14 @@ const visibleMobileOfferings = offerings.slice(mobileOfferingIndex, mobileOfferi
           className="flex-shrink-0 w-40 bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
         >
           <div className="relative h-32">
-            <img src={property.image} alt={property.name} className="w-full h-full object-cover" />
+            <img 
+              src={property.image} 
+              alt={property.name} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
+              }}
+            />
             {property.verified && (
               <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
                 <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />

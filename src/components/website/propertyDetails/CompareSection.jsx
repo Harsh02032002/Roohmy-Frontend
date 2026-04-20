@@ -34,7 +34,7 @@ export default function CompareSection({ currentProperty }) {
             name: p.propertyName || p.property_name || "Property",
             location: p.propertyInfo?.city || p.city || "Location",
             price: p.propertyInfo?.rent || p.monthlyRent || p.price || 0,
-            image: p.propertyInfo?.photos?.[0] || p.propertyImage || "https://via.placeholder.com/300x200?text=Property",
+            image: p.propertyInfo?.photos?.[0] || p.propertyImage || `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`,
             rating: p.rating || 4.0,
             type: p.propertyInfo?.propertyType || p.propertyType || "PG",
           }));
@@ -67,9 +67,12 @@ export default function CompareSection({ currentProperty }) {
           </div>
           <div className="h-[130px] bg-gray-100">
             <img
-              src={currentProperty?.image || "https://via.placeholder.com/300x200"}
+              src={currentProperty?.image || `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`}
               alt={currentProperty?.name}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
+              }}
             />
           </div>
           <div className="p-3 bg-white">
@@ -104,6 +107,9 @@ export default function CompareSection({ currentProperty }) {
                 src={prop.image}
                 alt={prop.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
+                }}
               />
             </div>
             <div className="p-3">

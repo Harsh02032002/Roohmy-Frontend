@@ -512,8 +512,9 @@ export default function PropertyDetailsPage() {
           console.log('Setting rawPropertyId to:', actualId);
           
           const formatted = {
+            // Basic fields
             id: foundProperty._id || foundProperty.visitId || foundProperty.propertyName,
-            name: foundProperty.propertyName || foundProperty.property_name || "Property",
+            name: foundProperty.propertyName || foundProperty.property_name || foundProperty.title || "Property",
             location: foundProperty.propertyInfo?.city || foundProperty.city || "Location",
             area: foundProperty.propertyInfo?.area || foundProperty.area || "",
             type: foundProperty.propertyInfo?.propertyType || foundProperty.propertyType || "",
@@ -523,19 +524,37 @@ export default function PropertyDetailsPage() {
             owner: foundProperty.generatedCredentials?.ownerName || foundProperty.ownerName || foundProperty.owner || "Owner",
             ownerPhone: foundProperty.ownerPhoneNumber || foundProperty.ownerPhone || "",
             ownerEmail: foundProperty.ownerEmail || "",
-            image: foundProperty.propertyInfo?.photos?.[0] || foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property",
-            images: foundProperty.propertyInfo?.photos || foundProperty.propertyImages || [foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property"],
+            
+            // Image fields - prioritize new fields
+            image: foundProperty.featuredImage || foundProperty.propertyInfo?.photos?.[0] || foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property",
+            images: foundProperty.images || foundProperty.propertyInfo?.photos || foundProperty.propertyImages || [foundProperty.featuredImage || foundProperty.propertyImage || foundProperty.image || "https://via.placeholder.com/800x600?text=Property"],
+            
+            // Description and basic info
             description: foundProperty.description || "No description provided",
             verified: foundProperty.isVerified || foundProperty.verified || false,
             rating: foundProperty.rating || 4.5,
-            amenities: foundProperty.propertyInfo?.amenities || foundProperty.amenities || [],
             latitude: foundProperty.latitude || foundProperty.propertyInfo?.latitude || foundProperty.propertyInfo?.location?.coordinates?.[1] || null,
             longitude: foundProperty.longitude || foundProperty.propertyInfo?.longitude || foundProperty.propertyInfo?.location?.coordinates?.[0] || null,
             address: foundProperty.address || foundProperty.propertyAddress || "",
             nearbyColleges: foundProperty.nearbyColleges || [],
-            // New fields for upgraded UI (backward-compatible)
+            
+            // NEW DYNAMIC FIELDS - Direct mapping for static data
+            amenities: foundProperty.amenities || foundProperty.propertyInfo?.amenities || [],
+            exclusiveBenefits: foundProperty.exclusiveBenefits || foundProperty.benefits || [],
+            propertyViews: foundProperty.propertyViews || [],
+            facilities: foundProperty.facilities || {},
+            
+            // Property details
+            propertyType: foundProperty.propertyType || foundProperty.propertyInfo?.propertyType || "pg",
+            monthlyRent: foundProperty.monthlyRent || foundProperty.rent || foundProperty.price || 0,
+            totalRooms: foundProperty.totalRooms || foundProperty.bedrooms || 0,
+            bedsPerRoom: foundProperty.bedsPerRoom || 1,
+            status: foundProperty.status || "active",
+            isPublished: foundProperty.isPublished !== undefined ? foundProperty.isPublished : true,
+            
+            // Legacy fields for backward compatibility
             highlights: foundProperty.highlights || [],
-            benefits: foundProperty.benefits || [],
+            benefits: foundProperty.benefits || foundProperty.exclusiveBenefits || [],
             offers: foundProperty.offers || [],
             roomVariants: foundProperty.roomVariants || [],
             pricingDetails: foundProperty.pricingDetails || null,

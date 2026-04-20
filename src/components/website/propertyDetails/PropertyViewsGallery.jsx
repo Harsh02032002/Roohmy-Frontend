@@ -6,10 +6,17 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
 
+  // Debug logs
+  console.log('PropertyViewsGallery - propertyViews:', propertyViews);
+  console.log('PropertyViewsGallery - images:', images);
+
   // Use propertyViews if available, otherwise fallback to images array
   const currentView = propertyViews[selectedView];
   const currentImages = currentView?.images || images;
   const viewLabels = propertyViews.map(view => view.label) || ['Gallery'];
+
+  console.log('PropertyViewsGallery - currentView:', currentView);
+  console.log('PropertyViewsGallery - currentImages:', currentImages);
 
   const handleViewChange = (viewIndex) => {
     setSelectedView(viewIndex);
