@@ -23,6 +23,7 @@ import {
 import PropertyViewsGallery from "../../components/website/propertyDetails/PropertyViewsGallery";
 import AmenitiesSection from "../../components/website/propertyDetails/AmenitiesSection";
 import ExclusiveBenefitsSection from "../../components/website/propertyDetails/ExclusiveBenefitsSection";
+import QuickBookingModal from "../../components/website/QuickBookingModal";
 
 // Static sample data for Vercel deployment - 10 Properties
 const staticPropertiesData = [
@@ -284,7 +285,6 @@ const staticPropertiesData = [
   }
 ];
 
-// Helper function to get property by ID
 const getStaticPropertyById = (id) => {
   return staticPropertiesData.find(p => p._id === id) || staticPropertiesData[0];
 };
@@ -298,6 +298,26 @@ export default function PropertyDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loadingInstitutes, setLoadingInstitutes] = useState(false);
+  const [showQuickBookingModal, setShowQuickBookingModal] = useState(false);
+  
+  // Handle Book Now button click
+  const handleBookNow = () => {
+    setShowQuickBookingModal(true);
+  };
+
+  // Handle quick booking submission
+  const handleQuickBookingSubmit = async (bookingData) => {
+    try {
+      // Here you would normally send the booking data to your backend
+      console.log('Booking Data:', bookingData);
+      
+      // For now, show success message and navigate
+      alert('Booking request submitted successfully! We will contact you soon.');
+      navigate('/website/ourproperty');
+    } catch (error) {
+      throw new Error('Failed to submit booking request');
+    }
+  };
   
   // Reviews state
   const [reviews, setReviews] = useState([]);
@@ -856,7 +876,7 @@ export default function PropertyDetailsPage() {
 
           {/* ==================== RIGHT SIDEBAR (Desktop) ==================== */}
           <div className="hidden md:block md:col-span-1">
-            <StickyCTA property={property} />
+            <StickyCTA property={property} onBookNow={handleBookNow} />
           </div>
         </div>
       </div>
@@ -868,11 +888,19 @@ export default function PropertyDetailsPage() {
 
       {/* Mobile Sticky Bottom CTA */}
       <div className="md:hidden">
-        <StickyCTA property={property} />
+        <StickyCTA property={property} onBookNow={handleBookNow} />
       </div>
 
       {/* Mobile Bottom Navigation — pushed up by sticky CTA */}
       {/* Note: MobileBottomNav is replaced by StickyCTA on this page */}
+      
+      {/* Quick Booking Modal */}
+      <QuickBookingModal
+        property={property}
+        isOpen={showQuickBookingModal}
+        onClose={() => setShowQuickBookingModal(false)}
+        onSubmit={handleQuickBookingSubmit}
+      />
     </div>
   );
 }
