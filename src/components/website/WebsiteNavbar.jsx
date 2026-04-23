@@ -96,162 +96,110 @@ export default function WebsiteNavbar() {
 
   return (
     <>
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 md:h-16">
-            <Link to="/website/index" className="flex items-center space-x-2 group">
-              <img 
-                src="/website/images/logoroomhy.jpg" 
-                alt="Roohmy Logo" 
-                className="h-8 md:h-10 w-auto transition-transform group-hover:scale-105"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png';
-                }}
-              />
-            </Link>
+      <div className="sticky top-0 z-50 flex flex-col">
+        {/* Top Row: Main Navbar */}
+        <nav className="bg-white border-b border-gray-100">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12">
+            <div className="flex items-center justify-between h-16 w-full">
+              {/* Left: Logo */}
+              <div className="flex-1 flex items-center h-full">
+                <div className="flex items-center pr-6 md:border-r border-gray-200 h-full">
+                  <Link to="/website/index" className="flex items-center space-x-2 group">
+                    <img 
+                      src="/website/images/logoroomhy.jpg" 
+                      alt="Roohmy Logo" 
+                      className="h-8 md:h-10 w-auto transition-transform group-hover:scale-105"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png';
+                      }}
+                    />
+                  </Link>
+                </div>
+              </div>
 
-            <div className="hidden md:flex items-center space-x-6">
-              <a href="/website/index" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">Home</a>
-              <a href="/website/ourproperty" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">Properties</a>
-              
-              <a href="/website/faq" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">FAQ</a>
-              <a href="/website/about" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">About</a>
-              <a href="/website/contact" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">Contact</a>
-              <a href="/website/list" className="text-gray-700 hover:text-teal-500 transition-colors font-medium">List Property</a>
-            </div>
+              {/* Center: Navigation Links */}
+              <div className="hidden md:flex flex-none items-center justify-center space-x-5 text-sm font-semibold text-gray-700 px-6">
+                <Link to="/website/index" className="hover:text-black transition-colors">Home</Link>
+                <div className="w-px h-6 bg-gray-300"></div>
+                <Link to="/website/ourproperty" className="hover:text-black transition-colors">Properties</Link>
+                <div className="w-px h-6 bg-gray-300"></div>
+                <Link to="/website/faq" className="hover:text-black transition-colors">FAQ</Link>
+                <div className="w-px h-6 bg-gray-300"></div>
+                <Link to="/website/about" className="hover:text-black transition-colors">About</Link>
+                <div className="w-px h-6 bg-gray-300"></div>
+                <Link to="/website/contact" className="hover:text-black transition-colors">Contact</Link>
+              </div>
 
-            <div className="flex items-center space-x-2 md:space-x-4">
-              {/* Search - Desktop only */}
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="hidden md:flex p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Search className="w-6 h-6 text-gray-700" />
-              </button>
+              {/* Right: Utilities */}
+              <div className="hidden md:flex flex-1 justify-end items-center h-full text-sm font-semibold text-gray-700">
+                {/* List Property */}
+                <div className="flex items-center pl-6 border-l border-gray-200 h-full">
+                  <Link to="/website/list" className="flex items-center space-x-2 hover:text-black transition-colors">
+                    <Building2 className="w-5 h-5 text-gray-600" />
+                    <span>List your property</span>
+                  </Link>
+                </div>
 
-              {/* Bid Now - Desktop only */}
-              <a href="/website/fast-bidding" className="hidden md:flex bg-orange-500 hover:bg-orange-600 text-white px-3 md:px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg text-sm md:text-base whitespace-nowrap items-center gap-2">
-                <span className="hidden md:inline">Bid</span>
-                Now
-              </a>
+                {/* Bid Now */}
+                <div className="flex items-center pl-6 ml-6 border-l border-gray-200 h-full">
+                  <Link to="/website/fast-bidding" className="flex items-center space-x-2 text-[#EE4266] hover:text-[#d63a5b] transition-colors">
+                    <span>Bid Now</span>
+                  </Link>
+                </div>
 
-              {isAuthenticated && user ? (
-                <div
-                  className="relative user-dropdown"
-                  onMouseEnter={() => setShowUserDropdown(true)}
-                  onMouseLeave={() => setShowUserDropdown(false)}
-                >
-                  <button
-                    onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="flex items-center gap-2 px-2 md:px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white"
+                {/* Login/User Dropdown */}
+                <div className="flex items-center pl-6 ml-6 border-l border-gray-200 h-full">
+                  {isAuthenticated && user ? (
+                  <div
+                    className="relative user-dropdown"
+                    onMouseEnter={() => setShowUserDropdown(true)}
+                    onMouseLeave={() => setShowUserDropdown(false)}
                   >
-                    <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-semibold">
-                        {user.name?.charAt(0)?.toUpperCase() || user.firstName?.charAt(0)?.toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <span className="hidden md:inline text-sm font-medium text-gray-700 max-w-[100px] truncate">
-                      {user.name || user.firstName || user.fullName || 'User'}
-                    </span>
-                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform hidden md:block ${showUserDropdown ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {showUserDropdown && (
-                    <div className="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 overflow-hidden">
-                      {/* User Info Header */}
-                      <div className="px-4 py-3 bg-gradient-to-r from-teal-50 to-blue-50 border-b border-gray-100">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold">
-                              {user.name?.charAt(0)?.toUpperCase() || user.firstName?.charAt(0)?.toUpperCase() || 'U'}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">
-                              {user.name || user.firstName || user.fullName || 'User'}
-                            </p>
-                            <p className="text-xs text-gray-500 truncate">
-                              {user.email || user.userEmail || user.emailId || user.userId || 'user@roomhy.com'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Menu Items */}
-                      <div className="py-1">
-                        <button
-                          onClick={() => { setShowUserDropdown(false); navigate('/website/profile'); }}
-                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <span className="font-medium">My Profile</span>
+                    <button
+                      onClick={() => setShowUserDropdown(!showUserDropdown)}
+                      className="flex items-center gap-2 hover:text-black transition-colors"
+                    >
+                      <User className="w-5 h-5 text-gray-600" />
+                      <span>{user.name || user.firstName || 'User'}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {showUserDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white rounded shadow-xl border border-gray-100 py-1 z-50 overflow-hidden">
+                        <button onClick={() => { setShowUserDropdown(false); navigate('/website/profile'); }} className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+                          <User className="w-4 h-4 text-gray-500" /> Profile
                         </button>
-                        
-                        <button
-                          onClick={() => { setShowUserDropdown(false); navigate('/website/mystays'); }}
-                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                            <Home className="w-4 h-4 text-green-600" />
-                          </div>
-                          <span className="font-medium">My Stays</span>
+                        <button onClick={() => { setShowUserDropdown(false); navigate('/website/mystays'); }} className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+                          <Home className="w-4 h-4 text-gray-500" /> My Stays
                         </button>
-                        
-                        <button
-                          onClick={() => { setShowUserDropdown(false); navigate('/website/reviews'); }}
-                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                            <Star className="w-4 h-4 text-yellow-600" />
-                          </div>
-                          <span className="font-medium">My Reviews</span>
+                        <button onClick={() => { setShowUserDropdown(false); navigate('/website/reviews'); }} className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+                          <Star className="w-4 h-4 text-gray-500" /> My Reviews
                         </button>
-                        
-                        <div className="border-t border-gray-100 my-1"></div>
-                        
-                        <button
-                          onClick={() => { setShowUserDropdown(false); navigate('/website/settings'); }}
-                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                            <Settings className="w-4 h-4 text-gray-600" />
-                          </div>
-                          <span className="font-medium">Settings</span>
-                        </button>
-                        
-                        <button
-                          onClick={handleLogout}
-                          className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                            <LogOut className="w-4 h-4 text-red-600" />
-                          </div>
-                          <span className="font-medium">Logout</span>
+                        <button onClick={handleLogout} className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3">
+                          <LogOut className="w-4 h-4 text-red-500" /> Logout
                         </button>
                       </div>
-                    </div>
+                    )}
+                  </div>
+                  ) : (
+                    <Link to="/login" className="flex items-center space-x-2 hover:text-black transition-colors">
+                      <User className="w-5 h-5 text-gray-600" />
+                      <span>Login / Signup</span>
+                    </Link>
                   )}
                 </div>
-              ) : (
-                <a href="/login" className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors bg-white">
-                  <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="hidden md:inline text-sm font-medium text-gray-700">Login</span>
-                </a>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+
+      </div>
 
       {/* Search Bar */}
       {showSearch && (
         <div className="bg-gradient-to-r from-blue-50 to-teal-50 border-b border-gray-200 shadow-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 py-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-teal-500" />
               Find Your Perfect Property

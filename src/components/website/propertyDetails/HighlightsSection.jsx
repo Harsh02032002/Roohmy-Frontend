@@ -127,26 +127,61 @@ export default function HighlightsSection({ property = {} }) {
     }
   }
 
+  // OYO-style: show as a highlight banner
+  const bannerHighlights = displayHighlights.filter(h => 
+    h.icon === 'verified' || h.icon === 'available'
+  );
+  const gridHighlights = displayHighlights.filter(h => 
+    h.icon !== 'verified' && h.icon !== 'available'
+  );
+
   return (
-    <div className="px-4 md:px-0 py-5 border-b border-gray-100">
-      <h2 className="text-lg font-bold text-gray-900 mb-4">
-        Why book this property? 🏡
+    <div className="px-4 md:px-0 py-5 md:py-6" style={{ borderBottom: '1px solid #e8e8e8' }}>
+      {/* OYO-style highlight banner */}
+      {bannerHighlights.length > 0 && (
+        <div className="mb-5 px-4 py-3 rounded-lg" style={{ background: '#eef7ee', border: '1px solid #c6e6c6' }}>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {bannerHighlights.map((item, idx) => {
+              const IconComponent = ICON_MAP[item.icon] || ICON_MAP.default;
+              return (
+                <div key={idx} className="flex items-center gap-2">
+                  <IconComponent size={16} className="text-[#1ab64f]" />
+                  <span className="text-sm text-[#1a1a1a] font-medium">{item.text}</span>
+                  {item.subtext && (
+                    <span className="text-xs text-[#6d787d]">• {item.subtext}</span>
+                  )}
+                  {idx < bannerHighlights.length - 1 && (
+                    <span className="text-gray-300 mx-1">|</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <h2 className="text-[22px] font-bold text-[#222] mb-4">
+        Why book this property?
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {displayHighlights.map((item, idx) => {
+
+      {/* OYO-style: clean grid with icon + text */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {gridHighlights.map((item, idx) => {
           const IconComponent = ICON_MAP[item.icon] || ICON_MAP.default;
           return (
             <div
               key={idx}
-              className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 hover:bg-amber-50/50 transition-colors"
+              className="flex items-center gap-3 py-2"
             >
-              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <IconComponent size={18} className="text-amber-600" />
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{
+                background: '#f5f5f5'
+              }}>
+                <IconComponent size={20} className="text-[#6d787d]" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-800">{item.text}</p>
+                <p className="text-[15px] font-semibold text-[#222]">{item.text}</p>
                 {item.subtext && (
-                  <p className="text-xs text-gray-500 mt-0.5">{item.subtext}</p>
+                  <p className="text-xs text-[#6d787d] mt-0.5">{item.subtext}</p>
                 )}
               </div>
             </div>

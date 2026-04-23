@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Star, MapPin, ChevronRight } from "lucide-react";
+import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { fetchProperties } from "../../../utils/api";
 
@@ -13,7 +13,6 @@ export default function CompareSection({ currentProperty }) {
         setLoading(true);
         const allProperties = await fetchProperties();
         
-        // Filter similar properties: same city or same type, excluding current
         const similar = allProperties
           .filter((p) => {
             const pId = p._id || p.visitId || p.propertyName;
@@ -52,42 +51,43 @@ export default function CompareSection({ currentProperty }) {
 
   if (loading || similarProperties.length === 0) return null;
 
+  const getRatingBg = (rating) => {
+    if (rating >= 4) return '#1ab64f';
+    if (rating >= 3) return '#f0ad4e';
+    return '#e74c3c';
+  };
+
   return (
-    <div className="py-6 border-b border-gray-100 bg-white">
+    <div className="py-5 md:py-6" style={{ borderBottom: '1px solid #e8e8e8' }}>
       <div className="px-4 md:px-0 mb-4">
-        <h2 className="text-lg font-bold text-gray-900">Compare with similar properties</h2>
-        <p className="text-gray-500 text-[11px] mt-0.5">Find the perfect stay for you</p>
+        <h2 className="text-[22px] font-bold text-[#222]">Compare with similar properties</h2>
+        <p className="text-[#6d787d] text-xs mt-0.5">Find the perfect stay for you</p>
       </div>
 
       <div className="flex gap-4 overflow-x-auto px-4 md:px-0 pb-4 no-scrollbar">
-        {/* Current Property - Sticky Left */}
-        <div className="sticky left-0 z-20 flex-shrink-0 w-[165px] md:w-[220px] bg-white shadow-[8px_0_15px_-5px_rgba(0,0,0,0.1)] pr-3">
-          <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-[#EE4266] text-white text-[9px] font-bold rounded-full uppercase tracking-wider">
-              Current
+        {/* Current Property — OYO style with "CURRENT" badge */}
+        <div className="flex-shrink-0 w-[200px]">
+          <div className="relative rounded-lg overflow-hidden" style={{ border: '2px solid #EE4266' }}>
+            <div className="absolute top-0 left-0 right-0 z-10 px-2 py-1 text-center text-[10px] font-bold text-white uppercase tracking-wider" style={{ background: '#EE4266' }}>
+              ★ Current
             </div>
-            <div className="h-[110px] md:h-[150px] bg-gray-100">
+            <div className="h-[130px] bg-[#f0f0f0]">
               <img
                 src={currentProperty?.image || `https://picsum.photos/600/400?random=1`}
                 alt={currentProperty?.name}
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* Rating Overlay */}
-            <div className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm text-gray-900 px-1 py-0.5 rounded shadow-sm flex items-center gap-0.5 z-10 border border-gray-100">
-              <Star size={10} className="fill-black text-black" />
-              <span className="text-[10px] font-bold">{currentProperty?.rating || "4.5"}</span>
-            </div>
           </div>
-          <div className="py-2.5">
-            <p className="text-[13px] font-bold text-gray-900 line-clamp-1 leading-tight">{currentProperty?.name}</p>
-            <p className="text-[11px] text-gray-500 mt-0.5">{currentProperty?.location}</p>
+          <div className="pt-2.5">
+            <p className="text-[13px] font-bold text-[#222] line-clamp-1">{currentProperty?.name}</p>
+            <p className="text-[11px] text-[#6d787d] mt-0.5">{currentProperty?.location}</p>
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="text-sm font-extrabold text-gray-900">₹{currentProperty?.price}</span>
-              <span className="text-[9px] text-gray-400 font-medium">/mo</span>
+              <span className="text-sm font-extrabold text-[#222]">₹{currentProperty?.price}</span>
+              <span className="text-[10px] text-[#6d787d]">/mo</span>
             </div>
-            <div className="mt-2 py-1.5 text-center bg-[#EE4266]/10 text-[#EE4266] text-[10px] font-bold rounded-lg border border-[#EE4266]/20">
-              Selected
+            <div className="mt-2 py-1.5 text-center text-[10px] font-bold rounded text-[#1ab64f]" style={{ background: '#eef7ee', border: '1px solid #c6e6c6' }}>
+              ✓ Selected
             </div>
           </div>
         </div>
@@ -97,10 +97,10 @@ export default function CompareSection({ currentProperty }) {
           <Link
             key={prop.id}
             to={`/website/property-details/${prop.id}`}
-            className="flex-shrink-0 w-[155px] md:w-[220px] transition-all"
+            className="flex-shrink-0 w-[200px] group"
           >
-            <div className="relative rounded-xl overflow-hidden mb-2">
-              <div className="h-[110px] md:h-[150px] bg-gray-100">
+            <div className="relative rounded-lg overflow-hidden" style={{ border: '1px solid #e8e8e8' }}>
+              <div className="h-[130px] bg-[#f0f0f0]">
                 <img
                   src={prop.image}
                   alt={prop.name}
@@ -110,20 +110,19 @@ export default function CompareSection({ currentProperty }) {
                   }}
                 />
               </div>
-              {/* Rating Overlay */}
-              <div className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm text-gray-900 px-1 py-0.5 rounded shadow-sm flex items-center gap-0.5 z-10 border border-gray-100">
-                <Star size={10} className="fill-black text-black" />
-                <span className="text-[10px] font-bold">{prop.rating}</span>
+              {/* Rating badge — OYO style bottom-left */}
+              <div className="absolute bottom-2 left-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded text-white text-[10px] font-bold" style={{ background: getRatingBg(prop.rating) }}>
+                {prop.rating}<Star size={8} className="fill-white text-white" />
               </div>
             </div>
-            <div className="py-1">
-              <p className="text-[13px] font-bold text-gray-900 line-clamp-1 leading-tight">{prop.name}</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">{prop.location}</p>
+            <div className="pt-2.5">
+              <p className="text-[13px] font-bold text-[#222] line-clamp-1">{prop.name}</p>
+              <p className="text-[11px] text-[#6d787d] mt-0.5">{prop.location}</p>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-sm font-extrabold text-gray-900">₹{prop.price}</span>
-                <span className="text-[9px] text-gray-400 font-medium">/mo</span>
+                <span className="text-sm font-extrabold text-[#222]">₹{prop.price}</span>
+                <span className="text-[10px] text-[#6d787d]">/mo</span>
               </div>
-              <div className="mt-2 py-1.5 text-center bg-gray-50 text-gray-600 text-[10px] font-semibold rounded-lg hover:bg-[#EE4266] hover:text-white transition-colors border border-gray-200">
+              <div className="mt-2 py-1.5 text-center text-[10px] font-semibold rounded text-[#222] group-hover:bg-[#EE4266] group-hover:text-white group-hover:border-[#EE4266] transition-colors" style={{ border: '1px solid #e0e0e0' }}>
                 View Stay
               </div>
             </div>

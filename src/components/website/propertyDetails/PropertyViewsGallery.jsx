@@ -7,15 +7,19 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
   const [showDetailedGallery, setShowDetailedGallery] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Helper to open detailed gallery at a specific category
   const openDetailedGallery = (viewIndex) => {
+    console.log('🔓 openDetailedGallery called with viewIndex:', viewIndex);
     setSelectedView(viewIndex);
     setSelectedImageIndex(0);
     setShowDetailedGallery(true);
+    console.log('🔓 setShowDetailedGallery(true) called, showDetailedGallery:', true);
   };
 
-  // Fallback: If no propertyViews (categories) provided by DB, create a default 'Photos' view
+  // Use images array for main gallery, propertyViews for categories
   const galleryViews = (propertyViews && propertyViews.length > 0) 
     ? propertyViews 
     : (images && images.length > 0)
@@ -23,26 +27,89 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
       : [];
 
   const currentView = galleryViews[selectedView];
+  
+  // Use propertyViews images for category-based display
   const currentImages = currentView?.images || images || [];
   const viewLabels = galleryViews.map(view => view.label);
 
-  console.log('🖼️ Gallery Data Check:', { 
+  console.log('🖼️ Gallery Data Check v2:', { 
+    propertyViews: propertyViews,
+    images: images,
+    galleryViews: galleryViews,
     viewCount: galleryViews.length, 
     currentView: viewLabels[selectedView], 
-    imageCount: currentImages.length 
+    imageCount: currentImages.length,
+    selectedView: selectedView,
+    selectedImageIndex: selectedImageIndex
   });
+  
+  // Debug: Show first few images from each source
+  console.log('🔍 Image Sources Debug:');
+  console.log('  images prop (first 2):', images?.slice(0, 2));
+  console.log('  propertyViews first view images:', propertyViews?.[0]?.images);
+  console.log('  currentImages (first 2):', currentImages?.slice(0, 2));
+  console.log('  ✅ USING IMAGES ARRAY:', images && images.length > 0 ? 'YES' : 'NO');
+  
+  // Debug: Show if images are the same across different properties
+  if (images && images.length > 0) {
+    console.log(`  Property has ${images.length} images`);
+    console.log(`  First image: ${images[0]}`);
+    console.log(`  Second image: ${images[1] || 'No second image'}`);
+    console.log(`  Third image: ${images[2] || 'No third image'}`);
+    console.log(`  Fourth image: ${images[3] || 'No fourth image'}`);
+  }
 
   const handleViewChange = (viewIndex) => {
-    console.log('🔄 Switching to view:', viewLabels[viewIndex]);
+    console.log('🔄 Switching to view:', { 
+      fromIndex: selectedView, 
+      toIndex: viewIndex, 
+      fromView: viewLabels[selectedView], 
+      toView: viewLabels[viewIndex],
+      totalViews: viewLabels.length
+    });
     setSelectedView(viewIndex);
     setSelectedImageIndex(0);
   };
 
   const handleImageChange = (direction) => {
+    console.log('🖼️ Image Change:', { direction, currentLength: currentImages.length, currentIndex: selectedImageIndex });
     if (direction === 'next') {
-      setSelectedImageIndex((prev) => (prev + 1) % currentImages.length);
+      setSelectedImageIndex((prev) => {
+        const newIndex = (prev + 1) % currentImages.length;
+        console.log('🖼️ Next Image:', { from: prev, to: newIndex });
+        return newIndex;
+      });
     } else {
-      setSelectedImageIndex((prev) => (prev - 1 + currentImages.length) % currentImages.length);
+      setSelectedImageIndex((prev) => {
+        const newIndex = (prev - 1 + currentImages.length) % currentImages.length;
+        console.log('🖼️ Previous Image:', { from: prev, to: newIndex });
+        return newIndex;
+      });
+    }
+  };
+
+  // Mobile swipe handlers
+  const handleTouchStart = (e) => {
+    setTouchEnd(0);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && currentImages.length > 1) {
+      handleImageChange('next');
+    }
+    if (isRightSwipe && currentImages.length > 1) {
+      handleImageChange('prev');
     }
   };
 
@@ -65,14 +132,33 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
     <div className="w-full">
       {/* Main Image Display */}
       <div className="relative overflow-hidden bg-gray-900 group">
-        <div className="aspect-[4/3] md:aspect-video relative">
-          <img
-            src={currentImages[selectedImageIndex]}
-            alt={`${viewLabels[selectedView]} - Image ${selectedImageIndex + 1}`}
-            className="w-full h-full object-cover cursor-pointer"
-            onClick={() => openDetailedGallery(selectedView)}
-          />
+        <div 
+          className="aspect-[4/3] md:aspect-video relative"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div 
+            className="w-full h-full cursor-pointer relative z-5"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('🖼️ Image clicked! Opening modal for view:', selectedView);
+              openDetailedGallery(selectedView);
+            }}
+          >
+            <img
+              src={currentImages[selectedImageIndex]}
+              alt={`${viewLabels[selectedView]} - Image ${selectedImageIndex + 1}`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.log('🖼️ Image failed to load:', currentImages[selectedImageIndex]);
+                e.target.src = 'https://picsum.photos/800/600?random=' + Math.random();
+              }}
+            />
+          </div>
 
+          
+          
           {/* Top Navigation Bar (Floating) */}
           <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20 bg-gradient-to-b from-black/50 to-transparent">
             <button 
@@ -82,27 +168,27 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex gap-2">
-              <button className="p-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all">
+              <button className="p-2 rounded-full bg-transparent hover:bg-white/10 text-white transition-all">
                 <Heart className="w-5 h-5" />
               </button>
-              <button className="p-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all">
+              <button className="p-2 rounded-full bg-transparent hover:bg-white/10 text-white transition-all">
                 <Share2 className="w-5 h-5" />
               </button>
             </div>
           </div>
           
-          {/* Navigation Arrows (Visible on Hover / md+) */}
+          {/* Navigation Arrows (Always Visible on Mobile, Hover on Desktop) */}
           {currentImages.length > 1 && (
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); handleImageChange('prev'); }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-2 backdrop-blur-sm transition-all md:opacity-0 md:group-hover:opacity-100"
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-white/10 text-white rounded-full p-2 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-30"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); handleImageChange('next'); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-2 backdrop-blur-sm transition-all md:opacity-0 md:group-hover:opacity-100"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent hover:bg-white/10 text-white rounded-full p-2 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 z-30"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -110,14 +196,18 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
           )}
 
           {/* Image Counter & View Selector Floating at Bottom */}
-          <div className="absolute bottom-4 left-0 right-0 px-4 z-20">
+          <div className="absolute bottom-4 left-0 right-0 px-4 z-30">
             <div className="flex items-end justify-between">
               {/* Category Thumbnails (Facade, Reception, etc.) */}
               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
                 {galleryViews.map((view, index) => (
                   <button
                     key={index}
-                    onClick={(e) => { e.stopPropagation(); openDetailedGallery(index); }}
+                    onClick={(e) => { 
+              e.stopPropagation(); 
+              handleViewChange(index); 
+              openDetailedGallery(index); 
+            }}
                     className={`relative flex-shrink-0 w-20 h-14 md:w-24 md:h-16 rounded-lg overflow-hidden border-2 transition-all ${
                       selectedView === index
                         ? 'border-white shadow-xl scale-105'
@@ -170,7 +260,7 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
       )}
 
       {/* DETAILED GALLERY VIEW (Full Screen Vertical List) */}
-      {showDetailedGallery && (
+      {console.log('🎬 Rendering modal, showDetailedGallery:', showDetailedGallery) || showDetailedGallery && (
         <div className="fixed inset-0 z-[100] bg-white flex flex-col">
           {/* Header with Close Button */}
           <div className="bg-white px-4 py-3 flex items-center gap-4 border-b border-gray-100 shadow-sm">
@@ -250,13 +340,13 @@ const PropertyViewsGallery = ({ propertyViews = [], images = [] }) => {
               <>
                 <button
                   onClick={() => handleImageChange('prev')}
-                  className="absolute left-0 md:-left-20 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-4 transition-all backdrop-blur-sm z-[210]"
+                  className="absolute left-0 md:-left-20 top-1/2 -translate-y-1/2 bg-transparent hover:bg-white/10 text-white rounded-full p-4 transition-all z-[210]"
                 >
                   <ChevronLeft className="w-8 h-8" />
                 </button>
                 <button
                   onClick={() => handleImageChange('next')}
-                  className="absolute right-0 md:-right-20 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-4 transition-all backdrop-blur-sm z-[210]"
+                  className="absolute right-0 md:-right-20 top-1/2 -translate-y-1/2 bg-transparent hover:bg-white/10 text-white rounded-full p-4 transition-all z-[210]"
                 >
                   <ChevronRight className="w-8 h-8" />
                 </button>

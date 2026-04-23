@@ -11,70 +11,80 @@ export default function PropertyHeader({ property, reviewStats }) {
     return "FAIR";
   };
 
+  const getRatingBg = (rating) => {
+    if (rating >= 4) return '#1ab64f';
+    if (rating >= 3) return '#f0ad4e';
+    return '#e74c3c';
+  };
+
   const avgRating = reviewStats?.avgRating || property?.rating || 0;
   const totalReviews = reviewStats?.totalReviews || 0;
 
   return (
     <div className="px-4 md:px-0">
-      {/* Property Name */}
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
-        {property?.name || "Property"}
-      </h1>
-
-      {/* Rating Row */}
-      {avgRating > 0 && (
-        <div className="flex items-center gap-2 mt-2">
-          <div className="flex items-center gap-1 px-2 py-1 bg-[#1ab64f] rounded-md">
-            <Star size={12} className="fill-white text-white" />
-            <span className="text-white text-sm font-bold">{avgRating.toFixed(1)}</span>
+      {/* Property Name + Rating Row — OYO style inline */}
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="text-xl sm:text-2xl md:text-[26px] font-bold text-[#222] leading-tight">
+          {property?.name || "Property"}
+        </h1>
+        
+        {/* OYO-style rating badge — top right */}
+        {avgRating > 0 && (
+          <div className="flex-shrink-0 text-center">
+            <div className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-white font-bold" style={{ background: getRatingBg(avgRating) }}>
+              {avgRating.toFixed(1)}
+              <Star size={12} className="fill-white text-white" />
+            </div>
+            <p className="text-[10px] text-[#6d787d] mt-1">{totalReviews} Ratings</p>
           </div>
-          <span className="text-gray-500 text-sm">
-            ({totalReviews} {totalReviews === 1 ? "rating" : "ratings"})
-          </span>
-          <span className="text-xs font-semibold text-[#1ab64f] uppercase tracking-wide">
-            {getRatingLabel(avgRating)}
-          </span>
-        </div>
-      )}
-
-      {/* Address */}
-      <div className="mt-2.5 flex items-start gap-1.5">
-        <MapPin size={15} className="text-gray-400 mt-0.5 flex-shrink-0" />
-        <p className="text-gray-600 text-sm leading-relaxed">
-          {property?.address || `${property?.area ? `${property.area}, ` : ""}${property?.location || ""}`}
-        </p>
+        )}
       </div>
 
-      {/* View on map */}
+      {/* Address — OYO style */}
+      <p className="text-[13px] text-[#6d787d] mt-1.5 leading-relaxed">
+        {property?.address || `${property?.area ? `${property.area}, ` : ""}${property?.location || ""}`}
+      </p>
+
+      {/* Badges Row — OYO style horizontal pills */}
+      <div className="flex flex-wrap items-center gap-3 mt-3">
+        {property?.type && (
+          <div className="flex items-center gap-1.5 text-xs text-[#222]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#222]"></span>
+            <span className="font-medium capitalize">{property.type}</span>
+          </div>
+        )}
+        {property?.verified && (
+          <div className="flex items-center gap-1 text-xs text-[#1ab64f] font-medium">
+            <Shield size={12} />
+            <span>Verified</span>
+          </div>
+        )}
+        {property?.gender && property.gender !== "Any" && (
+          <div className="flex items-center gap-1 text-xs text-[#6d787d] font-medium">
+            <span>•</span>
+            <span>{property.gender}</span>
+          </div>
+        )}
+        {/* Check-in rating — OYO style */}
+        {avgRating > 0 && (
+          <div className="flex items-center gap-1 text-xs text-[#6d787d]">
+            <span>•</span>
+            <span className="font-medium">{getRatingLabel(avgRating)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* View on map link — OYO style */}
       {hasCoordinates && (
         <a
           href={`https://www.google.com/maps?q=${property.latitude},${property.longitude}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 mt-2 text-[#EE4266] text-sm font-semibold hover:underline"
+          className="inline-flex items-center gap-1 mt-2.5 text-[#EE4266] text-sm font-semibold hover:underline"
         >
           View on map <ExternalLink size={13} />
         </a>
       )}
-
-      {/* Badges */}
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        {property?.type && (
-          <span className="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-100">
-            {property.type}
-          </span>
-        )}
-        {property?.verified && (
-          <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-lg border border-green-100 flex items-center gap-1">
-            <Shield size={12} /> Verified
-          </span>
-        )}
-        {property?.gender && property.gender !== "Any" && (
-          <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100">
-            {property.gender}
-          </span>
-        )}
-      </div>
     </div>
   );
 }

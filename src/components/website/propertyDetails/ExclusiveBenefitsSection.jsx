@@ -2,17 +2,10 @@ import React from 'react';
 import { Gift, Star, Shield, Clock, Heart, Zap, Crown, Diamond } from 'lucide-react';
 
 const ExclusiveBenefitsSection = ({ exclusiveBenefits = [] }) => {
-  // Icon mapping for benefits
   const getIcon = (iconName) => {
     const iconMap = {
-      gift: Gift,
-      star: Star,
-      shield: Shield,
-      clock: Clock,
-      heart: Heart,
-      zap: Zap,
-      crown: Crown,
-      diamond: Diamond
+      gift: Gift, star: Star, shield: Shield, clock: Clock,
+      heart: Heart, zap: Zap, crown: Crown, diamond: Diamond
     };
     return iconMap[iconName] || Gift;
   };
@@ -22,41 +15,35 @@ const ExclusiveBenefitsSection = ({ exclusiveBenefits = [] }) => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-6 shadow-sm">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Exclusive Direct Benefits</h2>
+    <div className="py-5 md:py-6" style={{ borderBottom: '1px solid #e8e8e8' }}>
+      <h2 className="text-[22px] font-bold text-[#222] mb-4">Exclusive Direct Benefits</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-3">
         {exclusiveBenefits.map((benefit, index) => {
           const Icon = getIcon(benefit.icon);
           return (
             <div 
               key={index} 
-              className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-teal-100"
+              className="flex items-center gap-3 py-2"
             >
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full flex items-center justify-center">
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1">{benefit.title}</h3>
-                  {benefit.description && (
-                    <p className="text-sm text-gray-600 leading-relaxed">{benefit.description}</p>
-                  )}
-                </div>
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: '#eef7ee' }}>
+                <Icon className="w-5 h-5 text-[#1ab64f]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-[#222] text-[15px]">{benefit.title}</h3>
+                {benefit.description && (
+                  <p className="text-sm text-[#6d787d]">{benefit.description}</p>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Trust Badge */}
-      <div className="mt-6 text-center">
-        <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-teal-200">
-          <Shield className="w-4 h-4 text-teal-600" />
-          <span className="text-sm font-medium text-teal-700">
-            Book Direct & Get Exclusive Benefits
-          </span>
-        </div>
+      {/* Trust Badge — OYO style simple text */}
+      <div className="mt-4 flex items-center gap-2 text-sm text-[#1ab64f]">
+        <Shield className="w-4 h-4" />
+        <span className="font-medium">Book Direct & Get Exclusive Benefits</span>
       </div>
     </div>
   );

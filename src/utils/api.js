@@ -1,7 +1,7 @@
 import { fetchPropertiesLocal } from './mockApi';
 
 export const getApiBase = () => {
-  // 1. Priority: Vite environment variable (Highest)
+  // Use Vite env variable if available
   if (import.meta.env?.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
@@ -9,14 +9,15 @@ export const getApiBase = () => {
   if (typeof window === "undefined") return "";
   const host = window.location.hostname;
   
-  // 2. Local development check
-  if (host === "localhost" || host === "127.0.0.1") {
-    return "http://localhost:5001";
+  // Production Vercel deployment
+  if (host.includes('vercel.app') || host.includes('roomhy.com')) {
+    return "https://roomhy-backend.vercel.app";
   }
   
-  // 3. Current host as base (relative API calls)
-  // This is best practice for production if backend is on same domain
-  return ""; 
+  // Local development
+  return host === "localhost" || host === "127.0.0.1"
+    ? "http://localhost:5001"
+    : "https://roomhy-backend.vercel.app";
 };
 
 export const getAuthHeader = () => {
@@ -94,9 +95,54 @@ const staticPropertiesList = [
       "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600"
     ],
     propertyViews: [
-      { label: "Facade", images: ["https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600"] },
-      { label: "Reception", images: ["https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600"] },
-      { label: "Room", images: ["https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600"] }
+      { 
+        label: "Facade", 
+        images: [
+          "https://picsum.photos/800/600?random=1001",
+          "https://picsum.photos/800/600?random=1002",
+          "https://picsum.photos/800/600?random=1003",
+          "https://picsum.photos/800/600?random=1004"
+        ] 
+      },
+      { 
+        label: "Reception", 
+        images: [
+          "https://picsum.photos/800/600?random=2001",
+          "https://picsum.photos/800/600?random=2002"
+        ] 
+      },
+      { 
+        label: "Room", 
+        images: [
+          "https://picsum.photos/800/600?random=3001",
+          "https://picsum.photos/800/600?random=3002",
+          "https://picsum.photos/800/600?random=3003"
+        ] 
+      },
+      { 
+        label: "Common Area", 
+        images: [
+          "https://picsum.photos/800/600?random=4001",
+          "https://picsum.photos/800/600?random=4002"
+        ] 
+      },
+      { 
+        label: "Mess/Food", 
+        images: [
+          "https://picsum.photos/800/600?random=5001",
+          "https://picsum.photos/800/600?random=5002"
+        ] 
+      }
+    ],
+    amenities: [
+      { title: "High-Speed WiFi", description: "24/7 unlimited internet access", icon: "wifi" },
+      { title: "Air Conditioning", description: "Centralized AC in all rooms", icon: "ac" },
+      { title: "Food Included", description: "3 meals + tea/coffee", icon: "food" },
+      { title: "Laundry Service", description: "Weekly pickup and delivery", icon: "laundry" },
+      { title: "Parking", description: "Secure bike and car parking", icon: "parking" },
+      { title: "Gym", description: "Fully equipped fitness center", icon: "gym" },
+      { title: "TV Room", description: "LCD TV with cable connection", icon: "tv" },
+      { title: "Power Backup", description: "24/7 generator backup", icon: "power" }
     ],
     featuredImage: "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
@@ -121,9 +167,55 @@ const staticPropertiesList = [
       "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600"
     ],
     propertyViews: [
-      { label: "Facade", images: ["https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600"] },
-      { label: "Reception", images: ["https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=600"] },
-      { label: "Room", images: ["https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=600"] }
+      { 
+        label: "Facade", 
+        images: [
+          "https://picsum.photos/800/600?random=1101",
+          "https://picsum.photos/800/600?random=1102",
+          "https://picsum.photos/800/600?random=1103"
+        ] 
+      },
+      { 
+        label: "Reception", 
+        images: [
+          "https://picsum.photos/800/600?random=2101",
+          "https://picsum.photos/800/600?random=2102"
+        ] 
+      },
+      { 
+        label: "Room", 
+        images: [
+          "https://picsum.photos/800/600?random=3101",
+          "https://picsum.photos/800/600?random=3102",
+          "https://picsum.photos/800/600?random=3103",
+          "https://picsum.photos/800/600?random=3104"
+        ] 
+      },
+      { 
+        label: "Common Area", 
+        images: [
+          "https://picsum.photos/800/600?random=4101",
+          "https://picsum.photos/800/600?random=4102"
+        ] 
+      },
+      { 
+        label: "Mess/Food", 
+        images: [
+          "https://picsum.photos/800/600?random=5101",
+          "https://picsum.photos/800/600?random=5102",
+          "https://picsum.photos/800/600?random=5103"
+        ] 
+      }
+    ],
+    amenities: [
+      { title: "High-Speed WiFi", description: "24/7 unlimited internet access", icon: "wifi" },
+      { title: "Air Conditioning", description: "Centralized AC in all rooms", icon: "ac" },
+      { title: "Food Included", description: "3 meals + evening snacks", icon: "food" },
+      { title: "Laundry Service", description: "Daily pickup and delivery", icon: "laundry" },
+      { title: "Parking", description: "Secure two-wheeler parking", icon: "parking" },
+      { title: "Gym", description: "Basic fitness equipment", icon: "gym" },
+      { title: "TV Room", description: "Common area with entertainment", icon: "tv" },
+      { title: "Power Backup", description: "Inverter backup for all rooms", icon: "power" }
     ],
     featuredImage: "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=600"
   },
@@ -313,7 +405,9 @@ const staticPropertiesList = [
 // Fetch properties from backend
 export const fetchProperties = async () => {
   try {
-    const data = await fetchJson('/api/WRONG_ENDPOINT_FORCE_FAILURE');
+    // Add cache-busting timestamp to ensure fresh data
+    const timestamp = Date.now();
+    const data = await fetchJson(`/api/approved-properties/public/approved?t=${timestamp}`);
     const properties = Array.isArray(data) ? data : data?.properties || data?.data || [];
     
     // Get total count from API (new field) or fallback to properties length
@@ -321,26 +415,60 @@ export const fetchProperties = async () => {
     
     console.log('📊 API returned', properties.length, 'properties (Total:', totalCount + ')');
     
+    // Debug: Check first property to see what images data we have
+    if (properties.length > 0) {
+      console.log('🔍 API Debug - First Property:');
+      console.log('  p.images:', properties[0].images);
+      console.log('  p.photos:', properties[0].photos);
+      console.log('  p.propertyInfo?.photos:', properties[0].propertyInfo?.photos);
+      console.log('  p.property_name:', properties[0].property_name);
+      console.log('  p.propertyName:', properties[0].propertyName);
+    }
+    
     // Ensure all required fields are present with fallback values
     const formattedProperties = properties
-      .map(p => ({
-        ...p,
-        property_name: p.property_name || p.propertyName || p.propertyInfo?.name || 'Property',
-        city: p.city || p.propertyInfo?.city || 'Unknown',
-        owner_name: p.owner_name || p.ownerName || p.generatedCredentials?.ownerName || p.approvedBy || 'Verified Owner',
-        owner_phone: p.owner_phone || p.contactPhone || p.ownerPhone || p.propertyInfo?.phone || '9000000000',
-        propertyName: p.propertyName || p.property_name || p.propertyInfo?.name || 'Property',
-        propertyType: p.propertyType || p.property_type || p.propertyInfo?.propertyType || 'PG',
-        monthlyRent: p.monthlyRent || p.rent || p.propertyInfo?.rent || 5000
-      }));
+      .map(p => {
+        // Debug each property
+        console.log(`🔍 Processing Property: ${p.property_name || p.propertyName || 'Unknown'}`);
+        console.log(`  Images: ${p.images?.length || 0}, Photos: ${p.photos?.length || 0}, PropertyInfo Photos: ${p.propertyInfo?.photos?.length || 0}`);
+        
+        const imagesArray = p.images || p.photos || p.propertyInfo?.photos || [];
+        const firstImage = imagesArray[0] || `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`;
+        
+        console.log(`  Final images array length: ${imagesArray.length}`);
+        console.log(`  First image: ${firstImage}`);
+        
+        return {
+          ...p,
+          property_name: p.property_name || p.propertyName || p.propertyInfo?.name || 'Property',
+          city: p.city || p.propertyInfo?.city || 'Unknown',
+          owner_name: p.owner_name || p.ownerName || p.generatedCredentials?.ownerName || p.approvedBy || 'Verified Owner',
+          owner_phone: p.owner_phone || p.contactPhone || p.ownerPhone || p.propertyInfo?.phone || '9000000000',
+          propertyName: p.propertyName || p.property_name || p.propertyInfo?.name || 'Property',
+          propertyType: p.propertyType || p.property_type || p.propertyInfo?.propertyType || 'PG',
+          monthlyRent: p.monthlyRent || p.rent || p.propertyInfo?.rent || 5000,
+          
+          // Add image field with first image from images array
+          image: firstImage,
+          
+          // Ensure images array exists for PropertyCard
+          images: imagesArray
+        };
+      });
     
     // Attach total count to the array for access by components
     formattedProperties.total = totalCount;
     
+    console.log('✅ API SUCCESS - Returning formatted properties:');
+    console.log('  Total properties:', formattedProperties.length);
+    console.log('  First property images:', formattedProperties[0]?.images);
+    console.log('  First property image:', formattedProperties[0]?.image);
+    
     return formattedProperties;
   } catch (error) {
-    console.error('Error fetching properties, using static data:', error);
-    // Return static properties as fallback
+    console.error('❌ API ERROR - Falling back to static data:', error);
+    console.log('🔄 Using static data fallback - this explains why PropertyCard gets wrong data!');
+    // Return static properties as fallback with correct structure
     const staticFormatted = staticPropertiesList.map(p => ({
       ...p,
       property_name: p.property_name,
@@ -349,7 +477,13 @@ export const fetchProperties = async () => {
       owner_phone: p.owner_phone,
       propertyName: p.propertyName,
       propertyType: p.propertyType,
-      monthlyRent: p.monthlyRent
+      monthlyRent: p.monthlyRent,
+      
+      // Add image field with first image from images array
+      image: p.images?.[0] || p.featuredImage || `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`,
+      
+      // Ensure images array exists for PropertyCard
+      images: p.images || []
     }));
     staticFormatted.total = staticPropertiesList.length;
     return staticFormatted;

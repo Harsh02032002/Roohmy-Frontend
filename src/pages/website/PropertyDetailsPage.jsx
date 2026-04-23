@@ -4,6 +4,16 @@ import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchProperties, getPropertyReviews, getPropertyReviewStats, checkUserReview, submitReview } from "../../utils/api";
+
+// Extract city from property name (e.g., "HOSTEL - Vastrapur, Ahmedabad" -> "Ahmedabad")
+const extractCityFromName = (name) => {
+  if (!name) return null;
+  const parts = name.split(',');
+  if (parts.length > 1) {
+    return parts[parts.length - 1].trim();
+  }
+  return null;
+};
 import {
   ChevronLeft, MapPin, Users, Bed, Wifi, Wind, Droplet,
   Phone, Mail, Star, Share2, GraduationCap, Navigation, ExternalLink
@@ -46,9 +56,15 @@ const staticPropertiesData = [
       { label: "Kitchen", images: ["https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Clean & Modern Kitchen" }
     ],
     amenities: [
+      { name: "Near Coaching Centers", icon: "graduation-cap", category: "popular" },
+      { name: "Student Friendly", icon: "users", category: "popular" },
+      { name: "Budget Friendly", icon: "dollar-sign", category: "popular" },
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
-      { name: "Air Conditioning", icon: "wind", category: "comfort" },
-      { name: "Study Table", icon: "check", category: "basic" }
+      { name: "Air Conditioning", icon: "wind", category: "basic" },
+      { name: "Study Table", icon: "check", category: "basic" },
+      { name: "Power Backup", icon: "zap", category: "basic" },
+      { name: "Water Supply", icon: "droplet", category: "basic" },
+      { name: "Security", icon: "shield", category: "basic" }
     ],
     exclusiveBenefits: [
       { title: "Free Maintenance", description: "No maintenance charges", icon: "gift" }
@@ -73,8 +89,14 @@ const staticPropertiesData = [
       { label: "Kitchen", images: ["https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Hygienic Dining Area" }
     ],
     amenities: [
+      { name: "Girls Safe Area", icon: "shield", category: "popular" },
+      { name: "Walking Distance to Metro", icon: "map-pin", category: "popular" },
+      { name: "24/7 Food Court", icon: "coffee", category: "popular" },
       { name: "CCTV", icon: "shield", category: "basic" },
-      { name: "RO Water", icon: "droplet", category: "basic" }
+      { name: "RO Water", icon: "droplet", category: "basic" },
+      { name: "Power Backup", icon: "zap", category: "basic" },
+      { name: "Housekeeping", icon: "home", category: "basic" },
+      { name: "WiFi", icon: "wifi", category: "basic" }
     ]
   },
   {
@@ -93,6 +115,16 @@ const staticPropertiesData = [
       { label: "Lobby", images: ["https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Community Chill Zone" },
       { label: "Bedroom", images: ["https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Sleek Private Rooms" },
       { label: "Kitchen", images: ["https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600"], description: "Shared Kitchen" }
+    ],
+    amenities: [
+      { name: "IT Professionals Hub", icon: "briefcase", category: "popular" },
+      { name: "Premium Location", icon: "star", category: "popular" },
+      { name: "Coworking Space", icon: "users", category: "popular" },
+      { name: "WiFi", icon: "wifi", category: "basic" },
+      { name: "AC", icon: "wind", category: "basic" },
+      { name: "Gym", icon: "dumbbell", category: "basic" },
+      { name: "Parking", icon: "car", category: "basic" },
+      { name: "TV", icon: "tv", category: "basic" }
     ]
   },
   {
@@ -104,11 +136,14 @@ const staticPropertiesData = [
     latitude: 28.6139, longitude: 77.2090,
     ownerLoginId: "DEL001", status: "active", isPublished: true,
     amenities: [
+      { name: "Family Friendly", icon: "users", category: "popular" },
+      { name: "Premium Location", icon: "star", category: "popular" },
+      { name: "Near Metro", icon: "map-pin", category: "popular" },
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
       { name: "Modular Kitchen", icon: "coffee", category: "basic" },
-      { name: "Power Backup", icon: "zap", category: "comfort" },
+      { name: "Power Backup", icon: "zap", category: "basic" },
       { name: "Lift", icon: "check", category: "basic" },
-      { name: "Reserved Parking", icon: "car", category: "luxury" }
+      { name: "Reserved Parking", icon: "car", category: "basic" }
     ],
     exclusiveBenefits: [
       { title: "No Brokerage", description: "Direct booking discount", icon: "star" },
@@ -131,10 +166,13 @@ const staticPropertiesData = [
     latitude: 23.2599, longitude: 77.4126,
     ownerLoginId: "BHO001", status: "active", isPublished: true,
     amenities: [
+      { name: "Near Coaching Centers", icon: "graduation-cap", category: "popular" },
+      { name: "Student Friendly", icon: "users", category: "popular" },
+      { name: "Budget Friendly", icon: "dollar-sign", category: "popular" },
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
       { name: "Study Room", icon: "check", category: "basic" },
       { name: "Mess Facility", icon: "coffee", category: "basic" },
-      { name: "Water Purifier", icon: "droplet", category: "comfort" },
+      { name: "Water Purifier", icon: "droplet", category: "basic" },
       { name: "Locker Facility", icon: "shield", category: "basic" }
     ],
     exclusiveBenefits: [
@@ -158,11 +196,14 @@ const staticPropertiesData = [
     latitude: 21.1458, longitude: 79.0882,
     ownerLoginId: "NAG001", status: "active", isPublished: true,
     amenities: [
+      { name: "Premium Location", icon: "star", category: "popular" },
+      { name: "IT Professionals Hub", icon: "briefcase", category: "popular" },
+      { name: "Luxury Living", icon: "shield", category: "popular" },
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
-      { name: "Air Conditioning", icon: "wind", category: "comfort" },
-      { name: "Mini Fridge", icon: "check", category: "luxury" },
-      { name: "TV in Room", icon: "tv", category: "luxury" },
-      { name: "Room Service", icon: "coffee", category: "luxury" }
+      { name: "Air Conditioning", icon: "wind", category: "basic" },
+      { name: "Mini Fridge", icon: "check", category: "basic" },
+      { name: "TV in Room", icon: "tv", category: "basic" },
+      { name: "Room Service", icon: "coffee", category: "basic" }
     ],
     exclusiveBenefits: [
       { title: "Premium Amenities", description: "Luxury facilities", icon: "star" },
@@ -185,11 +226,14 @@ const staticPropertiesData = [
     latitude: 26.2389, longitude: 73.0243,
     ownerLoginId: "JOD001", status: "active", isPublished: true,
     amenities: [
+      { name: "Girls Safe Area", icon: "shield", category: "popular" },
+      { name: "Working Women Friendly", icon: "users", category: "popular" },
+      { name: "Near IT Parks", icon: "map-pin", category: "popular" },
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
-      { name: "Air Conditioning", icon: "wind", category: "comfort" },
+      { name: "Air Conditioning", icon: "wind", category: "basic" },
       { name: "Security", icon: "shield", category: "basic" },
-      { name: "Power Backup", icon: "zap", category: "comfort" },
-      { name: "Laundry Service", icon: "droplet", category: "luxury" }
+      { name: "Power Backup", icon: "zap", category: "basic" },
+      { name: "Laundry Service", icon: "droplet", category: "basic" }
     ],
     exclusiveBenefits: [
       { title: "Transport Facility", description: "Drop to office", icon: "gift" },
@@ -212,10 +256,14 @@ const staticPropertiesData = [
     latitude: 19.0760, longitude: 72.8777,
     ownerLoginId: "MUM001", status: "active", isPublished: true,
     amenities: [
+      { name: "Budget Friendly", icon: "dollar-sign", category: "popular" },
+      { name: "Near Metro", icon: "map-pin", category: "popular" },
+      { name: "Student Friendly", icon: "users", category: "popular" },
       { name: "WiFi", icon: "wifi", category: "basic" },
       { name: "Common Kitchen", icon: "coffee", category: "basic" },
       { name: "Water Supply", icon: "droplet", category: "basic" },
-      { name: "Locker", icon: "shield", category: "basic" }
+      { name: "Locker", icon: "shield", category: "basic" },
+      { name: "Power Backup", icon: "zap", category: "basic" }
     ],
     exclusiveBenefits: [
       { title: "Best Price", description: "Affordable rates", icon: "star" },
@@ -238,10 +286,13 @@ const staticPropertiesData = [
     latitude: 12.8444, longitude: 77.6631,
     ownerLoginId: "BLR001", status: "active", isPublished: true,
     amenities: [
+      { name: "IT Professionals Hub", icon: "briefcase", category: "popular" },
+      { name: "Premium Location", icon: "star", category: "popular" },
+      { name: "Business Friendly", icon: "users", category: "popular" },
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
-      { name: "Conference Room", icon: "check", category: "luxury" },
-      { name: "Business Center", icon: "tv", category: "luxury" },
-      { name: "Gym", icon: "dumbbell", category: "comfort" },
+      { name: "Conference Room", icon: "check", category: "basic" },
+      { name: "Business Center", icon: "tv", category: "basic" },
+      { name: "Gym", icon: "dumbbell", category: "basic" },
       { name: "Cafeteria", icon: "coffee", category: "basic" }
     ],
     exclusiveBenefits: [
@@ -265,11 +316,14 @@ const staticPropertiesData = [
     latitude: 13.0827, longitude: 80.2707,
     ownerLoginId: "CHE001", status: "active", isPublished: true,
     amenities: [
+      { name: "Family Friendly", icon: "users", category: "popular" },
+      { name: "Premium Location", icon: "star", category: "popular" },
+      { name: "Near Metro", icon: "map-pin", category: "popular" },
       { name: "High-Speed WiFi", icon: "wifi", category: "basic" },
       { name: "Family Rooms", icon: "check", category: "basic" },
       { name: "Kitchen Access", icon: "coffee", category: "basic" },
-      { name: "Children Play Area", icon: "check", category: "comfort" },
-      { name: "Power Backup", icon: "zap", category: "comfort" }
+      { name: "Children Play Area", icon: "check", category: "basic" },
+      { name: "Power Backup", icon: "zap", category: "basic" }
     ],
     exclusiveBenefits: [
       { title: "Family Friendly", description: "Safe for families", icon: "heart" },
@@ -519,7 +573,7 @@ export default function PropertyDetailsPage() {
             // Basic fields
             id: foundProperty._id || foundProperty.visitId || foundProperty.propertyName,
             name: foundProperty.propertyName || foundProperty.property_name || foundProperty.title || "Property",
-            location: foundProperty.propertyInfo?.city || foundProperty.city || "Location",
+            location: foundProperty.city || foundProperty.propertyInfo?.city || foundProperty.propertyInfo?.address?.city || extractCityFromName(foundProperty.property_name) || "Location",
             area: foundProperty.propertyInfo?.area || foundProperty.area || "",
             type: foundProperty.propertyInfo?.propertyType || foundProperty.propertyType || "",
             price: foundProperty.propertyInfo?.rent || foundProperty.monthlyRent || foundProperty.price || "0",
@@ -543,7 +597,35 @@ export default function PropertyDetailsPage() {
             nearbyColleges: foundProperty.nearbyColleges || [],
             
             // NEW DYNAMIC FIELDS - Direct mapping for static data
-            amenities: foundProperty.amenities || foundProperty.propertyInfo?.amenities || [],
+            amenities: (() => {
+              const rawAmenities = foundProperty.amenities || foundProperty.propertyInfo?.amenities || [];
+              
+              // Parse amenities if they are JSON strings
+              const parsedAmenities = rawAmenities.map(amenity => {
+                if (typeof amenity === 'string') {
+                  try {
+                    // Try to parse JSON string
+                    return JSON.parse(amenity);
+                  } catch (e) {
+                    // If parsing fails, create a basic amenity object
+                    return {
+                      name: amenity.replace(/[{}]/g, '').trim(),
+                      icon: 'check',
+                      category: 'basic'
+                    };
+                  }
+                }
+                return amenity;
+              });
+              
+              console.log('🏠 PropertyDetailsPage amenities debug:', {
+                foundPropertyAmenities: foundProperty.amenities,
+                propertyInfoAmenities: foundProperty.propertyInfo?.amenities,
+                rawAmenities: rawAmenities,
+                parsedAmenities: parsedAmenities
+              });
+              return parsedAmenities;
+            })(),
             exclusiveBenefits: foundProperty.exclusiveBenefits || foundProperty.benefits || [],
             propertyViews: foundProperty.propertyViews || [],
             facilities: foundProperty.facilities || {},
@@ -731,7 +813,7 @@ export default function PropertyDetailsPage() {
       </div>
 
       {/* ==================== TWO-COLUMN LAYOUT ==================== */}
-      <div className="max-w-7xl mx-auto md:px-6 lg:px-8 md:py-6">
+      <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 md:py-6">
         <div className="md:grid md:grid-cols-3 md:gap-8">
 
           {/* ==================== LEFT / MAIN CONTENT ==================== */}
@@ -742,14 +824,15 @@ export default function PropertyDetailsPage() {
               <PropertyViewsGallery
                 propertyViews={property.propertyViews}
                 images={property.images}
+                categories={property.categories}
               />
             </div>
 
-            {/* Content Sections */}
-            <div className="mt-0 md:mt-0">
+            {/* Content Sections — OYO-style clean layout */}
+            <div className="md:px-0 px-0">
               
               {/* 2. Property Header */}
-              <div className="pt-4 pb-4 border-b border-gray-100">
+              <div className="pt-5 pb-5" style={{ borderBottom: '1px solid #e8e8e8' }}>
                 <PropertyHeader property={property} reviewStats={reviewStats} />
               </div>
 
@@ -765,16 +848,16 @@ export default function PropertyDetailsPage() {
                 price={property.price}
               />
 
-              {/* 5. Amenities Section - Dynamic */}
-              <div className="mt-6">
+              {/* 5. Amenities Section */}
+              <div className="px-4 md:px-0">
                 <AmenitiesSection
                   amenities={property.amenities}
                   facilities={property.facilities}
                 />
               </div>
 
-              {/* 6. Exclusive Benefits Section - Dynamic */}
-              <div className="mt-6">
+              {/* 6. Exclusive Benefits Section */}
+              <div className="px-4 md:px-0">
                 <ExclusiveBenefitsSection
                   exclusiveBenefits={property.exclusiveBenefits}
                 />
@@ -786,21 +869,21 @@ export default function PropertyDetailsPage() {
                 benefits={property.benefits}
               />
 
-              {/* 6. Nearby Places */}
+              {/* 8. Nearby Places */}
               <NearbySection
                 nearbyInstitutes={nearbyInstitutes}
                 loading={loadingInstitutes}
                 hasCoordinates={hasCoordinates}
               />
 
-              {/* 7. Map (Mobile Only) */}
+              {/* 9. Map (Mobile Only) */}
               {hasCoordinates && (
-                <div className="md:hidden px-4 py-5 border-b border-gray-100">
-                  <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <div className="md:hidden px-4 py-5" style={{ borderBottom: '1px solid #e8e8e8' }}>
+                  <h2 className="text-lg font-bold text-[#222] mb-3 flex items-center gap-2">
                     <Navigation size={16} className="text-[#EE4266]" />
                     Property Location
                   </h2>
-                  <div className="rounded-2xl overflow-hidden border border-gray-200" style={{ height: '250px' }}>
+                  <div className="rounded-lg overflow-hidden" style={{ height: '250px', border: '1px solid #e8e8e8' }}>
                     <iframe
                       src={`https://www.google.com/maps?q=${property.latitude},${property.longitude}&z=14&output=embed`}
                       width="100%"
@@ -816,17 +899,18 @@ export default function PropertyDetailsPage() {
                     href={`https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 mt-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-center gap-2 mt-3 py-2.5 rounded-lg text-sm font-semibold text-[#222] hover:text-[#EE4266] transition-colors"
+                    style={{ border: '1px solid #e0e0e0' }}
                   >
                     <Navigation size={14} /> Get Directions
                   </a>
                 </div>
               )}
 
-              {/* 8. Pricing Breakdown (Mobile) */}
+              {/* 10. Pricing Breakdown (Mobile) */}
               <PricingBreakdown property={property} />
 
-              {/* 9. Reviews */}
+              {/* 11. Reviews */}
               <ReviewsSection
                 reviews={reviews}
                 reviewStats={reviewStats}
@@ -842,21 +926,21 @@ export default function PropertyDetailsPage() {
                 handleSubmitReview={handleSubmitReview}
               />
 
-              {/* 10. Compare with Similar */}
+              {/* 12. Compare with Similar */}
               <CompareSection currentProperty={property} />
 
-              {/* 11. Owner Info (Mobile Only) */}
-              <div className="md:hidden px-4 py-5 border-b border-gray-100">
-                <h2 className="text-lg font-bold text-gray-900 mb-3">Owner Information</h2>
+              {/* 13. Owner Info (Mobile Only) */}
+              <div className="md:hidden px-4 py-5" style={{ borderBottom: '1px solid #e8e8e8' }}>
+                <h2 className="text-lg font-bold text-[#222] mb-3">Owner Information</h2>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider">Owner Name</p>
-                    <p className="text-sm text-gray-900 font-semibold">{property.owner}</p>
+                    <p className="text-[10px] text-[#6d787d] uppercase tracking-wider">Owner Name</p>
+                    <p className="text-sm text-[#222] font-semibold">{property.owner}</p>
                   </div>
                   {property.ownerPhone && (
                     <a
                       href={`tel:${property.ownerPhone}`}
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#EE4266] text-white rounded-xl font-semibold text-sm hover:bg-[#d63a5b] transition-colors"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-[#EE4266] text-white rounded-lg font-semibold text-sm hover:bg-[#d63a5b] transition-colors"
                     >
                       <Phone size={16} /> Call Owner
                     </a>
@@ -864,7 +948,8 @@ export default function PropertyDetailsPage() {
                   {property.ownerEmail && (
                     <a
                       href={`mailto:${property.ownerEmail}`}
-                      className="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:border-[#EE4266] hover:text-[#EE4266] transition-colors"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-white text-[#222] rounded-lg font-semibold text-sm transition-colors"
+                      style={{ border: '1px solid #e0e0e0' }}
                     >
                       <Mail size={16} /> Send Email
                     </a>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, MapPin, Star, BadgeCheck, TrendingUp, ChevronLeft, ChevronRight, X, Building2, Home, Users, MessageSquare, Gavel } from 'lucide-react';
+import { Search, MapPin, Star, BadgeCheck, TrendingUp, ChevronLeft, ChevronRight, ChevronDown, X, Building2, Home, Users, MessageSquare, Gavel } from 'lucide-react';
 import HowRoomhyWorks from './components/website/HowRoomhyWorks';
 import WhyRoomhy from './components/website/WhyRoomhy';
 import FindYourHome from './components/website/FindYourHome';
@@ -555,32 +555,33 @@ export default function HomePage() {
                 }`}
                 style={{ backgroundImage: `url(${image})` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-black/60"></div>
               </div>
             ))}
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-start pt-4 md:pt-16">
-            <h1 className="text-xl sm:text-4xl md:text-6xl font-bold text-white mb-1 md:mb-4 leading-tight text-center">
-              Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">Student Stay</span>
+          <div className="relative max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 h-full flex flex-col justify-start pt-4 md:pt-16">
+            <h1 className="text-xl sm:text-4xl md:text-6xl font-bold text-white mb-1 md:mb-4 leading-tight text-center drop-shadow-lg">
+              Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 drop-shadow-2xl">Student Stay</span>
             </h1>
             <p className="text-xs sm:text-lg md:text-xl text-white/95 mb-2 md:mb-6 max-w-4xl mx-auto leading-relaxed text-center px-2">
               Search verified PGs, hostels & co-living spaces across 50+ Indian cities
             </p>
 
             <div className="max-w-5xl mx-auto w-full px-2 md:px-4 search-container relative z-50">
-              <form onSubmit={handleSearchSubmit} className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-2xl p-2 md:p-3 flex flex-row gap-2 md:gap-3 items-center relative z-20">
-                <div className="relative flex-shrink-0" ref={typeDropdownRef}>
+              <form onSubmit={handleSearchSubmit} className="bg-white/95 md:bg-white backdrop-blur-md md:backdrop-blur-none rounded-2xl md:rounded shadow-2xl p-2 md:p-0 flex flex-row gap-2 md:gap-0 items-center relative z-20 md:overflow-hidden md:h-16 w-full">
+                
+                {/* Mobile Only: Type Dropdown */}
+                <div className="md:hidden relative flex-shrink-0" ref={typeDropdownRef}>
                   <div
                     onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-                    className="flex items-center justify-between bg-teal-50 text-gray-700 px-2 md:px-6 py-2 md:py-4 rounded-lg md:rounded-2xl font-medium focus:outline-none cursor-pointer w-[70px] md:w-[150px] text-[10px] md:text-lg transition-all border border-teal-100/50"
+                    className="flex items-center justify-between bg-teal-50 text-gray-700 px-2 py-2 rounded-lg font-medium focus:outline-none cursor-pointer w-[70px] text-[10px]"
                   >
                     <span className="truncate">{selectedType || 'Type'}</span>
-                    <ChevronLeft className={`w-3 h-3 md:w-5 md:h-5 text-teal-600 transition-transform duration-300 ${isTypeDropdownOpen ? '-rotate-90' : '-rotate-180'}`} style={{ transform: isTypeDropdownOpen ? 'rotate(90deg)' : 'rotate(270deg)' }} />
+                    <ChevronLeft className={`w-3 h-3 text-teal-600 transition-transform ${isTypeDropdownOpen ? '-rotate-90' : '-rotate-180'}`} style={{ transform: isTypeDropdownOpen ? 'rotate(90deg)' : 'rotate(270deg)' }} />
                   </div>
-
                   {isTypeDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-[120px] md:w-[200px] bg-white rounded-xl md:rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[70] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute top-full left-0 mt-2 w-[120px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[70]">
                       {['PG', 'Hostel', 'Co-living', 'Apartment'].map((type) => (
                         <div
                           key={type}
@@ -588,33 +589,57 @@ export default function HomePage() {
                             setSelectedType(type.toLowerCase());
                             setIsTypeDropdownOpen(false);
                           }}
-                          className={`px-3 md:px-6 py-2 md:py-4 text-[10px] md:text-lg cursor-pointer transition-colors hover:bg-teal-50 flex items-center justify-between ${
-                            selectedType === type.toLowerCase() ? 'bg-teal-50 text-teal-600 font-bold' : 'text-gray-600'
-                          }`}
+                          className={`px-3 py-2 text-[10px] cursor-pointer hover:bg-teal-50 ${selectedType === type.toLowerCase() ? 'bg-teal-50 text-teal-600 font-bold' : 'text-gray-600'}`}
                         >
                           {type}
-                          {selectedType === type.toLowerCase() && <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-teal-500"></div>}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="flex-1 flex items-center px-2 md:px-6 py-2 md:py-4 bg-gray-50 rounded-lg md:rounded-2xl relative min-w-0">
-                  <Search className="w-3 h-3 md:w-6 md:h-6 text-gray-400 mr-1 md:mr-4 flex-shrink-0" />
+
+                {/* 1. Property Type (Desktop Only) - Left */}
+                <div className="relative flex-1 hidden md:flex items-center px-5 h-full bg-white border-r border-gray-300 cursor-pointer hover:bg-gray-50" onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}>
+                  <div className="flex-1 flex justify-between items-center text-base font-semibold text-gray-900">
+                    <span className="truncate">{selectedType ? selectedType.charAt(0).toUpperCase() + selectedType.slice(1) : 'Property Type'}</span>
+                    <ChevronLeft className={`w-4 h-4 text-gray-400 transition-transform ${isTypeDropdownOpen ? '-rotate-90' : '-rotate-180'}`} style={{ transform: isTypeDropdownOpen ? 'rotate(90deg)' : 'rotate(270deg)' }} />
+                  </div>
+                  
+                  {isTypeDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-full bg-white rounded shadow-xl border border-gray-100 overflow-hidden z-[70]">
+                      {['PG', 'Hostel', 'Co-living', 'Apartment'].map((type) => (
+                        <div
+                          key={type}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedType(type.toLowerCase());
+                            setIsTypeDropdownOpen(false);
+                          }}
+                          className="px-4 py-3 text-base cursor-pointer hover:bg-gray-50 text-gray-800 font-medium"
+                        >
+                          {type}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Location / Search Query - Middle */}
+                <div className="flex-1 md:flex-[1.5] flex items-center px-2 md:px-5 py-2 md:py-0 h-full bg-gray-50 md:bg-white rounded-lg md:rounded-none relative min-w-0">
+                  <Search className="w-3 h-3 md:w-5 md:h-5 text-gray-400 mr-1 md:mr-3 flex-shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search..."
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-[10px] md:text-lg min-w-0 w-full"
+                    placeholder="Search city, locality, or landmark"
+                    className="flex-1 bg-transparent outline-none text-gray-900 text-[10px] md:text-base font-semibold min-w-0 w-full h-full"
                   />
-                  {isSearching && (
-                    <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2">
-                      <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                  )}
                 </div>
-                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-3 md:px-12 py-2 md:py-4 rounded-lg md:rounded-2xl font-bold text-[10px] md:text-lg transition-all flex-shrink-0 whitespace-nowrap">
+
+
+
+                {/* Search Button */}
+                <button type="submit" className="bg-gradient-to-r from-teal-500 to-teal-600 md:bg-none md:bg-[#1AB64F] hover:bg-[#18a245] text-white px-3 md:px-10 py-2 md:py-0 h-full rounded-lg md:rounded-none font-bold text-[10px] md:text-lg transition-all flex-shrink-0 whitespace-nowrap border-l border-transparent md:border-[#18a245]">
                   Search
                 </button>
               </form>
@@ -649,55 +674,53 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Popular Cities - Carousel with 4 items */}
-        <section className="py-1 md:py-12 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-2 md:mb-8">
-              <div className="flex-1">
-                <h2 className="text-xl md:text-3xl font-bold text-gray-900">Popular Cities</h2>
-                <p className="text-xs md:text-lg text-gray-600 mt-1">Explore top cities for student accommodation</p>
+        {/* Cities Sub-navigation placed under banner */}
+        <div className="hidden md:block bg-[#f8f9fa] border-b border-gray-200">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12">
+            <div className="flex items-center justify-center h-10 text-sm font-medium text-gray-600">
+              <div className="flex items-center justify-center space-x-10 w-full">
+                {['Indore', 'Jaipur', 'Mumbai', 'Bhopal', 'Delhi', 'Nagpur'].map((city) => (
+                  <Link key={city} to={`/website/ourproperty?city=${city}`} className="flex items-center space-x-1 hover:text-black cursor-pointer group">
+                    <span>{city}</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-black transition-colors" />
+                  </Link>
+                ))}
+                <Link to="/website/ourproperty" className="flex items-center space-x-1 hover:text-black cursor-pointer group font-semibold">
+                  <span>All Cities</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-black transition-colors" />
+                </Link>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Popular Cities - Carousel with 4 items */}
+        <section className="py-1 md:py-2 bg-white">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-2">
+            <div className="flex flex-col items-center justify-center text-center mb-2 md:mb-4">
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900">Popular Cities</h2>
+              <p className="text-xs md:text-base text-gray-600 mt-0.5">Explore top cities for student accommodation</p>
             </div>
 
             {/* Desktop Grid - Hidden on mobile */}
-            <div className="hidden md:block relative">
-              {/* Left Arrow - positioned on the side */}
-              {cities.length > citiesPerView && canShowPrevCities && (
-                <button
-                  onClick={prevCities}
-                  className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
+            <div className="hidden md:block relative px-12">
+              {/* Removed Navigation Arrows since we show all cities now */}
 
-              {/* Right Arrow - positioned on the side */}
-              {cities.length > citiesPerView && canShowNextCities && (
-                <button
-                  onClick={nextCities}
-                  className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {visibleCities.map((city) => (
+              <div className="flex justify-between items-center gap-4 py-4 w-full">
+                {cities.slice(0, 8).map((city) => (
                   <Link
                     key={city.name}
                     to={`/website/ourproperty?city=${city.name}`}
-                    className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 block h-48"
+                    className="flex flex-col items-center text-center group flex-shrink-0"
                   >
-                    <img
-                      src={city.image}
-                      alt={city.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <h3 className="text-xl font-bold text-white">{city.name}</h3>
-                      <p className="text-sm text-white/90">{city.properties} Properties</p>
+                    <div className="h-24 w-24 rounded-full overflow-hidden shadow-md ring-1 ring-gray-200 group-hover:shadow-xl group-hover:ring-teal-500 transition-all duration-300">
+                      <img
+                        src={city.image}
+                        alt={city.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
                     </div>
+                    <span className="mt-3 text-sm font-bold text-gray-800 group-hover:text-teal-600 transition-colors">{city.name}</span>
                   </Link>
                 ))}
               </div>
@@ -732,11 +755,11 @@ export default function HomePage() {
         </section>
 
         {/* What We Offer - Desktop & Mobile Responsive */}
-        <section className="py-1 md:py-12 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-2 md:mb-10">
-              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-3">What We Offer</h2>
-              <p className="text-xs md:text-lg text-gray-600">Choose from a variety of accommodation types tailored for students</p>
+        <section className="py-1 md:py-2 bg-white">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-2">
+            <div className="text-center mb-2 md:mb-4">
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1">What We Offer</h2>
+              <p className="text-xs md:text-base text-gray-600">Choose from a variety of accommodation types tailored for students</p>
             </div>
 
             {/* Desktop Grid - Hidden on mobile */}
@@ -767,7 +790,7 @@ export default function HomePage() {
                     className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-all group cursor-pointer"
                   >
                     {/* Main Image - with arrows */}
-                    <div className="h-36 overflow-hidden relative">
+                    <div className="h-40 overflow-hidden relative">
                       <img
                         src={allImages[selectedIdx]}
                         alt={offering.title}
@@ -862,36 +885,34 @@ export default function HomePage() {
 
         {/* How Roomhy Works - Video Section */}
         {/* How Roomhy Works - Improved Section */}
-<section className="hidden md:block py-20 bg-gradient-to-b from-gray-50 to-white">
-  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<section className="hidden md:block py-2 bg-white border-t border-gray-100">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-2">
 
     {/* Heading */}
-    <div className="text-center mb-12">
-      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+    <div className="text-center mb-4">
+      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
         How Roomhy Works
       </h2>
-      <p className="text-lg text-gray-600">
+      <p className="text-base text-gray-600">
         Find, compare, and book your perfect stay in just a few steps
       </p>
     </div>
 
     {/* Video Container */}
-    <div className="relative rounded-3xl overflow-hidden shadow-xl group">
+    <div className="relative max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-xl group aspect-video">
 
       {/* Overlay Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10 pointer-events-none"></div>
 
       {/* Video */}
-    <iframe
-  width="100%"
-  height="300"
-  className="max-h-[250px] md:max-h-[350px]"
-  src="https://www.youtube.com/embed/4pFUP0HZwWM"
-  title="YouTube video"
-  frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowFullScreen
-></iframe>
+      <iframe
+        className="absolute top-0 left-0 w-full h-full"
+        src="https://www.youtube.com/embed/4pFUP0HZwWM"
+        title="YouTube video"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      ></iframe>
 
       {/* Play Badge */}
       <div className="absolute bottom-5 left-5 z-20 text-white">
@@ -906,13 +927,11 @@ export default function HomePage() {
  
 
         {/* Trending Stays - Carousel with 12 properties - DESKTOP ONLY */}
-        <section className="hidden md:block py-12 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-10">
-              <div className="text-center flex-1">
-                <h2 className="text-3xl font-bold text-gray-900 mb-3">Trending Stays This Week</h2>
-                <p className="text-lg text-gray-600">Most popular properties among students</p>
-              </div>
+        <section className="hidden md:block py-1 md:py-2 bg-white">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-2">
+            <div className="flex flex-col items-center justify-center text-center mb-4">
+              <h2 className="text-3xl font-bold text-gray-900 mb-1">Trending Stays This Week</h2>
+              <p className="text-base text-gray-600">Most popular properties among students</p>
             </div>
             
             <div className="relative">
@@ -936,42 +955,46 @@ export default function HomePage() {
                 </button>
               )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
               {visibleTrending.map((property) => (
                 <Link 
                   key={property.name} 
                   to={`/website/property-details/${property._id}`}
-                  className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:-translate-y-1 block"
+                  className="group block cursor-pointer"
                 >
-                  <div className="relative h-48">
+                  <div className="relative h-48 rounded-md overflow-hidden mb-3">
                     <img 
                       src={property.image} 
                       alt={property.name} 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => {
                         e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
                       }}
                     />
-                    {/* Rating badge on image - bottom left */}
-                    <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 flex items-center gap-1 shadow">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs font-bold text-gray-800">{property.rating}</span>
-                    </div>
                     {property.verified && (
-                      <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-0.5 flex items-center">
-                        <BadgeCheck className="w-3 h-3 text-teal-600 mr-1" />
-                        <span className="text-[10px] font-bold">Verified</span>
+                      <div className="absolute top-3 left-3 bg-white/20 backdrop-blur border border-white/30 rounded px-2 py-1 flex items-center shadow-lg">
+                        <BadgeCheck className="w-4 h-4 text-teal-600 mr-1" />
+                        <span className="text-xs font-bold text-gray-900">Verified</span>
                       </div>
                     )}
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{property.name}</h3>
-                    <div className="flex items-center text-gray-500 text-xs mb-2">
-                      <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
-                      <span className="line-clamp-1">{property.location}</span>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg mb-0.5 line-clamp-1 group-hover:text-teal-600 transition-colors">{property.name}</h3>
+                    <div className="text-gray-500 text-sm mb-2 line-clamp-1">
+                      {property.location}
                     </div>
-                    <span className="text-base font-bold text-gray-900">{property.price}</span>
-                    <span className="text-xs text-gray-400 ml-1">/month</span>
+                    <div className="flex items-center gap-2 mb-2 text-sm">
+                      <div className="bg-[#1AB64F] text-white px-1.5 py-0.5 rounded text-xs font-bold flex items-center gap-1">
+                        {property.rating} <Star className="w-3 h-3 fill-white text-white" />
+                      </div>
+                      <span className="text-gray-500">(120 reviews) • Excellent</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-bold text-gray-900">{property.price}</span>
+                      <span className="text-sm text-gray-500 line-through">₹9,999</span>
+                      <span className="text-sm font-semibold text-[#f5a623]">40% off</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">+ ₹0 Taxes</p>
                   </div>
                 </Link>
               ))}
@@ -982,7 +1005,7 @@ export default function HomePage() {
 
         {/* Mobile Trending Stays - Smooth horizontal scroll */}
         <section className="md:hidden py-1 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12">
             {/* Heading - Same as Desktop */}
             <div className="text-center mb-3">
               <h2 className="text-xl font-bold text-gray-900 mb-1">Trending Stays This Week</h2>
@@ -1041,48 +1064,57 @@ export default function HomePage() {
 
         {/* Recently Viewed Properties - Desktop & Mobile */}
         {recentlyViewed.length > 0 && (
-          <section className="py-1 md:py-12 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="py-1 md:py-2 bg-white">
+            <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-2">
               {/* Heading - Matched with Trending Section */}
-              <div className="text-center md:text-left mb-6 md:mb-10">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+              <div className="text-center mb-4">
+                <div className="flex items-center justify-center gap-2 mb-1">
                   <TrendingUp className="w-5 h-5 text-teal-600" />
                   <h2 className="text-xl md:text-3xl font-bold text-gray-900">Recently Viewed</h2>
                 </div>
-                <p className="text-xs md:text-lg text-gray-600">Pick up where you left off</p>
+                <p className="text-xs md:text-base text-gray-600">Pick up where you left off</p>
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
                 {recentlyViewed.map((item) => (
                   <Link 
                     key={item.id} 
-                    to={`/website/property/${item.id}`}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+                    to={`/website/property-details/${item.id}`}
+                    className="group block cursor-pointer"
                   >
-                    <div className="relative h-48">
+                    <div className="relative h-48 rounded-md overflow-hidden mb-3">
                       <img 
                         src={item.image} 
                         alt={item.name} 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
+                        }}
                       />
-                      <div className="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur rounded-lg shadow-sm">
-                        <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider">{item.type}</span>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-gray-900 text-sm mb-2 line-clamp-1">{item.name}</h3>
-                      <div className="flex items-center text-gray-600 text-xs mb-2">
-                        <MapPin className="w-3 h-3 mr-1" />
-                        {item.location}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-gray-900">₹{item.price}</span>
-                        <div className="flex items-center">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                          <span className="font-semibold text-sm text-gray-700">4.5</span>
+                      <div className="absolute top-3 left-3 flex gap-2">
+                        <div className="bg-white/20 backdrop-blur border border-white/30 rounded px-2 py-1 flex items-center shadow-lg">
+                          <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider">{item.type || 'PG'}</span>
                         </div>
                       </div>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-lg mb-0.5 line-clamp-1 group-hover:text-teal-600 transition-colors">{item.name}</h3>
+                      <div className="text-gray-500 text-sm mb-2 line-clamp-1">
+                        {item.location}
+                      </div>
+                      <div className="flex items-center gap-2 mb-2 text-sm">
+                        <div className="bg-[#1AB64F] text-white px-1.5 py-0.5 rounded text-xs font-bold flex items-center gap-1">
+                          4.5 <Star className="w-3 h-3 fill-white text-white" />
+                        </div>
+                        <span className="text-gray-500">(120 reviews) • Excellent</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xl font-bold text-gray-900">₹{item.price}</span>
+                        <span className="text-sm text-gray-500 line-through">₹9,999</span>
+                        <span className="text-sm font-semibold text-[#f5a623]">30% off</span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-0.5">+ ₹0 Taxes</p>
                     </div>
                   </Link>
                 ))}
@@ -1129,11 +1161,11 @@ export default function HomePage() {
         <WhyRoomhy />
         
         {/* Reviews Slider Section - Auto Sliding */}
-        <section className="py-1 md:py-16 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 md:mb-10">
+        <section className="py-2 md:py-4 bg-gradient-to-b from-white to-gray-50 overflow-hidden mt-2">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mb-2 md:mb-4">
             <div className="text-center">
-              <h2 className="text-lg md:text-4xl font-bold text-gray-900 mb-1 md:mb-3">What Students Say</h2>
-              <p className="text-xs md:text-lg text-gray-600">Trusted by 10,000+ students across India</p>
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1">What Students Say</h2>
+              <p className="text-xs md:text-base text-gray-600">Trusted by 10,000+ students across India</p>
             </div>
           </div>
           

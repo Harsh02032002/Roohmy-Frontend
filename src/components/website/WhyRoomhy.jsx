@@ -57,14 +57,14 @@ export default function WhyRoomhy() {
   };
 
   return (
-    <section className="bg-white py-1 md:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section className="bg-white py-2 md:py-4">
+      <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-2">
 
-        <div className="text-center mb-3 md:mb-12">
-          <h2 className="text-lg md:text-4xl font-bold text-gray-900 mb-1 md:mb-4">
+        <div className="text-center mb-2 md:mb-4">
+          <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1">
             Why Choose Roomhy?
           </h2>
-          <p className="text-xs md:text-lg text-gray-600 mt-1 md:mt-2 max-w-2xl mx-auto">
+          <p className="text-xs md:text-base text-gray-600 max-w-2xl mx-auto">
             Built by students, for students. Here's why thousands trust us.
           </p>
         </div>
@@ -105,7 +105,7 @@ export default function WhyRoomhy() {
 
         </div>
 
-        <div className="mt-6 md:mt-12 text-center">
+        <div className="mt-4 md:mt-6 text-center">
           <div className="bg-teal-500 rounded-xl p-3 md:p-6 max-w-2xl mx-auto">
             <p className="text-white text-sm md:text-lg font-semibold">
               Join 50,000+ students who found their perfect home with Roomhy

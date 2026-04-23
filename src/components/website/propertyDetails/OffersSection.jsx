@@ -11,7 +11,7 @@ export default function OffersSection({ offers = [], benefits = [] }) {
   }
 
   return (
-    <div className="px-4 md:px-0 py-5 border-b border-gray-100">
+    <div className="px-4 md:px-0 py-3 md:py-5 border-b border-gray-100">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
           <Gift size={16} className="text-green-600" />

@@ -23,7 +23,7 @@ export default function PricingBreakdown({ property }) {
   const totalAmount = pricingItems.reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <div className="px-4 md:px-0 py-5 border-b border-gray-100 md:hidden">
+    <div className="px-4 md:px-0 py-3 md:py-5 border-b border-gray-100 md:hidden">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between"
