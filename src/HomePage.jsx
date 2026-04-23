@@ -569,7 +569,7 @@ export default function HomePage() {
             </p>
 
             <div className="max-w-5xl mx-auto w-full px-2 md:px-4 search-container relative z-50">
-              <form onSubmit={handleSearchSubmit} className="bg-white/95 md:bg-white backdrop-blur-md md:backdrop-blur-none rounded-2xl md:rounded shadow-2xl p-2 md:p-0 flex flex-row gap-2 md:gap-0 items-center relative z-20 md:overflow-hidden md:h-16 w-full">
+              <form onSubmit={handleSearchSubmit} className="bg-white/95 md:bg-white backdrop-blur-md md:backdrop-blur-none rounded-2xl md:rounded shadow-2xl p-2 md:p-0 flex flex-row gap-2 md:gap-0 items-center relative z-20 md:h-16 w-full">
                 
                 {/* Mobile Only: Type Dropdown */}
                 <div className="md:hidden relative flex-shrink-0" ref={typeDropdownRef}>
@@ -582,16 +582,17 @@ export default function HomePage() {
                   </div>
                   {isTypeDropdownOpen && (
                     <div className="absolute top-full left-0 mt-2 w-[120px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[70]">
-                      {['PG', 'Hostel', 'Co-living', 'Apartment'].map((type) => (
+                      {offerings.map((offering) => (
                         <div
-                          key={type}
+                          key={offering.category}
                           onClick={() => {
-                            setSelectedType(type.toLowerCase());
+                            setSelectedType(offering.category.toLowerCase());
                             setIsTypeDropdownOpen(false);
                           }}
-                          className={`px-3 py-2 text-[10px] cursor-pointer hover:bg-teal-50 ${selectedType === type.toLowerCase() ? 'bg-teal-50 text-teal-600 font-bold' : 'text-gray-600'}`}
+                          className={`px-3 py-2 cursor-pointer hover:bg-teal-50 ${selectedType === offering.category.toLowerCase() ? 'bg-teal-50 border-l-2 border-teal-500' : ''}`}
                         >
-                          {type}
+                          <div className="text-[10px] font-bold text-gray-900">{offering.title}</div>
+                          <div className="text-[8px] text-gray-500 truncate">{offering.description}</div>
                         </div>
                       ))}
                     </div>
@@ -607,17 +608,22 @@ export default function HomePage() {
                   
                   {isTypeDropdownOpen && (
                     <div className="absolute top-full left-0 mt-1 w-full bg-white rounded shadow-xl border border-gray-100 overflow-hidden z-[70]">
-                      {['PG', 'Hostel', 'Co-living', 'Apartment'].map((type) => (
+                      {offerings.map((offering) => (
                         <div
-                          key={type}
+                          key={offering.category}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedType(type.toLowerCase());
+                            setSelectedType(offering.category.toLowerCase());
                             setIsTypeDropdownOpen(false);
                           }}
-                          className="px-4 py-3 text-base cursor-pointer hover:bg-gray-50 text-gray-800 font-medium"
+                          className="px-5 py-3 cursor-pointer hover:bg-gray-50 border-b border-gray-50 last:border-0 group"
                         >
-                          {type}
+                          <div className="flex flex-col">
+                            <span className={`text-sm font-bold transition-colors ${selectedType === offering.category.toLowerCase() ? 'text-teal-600' : 'text-gray-900 group-hover:text-teal-600'}`}>
+                              {offering.title}
+                            </span>
+                            <span className="text-xs text-gray-500 line-clamp-1">{offering.description}</span>
+                          </div>
                         </div>
                       ))}
                     </div>

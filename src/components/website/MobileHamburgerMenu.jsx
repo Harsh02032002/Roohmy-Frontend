@@ -95,10 +95,15 @@ export default function MobileHamburgerMenu() {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <Link to="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <div className="w-8 h-8 bg-[#1ab64f] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <span className="font-bold text-lg text-gray-900">Roomhy</span>
+            <img 
+              src="/website/images/logoroomhy_cropped.jpg" 
+              alt="Roohmy Logo" 
+              className="h-8 w-auto"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/website/images/logoroomhy.jpg';
+              }}
+            />
           </Link>
           <button
             onClick={() => setIsOpen(false)}

@@ -102,12 +102,12 @@ export default function WebsiteFooter() {
           <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
             <a href="/website/index" className="inline-flex items-center gap-3 transition-transform hover:scale-105">
               <img
-                src="/website/images/logoroomhy.jpg"
+                src="/website/images/logoroomhy_cropped.jpg"
                 alt="Roohmy"
                 className="h-10 w-auto"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png';
+                  e.target.src = '/website/images/logoroomhy.jpg';
                 }}
               />
             </a>

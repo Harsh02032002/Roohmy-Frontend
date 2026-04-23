@@ -106,12 +106,12 @@ export default function WebsiteNavbar() {
                 <div className="flex items-center pr-6 md:border-r border-gray-200 h-full">
                   <Link to="/website/index" className="flex items-center space-x-2 group">
                     <img 
-                      src="/website/images/logoroomhy.jpg" 
+                      src="/website/images/logoroomhy_cropped.jpg" 
                       alt="Roohmy Logo" 
                       className="h-8 md:h-10 w-auto transition-transform group-hover:scale-105"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png';
+                        e.target.src = '/website/images/logoroomhy.jpg';
                       }}
                     />
                   </Link>
