@@ -21,7 +21,7 @@ const allPoints = [
   {
     title: "Fully Furnished",
     description: "Move in with just your suitcase. Our properties come with all the essential furniture and amenities.",
-    image: "https://images.unsplash.com/photo-1502005229766-52835d3e76d0?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80",
   },
   {
     title: "24/7 Support",
