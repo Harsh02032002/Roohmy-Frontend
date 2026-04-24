@@ -440,8 +440,12 @@ export const fetchProperties = async () => {
         
         return {
           ...p,
+          _id: String(p._id || p.visitId || ''),
+          visitId: p.visitId || p._id,
           property_name: p.property_name || p.propertyName || p.propertyInfo?.name || 'Property',
+          name: p.property_name || p.propertyName || p.propertyInfo?.name || 'Property',
           city: p.city || p.propertyInfo?.city || 'Unknown',
+          location: p.propertyInfo?.area ? `${p.propertyInfo.area}, ${p.city || p.propertyInfo?.city}` : (p.city || p.propertyInfo?.city || 'Unknown'),
           owner_name: p.owner_name || p.ownerName || p.generatedCredentials?.ownerName || p.approvedBy || 'Verified Owner',
           owner_phone: p.owner_phone || p.contactPhone || p.ownerPhone || p.propertyInfo?.phone || '9000000000',
           propertyName: p.propertyName || p.property_name || p.propertyInfo?.name || 'Property',
@@ -662,6 +666,17 @@ export const fetchPropertyTypes = async () => {
           'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=600',
           'https://images.pexels.com/photos/1743229/pexels-photo-1743229.jpeg?auto=compress&cs=tinysrgb&w=600'
         ]
+      },
+      'list': {
+        title: 'List Your Property',
+        category: 'list',
+        description: 'Are you a property owner? List your property with Roomhy and reach thousands of students.',
+        images: [
+          'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1000&auto=format&fit=crop'
+        ],
+        link: '/website/list'
       }
     };
     

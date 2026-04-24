@@ -13,6 +13,15 @@ import MobilePropertiesSection from './components/website/MobilePropertiesSectio
 import MobileVideoSection from './components/website/MobileVideoSection';
 import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
 
+const cityAreas = {
+  'Indore': ['Vijay Nagar', 'Bhawar Kuan', 'Rajwada', 'Palasia'],
+  'Jaipur': ['Malviya Nagar', 'Mansarovar', 'Vaishali Nagar', 'C-Scheme'],
+  'Mumbai': ['Andheri', 'Bandra', 'Borivali', 'Worli'],
+  'Bhopal': ['MP Nagar', 'Arera Colony', 'Bittan Market', 'Kolar'],
+  'Delhi': ['South Delhi', 'North Delhi', 'Rohini', 'Dwarka'],
+  'Nagpur': ['Civil Lines', 'Dharampeth', 'Manish Nagar', 'Sitabuldi']
+};
+
 // Static fallback data - moved outside to prevent re-renders
 const staticCities = [
   { name: 'Kota', properties: '2,500+', image: 'https://picsum.photos/600/400?random=1' },
@@ -211,6 +220,7 @@ export default function HomePage() {
   // State for dynamic data
   const [cities, setCities] = useState([]);
   const [offerings, setOfferings] = useState([]);
+  const [trendingProperties, setTrendingProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Search states
@@ -319,11 +329,22 @@ export default function HomePage() {
         } else {
           setOfferings(staticOfferings);
         }
+
+        // Fetch trending properties
+        const allProperties = await fetchProperties();
+        if (allProperties && allProperties.length > 0) {
+          // Use first 8-12 properties as trending
+          setTrendingProperties(allProperties);
+        } else {
+          // Fallback to static if API fails
+          setTrendingProperties(featuredProperties);
+        }
       } catch (error) {
         console.error('Error loading homepage data:', error);
         // Fallback to static data on error
         setCities(staticCities);
         setOfferings(staticOfferings);
+        setTrendingProperties(featuredProperties);
       } finally {
         setLoading(false);
       }
@@ -453,7 +474,7 @@ export default function HomePage() {
 
   // Trending properties carousel state
   const [trendingStartIndex, setTrendingStartIndex] = useState(0);
-  const trendingPerView = 4;
+  const trendingPerView = 5;
 
   // What We Offer - selected image index for each offering
   const [offeringSelectedImage, setOfferingSelectedImage] = useState({});
@@ -486,21 +507,21 @@ export default function HomePage() {
 
   const nextTrending = () => {
     setTrendingStartIndex((prev) => 
-      prev + trendingPerView >= featuredProperties.length ? 0 : prev + trendingPerView
+      prev + trendingPerView >= trendingProperties.length ? 0 : prev + trendingPerView
     );
   };
 
   const prevTrending = () => {
     setTrendingStartIndex((prev) => 
-      prev - trendingPerView < 0 ? Math.max(0, featuredProperties.length - trendingPerView) : prev - trendingPerView
+      prev - trendingPerView < 0 ? Math.max(0, trendingProperties.length - trendingPerView) : prev - trendingPerView
     );
   };
 
   const visibleCities = cities.slice(cityStartIndex, cityStartIndex + citiesPerView);
-  const visibleTrending = featuredProperties.slice(trendingStartIndex, trendingStartIndex + trendingPerView);
+  const visibleTrending = trendingProperties.slice(trendingStartIndex, trendingStartIndex + trendingPerView);
   const canShowNextCities = cityStartIndex + citiesPerView < cities.length;
   const canShowPrevCities = cityStartIndex > 0;
-  const canShowNextTrending = trendingStartIndex + trendingPerView < featuredProperties.length;
+  const canShowNextTrending = trendingStartIndex + trendingPerView < trendingProperties.length;
   const canShowPrevTrending = trendingStartIndex > 0;
 
   // Mobile carousel helpers
@@ -545,7 +566,7 @@ export default function HomePage() {
 
       <main className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative min-h-[180px] md:min-h-0 md:h-[380px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 z-10">
+        <div className="relative min-h-[160px] md:min-h-0 md:h-[320px] bg-gradient-to-br from-teal-600 via-blue-600 to-cyan-500 z-10">
           <div className="absolute inset-0 overflow-hidden">
             {heroImages.map((image, index) => (
               <div
@@ -560,7 +581,7 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="relative max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 h-full flex flex-col justify-start pt-4 md:pt-16">
+          <div className="relative max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 h-full flex flex-col justify-start pt-4 md:pt-10">
             <h1 className="text-xl sm:text-4xl md:text-6xl font-bold text-white mb-1 md:mb-4 leading-tight text-center drop-shadow-lg">
               Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 drop-shadow-2xl">Student Stay</span>
             </h1>
@@ -683,15 +704,30 @@ export default function HomePage() {
         {/* Cities Sub-navigation placed under banner */}
         <div className="hidden md:block bg-[#f8f9fa] border-b border-gray-200">
           <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12">
-            <div className="flex items-center justify-center h-10 text-sm font-medium text-gray-600">
+            <div className="flex items-center justify-center h-8 text-[13px] font-medium text-gray-600">
               <div className="flex items-center justify-center space-x-10 w-full">
-                {['Indore', 'Jaipur', 'Mumbai', 'Bhopal', 'Delhi', 'Nagpur'].map((city) => (
-                  <Link key={city} to={`/website/ourproperty?city=${city}`} className="flex items-center space-x-1 hover:text-black cursor-pointer group">
-                    <span>{city}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-black transition-colors" />
-                  </Link>
+                {Object.keys(cityAreas).map((city) => (
+                  <div key={city} className="relative group h-full flex items-center">
+                    <Link to={`/website/ourproperty?city=${city}`} className="flex items-center space-x-1 hover:text-black cursor-pointer h-full">
+                      <span>{city}</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-black transition-colors" />
+                    </Link>
+                    
+                    {/* Areas Dropdown on Hover */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-48 bg-white shadow-xl rounded-b-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                      {cityAreas[city].map((area) => (
+                        <Link
+                          key={area}
+                          to={`/website/ourproperty?city=${city}&area=${area}`}
+                          className="block px-4 py-2 text-xs text-gray-600 hover:bg-teal-50 hover:text-teal-600 transition-colors"
+                        >
+                          {area}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 ))}
-                <Link to="/website/ourproperty" className="flex items-center space-x-1 hover:text-black cursor-pointer group font-semibold">
+                <Link to="/website/ourproperty" className="flex items-center space-x-1 hover:text-black cursor-pointer group font-semibold h-full">
                   <span>All Cities</span>
                   <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-black transition-colors" />
                 </Link>
@@ -700,76 +736,18 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Popular Cities - Carousel with 4 items */}
-        <section className="py-1 md:py-2 bg-white">
-          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-2">
-            <div className="flex flex-col items-center justify-center text-center mb-2 md:mb-4">
-              <h2 className="text-xl md:text-3xl font-bold text-gray-900">Popular Cities</h2>
-              <p className="text-xs md:text-base text-gray-600 mt-0.5">Explore top cities for student accommodation</p>
-            </div>
 
-            {/* Desktop Grid - Hidden on mobile */}
-            <div className="hidden md:block relative px-12">
-              {/* Removed Navigation Arrows since we show all cities now */}
-
-              <div className="flex justify-between items-center gap-4 py-4 w-full">
-                {cities.slice(0, 8).map((city) => (
-                  <Link
-                    key={city.name}
-                    to={`/website/ourproperty?city=${city.name}`}
-                    className="flex flex-col items-center text-center group flex-shrink-0"
-                  >
-                    <div className="h-24 w-24 rounded-full overflow-hidden shadow-md ring-1 ring-gray-200 group-hover:shadow-xl group-hover:ring-teal-500 transition-all duration-300">
-                      <img
-                        src={city.image}
-                        alt={city.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </div>
-                    <span className="mt-3 text-sm font-bold text-gray-800 group-hover:text-teal-600 transition-colors">{city.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </div> 
-
-            {/* Mobile Carousel - Smooth horizontal scroll */}
-            <div className="md:hidden relative -mx-4">
-
-              {/* Smooth Horizontal Scroll Container */}
-              <div 
-                ref={citiesScrollContainerRef}
-                className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
-              >
-                <div className="flex gap-4 w-max px-2 py-3">
-                  {cities.map((city) => (
-                    <Link
-                      key={city.name}
-                      to={`/website/ourproperty?city=${city.name}`}
-                      className="flex flex-col items-center text-center flex-shrink-0"
-                    >
-                      <div className="h-16 w-16 rounded-2xl overflow-hidden shadow-md ring-1 ring-black/5">
-                        <img src={city.image} alt={city.name} className="h-full w-full object-cover" />
-                      </div>
-                      <span className="mt-1.5 text-[11px] font-semibold text-gray-800 leading-tight">{city.name}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              
-            </div>
-          </div>
-        </section>
 
         {/* What We Offer - Desktop & Mobile Responsive */}
-        <section className="py-1 md:py-2 bg-white">
-          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-2">
-            <div className="text-center mb-2 md:mb-4">
-              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1">What We Offer</h2>
+        <section className="py-1 bg-white">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1">
+            <div className="text-center mb-1 md:mb-2">
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-0.5">What We Offer</h2>
               <p className="text-xs md:text-base text-gray-600">Choose from a variety of accommodation types tailored for students</p>
             </div>
 
             {/* Desktop Grid - Hidden on mobile */}
-            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
               {offerings.map((offering) => {
                 const selectedIdx = offeringSelectedImage[offering.title] || 0;
                 const allImages = offering.images;
@@ -792,7 +770,7 @@ export default function HomePage() {
                 return (
                   <div
                     key={offering.title}
-                    onClick={() => navigate(`/website/ourproperty?type=${offering.category.toLowerCase()}`)}
+                    onClick={() => offering.link ? navigate(offering.link) : navigate(`/website/ourproperty?type=${offering.category.toLowerCase()}`)}
                     className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition-all group cursor-pointer"
                   >
                     {/* Main Image - with arrows */}
@@ -889,24 +867,20 @@ export default function HomePage() {
 
         <MobileVideoSection />
 
-        {/* How Roomhy Works - Video Section */}
         {/* How Roomhy Works - Improved Section */}
-<section className="hidden md:block py-2 bg-white border-t border-gray-100">
-  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-2">
-
-    {/* Heading */}
-    <div className="text-center mb-4">
-      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+<section className="hidden md:block py-1 bg-white border-t border-gray-100">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-1">
+    <div className="text-center mb-2">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-0.5">
         How Roomhy Works
       </h2>
-      <p className="text-base text-gray-600">
+      <p className="text-sm text-gray-600">
         Find, compare, and book your perfect stay in just a few steps
       </p>
     </div>
 
     {/* Video Container */}
-    <div className="relative max-w-2xl mx-auto rounded-3xl overflow-hidden shadow-xl group aspect-video">
-
+    <div className="relative max-w-xl mx-auto rounded-2xl overflow-hidden shadow-lg group aspect-video">
       {/* Overlay Gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent z-10 pointer-events-none"></div>
 
@@ -942,7 +916,7 @@ export default function HomePage() {
             
             <div className="relative">
               {/* Left Arrow */}
-              {featuredProperties.length > trendingPerView && canShowPrevTrending && (
+              {trendingProperties.length > trendingPerView && canShowPrevTrending && (
                 <button 
                   onClick={prevTrending}
                   className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
@@ -952,7 +926,7 @@ export default function HomePage() {
               )}
               
               {/* Right Arrow */}
-              {featuredProperties.length > trendingPerView && canShowNextTrending && (
+              {trendingProperties.length > trendingPerView && canShowNextTrending && (
                 <button 
                   onClick={nextTrending}
                   className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
@@ -961,14 +935,14 @@ export default function HomePage() {
                 </button>
               )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6">
               {visibleTrending.map((property) => (
                 <Link 
-                  key={property.name} 
+                  key={property._id} 
                   to={`/website/property-details/${property._id}`}
                   className="group block cursor-pointer"
                 >
-                  <div className="relative h-48 rounded-md overflow-hidden mb-3">
+                  <div className="relative h-36 rounded-md overflow-hidden mb-2">
                     <img 
                       src={property.image} 
                       alt={property.name} 
@@ -978,29 +952,30 @@ export default function HomePage() {
                       }}
                     />
                     {property.verified && (
-                      <div className="absolute top-3 left-3 bg-white/20 backdrop-blur border border-white/30 rounded px-2 py-1 flex items-center shadow-lg">
-                        <BadgeCheck className="w-4 h-4 text-teal-600 mr-1" />
-                        <span className="text-xs font-bold text-gray-900">Verified</span>
+                      <div className="absolute top-2 left-2 bg-white/20 backdrop-blur border border-white/30 rounded px-1.5 py-0.5 flex items-center shadow-lg">
+                        <BadgeCheck className="w-3.5 h-3.5 text-teal-600 mr-1" />
+                        <span className="text-[10px] font-bold text-gray-900">Verified</span>
                       </div>
                     )}
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg mb-0.5 line-clamp-1 group-hover:text-teal-600 transition-colors">{property.name}</h3>
-                    <div className="text-gray-500 text-sm mb-2 line-clamp-1">
+                    <h3 className="font-bold text-gray-900 text-sm mb-0.5 line-clamp-1 group-hover:text-teal-600 transition-colors">{property.name || property.property_name || 'Roomhy Property'}</h3>
+                    <div className="text-gray-500 text-[11px] mb-1 line-clamp-1">
                       {property.location}
                     </div>
-                    <div className="flex items-center gap-2 mb-2 text-sm">
-                      <div className="bg-[#1AB64F] text-white px-1.5 py-0.5 rounded text-xs font-bold flex items-center gap-1">
-                        {property.rating} <Star className="w-3 h-3 fill-white text-white" />
+                    <div className="flex items-center gap-1.5 mb-1 text-[11px]">
+                      <div className="bg-[#1AB64F] text-white px-1 py-0.5 rounded text-[10px] font-bold flex items-center gap-0.5">
+                        {property.rating} <Star className="w-2.5 h-2.5 fill-white text-white" />
                       </div>
-                      <span className="text-gray-500">(120 reviews) • Excellent</span>
+                      <span className="text-gray-500">Excellent</span>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-bold text-gray-900">{property.price}</span>
-                      <span className="text-sm text-gray-500 line-through">₹9,999</span>
-                      <span className="text-sm font-semibold text-[#f5a623]">40% off</span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-base font-bold text-gray-900">
+                        {property.monthlyRent ? `₹${property.monthlyRent.toLocaleString()}` : (property.price || '₹0')}
+                      </span>
+                      <span className="text-[10px] text-gray-500 line-through">₹9,999</span>
+                      <span className="text-[10px] font-semibold text-[#f5a623]">40% off</span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">+ ₹0 Taxes</p>
                   </div>
                 </Link>
               ))}
@@ -1026,9 +1001,9 @@ export default function HomePage() {
     className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing"
   >
     <div className="flex gap-3 w-max px-2 py-3">
-      {featuredProperties.map((property) => (
+      {trendingProperties.map((property) => (
         <Link
-          key={property.name}
+          key={property._id}
           to={`/website/property-details/${property._id}`}
           className="flex-shrink-0 w-36 block active:scale-95 transition-transform"
         >
@@ -1049,13 +1024,15 @@ export default function HomePage() {
             </div>
           </div>
           {/* Plain text below image — no card box */}
-          <h3 className="font-bold text-gray-900 text-sm mb-0 line-clamp-1">{property.name}</h3>
+          <h3 className="font-bold text-gray-900 text-sm mb-0 line-clamp-1">{property.name || property.property_name || 'Roomhy Property'}</h3>
           <div className="flex items-center text-gray-600 font-medium text-[10px] mb-0">
             <MapPin className="w-2.5 h-2.5 mr-0.5 flex-shrink-0" />
             <span className="line-clamp-1">{property.location}</span>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-sm font-bold text-gray-900">{property.price}</span>
+            <span className="text-sm font-bold text-gray-900">
+              {property.monthlyRent ? `₹${property.monthlyRent.toLocaleString()}` : (property.price || '₹0')}
+            </span>
             <span className="text-[10px] text-gray-500 line-through">₹9,999</span>
             <span className="text-[10px] font-semibold text-teal-600">30% off</span>
           </div>
@@ -1073,23 +1050,23 @@ export default function HomePage() {
           <section className="py-1 md:py-2 bg-white">
             <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-2">
               {/* Heading - Matched with Trending Section */}
-              <div className="text-center mb-4">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <TrendingUp className="w-5 h-5 text-teal-600" />
-                  <h2 className="text-xl md:text-3xl font-bold text-gray-900">Recently Viewed</h2>
+              <div className="text-center mb-2">
+                <div className="flex items-center justify-center gap-2 mb-0.5">
+                  <TrendingUp className="w-4 h-4 text-teal-600" />
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-900">Recently Viewed</h2>
                 </div>
-                <p className="text-xs md:text-base text-gray-600">Pick up where you left off</p>
+                <p className="text-[10px] md:text-sm text-gray-600">Pick up where you left off</p>
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+              <div className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-x-4 gap-y-6">
                 {recentlyViewed.map((item) => (
                   <Link 
                     key={item.id} 
                     to={`/website/property-details/${item.id}`}
                     className="group block cursor-pointer"
                   >
-                    <div className="relative h-48 rounded-md overflow-hidden mb-3">
+                    <div className="relative h-36 rounded-md overflow-hidden mb-2">
                       <img 
                         src={item.image} 
                         alt={item.name} 
@@ -1098,29 +1075,28 @@ export default function HomePage() {
                           e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
                         }}
                       />
-                      <div className="absolute top-3 left-3 flex gap-2">
-                        <div className="bg-white/20 backdrop-blur border border-white/30 rounded px-2 py-1 flex items-center shadow-lg">
-                          <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider">{item.type || 'PG'}</span>
+                      <div className="absolute top-2 left-2 flex gap-1">
+                        <div className="bg-white/20 backdrop-blur border border-white/30 rounded px-1.5 py-0.5 flex items-center shadow-lg">
+                          <span className="text-[9px] font-bold text-teal-600 uppercase tracking-wider">{item.type || 'PG'}</span>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900 text-lg mb-0.5 line-clamp-1 group-hover:text-teal-600 transition-colors">{item.name}</h3>
-                      <div className="text-gray-500 text-sm mb-2 line-clamp-1">
+                      <h3 className="font-bold text-gray-900 text-sm mb-0.5 line-clamp-1 group-hover:text-teal-600 transition-colors">{item.name}</h3>
+                      <div className="text-gray-500 text-[11px] mb-1 line-clamp-1">
                         {item.location}
                       </div>
-                      <div className="flex items-center gap-2 mb-2 text-sm">
-                        <div className="bg-[#1AB64F] text-white px-1.5 py-0.5 rounded text-xs font-bold flex items-center gap-1">
-                          4.5 <Star className="w-3 h-3 fill-white text-white" />
+                      <div className="flex items-center gap-1.5 mb-1 text-[11px]">
+                        <div className="bg-[#1AB64F] text-white px-1 py-0.5 rounded text-[10px] font-bold flex items-center gap-0.5">
+                          4.5 <Star className="w-2.5 h-2.5 fill-white text-white" />
                         </div>
-                        <span className="text-gray-500">(120 reviews) • Excellent</span>
+                        <span className="text-gray-500">Excellent</span>
                       </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-bold text-gray-900">₹{item.price}</span>
-                        <span className="text-sm text-gray-500 line-through">₹9,999</span>
-                        <span className="text-sm font-semibold text-[#f5a623]">30% off</span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-base font-bold text-gray-900">₹{item.price}</span>
+                        <span className="text-[10px] text-gray-500 line-through">₹9,999</span>
+                        <span className="text-[10px] font-semibold text-[#f5a623]">30% off</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5">+ ₹0 Taxes</p>
                     </div>
                   </Link>
                 ))}

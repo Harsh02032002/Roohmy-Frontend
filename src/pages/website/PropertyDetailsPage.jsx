@@ -553,11 +553,18 @@ export default function PropertyDetailsPage() {
           return;
         }
         
+        console.log('🔍 Debug: Looking for propertyId:', propertyId);
+        console.log('🔍 Debug: allProperties count:', allProperties.length);
+        
         const foundProperty = allProperties.find(
-          (p) => p._id === propertyId || p.visitId === propertyId || p.propertyName === propertyId
+          (p) => String(p._id) === String(propertyId) || 
+                 String(p.visitId) === String(propertyId) || 
+                 String(p.propertyName) === String(propertyId) ||
+                 String(p.property_name) === String(propertyId)
         );
 
         if (foundProperty) {
+          console.log('✅ Debug: Found property:', foundProperty.name || foundProperty.property_name);
           // Debug: Log the full property object to see what _id looks like
           console.log('Full foundProperty:', foundProperty);
           console.log('foundProperty._id:', foundProperty._id);
