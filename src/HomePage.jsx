@@ -524,6 +524,26 @@ export default function HomePage() {
   const canShowNextTrending = trendingStartIndex + trendingPerView < trendingProperties.length;
   const canShowPrevTrending = trendingStartIndex > 0;
 
+  // Recently Viewed carousel state
+  const [recentlyViewedStartIndex, setRecentlyViewedStartIndex] = useState(0);
+  const recentlyViewedPerView = 5;
+
+  const nextRecentlyViewed = () => {
+    setRecentlyViewedStartIndex((prev) => 
+      prev + recentlyViewedPerView >= recentlyViewed.length ? 0 : prev + recentlyViewedPerView
+    );
+  };
+
+  const prevRecentlyViewed = () => {
+    setRecentlyViewedStartIndex((prev) => 
+      prev - recentlyViewedPerView < 0 ? Math.max(0, recentlyViewed.length - recentlyViewedPerView) : prev - recentlyViewedPerView
+    );
+  };
+
+  const visibleRecentlyViewed = recentlyViewed.slice(recentlyViewedStartIndex, recentlyViewedStartIndex + recentlyViewedPerView);
+  const canShowNextRecentlyViewed = recentlyViewedStartIndex + recentlyViewedPerView < recentlyViewed.length;
+  const canShowPrevRecentlyViewed = recentlyViewedStartIndex > 0;
+
   // Mobile carousel helpers
   const canShowNextMobileCity = mobileCityIndex + 4 < cities.length;
   const canShowPrevMobileCity = mobileCityIndex > 0;
@@ -739,10 +759,10 @@ export default function HomePage() {
 
 
         {/* What We Offer - Desktop & Mobile Responsive */}
-        <section className="py-1 bg-white">
-          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1">
-            <div className="text-center mb-1 md:mb-2">
-              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-0.5">What We Offer</h2>
+        <section className="py-1 md:py-4 bg-white">
+          <div className="max-w-none w-full mx-auto px-4 md:px-8 lg:px-12 mt-1 md:mt-4">
+            <div className="text-center mb-4">
+              <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1">What We Offer</h2>
               <p className="text-xs md:text-base text-gray-600">Choose from a variety of accommodation types tailored for students</p>
             </div>
 
@@ -868,9 +888,9 @@ export default function HomePage() {
         <MobileVideoSection />
 
         {/* How Roomhy Works - Improved Section */}
-<section className="hidden md:block py-1 bg-white border-t border-gray-100">
-  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-1">
-    <div className="text-center mb-2">
+<section className="hidden md:block py-4 bg-white border-t border-gray-100 mt-4">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-2">
+    <div className="text-center mb-4">
       <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-0.5">
         How Roomhy Works
       </h2>
@@ -1059,22 +1079,43 @@ export default function HomePage() {
               </div>
 
               {/* Desktop Grid */}
-              <div className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-x-4 gap-y-6">
-                {recentlyViewed.map((item) => (
-                  <Link 
-                    key={item.id} 
-                    to={`/website/property-details/${item.id}`}
-                    className="group block cursor-pointer"
+              <div className="relative hidden md:block">
+                {/* Left Arrow */}
+                {recentlyViewed.length > recentlyViewedPerView && canShowPrevRecentlyViewed && (
+                  <button 
+                    onClick={prevRecentlyViewed}
+                    className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
                   >
-                    <div className="relative h-36 rounded-md overflow-hidden mb-2">
-                      <img 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
-                        }}
-                      />
+                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                  </button>
+                )}
+                
+                {/* Right Arrow */}
+                {recentlyViewed.length > recentlyViewedPerView && canShowNextRecentlyViewed && (
+                  <button 
+                    onClick={nextRecentlyViewed}
+                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:shadow-xl transition-all"
+                  >
+                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                  </button>
+                )}
+
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-4 gap-y-6">
+                  {visibleRecentlyViewed.map((item) => (
+                    <Link 
+                      key={item.id} 
+                      to={`/website/property-details/${item.id}`}
+                      className="group block cursor-pointer"
+                    >
+                      <div className="relative h-36 rounded-md overflow-hidden mb-2">
+                        <img 
+                          src={item.image} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.target.src = `https://picsum.photos/600/400?random=${Math.floor(Math.random() * 100)}`;
+                          }}
+                        />
                       <div className="absolute top-2 left-2 flex gap-1">
                         <div className="bg-white/20 backdrop-blur border border-white/30 rounded px-1.5 py-0.5 flex items-center shadow-lg">
                           <span className="text-[9px] font-bold text-teal-600 uppercase tracking-wider">{item.type || 'PG'}</span>
@@ -1100,6 +1141,7 @@ export default function HomePage() {
                     </div>
                   </Link>
                 ))}
+              </div>
               </div>
 
               {/* Mobile Swipe Carousel */}
