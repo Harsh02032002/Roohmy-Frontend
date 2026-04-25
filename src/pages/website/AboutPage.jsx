@@ -177,7 +177,7 @@ export default function AboutPage() {
                   <img src="/website/images/ceo2.png" alt="Co-Founder" className="w-full h-full object-cover transition-all duration-500" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">Anushka Sharma</h3>
+              <h3 className="text-2xl font-bold text-gray-900">Resham Singh</h3>
               <p className="text-teal-600 font-semibold mb-3">Founder & CEO</p>
               <p className="text-gray-500 text-center text-sm max-w-xs">
                 Dedicated to making room rentals fair, affordable, and accessible for students across the nation.

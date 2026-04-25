@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { resolveSectionFromPath, sharedNavConfig } from "./sharedNavConfig";
+import { Sidebar } from "./Sidebar";
 
 const NavItem = ({ to, label }) => (
   <NavLink
@@ -115,54 +116,15 @@ export default function SharedShell({ children }) {
           onClick={() => setSidebarOpen(false)}
           style={isMobile && sidebarOpen ? { display: "block" } : undefined}
         />
-        <aside
-          className={`sidebar w-72 flex-shrink-0 flex flex-col z-20 overflow-y-auto custom-scrollbar shared-superadmin-sidebar${sidebarOpen ? " open" : ""}`}
-          style={
-            isMobile
-              ? {
-                  transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
-                  display: sidebarOpen ? "flex" : "none"
-                }
-              : undefined
-          }
-        >
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img
-                  src="/website/images/whitelogo.jpeg"
-                  alt="Roomhy Logo"
-                  className="h-16 w-auto"
-                />
-                <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-              </div>
-              <button
-                className="shared-sidebar-close shared-superadmin-close"
-                type="button"
-                onClick={() => setSidebarOpen(false)}
-              >
-                &#10005;
-              </button>
-            </div>
-          </div>
-          <nav className="flex-1 py-6 space-y-1">
-            {config.sections.map((sectionBlock) => (
-              <div key={sectionBlock.label}>
-                <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {sectionBlock.label}
-                </div>
-                {sectionBlock.links.map((link) => (
-                  <SuperadminNavItem
-                    key={link.to}
-                    to={link.to}
-                    label={link.label}
-                    icon={link.icon}
-                  />
-                ))}
-              </div>
-            ))}
-          </nav>
-        </aside>
+        <Sidebar 
+          open={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)} 
+          onLogout={() => {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/superadmin/index";
+          }}
+        />
 
         <div className="shared-main">
           <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10 border-b border-gray-200">

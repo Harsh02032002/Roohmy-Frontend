@@ -5,6 +5,7 @@ import { TranslationProvider } from './contexts/TranslationContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import routes from "./routes";
 import { getOwnerSession } from "./utils/ownerSession";
+import SharedShell from "./components/SharedShell";
 
 const wrapWithShell = (path, element) => {
   const wrappedElement = (
@@ -24,6 +25,11 @@ const wrapWithShell = (path, element) => {
   
   // No shell for digital checkin
   if (path.startsWith("/digital-checkin/")) return wrappedElement;
+  
+  // Wrap superadmin routes with SharedShell
+  if (path.startsWith("/superadmin/") && path !== "/superadmin/index") {
+    return <SharedShell>{wrappedElement}</SharedShell>;
+  }
   
   // Return wrapped element for other panels (they have their own layouts)
   return wrappedElement;

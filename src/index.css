@@ -39,3 +39,33 @@ html {
 .animate-in {
   animation: slideInFromTop 0.2s ease-out;
 }
+
+/* Hide legacy superadmin elements when wrapped in SharedShell */
+.shared-shell-superadmin .shared-content aside.sidebar,
+.shared-shell-superadmin .shared-content aside#mobile-sidebar,
+.shared-shell-superadmin .shared-content header,
+.shared-shell-superadmin .shared-content #mobile-sidebar-overlay {
+  display: none !important;
+}
+
+/* Adjust layout for wrapped pages */
+.shared-shell-superadmin .shared-content .flex.h-screen.overflow-hidden {
+  height: 100% !important;
+  display: block !important;
+}
+
+/* Custom scrollbar for sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
