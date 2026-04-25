@@ -561,7 +561,6 @@ export default function SuperadminAreaadmin() {
     </main>
   );
 }
-}
 
 
 
