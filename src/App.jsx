@@ -7,42 +7,14 @@ import routes from "./routes";
 import { getOwnerSession } from "./utils/ownerSession";
 import SharedShell from "./components/SharedShell";
 
-const wrapWithShell = (path, element) => {
-  const wrappedElement = (
-    <Suspense
-      fallback={
-        <div className="min-h-[40vh] flex items-center justify-center px-4 py-12 text-sm text-slate-500">
-          Loading page...
-        </div>
-      }
-    >
-      {element}
-    </Suspense>
-  );
-
-  // No shell wrapping for website pages - direct render
-  if (path.startsWith("/website/")) return wrappedElement;
-  
-  // No shell for digital checkin
-  if (path.startsWith("/digital-checkin/")) return wrappedElement;
-  
-  // Wrap superadmin routes with SharedShell
-  if (path.startsWith("/superadmin/") && path !== "/superadmin/index") {
-    return <SharedShell>{wrappedElement}</SharedShell>;
-  }
-  
-  // Return wrapped element for other panels (they have their own layouts)
-  return wrappedElement;
-};
-
-const renderRoutes = (items) =>
-  items.map((route) => (
-    <Route
-      key={route.path}
-      path={route.path}
-      element={wrapWithShell(route.path, route.element)}
-    />
-  ));
+const PageLoader = () => (
+  <div className="min-h-[40vh] flex items-center justify-center px-4 py-12 text-sm text-slate-500">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+      <p className="font-bold tracking-widest uppercase text-[10px]">Loading Roomhy...</p>
+    </div>
+  </div>
+);
 
 const resolveHostHome = () => {
   if (typeof window === "undefined") return "/website/index";
@@ -132,22 +104,46 @@ const RouteChromeCleanup = () => {
 };
 
 export default function App() {
+  // Categorize routes for nested layout
+  const shellRoutes = routes.filter(r => {
+    const isSuperadmin = r.path.startsWith("/superadmin/") && r.path !== "/superadmin/index";
+    const isEmployee = r.path.startsWith("/employee/") && r.path !== "/employee/index";
+    const isOwner = r.path.startsWith("/propertyowner/") && !["/propertyowner/index", "/propertyowner/ownerlogin"].includes(r.path);
+    const isTenant = r.path.startsWith("/tenant/") && r.path !== "/tenant/tenantlogin";
+    return isSuperadmin || isEmployee || isOwner || isTenant;
+  });
+
+  const standaloneRoutes = routes.filter(r => !shellRoutes.find(sr => sr.path === r.path));
+
   return (
     <AuthProvider>
       <TranslationProvider>
         <ThemeProvider>
           <Router>
             <RouteChromeCleanup />
-            <Routes>
-              {renderRoutes(routes)}
-              <Route path="/" element={<Navigate to={resolveHostHome()} replace />} />
-              <Route path="/superadmin" element={<Navigate to="/superadmin/index" replace />} />
-              <Route path="/employee" element={<Navigate to="/employee/areaadmin" replace />} />
-              <Route path="/employee/superadmin" element={<Navigate to="/employee/areaadmin" replace />} />
-              <Route path="/propertyowner" element={<Navigate to="/propertyowner/index" replace />} />
-              <Route path="/website" element={<Navigate to="/website/index" replace />} />
-              <Route path="*" element={<HtmlRedirectOrHome />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Routes wrapped in SharedShell Layout */}
+                <Route element={<SharedShell />}>
+                  {shellRoutes.map(route => (
+                    <Route key={route.path} path={route.path} element={route.element} />
+                  ))}
+                </Route>
+
+                {/* Standalone routes (Login pages, website, etc.) */}
+                {standaloneRoutes.map(route => (
+                  <Route key={route.path} path={route.path} element={route.element} />
+                ))}
+
+                <Route path="/" element={<Navigate to={resolveHostHome()} replace />} />
+                <Route path="/superadmin" element={<Navigate to="/superadmin/index" replace />} />
+                <Route path="/employee" element={<Navigate to="/employee/areaadmin" replace />} />
+                <Route path="/employee/superadmin" element={<Navigate to="/employee/areaadmin" replace />} />
+                <Route path="/propertyowner" element={<Navigate to="/propertyowner/index" replace />} />
+                <Route path="/website" element={<Navigate to="/website/index" replace />} />
+                <Route path="*" element={<HtmlRedirectOrHome />} />
+              </Routes>
+            </Suspense>
           </Router>
         </ThemeProvider>
       </TranslationProvider>

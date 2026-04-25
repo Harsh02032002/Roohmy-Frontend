@@ -67,40 +67,33 @@ export default function EnquiryHold() {
   };
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar bg-[#111827] w-72 flex-shrink-0 hidden md:flex flex-col">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800">
-            <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-          </div>
-          <nav className="flex-1 py-6">
-            <a href="/superadmin/enquiry" className="flex items-center px-6 py-3 text-gray-400 hover:text-white transition-colors">
-              <i data-lucide="help-circle" className="w-5 h-5 mr-3"></i> Enquiries
-            </a>
-            <a href="/superadmin/website" className="flex items-center px-6 py-3 text-gray-400 hover:text-white transition-colors">
-              <i data-lucide="globe" className="w-5 h-5 mr-3"></i> Live Properties
-            </a>
-          </nav>
-        </aside>
-        <div className="flex-1 flex flex-col">
-          <header className="bg-white h-16 shadow-sm flex items-center px-8 border-b border-gray-200">
-            <a href="/superadmin/enquiry" className="mr-4 text-gray-400">
+    <div className="p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <a href="/superadmin/enquiry" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-slate-600">
               <i data-lucide="arrow-left" className="w-5 h-5"></i>
             </a>
-            <h1 className="text-xl font-bold text-gray-800">On Hold</h1>
-            <button onClick={loadVisits} className="ml-auto text-sm text-purple-600 hover:underline flex items-center gap-1">
-              <i data-lucide="refresh-cw" className="w-3 h-3"></i> Refresh
-            </button>
-          </header>
-          <main className="flex-1 p-8">
-            <div className="bg-white rounded-xl shadow border overflow-x-auto">
-              <table className="w-full text-left min-w-full">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">On Hold</h1>
+              <p className="text-sm text-slate-500">Property visits currently pending additional information or professional photos.</p>
+            </div>
+          </div>
+          <button onClick={loadVisits} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            <i data-lucide="refresh-cw" className="w-4 h-4"></i> Refresh
+          </button>
+        </div>
+
+        <main className="">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
                 <thead className="bg-gray-50 text-[10px] text-gray-500 uppercase border-b">
                   <tr>
                     <th className="px-6 py-4">Property</th>
                     <th className="px-6 py-4">Hold Reason</th>
                     <th className="px-6 py-4">Prof. Photo Status</th>
-                    <th className="px-6 py-4 text-center">Actions</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -123,17 +116,23 @@ export default function EnquiryHold() {
                     const prop = visit.propertyInfo || {};
                     const profCount = (visit.professionalPhotos || []).length;
                     return (
-                      <tr key={visit._id}>
+                      <tr key={visit._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="font-semibold text-gray-800">{prop.name || visit.propertyName || "-"}</div>
-                          <div className="text-xs text-gray-500">{visit.address || prop.address || "-"}</div>
+                          <div className="font-semibold text-slate-800">{prop.name || visit.propertyName || "-"}</div>
+                          <div className="text-xs text-slate-500">{visit.address || prop.address || "-"}</div>
                         </td>
-                        <td className="px-6 py-4 text-sm">{visit.holdReason || "On hold"}</td>
-                        <td className="px-6 py-4 text-sm">{profCount > 0 ? `${profCount} photos` : "Missing"}</td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-6 py-4 text-sm text-slate-600">{visit.holdReason || "On hold"}</td>
+                        <td className="px-6 py-4 text-sm">
+                          {profCount > 0 ? (
+                            <span className="text-blue-600 font-medium">{profCount} photos</span>
+                          ) : (
+                            <span className="text-amber-600 font-medium italic">Missing</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right">
                           <button
                             onClick={() => approveVisit(visit.visitId || visit._id)}
-                            className="text-xs px-3 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200"
+                            className="text-xs px-3 py-1 rounded border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors font-medium"
                           >
                             Approve
                           </button>
@@ -144,8 +143,8 @@ export default function EnquiryHold() {
                 </tbody>
               </table>
             </div>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );

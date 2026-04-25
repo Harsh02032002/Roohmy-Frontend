@@ -1,6 +1,5 @@
 import React from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
-import { useLegacySidebar } from "../../utils/legacyUi";
 
 export default function Security() {
   useHtmlPage({
@@ -50,299 +49,215 @@ export default function Security() {
     inlineScripts: []
   });
 
-  useLegacySidebar();
+
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   return (
-    <div className="html-page" dangerouslySetInnerHTML={{ __html: `
-<div class="flex h-screen overflow-hidden">
-                <!-- Sidebar -->
-        <aside class="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-            <div class="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-                 <div class="flex items-center gap-3">
-                     
-                     <div><img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" class="h-16 w-auto"><span class="text-[10px] text-gray-500">SUPER ADMIN</span></div>
-                 </div>
-            </div>
-            <nav class="flex-1 py-6 space-y-1">
-                <div class="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Overview</div>
-                <a href="/superadmin/superadmin" class="sidebar-link"><i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> Dashboard</a>
-                <div class="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Management</div>
-                <a href="/superadmin/manager" class="sidebar-link"><i data-lucide="map-pin" class="w-5 h-5 mr-3"></i> Teams</a>
-                <a href="/superadmin/owner" class="sidebar-link"><i data-lucide="briefcase" class="w-5 h-5 mr-3"></i> Property Owners</a>
-                <a href="/superadmin/properties" class="sidebar-link"><i data-lucide="home" class="w-5 h-5 mr-3"></i> Properties</a>
-                <a href="/superadmin/tenant" class="sidebar-link"><i data-lucide="users" class="w-5 h-5 mr-3"></i> Tenants</a>
-                <a href="/superadmin/new_signups" class="sidebar-link"><i data-lucide="file-badge" class="w-5 h-5 mr-3"></i> New Signups</a>
-                <div class="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Operations</div>
-                <a href="/superadmin/websiteenq" class="sidebar-link"><i data-lucide="folder-open" class="w-5 h-5 mr-3"></i> Web Enquiry</a>
-                <a href="/superadmin/enquiry" class="sidebar-link"><i data-lucide="help-circle" class="w-5 h-5 mr-3"></i> Enquiries</a>
-                <a href="/superadmin/booking" class="sidebar-link"><i data-lucide="calendar-check" class="w-5 h-5 mr-3"></i> Bookings</a>
-                <a href="/superadmin/reviews" class="sidebar-link"><i data-lucide="star" class="w-5 h-5 mr-3"></i> Reviews</a>
-                <a href="/superadmin/complaint-history" class="sidebar-link"><i data-lucide="alert-circle" class="w-5 h-5 mr-3"></i> Complaint History</a>
-                <div class="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Website</div>
-                <a href="/superadmin/website" class="sidebar-link"><i data-lucide="globe" class="w-5 h-5 mr-3"></i> Live Properties</a>
-                <div class="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Finance</div>
-                <div class="group">
-                    <div class="sidebar-link justify-between" onclick="toggleSubmenu('finance-submenu', this)">
-                        <div class="flex items-center"><i data-lucide="wallet" class="w-5 h-5 mr-3"></i> Finance</div>
-                        <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200"></i>
-                    </div>
-                    <div id="finance-submenu" class="submenu">
-                        <a href="/superadmin/rentcollection" class="sidebar-link text-sm hover:text-white">Rent Collections</a>
-                        <a href="/superadmin/platform" class="sidebar-link text-sm hover:text-white">Commissions</a>
-                        <a href="/superadmin/refund" class="sidebar-link text-sm hover:text-white">Refunds</a>
-                    </div>
-                </div>
-                <div class="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System</div><a href="/superadmin/location" class="sidebar-link"><i data-lucide="globe" class="w-5 h-5 mr-3"></i> Locations</a>
-            </nav>
-        </aside>
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-            <!-- Top Header -->
-            <header class="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-                <div class="flex items-center">
-                    <button id="mobile-menu-open" class="md:hidden mr-4 text-slate-500"><i data-lucide="menu" class="w-6 h-6"></i></button>
-                    <div class="flex items-center text-sm">
-                        <span class="text-slate-500 font-medium">System Settings</span>
-                        <i data-lucide="chevron-right" class="w-4 h-4 mx-2 text-slate-400"></i>
-                        <span class="text-slate-800 font-semibold">Security</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button class="text-slate-400 hover:text-slate-600"><i data-lucide="bell" class="w-5 h-5"></i></button>
-                    <div class="relative group">
-                        <button class="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-full transition-colors">
-                            <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs">SP</div>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Scrollable Content -->
-            <main class="flex-1 overflow-y-auto p-6 md:p-8">
-                <div class="max-w-7xl mx-auto">
-                    
-                    <!-- Page Header -->
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                        <div>
-                            <h1 class="text-2xl font-bold text-slate-800">Security Settings</h1>
-                            <p class="text-sm text-slate-500 mt-1">Configure authentication policies, access controls, and security protocols.</p>
-                        </div>
-                        
-                        <div class="flex items-center gap-3">
-                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center shadow-sm transition-all">
-                                <i data-lucide="save" class="w-4 h-4 mr-2"></i> Save Policy
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Security Policies Grid -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        
-                        <!-- Password Policy -->
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <i data-lucide="key" class="w-5 h-5 text-purple-600 mr-2"></i> Password Policy
-                                </h3>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-700">Minimum Length</p>
-                                        <p class="text-xs text-gray-500">Min chars required for passwords</p>
-                                    </div>
-                                    <select class="w-20 border-gray-300 rounded-md shadow-sm text-sm focus:ring-purple-500 focus:border-purple-500">
-                                        <option>8</option>
-                                        <option selected>10</option>
-                                        <option>12</option>
-                                    </select>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-700">Complexity Requirement</p>
-                                        <p class="text-xs text-gray-500">Require uppercase, numbers, symbols</p>
-                                    </div>
-                                    <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                                        <input type="checkbox" checked id="complexityToggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300"/>
-                                        <label for="complexityToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-green-500 cursor-pointer"></label>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-700">Password Expiry</p>
-                                        <p class="text-xs text-gray-500">Force reset after days</p>
-                                    </div>
-                                    <select class="w-32 border-gray-300 rounded-md shadow-sm text-sm focus:ring-purple-500 focus:border-purple-500">
-                                        <option>Never</option>
-                                        <option>30 Days</option>
-                                        <option selected>90 Days</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2FA Settings -->
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <i data-lucide="shield-check" class="w-5 h-5 text-green-600 mr-2"></i> Two-Factor Auth (2FA)
-                                </h3>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-700">Admin Accounts</p>
-                                        <p class="text-xs text-gray-500">Enforce 2FA for all admins</p>
-                                    </div>
-                                    <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                                        <input type="checkbox" checked id="admin2FAToggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300"/>
-                                        <label for="admin2FAToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-green-500 cursor-pointer"></label>
-                                    </div>
-                                </div>
-                                 <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-700">Property Owners</p>
-                                        <p class="text-xs text-gray-500">Optional but recommended</p>
-                                    </div>
-                                    <div class="relative inline-block w-10 mr-2 align-middle select-none">
-                                        <input type="checkbox" id="owner2FAToggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300"/>
-                                        <label for="owner2FAToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
-                                    </div>
-                                </div>
-                                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 mt-2">
-                                    <p class="text-xs text-blue-700">
-                                        <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
-                                        2FA codes will be sent via SMS (using configured provider) or Email.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Session Management -->
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">
-                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <i data-lucide="monitor" class="w-5 h-5 text-blue-600 mr-2"></i> Active Sessions
-                                </h3>
-                                <button class="text-xs text-red-600 hover:text-red-800 font-medium border border-red-200 bg-red-50 px-3 py-1 rounded transition-colors">
-                                    Logout All Users
-                                </button>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm">
-                                    <thead>
-                                        <tr class="text-gray-500 border-b border-gray-100">
-                                            <th class="pb-2 font-medium">User</th>
-                                            <th class="pb-2 font-medium">Role</th>
-                                            <th class="pb-2 font-medium">IP Address</th>
-                                            <th class="pb-2 font-medium">Device</th>
-                                            <th class="pb-2 font-medium">Last Active</th>
-                                            <th class="pb-2 font-medium text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-gray-700">
-                                        <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                                            <td class="py-3">Ajay Kumar</td>
-                                            <td><span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">Admin</span></td>
-                                            <td class="font-mono text-xs">192.168.1.45</td>
-                                            <td>Chrome / Windows</td>
-                                            <td class="text-green-600">Now</td>
-                                            <td class="text-right"><span class="text-gray-400 italic text-xs">Current</span></td>
-                                        </tr>
-                                        <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                                            <td class="py-3">Rajesh Kumar</td>
-                                            <td><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Owner</span></td>
-                                            <td class="font-mono text-xs">10.0.0.12</td>
-                                            <td>Safari / iPhone</td>
-                                            <td>5m ago</td>
-                                            <td class="text-right">
-                                                <button class="text-red-500 hover:text-red-700" title="Revoke Session"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Access Control -->
-                         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">
-                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <i data-lucide="globe-lock" class="w-5 h-5 text-orange-600 mr-2"></i> IP Whitelisting
-                                </h3>
-                                <button onclick="toggleModal('addIpModal')" class="text-xs text-purple-600 font-medium hover:text-purple-800 flex items-center">
-                                    <i data-lucide="plus" class="w-3 h-3 mr-1"></i> Add IP
-                                </button>
-                            </div>
-                            <p class="text-sm text-gray-500 mb-4">Restrict Admin Panel access to specific IP addresses for enhanced security.</p>
-                            <div class="flex flex-wrap gap-2">
-                                <div class="bg-gray-100 border border-gray-200 rounded-full px-3 py-1 flex items-center text-sm text-gray-700">
-                                    <span class="font-mono text-xs mr-2">192.168.1.0/24</span>
-                                    <span class="text-xs text-gray-400 mr-2">(Office)</span>
-                                    <button class="text-gray-400 hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>
-                                </div>
-                                 <div class="bg-gray-100 border border-gray-200 rounded-full px-3 py-1 flex items-center text-sm text-gray-700">
-                                    <span class="font-mono text-xs mr-2">45.22.19.110</span>
-                                    <span class="text-xs text-gray-400 mr-2">(VPN)</span>
-                                    <button class="text-gray-400 hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </main>
+    <div className="p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Security Settings</h1>
+            <p className="text-sm text-slate-500 mt-1">Configure authentication policies, access controls, and security protocols.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg text-sm font-bold flex items-center shadow-sm shadow-purple-100 transition-all">
+              <i data-lucide="save" className="w-4 h-4 mr-2"></i> Save Policy
+            </button>
+          </div>
         </div>
 
-        <!-- Mobile Sidebar Overlay -->
-        <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden backdrop-blur-sm" onclick="toggleMobileMenu()"></div>
-        <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-72 bg-[#111827] z-40 transform -translate-x-full transition-transform duration-300 md:hidden flex flex-col overflow-y-auto">
-            <div class="h-16 flex items-center justify-between px-6 border-b border-gray-800 sticky top-0 bg-[#111827]">
-                 <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" class="h-16 w-auto">
-                 <button id="mobile-menu-close"><i data-lucide="x" class="w-6 h-6 text-gray-400"></i></button>
+        {/* Security Policies Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Password Policy */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex justify-between items-center mb-6 pb-2 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                <i data-lucide="key" className="w-5 h-5 text-purple-600 mr-2"></i> Password Policy
+              </h3>
             </div>
-            <nav class="flex-1 py-4 space-y-1 px-2">
-                 <a href="/superadmin/superadmin" class="flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-400 hover:bg-gray-800">Dashboard</a>
-                 <a href="#" class="flex items-center px-4 py-3 text-sm font-medium rounded-md bg-gray-800 text-white border-l-4 border-purple-500">Settings</a>
-            </nav>
-        </aside>
-    </div>
-
-    <!-- Add IP Modal -->
-    <div id="addIpModal" class="modal fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="toggleModal('addIpModal')"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="flex justify-between items-center mb-4">
-                         <h3 class="text-lg leading-6 font-bold text-gray-900">Allow New IP Address</h3>
-                         <button onclick="toggleModal('addIpModal')" class="text-gray-400 hover:text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
-                    </div>
-                    <form class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">IP Address / CIDR</label>
-                            <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="e.g. 192.168.1.100">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Label (Optional)</label>
-                            <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="e.g. Home Office">
-                        </div>
-                    </form>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-slate-700">Minimum Length</p>
+                  <p className="text-xs text-slate-500">Min characters required for passwords</p>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                    <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none sm:w-auto sm:text-sm">
-                        Add to Whitelist
-                    </button>
-                    <button type="button" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:w-auto sm:text-sm" onclick="toggleModal('addIpModal')">
-                        Cancel
-                    </button>
+                <select className="w-24 border border-gray-200 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 px-3 py-2 outline-none transition-all">
+                  <option>8</option>
+                  <option defaultValue>10</option>
+                  <option>12</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-slate-700">Complexity Requirement</p>
+                  <p className="text-xs text-slate-500">Require uppercase, numbers, symbols</p>
                 </div>
+                <div className="relative inline-block w-10 h-5 bg-green-500 rounded-full relative shadow-inner cursor-pointer">
+                  <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform translate-x-5"></div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-slate-700">Password Expiry</p>
+                  <p className="text-xs text-slate-500">Force reset after days</p>
+                </div>
+                <select className="w-32 border border-gray-200 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 px-3 py-2 outline-none transition-all">
+                  <option>Never</option>
+                  <option>30 Days</option>
+                  <option defaultValue>90 Days</option>
+                </select>
+              </div>
             </div>
+          </div>
+
+          {/* 2FA Settings */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex justify-between items-center mb-6 pb-2 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                <i data-lucide="shield-check" className="w-5 h-5 text-green-600 mr-2"></i> Two-Factor Auth (2FA)
+              </h3>
+            </div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-slate-700">Admin Accounts</p>
+                  <p className="text-xs text-slate-500">Enforce 2FA for all admins</p>
+                </div>
+                <div className="relative inline-block w-10 h-5 bg-green-500 rounded-full relative shadow-inner cursor-pointer">
+                  <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform translate-x-5"></div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-slate-700">Property Owners</p>
+                  <p className="text-xs text-slate-500">Optional but recommended</p>
+                </div>
+                <div className="relative inline-block w-10 h-5 bg-slate-200 rounded-full relative shadow-inner cursor-pointer">
+                  <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform translate-x-0"></div>
+                </div>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <div className="flex gap-3">
+                  <i data-lucide="info" className="w-5 h-5 text-blue-500 shrink-0"></i>
+                  <p className="text-xs text-blue-700 leading-relaxed font-medium">
+                    2FA codes will be sent via SMS (using configured provider) or Email depending on user preference and availability.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Session Management */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 lg:col-span-2 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                <i data-lucide="monitor" className="w-4 h-4 text-blue-600 mr-2"></i> Active Sessions
+              </h3>
+              <button className="text-xs text-red-600 hover:text-red-700 font-bold bg-red-50 hover:bg-red-100 border border-red-100 px-4 py-2 rounded-lg transition-colors">
+                Logout All Users
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="bg-white text-[10px] text-slate-400 uppercase font-bold border-b border-gray-100">
+                    <th className="px-6 py-4">User</th>
+                    <th className="px-6 py-4">Role</th>
+                    <th className="px-6 py-4">IP Address</th>
+                    <th className="px-6 py-4">Device</th>
+                    <th className="px-6 py-4">Last Active</th>
+                    <th className="px-6 py-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  <tr className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="font-bold text-slate-700">Ajay Kumar</p>
+                    </td>
+                    <td className="px-6 py-4"><span className="bg-purple-100 text-purple-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Admin</span></td>
+                    <td className="px-6 py-4 font-mono text-xs text-slate-500">192.168.1.45</td>
+                    <td className="px-6 py-4 text-slate-600">Chrome / Windows</td>
+                    <td className="px-6 py-4 text-green-600 font-bold uppercase text-[10px]">Active Now</td>
+                    <td className="px-6 py-4 text-right"><span className="text-slate-300 italic text-[10px] font-bold uppercase tracking-tighter">Current Session</span></td>
+                  </tr>
+                  <tr className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <p className="font-bold text-slate-700">Rajesh Kumar</p>
+                    </td>
+                    <td className="px-6 py-4"><span className="bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Owner</span></td>
+                    <td className="px-6 py-4 font-mono text-xs text-slate-500">10.0.0.12</td>
+                    <td className="px-6 py-4 text-slate-600">Safari / iPhone</td>
+                    <td className="px-6 py-4 text-slate-400">5m ago</td>
+                    <td className="px-6 py-4 text-right">
+                      <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Revoke Session">
+                        <i data-lucide="x-circle" className="w-4 h-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Access Control */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">
+            <div className="flex justify-between items-center mb-6 pb-2 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                <i data-lucide="globe-lock" className="w-5 h-5 text-orange-600 mr-2"></i> IP Whitelisting
+              </h3>
+              <button onClick={() => setIsModalOpen(true)} className="text-xs text-purple-600 font-bold hover:text-purple-800 flex items-center px-3 py-1.5 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                <i data-lucide="plus" className="w-4 h-4 mr-1"></i> Add IP
+              </button>
+            </div>
+            <p className="text-sm text-slate-500 mb-6">Restrict Admin Panel access to specific IP addresses or ranges for enhanced network-level security.</p>
+            <div className="flex flex-wrap gap-3">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 flex items-center text-sm text-slate-700 hover:border-slate-300 transition-all">
+                <span className="font-mono font-bold text-purple-600 mr-2 text-xs">192.168.1.0/24</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase mr-3">Office</span>
+                <button className="text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" className="w-3 h-3"></i></button>
+              </div>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 flex items-center text-sm text-slate-700 hover:border-slate-300 transition-all">
+                <span className="font-mono font-bold text-purple-600 mr-2 text-xs">45.22.19.110</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase mr-3">VPN</span>
+                <button className="text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" className="w-3 h-3"></i></button>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Add IP Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-lg font-bold text-slate-800">Allow New IP Address</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" className="w-5 h-5"></i></button>
+            </div>
+            <div className="p-6">
+              <form className="space-y-6">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">IP Address / CIDR</label>
+                  <input type="text" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder:text-slate-300" placeholder="e.g. 192.168.1.100" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Label (Optional)</label>
+                  <input type="text" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder:text-slate-300" placeholder="e.g. Home Office" />
+                </div>
+              </form>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 flex flex-col-reverse sm:flex-row justify-end gap-3">
+              <button onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto px-6 py-2.5 border border-slate-200 bg-white text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">Cancel</button>
+              <button className="w-full sm:w-auto px-6 py-2.5 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 shadow-sm shadow-purple-200 transition-all">Add to Whitelist</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-` }} />
   );
 }
 

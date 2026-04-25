@@ -128,38 +128,20 @@ export default function Refund() {
   };
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div>
-              <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-              <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-            </div>
+    <>
+      <div className="p-4 md:p-8">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Refund Requests</h1>
+            <p className="text-sm text-slate-500">Manage and process booking refund requests.</p>
           </div>
-          <nav className="flex-1 py-6 space-y-1">
-            <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Finance</div>
-            <a href="/superadmin/refund" className="sidebar-link active">
-              <i data-lucide="rotate-ccw" className="w-5 h-5 mr-3"></i> Refunds
-            </a>
-            <a href="/superadmin/rentcollection" className="sidebar-link">
-              <i data-lucide="wallet" className="w-5 h-5 mr-3"></i> Rent Collections
-            </a>
-            <a href="/superadmin/booking" className="sidebar-link">
-              <i data-lucide="calendar-check" className="w-5 h-5 mr-3"></i> Bookings
-            </a>
-          </nav>
-        </aside>
+          <button onClick={loadRefunds} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            <i data-lucide="refresh-cw" className="w-4 h-4"></i> Refresh
+          </button>
+        </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="bg-white h-16 shadow-sm flex items-center justify-between px-8 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-gray-800">Refund Requests</h1>
-            <button onClick={loadRefunds} className="text-sm text-purple-600 hover:underline flex items-center gap-1">
-              <i data-lucide="refresh-cw" className="w-3 h-3"></i> Refresh
-            </button>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-8">
+        <main className="">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-xl p-6 border">
                 <div className="text-sm text-gray-500">Pending</div>
@@ -313,6 +295,6 @@ export default function Refund() {
           </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

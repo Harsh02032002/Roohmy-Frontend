@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 import { getApiBase, getAuthHeader } from "../../utils/api";
-import { useLegacySidebar } from "../../utils/legacyUi";
 
 export default function Location() {
   useHtmlPage({
@@ -25,7 +24,6 @@ export default function Location() {
     inlineScripts: []
   });
 
-  useLegacySidebar();
 
   const [tab, setTab] = useState("cities");
   const [cities, setCities] = useState([]);
@@ -139,161 +137,120 @@ export default function Location() {
   const cityOptions = useMemo(() => cities.map((city) => ({ id: city._id, name: city.name })), [cities]);
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-              </div>
+    <>
+      <div className="p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Serviceable Locations</h1>
+              <p className="text-sm text-slate-500">Manage Cities and Areas separately.</p>
             </div>
-          </div>
-          <nav className="flex-1 py-6 space-y-1">
-            <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Overview</div>
-            <a href="/superadmin/superadmin" className="sidebar-link">
-              <i data-lucide="layout-dashboard" className="w-5 h-5 mr-3"></i> Dashboard
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System</div>
-            <a href="/superadmin/location" className="sidebar-link active">
-              <i data-lucide="globe" className="w-5 h-5 mr-3"></i> Locations
-            </a>
-          </nav>
-        </aside>
-
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center">
-              <button id="mobile-menu-open" className="md:hidden mr-4 text-slate-500"><i data-lucide="menu" className="w-6 h-6"></i></button>
-              <div className="flex items-center text-sm">
-                <span className="text-slate-500 font-medium">System</span>
-                <i data-lucide="chevron-right" className="w-4 h-4 mx-2 text-slate-400"></i>
-                <span className="text-slate-800 font-semibold">Locations</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <button onClick={loadLocations} className="text-slate-500 hover:text-slate-700 text-sm flex items-center gap-2">
-                <i data-lucide="refresh-cw" className="w-4 h-4"></i> Refresh
+            <div className="flex gap-2">
+              <button onClick={() => openModal("city")} className="bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 px-5 py-2.5 rounded-lg text-sm font-medium flex items-center shadow-sm transition-all">
+                <i data-lucide="map" className="w-4 h-4 mr-2"></i> Add City
+              </button>
+              <button onClick={() => openModal("area")} className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium flex items-center shadow-md transition-all hover:shadow-lg">
+                <i data-lucide="map-pin" className="w-4 h-4 mr-2"></i> Add Area
               </button>
             </div>
-          </header>
+          </div>
 
-          <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Serviceable Locations</h1>
-                  <p className="text-sm text-slate-500 mt-1">Manage Cities and Areas separately.</p>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => openModal("city")} className="bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 px-5 py-2.5 rounded-lg text-sm font-medium flex items-center shadow-sm transition-all">
-                    <i data-lucide="map" className="w-4 h-4 mr-2"></i> Add City
-                  </button>
-                  <button onClick={() => openModal("area")} className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium flex items-center shadow-md transition-all hover:shadow-lg">
-                    <i data-lucide="map-pin" className="w-4 h-4 mr-2"></i> Add Area
-                  </button>
-                </div>
+          <div className="mb-6 flex space-x-3">
+            <button className={`filter-tab ${tab === "cities" ? "active" : ""}`} onClick={() => setTab("cities")}>Cities</button>
+            <button className={`filter-tab ${tab === "areas" ? "active" : ""}`} onClick={() => setTab("areas")}>Areas</button>
+          </div>
+
+          {errorMsg && (
+            <div className="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-2">{errorMsg}</div>
+          )}
+
+          {loading && (
+            <div className="text-center py-12 text-slate-400">Loading locations...</div>
+          )}
+
+          {!loading && tab === "cities" && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full data-table">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left">City Name</th>
+                      <th className="px-4 py-3 text-left">State</th>
+                      <th className="px-4 py-3 text-left">Image</th>
+                      <th className="px-4 py-3 text-left">Status</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {cities.length === 0 && (
+                      <tr><td colSpan={5} className="text-center py-8 text-gray-500 text-sm">No cities found</td></tr>
+                    )}
+                    {cities.map((city) => (
+                      <tr key={city._id}>
+                        <td className="px-4 py-4 text-sm font-medium text-gray-900">{city.name}</td>
+                        <td className="px-4 py-4 text-sm text-gray-700">{city.state}</td>
+                        <td className="px-4 py-4">
+                          {city.imageUrl ? <img src={city.imageUrl} alt={city.name} className="h-10 w-16 object-cover rounded" /> : "-"}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {city.status || "Active"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <button onClick={() => deleteLocation("cities", city._id)} className="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition-colors">
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-
-              <div className="mb-6 flex space-x-3">
-                <button className={`filter-tab ${tab === "cities" ? "active" : ""}`} onClick={() => setTab("cities")}>Cities</button>
-                <button className={`filter-tab ${tab === "areas" ? "active" : ""}`} onClick={() => setTab("areas")}>Areas</button>
-              </div>
-
-              {errorMsg && (
-                <div className="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-2">{errorMsg}</div>
-              )}
-
-              {loading && (
-                <div className="text-center py-12 text-slate-400">Loading locations...</div>
-              )}
-
-              {!loading && tab === "cities" && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full data-table">
-                      <thead>
-                        <tr>
-                          <th>City Name</th>
-                          <th>State</th>
-                          <th>Image</th>
-                          <th>Status</th>
-                          <th className="text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cities.length === 0 && (
-                          <tr><td colSpan={5} className="text-center py-8 text-gray-500 text-sm">No cities found</td></tr>
-                        )}
-                        {cities.map((city) => (
-                          <tr key={city._id}>
-                            <td className="text-sm font-medium text-gray-900">{city.name}</td>
-                            <td className="text-sm text-gray-700">{city.state}</td>
-                            <td>
-                              {city.imageUrl ? <img src={city.imageUrl} alt={city.name} className="h-10 w-16 object-cover rounded" /> : "-"}
-                            </td>
-                            <td>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {city.status || "Active"}
-                              </span>
-                            </td>
-                            <td className="text-right">
-                              <button onClick={() => deleteLocation("cities", city._id)} className="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition-colors">
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {!loading && tab === "areas" && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full data-table">
-                      <thead>
-                        <tr>
-                          <th>Area Name</th>
-                          <th>City</th>
-                          <th>Image</th>
-                          <th>Status</th>
-                          <th className="text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {areas.length === 0 && (
-                          <tr><td colSpan={5} className="text-center py-8 text-gray-500 text-sm">No areas found</td></tr>
-                        )}
-                        {areas.map((area) => (
-                          <tr key={area._id}>
-                            <td className="text-sm font-medium text-gray-900">{area.name}</td>
-                            <td className="text-sm text-gray-700">{area.cityName || area.city?.name || "-"}</td>
-                            <td>
-                              {area.imageUrl ? <img src={area.imageUrl} alt={area.name} className="h-10 w-16 object-cover rounded" /> : "-"}
-                            </td>
-                            <td>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {area.status || "Active"}
-                              </span>
-                            </td>
-                            <td className="text-right">
-                              <button onClick={() => deleteLocation("areas", area._id)} className="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition-colors">
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
             </div>
-          </main>
+          )}
+
+          {!loading && tab === "areas" && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full data-table">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left">Area Name</th>
+                      <th className="px-4 py-3 text-left">City</th>
+                      <th className="px-4 py-3 text-left">Image</th>
+                      <th className="px-4 py-3 text-left">Status</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {areas.length === 0 && (
+                      <tr><td colSpan={5} className="text-center py-8 text-gray-500 text-sm">No areas found</td></tr>
+                    )}
+                    {areas.map((area) => (
+                      <tr key={area._id}>
+                        <td className="px-4 py-4 text-sm font-medium text-gray-900">{area.name}</td>
+                        <td className="px-4 py-4 text-sm text-gray-700">{area.cityName || area.city?.name || "-"}</td>
+                        <td className="px-4 py-4">
+                          {area.imageUrl ? <img src={area.imageUrl} alt={area.name} className="h-10 w-16 object-cover rounded" /> : "-"}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {area.status || "Active"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <button onClick={() => deleteLocation("areas", area._id)} className="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition-colors">
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -368,7 +325,7 @@ export default function Location() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

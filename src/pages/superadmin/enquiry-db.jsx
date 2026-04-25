@@ -97,11 +97,16 @@ export default function EnquiryDb() {
   };
 
   return (
-    <div className="html-page">
-      <div className="container mx-auto py-8 px-4">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Enquiry Management</h1>
-          <p className="text-gray-600">Review and approve property submissions</p>
+    <main className="p-4 md:p-8 bg-slate-50/50 min-h-full">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Admin Enquiry Management</h1>
+            <p className="text-sm text-slate-500 mt-1">Review and approve property submissions from visitors and agents.</p>
+          </div>
+          <button onClick={loadVisits} className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center shadow-lg shadow-purple-600/20 transition-all active:scale-95">
+            <i data-lucide="refresh-cw" className="w-4 h-4 mr-2"></i> Refresh
+          </button>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -184,7 +189,7 @@ export default function EnquiryDb() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }
 

@@ -616,232 +616,139 @@ export default function Visit() {
   const rows = useMemo(() => visits, [visits]);
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">AREA ADMIN</span>
-              </div>
+    <>
+      <div className="p-4 md:p-8">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Visit Reports</h1>
+              <p className="text-sm text-slate-500">Submit new property visits for Super Admin approval.</p>
+            </div>
+            <button onClick={openModal} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">
+              <i data-lucide="plus" className="w-4 h-4"></i> Add Property Visit
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse excel-table">
+                <thead>
+                  <tr>
+                    <th>Visit ID</th>
+                    <th>Visit Date & Time</th>
+                    <th>Staff Name</th>
+                    <th>Staff ID</th>
+                    <th>Property Name</th>
+                    <th>Property Type</th>
+                    <th>Full Address</th>
+                    <th>Area / Locality</th>
+                    <th>Nearby Location</th>
+                    <th>Landmark</th>
+                    <th>Owner Name</th>
+                    <th>Owner Contact</th>
+                    <th>Owner Gmail</th>
+                    <th>Owner Login ID</th>
+                    <th>Gender</th>
+                    <th>Student Reviews</th>
+                    <th>Employee Rating</th>
+                    <th>Amenities</th>
+                    <th>Cleanliness</th>
+                    <th>Owner Behaviour</th>
+                    <th>Photo Count</th>
+                    <th>Professional Photo</th>
+                    <th>Geo Status</th>
+                    <th>Map</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading && (
+                    <tr>
+                      <td colSpan={26} className="text-center py-8 text-gray-500">Loading...</td>
+                    </tr>
+                  )}
+                  {!loading && errorMsg && (
+                    <tr>
+                      <td colSpan={26} className="text-center py-8 text-red-500">{errorMsg}</td>
+                    </tr>
+                  )}
+                  {!loading && !errorMsg && rows.length === 0 && (
+                    <tr>
+                      <td colSpan={26} className="text-center py-8 text-gray-500">No visits found. Add one to start.</td>
+                    </tr>
+                  )}
+                  {rows.map((visit) => {
+                    const prop = visit.propertyInfo || {};
+                    const photos = visit.photos || [];
+                    const prof = visit.professionalPhotos || [];
+                    const visitDateTime = new Date(visit.submittedAt || Date.now()).toLocaleString();
+                    const statusText = visit.status || "submitted";
+                    return (
+                      <tr key={visit._id}>
+                        <td className="text-xs font-mono">{visit._id}</td>
+                        <td className="text-sm text-gray-600">{visitDateTime}</td>
+                        <td className="text-sm text-gray-600">{visit.submittedBy || visit.staffName || "-"}</td>
+                        <td className="text-sm text-gray-600">{visit.submittedById || visit.staffId || "-"}</td>
+                        <td className="font-bold text-slate-700">{prop.name || visit.propertyName || "-"}</td>
+                        <td className="text-sm text-gray-600">{prop.propertyType || visit.propertyType || "-"}</td>
+                        <td className="text-sm text-gray-600">{visit.address || prop.address || "-"}</td>
+                        <td className="text-sm text-gray-600">{prop.area || visit.area || "-"}</td>
+                        <td className="text-sm text-gray-600">{visit.nearbyLocation || prop.nearbyLocation || "-"}</td>
+                        <td className="text-sm text-gray-600">{visit.landmark || prop.landmark || "-"}</td>
+                        <td className="text-sm text-gray-600">{prop.ownerName || visit.ownerName || "-"}</td>
+                        <td className="text-sm text-gray-600">{prop.contactPhone || visit.contactPhone || "-"}</td>
+                        <td className="text-sm text-gray-600">{prop.ownerEmail || visit.ownerEmail || "-"}</td>
+                        <td className="text-xs font-mono text-blue-700">{visit.generatedCredentials?.loginId || prop.ownerLoginId || "-"}</td>
+                        <td className="text-sm text-gray-600">{visit.gender || "-"}</td>
+                        <td className="text-center">
+                          <span className="text-lg font-bold text-amber-600">
+                            {visit.studentReviewsRating
+                              ? "★".repeat(Math.floor(visit.studentReviewsRating)) + "☆".repeat(5 - Math.floor(visit.studentReviewsRating))
+                              : "-"}
+                          </span>
+                        </td>
+                        <td className="text-center">
+                          <span className="text-lg font-bold text-emerald-600">
+                            {visit.employeeRating
+                              ? "★".repeat(Math.floor(visit.employeeRating)) + "☆".repeat(5 - Math.floor(visit.employeeRating))
+                              : "-"}
+                          </span>
+                        </td>
+                        <td className="text-sm text-gray-600">{(visit.amenities || []).slice(0, 3).join(", ") || "-"}</td>
+                        <td className="text-sm text-gray-600 text-center">{visit.cleanlinessRating || "-"}</td>
+                        <td className="text-sm text-gray-600 text-center">{visit.ownerBehaviourPublic || "-"}</td>
+                        <td className="text-sm text-gray-600 text-center">{photos.length}</td>
+                        <td className="text-sm text-gray-600 text-center">
+                          {prof.length > 0 ? (
+                            <div className="inline-flex items-center gap-2">
+                              <img src={prof[0]} className="w-8 h-8 object-cover rounded border" alt="Prof" />
+                              <span>({prof.length})</span>
+                            </div>
+                          ) : "-"}
+                        </td>
+                        <td className="text-sm text-gray-600 text-center">{visit.latitude && visit.longitude ? "Captured" : "N/A"}</td>
+                        <td className="text-center">
+                          <button onClick={() => viewMap(visit)} className="text-blue-600 hover:underline text-xs">View Map</button>
+                        </td>
+                        <td>
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusText === "approved" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="flex gap-2">
+                            <button onClick={() => openEditModal(visit)} className="p-1 hover:bg-gray-100 rounded" title="Edit"><i data-lucide="edit-2" className="w-4 h-4 text-gray-600"></i></button>
+                            <button onClick={() => deleteVisit(visit)} className="p-1 hover:bg-red-50 rounded" title="Delete"><i data-lucide="trash-2" className="w-4 h-4 text-red-600"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-          <nav className="flex-1 py-6 space-y-1">
-            <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Overview</div>
-            <a href="/superadmin/areaadmin" className="sidebar-link">
-              <i data-lucide="layout-dashboard" className="w-5 h-5 mr-3"></i> Dashboard
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Management</div>
-            <a href="/superadmin/properties" className="sidebar-link">
-              <i data-lucide="home" className="w-5 h-5 mr-3"></i> Properties
-            </a>
-            <a href="/superadmin/visit" className="sidebar-link active">
-              <i data-lucide="clipboard-list" className="w-5 h-5 mr-3"></i> Visit Reports
-            </a>
-            <a href="/superadmin/tenant" className="sidebar-link">
-              <i data-lucide="users" className="w-5 h-5 mr-3"></i> Tenants
-            </a>
-            <a href="/superadmin/owner" className="sidebar-link">
-              <i data-lucide="briefcase" className="w-5 h-5 mr-3"></i> Owners
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Operations</div>
-            <a href="/superadmin/rentcollection" className="sidebar-link">
-              <i data-lucide="wallet" className="w-5 h-5 mr-3"></i> Payments
-            </a>
-            <a href="/superadmin/complaint-history" className="sidebar-link">
-              <i data-lucide="alert-circle" className="w-5 h-5 mr-3"></i> Complaints & Maint.
-            </a>
-            <a href="/superadmin/kyc_verification" className="sidebar-link">
-              <i data-lucide="file-check" className="w-5 h-5 mr-3"></i> KYC Verification
-            </a>
-            <a href="/superadmin/enquiry" className="sidebar-link">
-              <i data-lucide="help-circle" className="w-5 h-5 mr-3"></i> Enquiries
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System</div>
-            <a href="/superadmin/location" className="sidebar-link">
-              <i data-lucide="map-pin" className="w-5 h-5 mr-3"></i> RoomHy Location
-            </a>
-            <a href="/superadmin/platform_reports" className="sidebar-link">
-              <i data-lucide="bar-chart-2" className="w-5 h-5 mr-3"></i> Reports
-            </a>
-            <a href="/superadmin/profile" className="sidebar-link">
-              <i data-lucide="user" className="w-5 h-5 mr-3"></i> Profile
-            </a>
-            <a href="/superadmin/settings" className="sidebar-link">
-              <i data-lucide="settings" className="w-5 h-5 mr-3"></i> Settings
-            </a>
-          </nav>
-        </aside>
-
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center text-sm">
-              <span className="text-slate-500 font-medium">Management</span>
-              <i data-lucide="chevron-right" className="w-4 h-4 mx-2 text-slate-400"></i>
-              <span className="text-slate-800 font-semibold">Visit Reports</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button className="text-slate-400 hover:text-slate-600" aria-label="Notifications">
-                <i data-lucide="bell" className="w-5 h-5"></i>
-              </button>
-              <div className="relative group">
-                <button className="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-full transition-colors">
-                  <img src="https://i.pravatar.cc/150?u=areaadmin" alt="Admin" className="w-8 h-8 rounded-full border border-slate-200" />
-                  <div className="text-left hidden sm:block">
-                    <p className="text-xs font-semibold text-gray-700">{staffName || "Manager"}</p>
-                    <p className="text-[10px] text-gray-500">Area Manager</p>
-                  </div>
-                  <i data-lucide="chevron-down" className="w-3 h-3 text-gray-400 hidden sm:block"></i>
-                </button>
-              </div>
-            </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-[1600px] mx-auto">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Visit Reports</h1>
-                  <p className="text-sm text-slate-500">Submit new property visits for Super Admin approval.</p>
-                </div>
-                <button onClick={openModal} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">
-                  <i data-lucide="plus" className="w-4 h-4"></i> Add Property Visit
-                </button>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse excel-table">
-                    <thead>
-                      <tr>
-                        <th>Visit ID</th>
-                        <th>Visit Date & Time</th>
-                        <th>Staff Name</th>
-                        <th>Staff ID</th>
-                        <th>Property Name</th>
-                        <th>Property Type</th>
-                        <th>Full Address</th>
-                        <th>Area / Locality</th>
-                        <th>Nearby Location</th>
-                        <th>Landmark</th>
-                        <th>Owner Name</th>
-                        <th>Owner Contact</th>
-                        <th>Owner Gmail</th>
-                        <th>Owner Login ID</th>
-                        <th>Gender</th>
-                        <th>Student Reviews</th>
-                        <th>Employee Rating</th>
-                        <th>Amenities</th>
-                        <th>Cleanliness</th>
-                        <th>Owner Behaviour</th>
-                        <th>Photo Count</th>
-                        <th>Professional Photo</th>
-                        <th>Geo Status</th>
-                        <th>Map</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loading && (
-                        <tr>
-                          <td colSpan={26} className="text-center py-8 text-gray-500">Loading...</td>
-                        </tr>
-                      )}
-                      {!loading && errorMsg && (
-                        <tr>
-                          <td colSpan={26} className="text-center py-8 text-red-500">{errorMsg}</td>
-                        </tr>
-                      )}
-                      {!loading && !errorMsg && rows.length === 0 && (
-                        <tr>
-                          <td colSpan={26} className="text-center py-8 text-gray-500">No visits found. Add one to start.</td>
-                        </tr>
-                      )}
-                      {rows.map((visit) => {
-                        const prop = visit.propertyInfo || {};
-                        const photos = visit.photos || [];
-                        const prof = visit.professionalPhotos || [];
-                        const visitDateTime = new Date(visit.submittedAt || Date.now()).toLocaleString();
-                        const statusText = visit.status || "submitted";
-                        return (
-                          <tr key={visit._id}>
-                            <td className="text-xs font-mono">{visit._id}</td>
-                            <td className="text-sm text-gray-600">{visitDateTime}</td>
-                            <td className="text-sm text-gray-600">{visit.submittedBy || visit.staffName || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.submittedById || visit.staffId || "-"}</td>
-                            <td className="font-bold text-slate-700">{prop.name || visit.propertyName || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.propertyType || visit.propertyType || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.address || prop.address || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.area || visit.area || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.nearbyLocation || prop.nearbyLocation || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.landmark || prop.landmark || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.ownerName || visit.ownerName || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.contactPhone || visit.contactPhone || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.ownerEmail || visit.ownerEmail || "-"}</td>
-                            <td className="text-xs font-mono text-blue-700">{visit.generatedCredentials?.loginId || prop.ownerLoginId || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.gender || "-"}</td>
-                            <td className="text-center">
-                              <span className="text-lg font-bold text-amber-600">
-                                {visit.studentReviewsRating
-                                  ? `${"★".repeat(Math.floor(visit.studentReviewsRating))}${"☆".repeat(5 - Math.floor(visit.studentReviewsRating))}`
-                                  : "-"}
-                              </span>
-                            </td>
-                            <td className="text-center">
-                              <span className="text-lg font-bold text-emerald-600">
-                                {visit.employeeRating
-                                  ? `${"★".repeat(Math.floor(visit.employeeRating))}${"☆".repeat(5 - Math.floor(visit.employeeRating))}`
-                                  : "-"}
-                              </span>
-                            </td>
-                            <td className="text-sm text-gray-600">{(visit.amenities || []).slice(0, 3).join(", ") || "-"}</td>
-                            <td className="text-sm text-gray-600 text-center">{visit.cleanlinessRating || "-"}</td>
-                            <td className="text-sm text-gray-600 text-center">{visit.ownerBehaviourPublic || "-"}</td>
-                            <td className="text-center">{photos.length}</td>
-                            <td className="text-center">
-                              {prof.length > 0 ? (
-                                <div className="inline-flex items-center gap-2">
-                                  <img src={prof[0]} className="w-12 h-12 object-cover rounded-full border" alt="Professional" />
-                                  <span className="text-xs text-gray-600">({prof.length})</span>
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </td>
-                            <td className="text-center">{visit.latitude && visit.longitude ? "Verified" : "Not Verified"}</td>
-                            <td className="text-center">
-                              <button onClick={() => viewMap(visit)} className="text-slate-600 hover:bg-slate-50 p-1 rounded text-xs">
-                                View Map
-                              </button>
-                            </td>
-                            <td className="text-sm text-gray-600">{statusText}</td>
-                            <td className="text-center">
-                              <div className="inline-flex items-center gap-2 flex-wrap justify-center">
-                                <button
-                                  onClick={() => addPropertyUnderOwner(visit)}
-                                  className="text-emerald-700 hover:bg-emerald-50 px-2 py-1 rounded text-xs font-medium border border-emerald-200"
-                                >
-                                  Add Property Under Owner
-                                </button>
-                                <button onClick={() => openEditModal(visit)} className="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs font-medium">
-                                  Edit
-                                </button>
-                                <button onClick={() => deleteVisit(visit)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs font-medium">
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </main>
         </div>
       </div>
 
@@ -1142,8 +1049,6 @@ export default function Visit() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
-
-

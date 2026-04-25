@@ -635,60 +635,9 @@ export default function Manager() {
   };
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className={`sidebar w-72 flex-shrink-0 ${mobileOpen ? "flex" : "hidden"} md:flex flex-col z-20 overflow-y-auto custom-scrollbar fixed md:static inset-y-0 left-0 transform ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} transition-transform duration-300`}>
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-              </div>
-            </div>
-          </div>
-          <nav className="flex-1 py-6 space-y-1">
-            {navSections.map((section) => (
-              <div key={section.label}>
-                <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">{section.label}</div>
-                {section.items.map((item) => (
-                  <a key={item.href} href={item.href} className={`sidebar-link ${item.key === "manager" ? "active" : ""}`}>
-                    <i data-lucide={item.icon} className="w-5 h-5 mr-3"></i> {item.text}
-                  </a>
-                ))}
-              </div>
-            ))}
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Finance</div>
-            <div className="group">
-              <div className="sidebar-link justify-between" onClick={() => setFinanceOpen((v) => !v)}>
-                <div className="flex items-center"><i data-lucide="wallet" className="w-5 h-5 mr-3"></i> Finance</div>
-                <i data-lucide="chevron-down" className={`w-4 h-4 transition-transform duration-200 ${financeOpen ? "rotate-180" : ""}`}></i>
-              </div>
-              <div id="finance-submenu" className={`submenu ${financeOpen ? "open" : ""}`}>
-                <a href="/superadmin/rentcollection" className="sidebar-link text-sm hover:text-white">Rent Collections</a>
-                <a href="/superadmin/platform" className="sidebar-link text-sm hover:text-white">Commissions</a>
-                <a href="/superadmin/refund" className="sidebar-link text-sm hover:text-white">Refunds</a>
-              </div>
-            </div>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System</div>
-            <a href="/superadmin/location" className="sidebar-link"><i data-lucide="globe" className="w-5 h-5 mr-3"></i> Locations</a>
-          </nav>
-        </aside>
-
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center">
-              <button className="md:hidden mr-4 text-slate-500" onClick={() => setMobileOpen(true)}><i data-lucide="menu" className="w-6 h-6"></i></button>
-              <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                Team Management <span className="text-gray-400">/</span> <span id="currentTeamLabel" className="text-purple-600">{currentTeamLabel}</span>
-              </h2>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="w-8 h-8 rounded-full border border-slate-200 bg-purple-600 text-white flex items-center justify-center font-bold text-xs">SA</span>
-            </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="max-w-7xl mx-auto">
+    <>
+      <main className="p-4 md:p-8 bg-slate-50/50 min-h-full">
+            <div className="max-w-[1600px] mx-auto space-y-6">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
                   <h3 className="text-xl font-bold text-gray-800">Team Directory</h3>
@@ -848,8 +797,6 @@ export default function Manager() {
               </div>
             </div>
           </main>
-        </div>
-      </div>
 
       {showModal ? (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -1017,7 +964,7 @@ export default function Manager() {
           </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }
 

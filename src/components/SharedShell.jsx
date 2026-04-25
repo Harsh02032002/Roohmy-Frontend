@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { NavLink, useLocation, Outlet } from "react-router-dom";
 import { resolveSectionFromPath, sharedNavConfig } from "./sharedNavConfig";
 import { Sidebar } from "./Sidebar";
 
@@ -26,7 +26,7 @@ const SuperadminNavItem = ({ to, label, icon }) => (
   </NavLink>
 );
 
-export default function SharedShell({ children }) {
+export default function SharedShell() {
   const location = useLocation();
   const pathName = location.pathname || "";
   const isEmbed = useMemo(() => {
@@ -52,14 +52,22 @@ export default function SharedShell({ children }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (window.lucide?.createIcons) {
-      window.lucide.createIcons();
-    }
+    if (!window.lucide?.createIcons) return undefined;
+    
+    // Run lucide once on navigation, and once after a short delay for dynamic content
+    window.lucide?.createIcons();
+    const t1 = setTimeout(() => window.lucide?.createIcons(), 100);
+    const t2 = setTimeout(() => window.lucide?.createIcons(), 500);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [location.pathname]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 980px)");
+    const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(mq.matches);
     update();
     if (mq.addEventListener) {
@@ -99,25 +107,22 @@ export default function SharedShell({ children }) {
   }, [section]);
 
   if (isEmbed) {
-    return <>{children}</>;
+    return <Outlet />;
   }
 
   // Tenant pages render a full standalone layout. If an older bundle or
   // wrapper path still mounts SharedShell, bypass it completely.
   if (!config) {
-    return <div className="shared-shell">{children}</div>;
+    return <div className="shared-shell"><Outlet /></div>;
   }
 
   if (section === "superadmin") {
     return (
-      <div className="shared-shell shared-shell-superadmin" data-section={section}>
-        <div
-          className={`shared-superadmin-overlay${sidebarOpen ? " is-open" : ""}`}
-          onClick={() => setSidebarOpen(false)}
-          style={isMobile && sidebarOpen ? { display: "block" } : undefined}
-        />
+      <div className="shared-shell shared-shell-superadmin flex flex-row h-screen w-full min-w-full overflow-hidden" data-section={section}>
+
         <Sidebar 
           open={sidebarOpen} 
+          isMobile={isMobile}
           onClose={() => setSidebarOpen(false)} 
           onLogout={() => {
             localStorage.clear();
@@ -127,7 +132,7 @@ export default function SharedShell({ children }) {
         />
 
         <div className="shared-main">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10 border-b border-gray-200">
+          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-20 border-b border-gray-200 sticky top-0 shrink-0">
             <button
               id="mobile-menu-open"
               className="md:hidden mr-4 text-slate-500"
@@ -163,8 +168,17 @@ export default function SharedShell({ children }) {
               </span>
             </div>
           </header>
-          <div className="shared-content">{children}</div>
+          <div className="shared-content overflow-y-auto overflow-x-hidden flex-1 h-full custom-scrollbar">
+            <Outlet />
+          </div>
         </div>
+
+        {/* Overlay moved to bottom to prevent flex flow issues */}
+        <div
+          className={`shared-superadmin-overlay${sidebarOpen ? " is-open" : ""}`}
+          onClick={() => setSidebarOpen(false)}
+          style={isMobile && sidebarOpen ? { display: "block" } : undefined}
+        />
       </div>
     );
   }
@@ -209,7 +223,7 @@ export default function SharedShell({ children }) {
             <span className="shared-user-pill">Roomhy</span>
           </div>
         </header>
-        <div className="shared-content">{children}</div>
+        <div className="shared-content"><Outlet /></div>
       </div>
     </div>
   );

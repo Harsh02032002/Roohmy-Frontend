@@ -58,116 +58,100 @@ export default function EnquiryApproved() {
   );
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827]">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-              </div>
+    <div className="p-4 md:p-8">
+      <div className="max-w-[1600px] mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <a href="/superadmin/enquiry" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-slate-600">
+              <i data-lucide="arrow-left" className="w-5 h-5"></i>
+            </a>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Approved Enquiries</h1>
+              <p className="text-sm text-slate-500">View all properties that have been successfully reviewed and approved.</p>
             </div>
           </div>
-          <nav className="flex-1 py-6 space-y-1">
-            <a href="..//superadmin/superadmin" className="sidebar-link">
-              <i data-lucide="layout-dashboard" className="w-5 h-5 mr-3"></i> Dashboard
-            </a>
-            <a href="/superadmin/enquiry" className="sidebar-link">
-              <i data-lucide="help-circle" className="w-5 h-5 mr-3"></i> Enquiries
-            </a>
-            <a href="/superadmin/website" className="sidebar-link">
-              <i data-lucide="globe" className="w-5 h-5 mr-3"></i> Live Properties
-            </a>
-          </nav>
-        </aside>
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="bg-white h-16 shadow-sm flex items-center justify-between px-8 border-b border-gray-200">
-            <div className="flex items-center gap-4">
-              <a href="/superadmin/enquiry" className="text-gray-400 hover:text-purple-600 transition-colors">
-                <i data-lucide="arrow-left" className="w-5 h-5"></i>
-              </a>
-              <h1 className="text-xl font-bold text-gray-800">Approved Enquiries</h1>
-            </div>
-            <button onClick={loadVisits} className="text-sm text-purple-600 hover:underline flex items-center gap-1">
-              <i data-lucide="refresh-cw" className="w-3 h-3"></i> Refresh
-            </button>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-[1600px] mx-auto">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-                <table className="w-full text-left min-w-full">
-                  <thead className="bg-gray-50 text-[10px] text-gray-500 uppercase border-b">
-                    <tr>
-                      <th className="px-6 py-4">Image</th>
-                      <th className="px-6 py-4">Property</th>
-                      <th className="px-6 py-4">Owner</th>
-                      <th className="px-6 py-4">Area</th>
-                      <th className="px-6 py-4">Rent</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {loading && (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center text-gray-400">Loading...</td>
-                      </tr>
-                    )}
-                    {!loading && errorMsg && (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center text-red-500">{errorMsg}</td>
-                      </tr>
-                    )}
-                    {!loading && !errorMsg && approved.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center text-gray-400">No approved visits found.</td>
-                      </tr>
-                    )}
-                    {approved.map((visit) => {
-                      const prop = visit.propertyInfo || {};
-                      const image = (visit.professionalPhotos && visit.professionalPhotos[0]) || (visit.photos && visit.photos[0]);
-                      return (
-                        <tr key={visit._id}>
-                          <td className="px-6 py-4">
-                            {image ? (
-                              <img src={image} alt="Property" className="w-16 h-16 rounded-lg object-cover border" />
-                            ) : (
-                              <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-400">No Image</div>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="font-semibold text-gray-800">{prop.name || visit.propertyName || "-"}</div>
-                            <div className="text-xs text-gray-500">{visit.address || prop.address || "-"}</div>
-                          </td>
-                          <td className="px-6 py-4 text-sm">
-                            <div className="text-gray-800">{prop.ownerName || visit.ownerName || "-"}</div>
-                            <div className="text-xs text-gray-500">{prop.ownerEmail || visit.ownerEmail || "-"}</div>
-                          </td>
-                          <td className="px-6 py-4 text-sm">{prop.area || visit.area || "-"}</td>
-                          <td className="px-6 py-4 text-sm">₹{visit.monthlyRent || prop.monthlyRent || 0}</td>
-                          <td className="px-6 py-4 text-sm text-green-600 font-semibold">Approved</td>
-                          <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => {
-                                if (!visit.latitude || !visit.longitude) return;
-                                window.open(`https://www.google.com/maps?q=${visit.latitude},${visit.longitude}`, "_blank");
-                              }}
-                              className="text-xs px-3 py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
-                            >
-                              Map
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </main>
+          <button onClick={loadVisits} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            <i data-lucide="refresh-cw" className="w-4 h-4"></i> Refresh
+          </button>
         </div>
+
+        <main className="">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 text-[10px] text-gray-500 uppercase border-b">
+                  <tr>
+                    <th className="px-6 py-4">Image</th>
+                    <th className="px-6 py-4">Property</th>
+                    <th className="px-6 py-4">Owner</th>
+                    <th className="px-6 py-4">Area</th>
+                    <th className="px-6 py-4">Rent</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {loading && (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-400">Loading...</td>
+                    </tr>
+                  )}
+                  {!loading && errorMsg && (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-red-500">{errorMsg}</td>
+                    </tr>
+                  )}
+                  {!loading && !errorMsg && approved.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-400">No approved visits found.</td>
+                    </tr>
+                  )}
+                  {approved.map((visit) => {
+                    const prop = visit.propertyInfo || {};
+                    const image = (visit.professionalPhotos && visit.professionalPhotos[0]) || (visit.photos && visit.photos[0]);
+                    return (
+                      <tr key={visit._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          {image ? (
+                            <img src={image} alt="Property" className="w-16 h-16 rounded-lg object-cover border border-gray-200" />
+                          ) : (
+                            <div className="w-16 h-16 rounded-lg bg-gray-50 flex items-center justify-center text-[10px] text-gray-400 border border-dashed border-gray-300 uppercase">No Image</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-slate-800">{prop.name || visit.propertyName || "-"}</div>
+                          <div className="text-xs text-slate-500">{visit.address || prop.address || "-"}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <div className="text-slate-800 font-medium">{prop.ownerName || visit.ownerName || "-"}</div>
+                          <div className="text-xs text-slate-500">{prop.ownerEmail || visit.ownerEmail || "-"}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{prop.area || visit.area || "-"}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-slate-800">₹{visit.monthlyRent || prop.monthlyRent || 0}</td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Approved
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => {
+                              if (!visit.latitude || !visit.longitude) return;
+                              window.open(`https://www.google.com/maps?q=${visit.latitude},${visit.longitude}`, "_blank");
+                            }}
+                            className="text-xs px-3 py-1 rounded border border-gray-200 bg-white text-slate-600 hover:bg-gray-50 transition-colors font-medium shadow-sm"
+                          >
+                            Map
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );

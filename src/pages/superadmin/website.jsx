@@ -64,96 +64,76 @@ export default function Website() {
   };
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-              </div>
-            </div>
-          </div>
-          <nav className="flex-1 py-6 space-y-1">
-            <a href="/superadmin/website" className="sidebar-link active">
-              <i data-lucide="globe" className="w-5 h-5 mr-3"></i> Live Properties
-            </a>
-          </nav>
-        </aside>
+    <div className="p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-slate-800">Website Properties</h1>
+          <button onClick={loadWebsite} className="text-sm text-purple-600 hover:underline flex items-center gap-1">
+            <i data-lucide="refresh-cw" className="w-3 h-3"></i> Refresh
+          </button>
+        </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <h2 className="text-lg font-semibold text-slate-800">Website Properties</h2>
-            <button onClick={loadWebsite} className="text-sm text-purple-600 hover:underline flex items-center gap-1">
-              <i data-lucide="refresh-cw" className="w-3 h-3"></i> Refresh
-            </button>
-          </header>
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setFilter("online")}
+            className={`px-4 py-2 rounded ${filter === "online" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"}`}
+          >
+            Online
+          </button>
+          <button
+            onClick={() => setFilter("offline")}
+            className={`px-4 py-2 rounded ${filter === "offline" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"}`}
+          >
+            Offline
+          </button>
+        </div>
 
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="flex gap-2 mb-6">
-              <button
-                onClick={() => setFilter("online")}
-                className={`px-4 py-2 rounded ${filter === "online" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"}`}
-              >
-                Online
-              </button>
-              <button
-                onClick={() => setFilter("offline")}
-                className={`px-4 py-2 rounded ${filter === "offline" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"}`}
-              >
-                Offline
-              </button>
-            </div>
-
-            <div className="bg-white rounded-xl shadow border overflow-x-auto">
-              <table className="w-full text-left min-w-full">
-                <thead className="bg-gray-50 text-[10px] text-gray-500 uppercase border-b">
-                  <tr>
-                    <th className="px-4 py-3">Visit ID</th>
-                    <th className="px-4 py-3">Property</th>
-                    <th className="px-4 py-3">Area</th>
-                    <th className="px-4 py-3">Owner</th>
-                    <th className="px-4 py-3">Rent</th>
-                    <th className="px-4 py-3">Status</th>
+        <div className="bg-white rounded-xl shadow border overflow-x-auto">
+          <table className="w-full text-left min-w-full">
+            <thead className="bg-gray-50 text-[10px] text-gray-500 uppercase border-b">
+              <tr>
+                <th className="px-4 py-3">Visit ID</th>
+                <th className="px-4 py-3">Property</th>
+                <th className="px-4 py-3">Area</th>
+                <th className="px-4 py-3">Owner</th>
+                <th className="px-4 py-3">Rent</th>
+                <th className="px-4 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading && (
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr>
+              )}
+              {!loading && errorMsg && (
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-red-500">{errorMsg}</td></tr>
+              )}
+              {!loading && !errorMsg && filtered.length === 0 && (
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">No properties found.</td></tr>
+              )}
+              {filtered.map((v) => {
+                const prop = v.propertyInfo || {};
+                const visitId = v.visitId || v._id || "";
+                const rent = prop.rent || v.monthlyRent || 0;
+                return (
+                  <tr key={visitId}>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-600">{visitId.slice(-8).toUpperCase()}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-800">{prop.name || "-"}</td>
+                    <td className="px-4 py-3">{prop.area || "-"}</td>
+                    <td className="px-4 py-3">{prop.ownerName || "-"}</td>
+                    <td className="px-4 py-3 font-bold">₹{rent}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => toggleLive(v)}
+                        className={`px-3 py-1 rounded text-xs font-medium ${v.isLiveOnWebsite ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                      >
+                        {v.isLiveOnWebsite ? "ONLINE" : "OFFLINE"}
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {loading && (
-                    <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">Loading...</td></tr>
-                  )}
-                  {!loading && errorMsg && (
-                    <tr><td colSpan={6} className="px-6 py-12 text-center text-red-500">{errorMsg}</td></tr>
-                  )}
-                  {!loading && !errorMsg && filtered.length === 0 && (
-                    <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">No properties found.</td></tr>
-                  )}
-                  {filtered.map((v) => {
-                    const prop = v.propertyInfo || {};
-                    const visitId = v.visitId || v._id || "";
-                    const rent = prop.rent || v.monthlyRent || 0;
-                    return (
-                      <tr key={visitId}>
-                        <td className="px-4 py-3 font-mono text-xs text-gray-600">{visitId.slice(-8).toUpperCase()}</td>
-                        <td className="px-4 py-3 font-semibold text-gray-800">{prop.name || "-"}</td>
-                        <td className="px-4 py-3">{prop.area || "-"}</td>
-                        <td className="px-4 py-3">{prop.ownerName || "-"}</td>
-                        <td className="px-4 py-3 font-bold">₹{rent}</td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => toggleLive(v)}
-                            className={`px-3 py-1 rounded text-xs font-medium ${v.isLiveOnWebsite ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
-                          >
-                            {v.isLiveOnWebsite ? "ONLINE" : "OFFLINE"}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </main>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

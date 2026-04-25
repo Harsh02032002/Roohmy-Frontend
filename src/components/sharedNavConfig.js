@@ -121,6 +121,55 @@ export const sharedNavConfig = {
       { label: "Before", to: "/website/before" }
     ]
   },
+  employee: {
+    title: "Employee",
+    base: "/employee",
+    sections: [
+      {
+        label: "Overview",
+        links: [
+          { label: "Dashboard", to: "/employee/areaadmin", icon: "layout-dashboard" }
+        ]
+      },
+      {
+        label: "Management",
+        links: [
+          { label: "Teams", to: "/employee/manager", icon: "map-pin" },
+          { label: "Property Owners", to: "/employee/owner", icon: "briefcase" },
+          { label: "Properties", to: "/employee/properties", icon: "home" },
+          { label: "Tenants", to: "/employee/tenant", icon: "users" },
+          { label: "New Signups", to: "/employee/new_signups", icon: "file-badge" }
+        ]
+      },
+      {
+        label: "Operations",
+        links: [
+          { label: "Web Enquiry", to: "/employee/websiteenq", icon: "folder-open" },
+          { label: "Enquiries", to: "/employee/enquiry", icon: "help-circle" },
+          { label: "Bookings", to: "/employee/booking", icon: "calendar-check" },
+          { label: "Reviews", to: "/employee/reviews", icon: "star" },
+          { label: "Complaint History", to: "/employee/complaint-history", icon: "alert-circle" }
+        ]
+      },
+      {
+        label: "Finance",
+        links: [
+          { label: "Rent Collections", to: "/employee/rentcollection", icon: "wallet" },
+          { label: "Commissions", to: "/employee/platform", icon: "indian-rupee" },
+          { label: "Refunds", to: "/employee/refund", icon: "rotate-ccw" }
+        ]
+      },
+      {
+        label: "System",
+        links: [
+          { label: "Locations", to: "/employee/location", icon: "globe" },
+          { label: "Settings", to: "/employee/settings", icon: "settings" },
+          { label: "Profile", to: "/employee/profile", icon: "user" }
+        ]
+      }
+    ],
+    links: []
+  },
   "digital-checkin": {
     title: "Digital Check-in",
     base: "/digital-checkin",
@@ -139,19 +188,13 @@ export const sharedNavConfig = {
 
 export const resolveSectionFromPath = (path = "") => {
   if (path === "/superadmin/index") return null;
-  if (path.startsWith("/superadmin/areaadmin")) return null;
-  if (path.startsWith("/employee/")) return null;
-  if (
-    path === "/propertyowner/index" ||
-    path === "/propertyowner/ownerlogin" ||
-    path.startsWith("/tenant/")
-  ) {
-    return null;
-  }
+  if (path === "/propertyowner/ownerlogin" || path === "/propertyowner/index") return null;
+  if (path === "/tenant/tenantlogin") return null;
+
   if (path.startsWith("/superadmin/")) return "superadmin";
-  // Property owner pages render their own admin.html-style shell.
-  if (path.startsWith("/propertyowner/")) return null;
-  // Digital check-in pages render as standalone forms without the shared shell.
-  if (path.startsWith("/digital-checkin/")) return null;
+  if (path.startsWith("/employee/")) return "employee";
+  if (path.startsWith("/propertyowner/")) return "propertyowner";
+  if (path.startsWith("/tenant/")) return "tenant";
+  
   return null;
 };

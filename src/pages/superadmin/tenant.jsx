@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 import { fetchJson } from "../../utils/api";
-import { useLegacySidebar } from "../../utils/legacyUi";
 
 function getImageDataUrl(fileLike) {
   if (!fileLike) return "";
@@ -98,7 +97,6 @@ export default function Tenant() {
     inlineScripts: []
   });
 
-  useLegacySidebar();
 
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -175,216 +173,133 @@ export default function Tenant() {
     : [];
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div>
-              <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-              <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-            </div>
+    <>
+      <main className="p-4 md:p-8 bg-slate-50/50 min-h-full">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">All Tenants</h1>
+            <p className="text-sm text-slate-500 mt-1">Tenant list merged with digital check-in profile and tenant KYC data.</p>
           </div>
-          <nav className="flex-1 py-6 space-y-1">
-            <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Overview</div>
-            <a href="/superadmin/superadmin" className="sidebar-link">
-              <i data-lucide="layout-dashboard" className="w-5 h-5 mr-3"></i> Dashboard
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Management</div>
-            <a href="/superadmin/manager" className="sidebar-link">
-              <i data-lucide="map-pin" className="w-5 h-5 mr-3"></i> Teams
-            </a>
-            <a href="/superadmin/owner" className="sidebar-link">
-              <i data-lucide="briefcase" className="w-5 h-5 mr-3"></i> Property Owners
-            </a>
-            <a href="/superadmin/properties" className="sidebar-link">
-              <i data-lucide="home" className="w-5 h-5 mr-3"></i> Properties
-            </a>
-            <a href="/superadmin/tenant" className="sidebar-link active">
-              <i data-lucide="users" className="w-5 h-5 mr-3"></i> Tenants
-            </a>
-            <a href="/superadmin/new_signups" className="sidebar-link">
-              <i data-lucide="file-badge" className="w-5 h-5 mr-3"></i> New Signups
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Operations</div>
-            <a href="/superadmin/websiteenq" className="sidebar-link">
-              <i data-lucide="folder-open" className="w-5 h-5 mr-3"></i> Web Enquiry
-            </a>
-            <a href="/superadmin/enquiry" className="sidebar-link">
-              <i data-lucide="help-circle" className="w-5 h-5 mr-3"></i> Enquiries
-            </a>
-            <a href="/superadmin/booking" className="sidebar-link">
-              <i data-lucide="calendar-check" className="w-5 h-5 mr-3"></i> Bookings
-            </a>
-            <a href="/superadmin/reviews" className="sidebar-link">
-              <i data-lucide="star" className="w-5 h-5 mr-3"></i> Reviews
-            </a>
-            <a href="/superadmin/complaint-history" className="sidebar-link">
-              <i data-lucide="alert-circle" className="w-5 h-5 mr-3"></i> Complaint History
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Website</div>
-            <a href="/superadmin/website" className="sidebar-link">
-              <i data-lucide="globe" className="w-5 h-5 mr-3"></i> Live Properties
-            </a>
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System</div>
-            <a href="/superadmin/location" className="sidebar-link">
-              <i data-lucide="globe" className="w-5 h-5 mr-3"></i> Locations
-            </a>
-          </nav>
-        </aside>
+          <div className="relative w-full md:w-80">
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search tenant, property, login ID..."
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+            />
+            <i data-lucide="search" className="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
+          </div>
+        </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center">
-              <button id="mobile-menu-open" className="md:hidden mr-4 text-slate-500">
-                <i data-lucide="menu" className="w-6 h-6"></i>
-              </button>
-              <div className="flex items-center text-sm">
-                <span className="text-slate-500 font-medium">Management</span>
-                <i data-lucide="chevron-right" className="w-4 h-4 mx-2 text-slate-400"></i>
-                <span className="text-slate-800 font-semibold">Tenants & KYC</span>
-              </div>
-            </div>
-            <button onClick={loadTenants} className="text-slate-500 hover:text-slate-700 text-sm flex items-center gap-2">
-              <i data-lucide="refresh-cw" className="w-4 h-4"></i> Refresh
-            </button>
-          </header>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Tenants</p>
+            <p className="text-3xl font-bold text-slate-800 mt-2">{stats.total}</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verified KYC</p>
+            <p className="text-3xl font-bold text-emerald-600 mt-2">{stats.verified}</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Submitted</p>
+            <p className="text-3xl font-bold text-amber-600 mt-2">{stats.submitted}</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending</p>
+            <p className="text-3xl font-bold text-slate-500 mt-2">{stats.pending}</p>
+          </div>
+        </div>
 
-          <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">All Tenants</h1>
-                  <p className="text-sm text-slate-500 mt-1">Tenant list merged with digital check-in profile and tenant KYC data.</p>
-                </div>
-                <div className="relative w-full md:w-80">
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search tenant, property, login ID..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
-                  />
-                  <i data-lucide="search" className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Total Tenants</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Verified KYC</p>
-                  <p className="text-2xl font-bold text-green-600 mt-1">{stats.verified}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Submitted</p>
-                  <p className="text-2xl font-bold text-yellow-600 mt-1">{stats.submitted}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Pending</p>
-                  <p className="text-2xl font-bold text-slate-700 mt-1">{stats.pending}</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-                <div className="overflow-x-auto">
-                  <table className="w-full data-table">
-                    <thead>
-                      <tr>
-                        <th>Tenant Info</th>
-                        <th>Property Details</th>
-                        <th>Tenant Profile</th>
-                        <th>KYC Status</th>
-                        <th className="text-right">Actions</th>
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">
+          <div className="overflow-x-auto">
+            <table className="w-full data-table">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tenant Info</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Property Details</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tenant Profile</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">KYC Status</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {loading && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium">Loading tenants...</td>
+                  </tr>
+                )}
+                {!loading && errorMsg && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-rose-500 font-medium">{errorMsg}</td>
+                  </tr>
+                )}
+                {!loading && !errorMsg && filteredTenants.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium">No tenants found.</td>
+                  </tr>
+                )}
+                {!loading &&
+                  !errorMsg &&
+                  filteredTenants.map((tenant) => {
+                    const status = tenant.kyc.status;
+                    const badgeClass =
+                      status === "verified"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        : status === "submitted"
+                        ? "bg-amber-50 text-amber-700 border-amber-100"
+                        : "bg-slate-50 text-slate-600 border-slate-100";
+                    return (
+                      <tr key={tenant._id || tenant.loginId} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-start gap-3">
+                            <div className="h-10 w-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm border border-purple-100">
+                              {(tenant.profile.name || "?").charAt(0).toUpperCase()}
+                            </div>
+                            <div className="space-y-0.5">
+                              <div className="text-sm font-bold text-slate-800">{tenant.profile.name || "-"}</div>
+                              <div className="text-xs font-mono text-purple-600">{tenant.loginId || "-"}</div>
+                              <div className="text-xs text-slate-500">{tenant.profile.phone || "-"}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1 text-xs">
+                            <div className="font-bold text-slate-700">{tenant.profile.propertyText}</div>
+                            <div className="text-slate-500">Room: {tenant.profile.roomNo || "-"} | Bed: {tenant.profile.bedNo || "-"}</div>
+                            <div className="text-emerald-600 font-bold">Rent: {tenant.profile.agreedRent ? `₹${tenant.profile.agreedRent}` : "-"}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1 text-xs text-slate-600">
+                            <div>DOB: {tenant.profile.dob || "-"}</div>
+                            <div>Move In: {formatDate(tenant.profile.moveInDate)}</div>
+                            <div className="uppercase font-bold text-[10px] text-slate-400">Status: {tenant.status || "pending"}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-2">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${badgeClass}`}>
+                              {status}
+                            </span>
+                            <div className="text-[10px] text-slate-400 font-mono">Aadhaar: {tenant.kyc.aadhaarNumber || "-"}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => setSelectedTenant(tenant)}
+                            className="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 shadow-sm transition-all active:scale-95"
+                          >
+                            View Profile
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {loading && (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading tenants...</td>
-                        </tr>
-                      )}
-                      {!loading && errorMsg && (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-8 text-center text-red-500">{errorMsg}</td>
-                        </tr>
-                      )}
-                      {!loading && !errorMsg && filteredTenants.length === 0 && (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-8 text-center text-gray-500">No tenants found.</td>
-                        </tr>
-                      )}
-                      {!loading &&
-                        !errorMsg &&
-                        filteredTenants.map((tenant) => {
-                          const status = tenant.kyc.status;
-                          const badgeClass =
-                            status === "verified"
-                              ? "bg-green-100 text-green-800"
-                              : status === "submitted"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-600";
-                          return (
-                            <tr key={tenant._id || tenant.loginId}>
-                              <td>
-                                <div className="flex items-start gap-3">
-                                  <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
-                                    {(tenant.profile.name || "?").charAt(0).toUpperCase()}
-                                  </div>
-                                  <div className="space-y-1">
-                                    <div className="text-sm font-semibold text-gray-900">{tenant.profile.name || "-"}</div>
-                                    <div className="text-xs text-gray-500">{tenant.loginId || "-"}</div>
-                                    <div className="text-xs text-gray-600">{tenant.profile.phone || "-"}</div>
-                                    <div className="text-xs text-gray-600">{tenant.profile.email || "-"}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td>
-                                <div className="space-y-1 text-sm text-gray-700">
-                                  <div className="font-medium text-gray-900">{tenant.profile.propertyText}</div>
-                                  <div>Room: {tenant.profile.roomNo || "-"}</div>
-                                  <div>Bed: {tenant.profile.bedNo || "-"}</div>
-                                  <div>Rent: {tenant.profile.agreedRent ? `Rs ${tenant.profile.agreedRent}` : "-"}</div>
-                                </div>
-                              </td>
-                              <td>
-                                <div className="space-y-1 text-sm text-gray-700">
-                                  <div>DOB: {tenant.profile.dob || "-"}</div>
-                                  <div>Guardian: {tenant.profile.guardianNumber || "-"}</div>
-                                  <div>Move In: {formatDate(tenant.profile.moveInDate)}</div>
-                                  <div>Status: <span className="uppercase text-xs">{tenant.status || "pending"}</span></div>
-                                </div>
-                              </td>
-                              <td>
-                                <div className="space-y-2">
-                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${badgeClass}`}>
-                                    {status}
-                                  </span>
-                                  <div className="text-xs text-gray-600">Aadhaar: {tenant.kyc.aadhaarNumber || "-"}</div>
-                                  <div className="text-xs text-gray-600">Linked Phone: {tenant.kyc.aadhaarLinkedPhone || "-"}</div>
-                                  <div className="text-xs text-gray-600">
-                                    OTP: {tenant.kyc.otpVerified ? "Verified" : "Pending"}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="text-right">
-                                <button
-                                  onClick={() => setSelectedTenant(tenant)}
-                                  className="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-blue-700 shadow-sm transition-colors"
-                                >
-                                  View Details
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </main>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -451,6 +366,7 @@ export default function Tenant() {
           </div>
         </div>
       )}
-    </div>
+      </main>
+    </>
   );
 }

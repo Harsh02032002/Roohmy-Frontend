@@ -1,22 +1,23 @@
 .shared-shell {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
-  background: #f5f6fa;
+  overflow: hidden;
+  background: #f1f5f9; /* Standardized light background */
   color: #111827;
   font-family: "Inter", system-ui, sans-serif;
 }
 
 .shared-sidebar {
-  width: 240px;
+  width: 260px;
+  flex-shrink: 0;
   background: #0f172a;
   color: #e2e8f0;
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
   border-right: 1px solid rgba(148, 163, 184, 0.2);
+  z-index: 40;
 }
 
 .shared-sidebar-header {
@@ -84,6 +85,9 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
 }
 
 .shared-header {
@@ -129,9 +133,17 @@
   font-size: 12px;
 }
 
+/* Ensure nothing pushes from the right */
+.shared-shell-superadmin {
+  background: #f1f5f9 !important;
+}
+
 .shared-content {
-  padding: 16px;
-  min-height: calc(100vh - 56px);
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  height: 100%;
+  background: #f1f5f9; /* Force light background */
 }
 
 .shared-shell .html-page header,
@@ -153,14 +165,32 @@
   width: 100%;
 }
 
-.shared-shell-superadmin .shared-superadmin-overlay {
-  display: none;
+.shared-shell-superadmin .shared-main {
+  background: #f1f5f9;
 }
 
-@media (max-width: 980px) {
-  .shared-shell {
+.shared-shell-superadmin .shared-content {
+  background: #f1f5f9 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure the sidebar doesn't overlap on desktop */
+@media (min-width: 768px) {
+  .shared-shell-superadmin {
+    display: flex !important;
+    flex-direction: row !important;
+    height: 100vh !important;
+    width: 100% !important; /* Ensure full width */
+    overflow: hidden !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .shared-shell:not(.shared-shell-superadmin) {
     flex-direction: column;
   }
+}
 
   .shared-sidebar {
     position: fixed;
@@ -169,6 +199,7 @@
     transform: translateX(-100%);
     transition: transform 0.2s ease;
     z-index: 50;
+    height: 100vh;
   }
 
   .shared-sidebar.open {
@@ -205,21 +236,23 @@
     transform: translateX(0);
   }
 
-  .shared-shell-superadmin .shared-superadmin-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 50;
-    display: none;
-  }
+.shared-shell-superadmin .shared-superadmin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 50;
+  display: none;
+}
 
-  .shared-shell-superadmin .shared-superadmin-overlay.is-open {
-    display: block;
-  }
+.shared-shell-superadmin .shared-superadmin-overlay.is-open {
+  display: block;
+}
 
+@media (max-width: 767px) {
   body.superadmin-menu-open .shared-shell-superadmin .shared-superadmin-overlay {
     display: block;
   }
+}
 
   .shared-shell-superadmin .shared-superadmin-close {
     display: inline-flex;

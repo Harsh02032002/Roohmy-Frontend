@@ -362,115 +362,30 @@ export default function SuperadminProperties() {
   const currentPage = "properties";
 
   return (
-    <div className="html-page">
-      <div
-        id="mobile-sidebar-overlay"
-        className={`fixed inset-0 bg-black/50 z-30 md:hidden ${mobileOpen ? "" : "hidden"}`}
-        onClick={() => setMobileOpen(false)}
-      ></div>
-
-      <div className="flex h-screen overflow-hidden">
-        <aside className={`sidebar w-72 flex-shrink-0 ${mobileOpen ? "flex" : "hidden"} md:flex flex-col z-20 overflow-y-auto custom-scrollbar fixed md:static inset-y-0 left-0 transform ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} transition-transform duration-300`}>
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-              </div>
+    <>
+      <div className="p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Properties List</h1>
+              <p className="text-sm text-slate-500 mt-1">Manage all properties, view room details, and track occupancy.</p>
             </div>
-            <button className="md:hidden ml-auto p-2 text-gray-400 hover:text-white" onClick={() => setMobileOpen(false)}>
-              <i data-lucide="x" className="w-5 h-5"></i>
-            </button>
-          </div>
-          <nav className="flex-1 py-6 space-y-1">
-            {navSections.map((section) => (
-              <div key={section.label}>
-                <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">{section.label}</div>
-                {section.items.map((item) => (
-                  <a key={item.href} href={item.href} className={`sidebar-link ${item.key === currentPage ? "active" : ""}`}>
-                    <i data-lucide={item.icon} className="w-5 h-5 mr-3"></i> {item.text}
-                  </a>
-                ))}
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="relative flex-1 md:w-72">
+                <i data-lucide="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input
+                  type="text"
+                  placeholder="Search Property, Owner, ID..."
+                  className="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none w-full transition-all"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-            ))}
-
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Finance</div>
-            <div className="group">
-              <div className="sidebar-link justify-between" onClick={() => setFinanceOpen((v) => !v)}>
-                <div className="flex items-center"><i data-lucide="wallet" className="w-5 h-5 mr-3"></i> Finance</div>
-                <i data-lucide="chevron-down" className={`w-4 h-4 transition-transform duration-200 ${financeOpen ? "rotate-180" : ""}`}></i>
-              </div>
-              <div id="finance-submenu" className={`submenu ${financeOpen ? "open" : ""}`}>
-                <a href="/superadmin/rentcollection" className="sidebar-link">Rent Collections</a>
-                <a href="/superadmin/platform" className="sidebar-link">Commissions</a>
-                <a href="/superadmin/refund" className="sidebar-link">Refunds</a>
-                <a href="/superadmin/payment_disputes" className="sidebar-link">Payment Disputes</a>
-              </div>
-            </div>
-
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System</div>
-            <a href="/superadmin/location" className="sidebar-link"><i data-lucide="globe" className="w-5 h-5 mr-3"></i> Locations</a>
-            <div className="group">
-              <div className="sidebar-link justify-between" onClick={() => setSettingsOpen((v) => !v)}>
-                <div className="flex items-center"><i data-lucide="settings" className="w-5 h-5 mr-3"></i> Settings</div>
-                <i data-lucide="chevron-down" className={`w-4 h-4 transition-transform duration-200 ${settingsOpen ? "rotate-180" : ""}`}></i>
-              </div>
-              <div id="settings-submenu" className={`submenu ${settingsOpen ? "open" : ""}`}>
-                <a href="/superadmin/log" className="sidebar-link">Logs</a>
-                <a href="/superadmin/security" className="sidebar-link">Security</a>
-                <a href="/superadmin/backup" className="sidebar-link">Backup</a>
-              </div>
-            </div>
-          </nav>
-        </aside>
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center">
-              <button className="md:hidden mr-4 text-slate-500" onClick={() => setMobileOpen(true)}>
-                <i data-lucide="menu" className="w-6 h-6"></i>
+              <button onClick={exportToExcel} className="bg-green-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-green-700 transition-all flex items-center justify-center shadow-sm shadow-green-100">
+                <i data-lucide="sheet" className="w-4 h-4 mr-2"></i> Export Excel
               </button>
-              <div className="flex items-center text-sm">
-                <span className="text-slate-500 font-medium">Management</span>
-                <i data-lucide="chevron-right" className="w-4 h-4 mx-2 text-slate-400"></i>
-                <span className="text-slate-800 font-semibold">Properties</span>
-              </div>
             </div>
-            <div className="flex items-center gap-4">
-              {demoMode ? (
-                <div className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded">Demo Mode</div>
-              ) : null}
-              <button className="text-slate-400 hover:text-slate-600"><i data-lucide="bell" className="w-5 h-5"></i></button>
-              <div className="relative group">
-                <button className="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-full transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs">SP</div>
-                </button>
-              </div>
-            </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Properties List</h1>
-                  <p className="text-sm text-gray-500 mt-1">Manage all properties, view room details, and track occupancy.</p>
-                </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                  <div className="relative flex-1 md:w-64">
-                    <i data-lucide="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                    <input
-                      type="text"
-                      placeholder="Search Name, Owner, Loc..."
-                      className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none w-full"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <button onClick={exportToExcel} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center shadow-sm">
-                    <i data-lucide="sheet" className="w-4 h-4 mr-2"></i> Export
-                  </button>
-                </div>
-              </div>
+          </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
@@ -551,10 +466,6 @@ export default function SuperadminProperties() {
                   </table>
                 </div>
               </div>
-            </div>
-          </main>
-        </div>
-      </div>
 
       {showGallery ? (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60] backdrop-blur-sm" onClick={closeGallery}>
@@ -664,8 +575,10 @@ export default function SuperadminProperties() {
           </div>
         </div>
       ) : null}
+      </div>
     </div>
-  );
+  </>
+);
 }
 
 

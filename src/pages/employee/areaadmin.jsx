@@ -469,154 +469,98 @@ export default function SuperadminAreaadmin() {
   }, [displayName, user]);
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className={`sidebar w-72 flex-shrink-0 ${mobileOpen ? "flex" : "hidden"} md:flex flex-col z-20 overflow-y-auto custom-scrollbar fixed md:static inset-y-0 left-0 transform ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} transition-transform duration-300`}>
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500 font-medium tracking-wider">{roleLabel}</span>
-              </div>
-            </div>
-            <button className="md:hidden ml-auto p-2 text-gray-400 hover:text-white" onClick={() => setMobileOpen(false)} aria-label="Close menu">
-              <i data-lucide="x" className="w-5 h-5"></i>
-            </button>
+    <main class="flex-1 min-h-full bg-[#f1f5f9] p-6 md:p-10">
+      <div class="w-full">
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          <div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+              Welcome, <span id="welcomeName">{displayName}</span>!
+            </h1>
+            <p class="text-lg text-slate-500 mt-2">
+              Accessing <span id="welcomeArea" class="font-semibold text-purple-600">Dashboard</span>.
+            </p>
           </div>
 
-          <nav className="flex-1 py-6 space-y-1" id="dynamicSidebarNav">
-            <a href={sidebarConfig.dashboard.path} className="sidebar-link active">
-              <i data-lucide={sidebarConfig.dashboard.icon} className="w-5 h-5 mr-3"></i> {sidebarConfig.dashboard.label}
-            </a>
-            {renderSection("Management", navManagement)}
-            {renderSection("Finance", navFinance)}
-            {renderSection("System", navSystem)}
-            <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4">Account</div>
-            <a href="/employee/profile" className="sidebar-link"><i data-lucide="user" className="w-5 h-5 mr-3"></i> Profile</a>
-            <a href="/employee/settings" className="sidebar-link"><i data-lucide="settings" className="w-5 h-5 mr-3"></i> Settings</a>
-          </nav>
-        </aside>
-
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10 border-b border-gray-200">
-            <div className="flex items-center">
-              <button id="mobile-menu-open" className="md:hidden mr-4 text-slate-500" onClick={() => setMobileOpen(true)}>
-                <i data-lucide="menu" className="w-6 h-6"></i>
-              </button>
-              <div className="flex items-center text-sm">
-                <span id="headerAreaBadge" className="px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-bold uppercase tracking-wide">
-                  {headerBadge}
-                </span>
-              </div>
+          <div id="areaStatsRow" class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6 w-full md:w-auto">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center min-w-[160px]">
+              <p class="text-sm font-medium text-slate-500 mb-1">Total Properties</p>
+              <h3 id="totalPropertiesCountArea" class="text-3xl font-bold text-slate-900">
+                {areaStats.totalProperties}
+              </h3>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative group">
-                <button className="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-full transition-colors">
-                  {avatarData.photoUrl ? (
-                    <img src={avatarData.photoUrl} alt="User" className="w-8 h-8 rounded-full border border-slate-200" />
-                  ) : (
-                    <div className={`w-8 h-8 rounded-full ${avatarData.color} flex items-center justify-center text-white text-xs font-bold border border-slate-200`} data-emp-avatar="true">
-                      {avatarData.initials}
-                    </div>
-                  )}
-                  <div className="text-left hidden sm:block">
-                    <p className="text-xs font-semibold text-gray-700" id="headerName">{displayName}</p>
-                    <p className="text-[10px] text-gray-500" id="headerRole">{headerRole}</p>
-                  </div>
-                  <i data-lucide="chevron-down" className="w-3 h-3 text-gray-400 hidden sm:block"></i>
-                </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block z-50">
-                  <a href="/superadmin/index" id="logoutBtn" onClick={logout} className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
-                </div>
-              </div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center min-w-[160px]">
+              <p class="text-sm font-medium text-slate-500 mb-1">Pending Approvals</p>
+              <h3 id="pendingApprovalsCountArea" class="text-3xl font-bold text-slate-900">
+                {areaStats.pendingApprovals}
+              </h3>
             </div>
-          </header>
-
-          <div className="flex-1 overflow-hidden relative">
-            <main id="dashboard-view" className="h-full overflow-y-auto p-4 md:p-8">
-              <div className="max-w-[1600px] mx-auto">
-                <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-                  <div>
-                    <h1 className="text-2xl font-bold text-slate-800">Welcome, <span id="welcomeName">{displayName}</span>!</h1>
-                    <p className="text-sm text-slate-500 mt-1">Accessing <span id="welcomeArea" className="font-semibold text-purple-600">Dashboard</span>.</p>
-                  </div>
-
-                  <div id="areaStatsRow" className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-                    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm text-center">
-                      <p className="text-sm text-gray-500">Total Properties</p>
-                      <h3 id="totalPropertiesCountArea" className="text-2xl font-bold text-slate-800">{areaStats.totalProperties}</h3>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm text-center">
-                      <p className="text-sm text-gray-500">Pending Approvals</p>
-                      <h3 id="pendingApprovalsCountArea" className="text-2xl font-bold text-slate-800">{areaStats.pendingApprovals}</h3>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm text-center">
-                      <p className="text-sm text-gray-500">Active Owners</p>
-                      <h3 id="activeOwnersCountArea" className="text-2xl font-bold text-slate-800">{areaStats.activeOwners}</h3>
-                    </div>
-                  </div>
-
-                  {showSalary ? (
-                    <div id="salaryBadge" className="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 text-right hidden md:block">
-                      <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Current Salary</p>
-                      <p className="text-lg font-bold text-green-600">&#8377; --</p>
-                    </div>
-                  ) : null}
-                </div>
-
-                <div id="dashboardWidgetGrid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {dashboardCards.map((card) => (
-                    <div
-                      key={card.id}
-                      className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer"
-                      onClick={() => {
-                        const cfg = sidebarConfig[card.id];
-                        if (cfg?.path) window.location.href = cfg.path;
-                      }}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`p-3 bg-${card.color}-50 rounded-lg text-${card.color}-600`}>
-                          <i data-lucide={card.icon} className="w-6 h-6"></i>
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-800">{card.label}</h3>
-                          <p className="text-xs text-gray-500">{card.desc}</p>
-                          <p className="text-sm font-semibold text-slate-700 mt-1">
-                            {card.id === "properties" ? widgetCounts.properties :
-                              card.id === "tenants" ? widgetCounts.tenants :
-                                card.id === "complaint_history" ? widgetCounts.complaints :
-                                  widgetCounts.visits}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 p-8 bg-white rounded-xl border border-gray-200 text-center">
-                  <h3 className="text-lg font-medium text-gray-800">Select a module from the sidebar</h3>
-                  <p className="text-gray-500 text-sm mt-1">Your access is limited to the specific permissions assigned to your Team role.</p>
-                  {allowedModules.includes("visits") ? (
-                    <div className="mt-6">
-                      <a
-                        href="/employee/visit"
-                        className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors"
-                      >
-                        <i data-lucide="clipboard-list" className="w-4 h-4"></i>
-                        Add Visit Report
-                      </a>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </main>
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center min-w-[160px]">
+              <p class="text-sm font-medium text-slate-500 mb-1">Active Owners</p>
+              <h3 id="activeOwnersCountArea" class="text-3xl font-bold text-slate-900">
+                {areaStats.activeOwners}
+              </h3>
+            </div>
           </div>
         </div>
 
-        <div id="mobile-sidebar-overlay" className={`fixed inset-0 bg-black/50 z-30 ${mobileOpen ? "" : "hidden"} md:hidden backdrop-blur-sm`} onClick={() => setMobileOpen(false)}></div>
+        <div id="dashboardWidgetGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {dashboardCards.map((card) => (
+            <div
+              key={card.id}
+              class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+              onClick={() => {
+                const cfg = sidebarConfig[card.id];
+                if (cfg?.path) window.location.href = cfg.path;
+              }}
+            >
+              <div class="flex items-center gap-5">
+                <div class="p-4 bg-slate-50 rounded-2xl group-hover:bg-purple-50 transition-colors">
+                  <i data-lucide={card.icon} class="w-8 h-8 text-slate-600 group-hover:text-purple-600 transition-colors"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">{card.label}</h3>
+                  <p class="text-3xl font-bold text-slate-900 mt-1">
+                    {card.id === "properties"
+                      ? widgetCounts.properties
+                      : card.id === "tenants"
+                      ? widgetCounts.tenants
+                      : card.id === "complaint_history"
+                      ? widgetCounts.complaints
+                      : widgetCounts.visits}
+                  </p>
+                  <p class="text-xs text-slate-400 mt-1 font-medium">{card.desc}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-8 p-10 bg-white rounded-2xl border border-slate-200 text-center shadow-sm">
+          <div class="max-w-md mx-auto">
+            <div class="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="layers" class="w-8 h-8 text-purple-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Select a module from the sidebar</h3>
+            <p class="text-slate-500 mt-2">
+              Your access is limited to the specific permissions assigned to your Team role.
+            </p>
+            {allowedModules.includes("visits") ? (
+              <div class="mt-8">
+                <a
+                  href="/employee/visit"
+                  class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-200 transition-all active:scale-95"
+                >
+                  <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                  Add Visit Report
+                </a>
+              </div>
+            ) : null}
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   );
+}
 }
 
 

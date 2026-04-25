@@ -42,6 +42,7 @@ const NAV = [
       { label: "Web Enquiry", to: "/superadmin/websiteenq" },
       { label: "Enquiries", to: "/superadmin/enquiry" },
       { label: "Bookings", to: "/superadmin/booking" },
+      { label: "Visit Reports", to: "/superadmin/visit" },
       { label: "Reviews", to: "/superadmin/reviews" },
       { label: "Complaint History", to: "/superadmin/complaint-history" },
     ],
@@ -95,7 +96,7 @@ const NAV = [
   },
 ];
 
-export function Sidebar({ open, onClose, onLogout }) {
+export function Sidebar({ open, onClose, onLogout, isMobile }) {
   const location = useLocation();
   const path = location.pathname;
   
@@ -116,8 +117,9 @@ export function Sidebar({ open, onClose, onLogout }) {
       />
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-[#111827] text-gray-300 flex flex-col shrink-0 transition-transform",
-          open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "bg-[#111827] text-gray-300 flex flex-col shrink-0 transition-transform duration-300",
+          "w-64 h-full",
+          isMobile ? (open ? "translate-x-0 fixed inset-y-0 left-0 z-40" : "-translate-x-full fixed inset-y-0 left-0 z-40") : "translate-x-0"
         )}
       >
         {/* Brand */}

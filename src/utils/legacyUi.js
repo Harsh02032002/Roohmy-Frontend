@@ -58,9 +58,9 @@ export const useLegacySidebar = () => {
       if (openBtn) openBtn.removeEventListener("click", openHandler);
       if (closeBtn) closeBtn.removeEventListener("click", openHandler);
       if (overlay) overlay.removeEventListener("click", openHandler);
-      delete window.toggleSubmenu;
-      delete window.toggleMobileMenu;
-      delete window.toggleModal;
+      window.toggleSubmenu = null;
+      window.toggleMobileMenu = null;
+      window.toggleModal = null;
     };
   }, []);
 };

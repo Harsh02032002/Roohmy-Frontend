@@ -74,43 +74,90 @@ export default function ImportLocal() {
   };
 
   return (
-    <div className="html-page">
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow">
-        <h1 className="text-xl font-bold mb-3">Import localStorage JSON to MongoDB</h1>
-        <p className="text-sm text-gray-600 mb-4">
-          Paste the exported localStorage JSON below (or drop a .json file) and provide the import secret.
-          The server will upsert Owners, Visits, Tenants and Properties.
-        </p>
+    <main className="p-4 md:p-8 bg-slate-50/50 min-h-full">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
+          <div className="mb-8">
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Import LocalStorage → MongoDB</h1>
+            <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+              Paste the exported localStorage JSON below (or drop a .json file) and provide the import secret.
+              The server will upsert Owners, Visits, Tenants and Properties into the database.
+            </p>
+          </div>
 
-        <textarea
-          className="w-full h-56 p-3 border rounded mb-3 font-mono text-sm"
-          placeholder="Paste localStorage JSON here"
-          value={payloadText}
-          onChange={(event) => setPayloadText(event.target.value)}
-        />
-        <div className="flex gap-2 mb-3">
-          <input
-            type="text"
-            placeholder="Import secret (x-import-secret)"
-            className="border p-2 rounded flex-1"
-            value={importSecret}
-            onChange={(event) => setImportSecret(event.target.value)}
-          />
-          <input type="file" accept="application/json" className="border p-2 rounded" onChange={handleFile} />
-        </div>
-        <div className="flex gap-2">
-          <button onClick={doImport} disabled={loading} className="bg-green-600 text-white px-4 py-2 rounded font-semibold">
-            {loading ? "Importing..." : "Import"}
-          </button>
-          <button onClick={previewPayload} className="bg-gray-200 px-4 py-2 rounded">Preview Parsed</button>
-          {status && <span className="text-sm text-gray-600 ml-3">{status}</span>}
-        </div>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Payload JSON</label>
+              <textarea
+                className="w-full h-64 p-4 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-xs focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none"
+                placeholder='{ "owners": [...], "visits": [...] }'
+                value={payloadText}
+                onChange={(event) => setPayloadText(event.target.value)}
+              />
+            </div>
 
-        {result && (
-          <pre className="mt-4 p-3 bg-gray-50 border rounded text-sm max-h-72 overflow-auto">{result}</pre>
-        )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Import Secret</label>
+                <input
+                  type="password"
+                  placeholder="x-import-secret"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none text-sm"
+                  value={importSecret}
+                  onChange={(event) => setImportSecret(event.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Upload File</label>
+                <input 
+                  type="file" 
+                  accept="application/json" 
+                  className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-all cursor-pointer" 
+                  onChange={handleFile} 
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-50">
+              <button 
+                onClick={doImport} 
+                disabled={loading} 
+                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg shadow-slate-900/10 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <i data-lucide="upload-cloud" className="w-4 h-4"></i>
+                    Start Import
+                  </>
+                )}
+              </button>
+              <button onClick={previewPayload} className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
+                Preview Parsed
+              </button>
+              {status && (
+                <div className="ml-auto px-4 py-2 bg-purple-50 text-purple-700 text-xs font-bold rounded-lg border border-purple-100 animate-pulse">
+                  {status}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {result && (
+            <div className="mt-8">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Server Response</label>
+              <pre className="p-5 bg-slate-900 text-emerald-400 rounded-2xl text-[10px] font-mono overflow-auto max-h-80 shadow-inner">
+                {result}
+              </pre>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
 

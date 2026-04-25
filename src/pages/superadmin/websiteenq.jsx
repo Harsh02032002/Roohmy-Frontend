@@ -304,193 +304,150 @@ export default function SuperadminWebsiteenq() {
   const currentPage = "websiteenq";
 
   return (
-    <div className="html-page">
-      <div className={`fixed inset-0 bg-black/50 z-30 md:hidden ${mobileOpen ? "" : "hidden"}`} onClick={() => setMobileOpen(false)}></div>
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
+    <div className="p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Property Enquiries from Website</h1>
+            <p className="text-sm text-slate-500 mt-1">Manage and assign property enquiries to area managers.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
               <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
+                <p className="text-sm text-gray-600">Total Enquiries</p>
+                <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
               </div>
+              <i data-lucide="inbox" className="w-8 h-8 text-blue-500"></i>
             </div>
           </div>
-          <nav className="flex-1 py-6 space-y-1">
-            {navSections.map((section) => (
-              <div key={section.label}>
-                <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">{section.label}</div>
-                {section.items.map((item) => (
-                  <a key={item.href} href={item.href} className={`sidebar-link ${item.key === currentPage ? "active" : ""}`}>
-                    <i data-lucide={item.icon} className="w-5 h-5 mr-3"></i> {item.text}
-                  </a>
-                ))}
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Pending</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
               </div>
-            ))}
-          </nav>
-        </aside>
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center">
-              <button className="md:hidden mr-4 text-slate-500" onClick={() => setMobileOpen(true)}><i data-lucide="menu" className="w-6 h-6"></i></button>
-              <div className="flex items-center text-sm">
-                <span className="text-slate-500 font-medium">Operations</span>
-                <i data-lucide="chevron-right" className="w-4 h-4 mx-2 text-slate-400"></i>
-                <span className="text-slate-800 font-semibold">Website Property Enquiries</span>
-              </div>
+              <i data-lucide="clock" className="w-8 h-8 text-yellow-500"></i>
             </div>
-            <div className="flex items-center gap-4">
-              <button className="text-slate-400 hover:text-slate-600"><i data-lucide="bell" className="w-5 h-5"></i></button>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Assigned</p>
+                <p className="text-2xl font-bold text-green-600">{stats.assigned}</p>
+              </div>
+              <i data-lucide="check-circle" className="w-8 h-8 text-green-500"></i>
             </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Property Enquiries from Website</h1>
-                  <p className="text-sm text-slate-500 mt-1">Manage and assign property enquiries to area managers.</p>
-                </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Cities</p>
+                <p className="text-2xl font-bold text-purple-600">{stats.cities}</p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Total Enquiries</p>
-                      <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
-                    </div>
-                    <i data-lucide="inbox" className="w-8 h-8 text-blue-500"></i>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Pending</p>
-                      <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-                    </div>
-                    <i data-lucide="clock" className="w-8 h-8 text-yellow-500"></i>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Assigned</p>
-                      <p className="text-2xl font-bold text-green-600">{stats.assigned}</p>
-                    </div>
-                    <i data-lucide="check-circle" className="w-8 h-8 text-green-500"></i>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Cities</p>
-                      <p className="text-2xl font-bold text-purple-600">{stats.cities}</p>
-                    </div>
-                    <i data-lucide="map-pin" className="w-8 h-8 text-purple-500"></i>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 shadow-sm">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Search property name, owner, locality..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <select
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="assigned">Assigned</option>
-                  </select>
-                  <select
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    value={cityFilter}
-                    onChange={(e) => setCityFilter(e.target.value)}
-                  >
-                    <option value="">All Cities</option>
-                    {Array.from(new Set(enquiries.map((e) => e.city).filter(Boolean))).map((city) => (
-                      <option key={city} value={city}>{city.charAt(0).toUpperCase() + city.slice(1)}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                {filteredEnquiries.length === 0 ? (
-                  <p className="text-center text-gray-500 py-8">No enquiries found.</p>
-                ) : (
-                  Object.keys(grouped).sort().map((city) => (
-                    <div key={city} className="area-section">
-                      <div className="area-header">
-                        <h2 className="text-lg font-semibold flex items-center gap-2">
-                          <i data-lucide="map-pin" className="w-5 h-5"></i>
-                          {city.charAt(0).toUpperCase() + city.slice(1)}
-                        </h2>
-                        <p className="text-sm opacity-90 mt-1">{grouped[city].length} enquiries</p>
-                      </div>
-                      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                        <table className="w-full data-table">
-                          <thead>
-                            <tr>
-                              <th>Property</th>
-                              <th>Owner</th>
-                              <th>Locality</th>
-                              <th>Type</th>
-                              <th>Date</th>
-                              <th>Status</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {grouped[city].map((e) => (
-                              <tr key={e.id}>
-                                <td><strong>{e.property_name}</strong></td>
-                                <td>{e.owner_name}</td>
-                                <td>{e.locality || "-"}</td>
-                                <td>
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {(e.property_type || "Other").toUpperCase()}
-                                  </span>
-                                </td>
-                                <td><small>{e.created_at ? new Date(e.created_at).toLocaleDateString() : "-"}</small></td>
-                                <td>
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${e.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}`}>
-                                    {e.status === "pending" ? "Pending" : `Assigned to ${e.assigned_to || "?"}`}
-                                  </span>
-                                </td>
-                                <td>
-                                  <div className="flex gap-2">
-                                    <button onClick={() => openDetails(e.id)} className="text-blue-600 hover:text-blue-800 p-1" title="View Details">
-                                      <i data-lucide="eye" className="w-4 h-4"></i>
-                                    </button>
-                                    {e.status === "pending" ? (
-                                      <button onClick={() => openAssign(e.id)} className="text-purple-600 hover:text-purple-800 p-1" title="Assign">
-                                        <i data-lucide="user-check" className="w-4 h-4"></i>
-                                      </button>
-                                    ) : null}
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              <i data-lucide="map-pin" className="w-8 h-8 text-purple-500"></i>
             </div>
-          </main>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 shadow-sm">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search property name, owner, locality..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="assigned">Assigned</option>
+            </select>
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+            >
+              <option value="">All Cities</option>
+              {Array.from(new Set(enquiries.map((e) => e.city).filter(Boolean))).map((city) => (
+                <option key={city} value={city}>{city.charAt(0).toUpperCase() + city.slice(1)}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {filteredEnquiries.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">No enquiries found.</p>
+          ) : (
+            Object.keys(grouped).sort().map((city) => (
+              <div key={city} className="area-section">
+                <div className="area-header">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="map-pin" className="w-5 h-5"></i>
+                    {city.charAt(0).toUpperCase() + city.slice(1)}
+                  </h2>
+                  <p className="text-sm opacity-90 mt-1">{grouped[city].length} enquiries</p>
+                </div>
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <table className="w-full data-table">
+                    <thead>
+                      <tr>
+                        <th>Property</th>
+                        <th>Owner</th>
+                        <th>Locality</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {grouped[city].map((e) => (
+                        <tr key={e.id}>
+                          <td><strong>{e.property_name}</strong></td>
+                          <td>{e.owner_name}</td>
+                          <td>{e.locality || "-"}</td>
+                          <td>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {(e.property_type || "Other").toUpperCase()}
+                            </span>
+                          </td>
+                          <td><small>{e.created_at ? new Date(e.created_at).toLocaleDateString() : "-"}</small></td>
+                          <td>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${e.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}`}>
+                              {e.status === "pending" ? "Pending" : `Assigned to ${e.assigned_to || "?"}`}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="flex gap-2">
+                              <button onClick={() => openDetails(e.id)} className="text-blue-600 hover:text-blue-800 p-1" title="View Details">
+                                <i data-lucide="eye" className="w-4 h-4"></i>
+                              </button>
+                              {e.status === "pending" ? (
+                                <button onClick={() => openAssign(e.id)} className="text-purple-600 hover:text-purple-800 p-1" title="Assign">
+                                  <i data-lucide="user-check" className="w-4 h-4"></i>
+                                </button>
+                              ) : null}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
       {showDetails ? (

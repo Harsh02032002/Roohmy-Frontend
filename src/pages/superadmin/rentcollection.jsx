@@ -354,68 +354,22 @@ export default function SuperadminRentcollection() {
   const currentPage = "rentcollection";
 
   return (
-    <div className="html-page">
+    <>
       {toast ? (
-        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg ${toast.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
-          <div className="flex items-center gap-2">
+        <div className={`fixed top-4 right-4 z-[100] px-6 py-3 rounded-2xl shadow-xl border ${toast.type === "success" ? "bg-green-500 border-green-400 text-white" : "bg-red-500 border-red-400 text-white"} animate-in slide-in-from-top-4 duration-300`}>
+          <div className="flex items-center gap-3">
             <i data-lucide={toast.type === "success" ? "check-circle" : "alert-circle"} className="w-5 h-5"></i>
-            <span className="font-medium">{toast.message}</span>
+            <span className="font-bold text-sm">{toast.message}</span>
           </div>
         </div>
       ) : null}
 
-      <div id="mobile-sidebar-overlay" className={`fixed inset-0 bg-black/50 z-30 md:hidden ${mobileOpen ? "" : "hidden"}`} onClick={() => setMobileOpen(false)}></div>
-      <div className="flex h-screen">
-        <aside id="mobile-sidebar" className={`sidebar w-72 flex-shrink-0 ${mobileOpen ? "flex" : "hidden"} md:flex flex-col z-20 overflow-y-auto custom-scrollbar fixed md:static inset-y-0 left-0 transform ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} transition-transform duration-300`}>
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div><img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" /><span className="text-[10px] text-gray-500">SUPER ADMIN</span></div>
-            </div>
-            <button className="md:hidden ml-auto p-2 text-gray-400 hover:text-white" onClick={() => setMobileOpen(false)}>
-              <i data-lucide="x" className="w-5 h-5"></i>
-            </button>
+      <div className="p-4 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Rent Collection</h2>
+            <p className="text-sm md:text-base text-slate-500 mt-1">View all tenant rent information and manage collections.</p>
           </div>
-          <nav className="flex-1 py-6 space-y-1">
-            {navSections.map((section) => (
-              <div key={section.label}>
-                <div className="px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">{section.label}</div>
-                {section.items.map((item) => (
-                  <a key={item.href} href={item.href} className={`sidebar-link ${item.key === currentPage ? "active" : ""}`}>
-                    <i data-lucide={item.icon} className="w-5 h-5 mr-3"></i> {item.text}
-                  </a>
-                ))}
-              </div>
-            ))}
-
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Finance</div>
-            <div className="group">
-              <div className="sidebar-link justify-between" onClick={() => setFinanceOpen((v) => !v)}>
-                <div className="flex items-center"><i data-lucide="wallet" className="w-5 h-5 mr-3"></i> Finance</div>
-                <i data-lucide="chevron-down" className={`w-4 h-4 transition-transform duration-200 ${financeOpen ? "rotate-180" : ""}`}></i>
-              </div>
-              <div id="finance-submenu" className={`submenu ${financeOpen ? "open" : ""}`}>
-                <a href="/superadmin/rentcollection" className="sidebar-link text-sm hover:text-white active">Rent Collections</a>
-                <a href="/superadmin/platform" className="sidebar-link text-sm hover:text-white">Commissions</a>
-                <a href="/superadmin/refund" className="sidebar-link text-sm hover:text-white">Refunds</a>
-              </div>
-            </div>
-
-            <div className="mt-6 px-6 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System</div>
-            <a href="/superadmin/location" className="sidebar-link"><i data-lucide="globe" className="w-5 h-5 mr-3"></i> Locations</a>
-          </nav>
-        </aside>
-        <div className="flex-1 overflow-auto">
-          <div className="md:hidden bg-white p-4 shadow-sm flex items-center">
-            <button id="mobile-menu-open" className="mr-4 text-slate-500" onClick={() => setMobileOpen(true)}>
-              <i data-lucide="menu" className="w-6 h-6"></i>
-            </button>
-            <h2 className="text-lg font-bold text-slate-900">Rent Collection</h2>
-          </div>
-          <div className="p-4 sm:p-6 md:p-8">
-            <div className="mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Rent Collection</h2>
-              <p className="text-sm md:text-base text-gray-600">View all tenant rent information</p>
-            </div>
 
             <div className="bg-white rounded-lg shadow p-6 mb-6">
               <div className="flex flex-wrap gap-2 sm:gap-4 mb-4">
@@ -579,8 +533,7 @@ export default function SuperadminRentcollection() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </>
   );
 }
 
