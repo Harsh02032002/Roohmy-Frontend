@@ -127,7 +127,6 @@ export function Sidebar({ open, onClose, onLogout, isMobile }) {
         <div className="h-20 px-6 flex items-center bg-[#111827] border-b border-gray-800">
            <div className="flex flex-col">
             <span className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-               <img src="https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png" alt="" className="h-6 w-auto brightness-0 invert" />
                Roomhy<span className="text-purple-500">.com</span>
             </span>
             <span className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mt-1">Super Admin</span>
@@ -218,8 +217,8 @@ export function Sidebar({ open, onClose, onLogout, isMobile }) {
             Logout
           </button>
           <div className="flex items-center gap-3 px-3 py-3 bg-gray-900/50 rounded-xl border border-gray-800">
-            <div className="h-9 w-9 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <ShieldCheck className="h-5 w-5 text-purple-500" />
+            <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-white font-black text-sm">
+                RH
             </div>
             <div className="text-xs">
               <div className="text-white font-medium">Roomhy Admin</div>
