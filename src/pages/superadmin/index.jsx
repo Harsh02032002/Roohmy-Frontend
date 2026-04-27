@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, ArrowRight, X, Mail } from "lucide-react";
 import { useHeadAssets } from "../../utils/useHeadAssets.js";
+import { getApiBase } from "../../utils/api";
 
 const title = "RoomHy - Staff Login";
 
@@ -35,9 +36,7 @@ export default function SuperadminIndexPage() {
         e.preventDefault();
         setError("");
         
-        const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? 'http://localhost:5001'
-            : 'https://api.roomhy.com';
+        const API_URL = getApiBase();
 
         try {
             const res = await fetch(`${API_URL}/api/auth/login`, {
