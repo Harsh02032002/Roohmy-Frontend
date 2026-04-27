@@ -4,15 +4,15 @@ export const sharedNavConfig = {
     base: "/superadmin",
     sections: [
       {
-        label: "Overview",
+        label: "OVERVIEW",
         links: [
           { label: "Dashboard", to: "/superadmin/superadmin", icon: "layout-dashboard" }
         ]
       },
       {
-        label: "Management",
+        label: "MANAGEMENT",
         links: [
-          { label: "Teams", to: "/superadmin/manager", icon: "map-pin" },
+          { label: "Teams", to: "/superadmin/manager", icon: "users" },
           { label: "Property Owners", to: "/superadmin/owner", icon: "briefcase" },
           { label: "Properties", to: "/superadmin/properties", icon: "home" },
           { label: "Tenants", to: "/superadmin/tenant", icon: "users" },
@@ -20,7 +20,17 @@ export const sharedNavConfig = {
         ]
       },
       {
-        label: "Operations",
+        label: "PROPERTY MANAGEMENT",
+        links: [
+          { label: "All Listings", to: "/superadmin/properties", icon: "building-2" },
+          { label: "Approval Queue", to: "/superadmin/property/approvals", icon: "hourglass" },
+          { label: "Flagged Listings", to: "/superadmin/property/flagged", icon: "flag" },
+          { label: "Live Properties", to: "/superadmin/website", icon: "globe" },
+          { label: "Locations", to: "/superadmin/location", icon: "map-pin" }
+        ]
+      },
+      {
+        label: "OPERATIONS",
         links: [
           { label: "Web Enquiry", to: "/superadmin/websiteenq", icon: "folder-open" },
           { label: "Enquiries", to: "/superadmin/enquiry", icon: "help-circle" },
@@ -30,24 +40,27 @@ export const sharedNavConfig = {
         ]
       },
       {
-        label: "Website",
+        label: "ACCOUNTING",
         links: [
-          { label: "Live Properties", to: "/superadmin/website", icon: "globe" }
-        ]
-      },
-      {
-        label: "Finance",
-        links: [
+          { label: "Dashboard", to: "/superadmin/accounting", icon: "dollar-sign" },
+          { label: "Transactions", to: "/superadmin/accounting/transactions", icon: "credit-card" },
           { label: "Rent Collections", to: "/superadmin/rentcollection", icon: "wallet" },
-          { label: "Commissions", to: "/superadmin/platform", icon: "indian-rupee" },
           { label: "Refunds", to: "/superadmin/refund", icon: "rotate-ccw" }
         ]
       },
       {
-        label: "System",
+        label: "REPORTS",
         links: [
-          { label: "Locations", to: "/superadmin/location", icon: "globe" },
-          { label: "Settings", to: "/superadmin/settings", icon: "settings" },
+          { label: "Overview", to: "/superadmin/reports", icon: "bar-chart-3" },
+          { label: "Listings", to: "/superadmin/reports/listings", icon: "home" },
+          { label: "Revenue", to: "/superadmin/reports/revenue", icon: "indian-rupee" }
+        ]
+      },
+      {
+        label: "SYSTEM",
+        links: [
+          { label: "General Settings", to: "/superadmin/settings", icon: "settings" },
+          { label: "Security", to: "/superadmin/security", icon: "shield" },
           { label: "Profile", to: "/superadmin/profile", icon: "user" }
         ]
       }

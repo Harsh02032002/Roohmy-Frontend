@@ -3,24 +3,22 @@
 @tailwind utilities;
 
 /* ===== Global Utilities ===== */
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  background-color: #f1f5f9 !important; /* Standardized light background */
-  scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
-}
-
-#root {
-  width: 100% !important;
-  min-width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --sidebar-bg: 222 47% 11%;
+    --sidebar-bg-2: 217 33% 17%;
+    --sidebar-fg: 215 20% 75%;
+    --sidebar-fg-muted: 215 20% 55%;
+    --sidebar-active: 221 83% 53%;
+    --sidebar-active-fg: 0 0% 100%;
+    --sidebar-border: 217 33% 20%;
+    --radius: 0.75rem;
+  }
 
 /* ===== Shared Shell Layout ===== */
 .shared-shell {
