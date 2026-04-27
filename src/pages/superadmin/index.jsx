@@ -40,10 +40,10 @@ export default function SuperadminIndexPage() {
             : 'https://api.roomhy.com';
 
         try {
-            const res = await fetch(`${API_URL}/api/login`, {
+            const res = await fetch(`${API_URL}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ loginId, password })
+                body: JSON.stringify({ identifier: loginId, password })
             });
             const data = await res.json();
 
