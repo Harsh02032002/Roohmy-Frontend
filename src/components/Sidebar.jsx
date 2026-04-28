@@ -8,6 +8,8 @@ import {
   DollarSign, BarChart3, Database, MessageSquare, Shield, Activity
 } from "lucide-react";
 
+import { LogoutDialog } from "./superadmin/LogoutDialog";
+
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const NAV = [
@@ -100,6 +102,7 @@ const NAV = [
 export function Sidebar({ open, onClose, onLogout, isMobile }) {
   const location = useLocation();
   const path = location.pathname;
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const findActiveTop = () =>
     NAV.find((n) => n.children ? n.children.some(c => path === c.to || path.startsWith(c.to + "/")) || path === n.to : path === n.to)?.label;
@@ -108,6 +111,11 @@ export function Sidebar({ open, onClose, onLogout, isMobile }) {
 
   return (
     <>
+      <LogoutDialog 
+        open={showLogoutDialog} 
+        onClose={() => setShowLogoutDialog(false)} 
+        onConfirm={onLogout} 
+      />
       {/* Mobile overlay */}
       <div
         className={cn(
@@ -209,7 +217,7 @@ export function Sidebar({ open, onClose, onLogout, isMobile }) {
         {/* Footer */}
         <div className="p-4 space-y-2 bg-[#0B1739]">
           <button
-            onClick={onLogout}
+            onClick={() => setShowLogoutDialog(true)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all group"
           >
             <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
