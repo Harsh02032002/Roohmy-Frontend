@@ -13,13 +13,22 @@ const cn = (...classes) => classes.filter(Boolean).join(" ");
 const NAV = [
   { label: "Dashboard", to: "/superadmin/superadmin", icon: LayoutDashboard },
   {
-    label: "Management", icon: Users,
+    label: "User Management", icon: Users,
     children: [
-      { label: "Teams", to: "/superadmin/manager" },
       { label: "Property Owners", to: "/superadmin/owner" },
       { label: "Tenants", to: "/superadmin/tenant" },
       { label: "New Signups", to: "/superadmin/new_signups" },
       { label: "KYC Verification", to: "/superadmin/kyc_verification" },
+    ],
+  },
+  {
+    label: "Team Management", icon: Briefcase,
+    children: [
+      { label: "Teams & Roles", to: "/superadmin/manager" },
+      { label: "Area Managers", to: "/superadmin/areaadmin" },
+      { label: "Activity Logs", to: "/superadmin/log" },
+      { label: "Access Control", to: "/superadmin/security" },
+      { label: "Superchat", to: "/superadmin/superchat" },
     ],
   },
   {
@@ -40,7 +49,7 @@ const NAV = [
     ],
   },
   {
-    label: "Operations", icon: Briefcase,
+    label: "Operations", icon: Activity,
     children: [
       { label: "Web Enquiry", to: "/superadmin/websiteenq" },
       { label: "Enquiries", to: "/superadmin/enquiry" },
