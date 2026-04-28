@@ -1,94 +1,47 @@
-import React, { useEffect, useState } from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { Hourglass, CheckCircle, XCircle, Eye, Search, Filter } from "lucide-react";
+import React from "react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { StatCard } from "../../components/dashboard/StatCard";
+import { DataTable, StatusBadge, TableToolbar } from "../../components/dashboard/DataTable";
+import { Hourglass, CheckCircle2, XCircle, Clock, Check, X, Eye } from "lucide-react";
 
-const title = "Roomhy - Approval Queue";
-const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-const links = [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-  { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
+const queue = [
+  { id: "L-2547", title: "Silver Heights PG", owner: "Priya Verma", loc: "Pune", type: "PG", submitted: "20 May 2025, 02:15 PM", waiting: "2h 30m", status: "Pending" },
+  { id: "L-2549", title: "Crystal Apartments", owner: "Rohit Sharma", loc: "Mumbai", type: "Apartment", submitted: "20 May 2025, 11:00 AM", waiting: "5h 45m", status: "Pending" },
+  { id: "L-2550", title: "Lotus Villa", owner: "Meera Iyer", loc: "Chennai", type: "Villa", submitted: "20 May 2025, 09:20 AM", waiting: "7h 25m", status: "Pending" },
+  { id: "L-2551", title: "Sunrise PG", owner: "Anil Kapoor", loc: "Delhi", type: "PG", submitted: "19 May 2025, 06:00 PM", waiting: "22h", status: "Pending" },
+  { id: "L-2552", title: "Ocean Breeze", owner: "Kavita Singh", loc: "Goa", type: "Apartment", submitted: "19 May 2025, 04:30 PM", waiting: "23h 30m", status: "Pending" },
 ];
-const scripts = [{ src: "https://cdn.tailwindcss.com" }];
 
-export default function PropertyApprovalsPage() {
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
-
-  const [pendingListings, setPendingListings] = useState([
-    { id: "PRP001", title: "Green Villa Residency", owner: "Rahul Sharma", loc: "Bangalore", type: "3 BHK Villa", price: "₹25,000", date: "20 May 2025" },
-    { id: "PRP002", title: "Silver Heights PG", owner: "Priya Verma", loc: "Pune", type: "Twin Sharing", price: "₹8,500", date: "20 May 2025" },
-    { id: "PRP003", title: "Blue Bells Apartment", owner: "Amit Kumar", loc: "Hyderabad", type: "2 BHK Flat", price: "₹18,000", date: "19 May 2025" },
-    { id: "PRP004", title: "Sunset Co-Living", owner: "Neha Singh", loc: "Bangalore", type: "Private Room", price: "₹12,000", date: "19 May 2025" },
-  ]);
-
+export default function ApprovalQueue() {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Approval Queue</h1>
-          <p className="text-slate-500 mt-1">Review and approve new property listings before they go live.</p>
-        </div>
-        <div className="flex items-center gap-2">
-           <div className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-             <Hourglass className="w-3 h-3" /> 18 Pending
-           </div>
-        </div>
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader title="Approval Queue" subtitle="Review and approve pending property listings." />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Pending Approvals" value="18" delta="+5 today" trend="up" icon={Hourglass} iconColor="yellow" />
+        <StatCard label="Approved Today" value="12" delta="On track" icon={CheckCircle2} iconColor="green" />
+        <StatCard label="Rejected Today" value="3" delta="-1 vs yesterday" trend="down" icon={XCircle} iconColor="red" />
+        <StatCard label="Avg. Review Time" value="3h 24m" delta="Within SLA" icon={Clock} iconColor="blue" />
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-4 items-center justify-between">
-          <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input type="text" placeholder="Search by title, owner or location..." className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-purple-500/20 outline-none transition-all" />
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all">
-            <Filter className="w-4 h-4" /> Filters
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/50 text-[10px] text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100">
-                <th className="px-6 py-4">Property Details</th>
-                <th className="px-6 py-4">Owner</th>
-                <th className="px-6 py-4">Location</th>
-                <th className="px-6 py-4">Price</th>
-                <th className="px-6 py-4">Submitted On</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 text-sm">
-              {pendingListings.map((l) => (
-                <tr key={l.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
-                        <Eye className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-800">{l.title}</p>
-                        <p className="text-xs text-slate-400">{l.type}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-slate-600 font-medium">{l.owner}</td>
-                  <td className="px-6 py-4 text-slate-600">{l.loc}</td>
-                  <td className="px-6 py-4 font-bold text-slate-900">{l.price}</td>
-                  <td className="px-6 py-4 text-slate-500">{l.date}</td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all" title="View Details"><Eye className="w-4 h-4" /></button>
-                    <button className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Approve"><CheckCircle className="w-4 h-4" /></button>
-                    <button className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="Reject"><XCircle className="w-4 h-4" /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="panel">
+        <TableToolbar searchPlaceholder="Search approvals..." filters={[{ label: "Type", value: "All" }, { label: "City", value: "All" }]} />
+        <DataTable data={queue} columns={[
+          { key: "id", header: "ID", render: (r) => <span className="font-medium">{r.id}</span> },
+          { key: "title", header: "Property", render: (r) => <div><div className="font-medium">{r.title}</div><div className="text-xs text-muted-foreground">{r.type}</div></div> },
+          { key: "owner", header: "Owner", render: (r) => <span className="text-muted-foreground">{r.owner}</span> },
+          { key: "loc", header: "Location", render: (r) => <span className="text-muted-foreground">{r.loc}</span> },
+          { key: "submitted", header: "Submitted", render: (r) => <span className="text-muted-foreground text-xs">{r.submitted}</span> },
+          { key: "waiting", header: "Waiting", render: (r) => <span className="text-warning font-medium text-xs">{r.waiting}</span> },
+          { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+          { key: "actions", header: "Actions", render: () => (
+            <div className="flex items-center gap-2 justify-end">
+              <button className="h-8 px-3 rounded-lg bg-success-soft text-success text-xs font-medium flex items-center gap-1 hover:bg-success/20"><Check className="h-3 w-3" /> Approve</button>
+              <button className="h-8 px-3 rounded-lg bg-destructive/10 text-destructive text-xs font-medium flex items-center gap-1 hover:bg-destructive/20"><X className="h-3 w-3" /> Reject</button>
+              <button className="p-1.5 rounded hover:bg-muted"><Eye className="h-4 w-4 text-muted-foreground" /></button>
+            </div>
+          ), className: "text-right" },
+        ]} />
       </div>
-    </main>
+    </div>
   );
 }

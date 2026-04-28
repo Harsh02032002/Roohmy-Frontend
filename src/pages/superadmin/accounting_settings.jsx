@@ -1,33 +1,131 @@
-import React from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
 
-export default function AccountingSettingsPage() {
-  const title = "Roomhy - Accounting Settings";
-  const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-  const links = [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-    { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
-  ];
-  const scripts = [{ src: "https://cdn.tailwindcss.com" }];
-
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
-
+function Toggle({ on = false }) {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center shadow-sm">
-        <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <LayoutDashboard className="w-8 h-8 text-purple-600" />
+    <div className={`relative w-11 h-6 rounded-full ${on ? "bg-primary" : "bg-muted"}`}>
+      <div className={`absolute top-0.5 h-5 w-5 bg-white rounded-full shadow ${on ? "right-0.5" : "left-0.5"}`} />
+    </div>
+  );
+}
+
+export default function AccountingSettings() {
+  return (
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader
+        title="Accounting Settings"
+        subtitle="Configure financial preferences and rules."
+        actions={<button className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">Save Changes</button>}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="panel">
+          <h3 className="font-semibold mb-1">Currency & Format</h3>
+          <p className="text-sm text-muted-foreground mb-5">Set default currency and number formats.</p>
+          <div className="space-y-4">
+            {[
+              { label: "Default Currency", val: "INR (₹)" },
+              { label: "Currency Position", val: "Before amount (₹100)" },
+              { label: "Decimal Places", val: "2" },
+              { label: "Thousand Separator", val: "Indian (1,00,000)" },
+            ].map((f, i) => (
+              <div key={i}>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{f.label}</label>
+                <button className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm flex items-center justify-between">
+                  <span>{f.val}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-        <h3 className="text-xl font-bold text-slate-800">Accounting Settings</h3>
-        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-          This module is currently being synchronized with the master dashboard template.
-          Access level and data integration are in progress.
-        </p>
+
+        <div className="panel">
+          <h3 className="font-semibold mb-1">Payout Rules</h3>
+          <p className="text-sm text-muted-foreground mb-5">Configure automatic payouts.</p>
+          <div className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-sm font-medium">Auto Payouts</div>
+                <div className="text-xs text-muted-foreground">Automatically process payouts on schedule</div>
+              </div>
+              <Toggle on />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Payout Frequency</label>
+              <button className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm flex items-center justify-between">
+                <span>Weekly (Every Monday)</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+              </button>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Minimum Payout Amount</label>
+              <input defaultValue="₹500" className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Hold Period (days)</label>
+              <input defaultValue="3" className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+          </div>
+        </div>
+
+        <div className="panel">
+          <h3 className="font-semibold mb-1">Invoice Settings</h3>
+          <p className="text-sm text-muted-foreground mb-5">Customize invoice generation.</p>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Invoice Prefix</label>
+              <input defaultValue="INV-2025-" className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Default Payment Terms (days)</label>
+              <input defaultValue="15" className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-sm font-medium">Auto-send Invoices</div>
+                <div className="text-xs text-muted-foreground">Email invoice on creation</div>
+              </div>
+              <Toggle on />
+            </div>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-sm font-medium">Overdue Reminders</div>
+                <div className="text-xs text-muted-foreground">Notify customers of overdue invoices</div>
+              </div>
+              <Toggle on />
+            </div>
+          </div>
+        </div>
+
+        <div className="panel">
+          <h3 className="font-semibold mb-1">Tax Settings</h3>
+          <p className="text-sm text-muted-foreground mb-5">Manage tax configuration.</p>
+          <div className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-sm font-medium">Enable Taxes</div>
+                <div className="text-xs text-muted-foreground">Apply tax rules on transactions</div>
+              </div>
+              <Toggle on />
+            </div>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-sm font-medium">Inclusive Pricing</div>
+                <div className="text-xs text-muted-foreground">Show prices inclusive of taxes</div>
+              </div>
+              <Toggle on />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">GSTIN</label>
+              <input defaultValue="29ABCDE1234F1Z5" className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">PAN Number</label>
+              <input defaultValue="ABCDE1234F" className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -1,33 +1,64 @@
 import React from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
 
-export default function PropertySettingsPage() {
-  const title = "Roomhy - Property Settings";
-  const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-  const links = [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-    { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
-  ];
-  const scripts = [{ src: "https://cdn.tailwindcss.com" }];
-
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
-
+function Toggle({ on = false }) {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center shadow-sm">
-        <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <LayoutDashboard className="w-8 h-8 text-purple-600" />
+    <div className={`relative w-11 h-6 rounded-full ${on ? "bg-primary" : "bg-muted"}`}>
+      <div className={`absolute top-0.5 h-5 w-5 bg-white rounded-full shadow ${on ? "right-0.5" : "left-0.5"}`} />
+    </div>
+  );
+}
+
+export default function PropertySettings() {
+  return (
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader
+        title="Property Settings"
+        subtitle="Configure property listing rules and preferences."
+        actions={<button className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">Save Changes</button>}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="panel">
+          <h3 className="font-semibold mb-1">Listing Rules</h3>
+          <p className="text-sm text-muted-foreground mb-5">Define rules for new listings.</p>
+          <div className="space-y-4">
+            {[
+              { title: "Auto Approve Listings", sub: "Skip manual review for verified owners", on: false },
+              { title: "Require Property Photos", sub: "Minimum 3 photos per listing", on: true },
+              { title: "Verify Owner Documents", sub: "Mandatory KYC for new owners", on: true },
+              { title: "Allow Negotiable Pricing", sub: "Show 'Negotiable' tag on listings", on: true },
+            ].map((s, i) => (
+              <div key={i} className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm font-medium">{s.title}</div>
+                  <div className="text-xs text-muted-foreground">{s.sub}</div>
+                </div>
+                <Toggle on={s.on} />
+              </div>
+            ))}
+          </div>
         </div>
-        <h3 className="text-xl font-bold text-slate-800">Property Settings</h3>
-        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-          This module is currently being synchronized with the master dashboard template.
-          Access level and data integration are in progress.
-        </p>
+
+        <div className="panel">
+          <h3 className="font-semibold mb-1">Listing Limits</h3>
+          <p className="text-sm text-muted-foreground mb-5">Configure platform-wide listing limits.</p>
+          <div className="space-y-4">
+            {[
+              { label: "Max Listings per Owner", val: "50" },
+              { label: "Max Photos per Listing", val: "20" },
+              { label: "Max Price (₹)", val: "10,00,000" },
+              { label: "Min Price (₹)", val: "1,000" },
+              { label: "Listing Expiry (days)", val: "90" },
+            ].map((f, i) => (
+              <div key={i}>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{f.label}</label>
+                <input defaultValue={f.val} className="w-full h-11 px-4 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

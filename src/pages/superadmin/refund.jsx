@@ -1,300 +1,45 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useHtmlPage } from "../../utils/htmlPage";
-import { fetchJson } from "../../utils/api";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { StatCard } from "../../components/dashboard/StatCard";
+import { DataTable, TableToolbar, StatusBadge } from "../../components/dashboard/DataTable";
+import { RotateCcw, Clock, CheckCircle2, XCircle, Plus, Eye } from "lucide-react";
 
-const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
+const refunds = [
+  { id: "RF-485", txn: "TXN-125482", customer: "Karan Mehta", reason: "Cancelled subscription", amount: "₹8,999", date: "24 May 2025", status: "Refunded" },
+  { id: "RF-484", txn: "TXN-125470", customer: "Anjali Roy", reason: "Duplicate payment", amount: "₹2,500", date: "23 May 2025", status: "Refunded" },
+  { id: "RF-483", txn: "TXN-125465", customer: "Rajesh Verma", reason: "Service not delivered", amount: "₹15,000", date: "22 May 2025", status: "Processing" },
+  { id: "RF-482", txn: "TXN-125455", customer: "Pooja Gupta", reason: "Billing error", amount: "₹999", date: "22 May 2025", status: "Pending" },
+  { id: "RF-481", txn: "TXN-125440", customer: "Suresh Kumar", reason: "Customer request", amount: "₹4,500", date: "21 May 2025", status: "Rejected" },
+  { id: "RF-480", txn: "TXN-125425", customer: "Meera Iyer", reason: "Cancelled booking", amount: "₹7,999", date: "20 May 2025", status: "Refunded" },
+];
 
-const readAdminName = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("user") || localStorage.getItem("admin_user") || "null");
-    return user?.name || user?.loginId || "superadmin";
-  } catch {
-    return "superadmin";
-  }
-};
-
-export default function Refund() {
-  useHtmlPage({
-    title: "Refund Requests - Roomhy SuperAdmin",
-    bodyClass: "text-slate-800",
-    htmlAttrs: { lang: "en" },
-    metas: [
-      { charset: "UTF-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: true },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
-      { rel: "stylesheet", href: "/superadmin/assets/css/refund.css" }
-    ],
-    scripts: [{ src: "https://cdn.tailwindcss.com" }, { src: "https://unpkg.com/lucide@latest" }],
-    inlineScripts: []
-  });
-
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [selected, setSelected] = useState(null);
-  const [notes, setNotes] = useState("");
-  const [transactionId, setTransactionId] = useState("");
-  const [busyAction, setBusyAction] = useState("");
-
-  const loadRefunds = async () => {
-    setLoading(true);
-    setErrorMsg("");
-    try {
-      const data = await fetchJson("/api/booking/refund-requests");
-      setRequests(data?.data || []);
-    } catch (err) {
-      setErrorMsg(err?.body || err?.message || "Error loading refunds");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadRefunds();
-  }, []);
-
-  useEffect(() => {
-    if (window?.lucide) window.lucide.createIcons();
-  }, [requests, selected, busyAction]);
-
-  const stats = useMemo(() => {
-    const pending = requests.filter((item) => item.refund_status === "pending");
-    const approved = requests.filter((item) => item.refund_status === "approved");
-    const processed = requests.filter((item) => item.refund_status === "processed");
-    const rejected = requests.filter((item) => item.refund_status === "rejected");
-    return {
-      pending,
-      approved,
-      processed,
-      rejected,
-      pendingAmount: pending.reduce((sum, item) => sum + Number(item.refund_amount || 0), 0),
-      processedAmount: processed.reduce((sum, item) => sum + Number(item.refund_amount || 0), 0)
-    };
-  }, [requests]);
-
-  const openRequest = (request) => {
-    setSelected(request);
-    setNotes(request?.admin_notes || "");
-    setTransactionId(request?.refund_transaction_id || "");
-  };
-
-  const closeRequest = () => {
-    setSelected(null);
-    setNotes("");
-    setTransactionId("");
-    setBusyAction("");
-  };
-
-  const updateStatus = async (request, refund_status) => {
-    setBusyAction(refund_status);
-    try {
-      await fetchJson(`/api/booking/refund-request/${request._id}/status`, {
-        method: "PUT",
-        body: JSON.stringify({
-          refund_status,
-          admin_notes: notes || request.admin_notes || ""
-        })
-      });
-      await loadRefunds();
-      setSelected((current) => current ? { ...current, refund_status, admin_notes: notes } : current);
-    } catch (err) {
-      setErrorMsg(err?.body || err?.message || "Failed to update refund status");
-    } finally {
-      setBusyAction("");
-    }
-  };
-
-  const processRefund = async (request) => {
-    setBusyAction("processed");
-    try {
-      await fetchJson(`/api/booking/refund-request/${request._id}/process`, {
-        method: "POST",
-        body: JSON.stringify({
-          admin_notes: notes || "Refund processed",
-          processed_by: readAdminName(),
-          razorpay_payment_id: transactionId || undefined
-        })
-      });
-      await loadRefunds();
-      closeRequest();
-    } catch (err) {
-      setErrorMsg(err?.body || err?.message || "Failed to process refund");
-      setBusyAction("");
-    }
-  };
-
+export default function Refunds() {
   return (
-    <>
-      <div className="p-4 md:p-8">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Refund Requests</h1>
-            <p className="text-sm text-slate-500">Manage and process booking refund requests.</p>
-          </div>
-          <button onClick={loadRefunds} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-            <i data-lucide="refresh-cw" className="w-4 h-4"></i> Refresh
-          </button>
-        </div>
-
-        <main className="">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-xl p-6 border">
-                <div className="text-sm text-gray-500">Pending</div>
-                <div className="text-2xl font-bold">{stats.pending.length}</div>
-                <div className="text-sm text-gray-500">{formatCurrency(stats.pendingAmount)}</div>
-              </div>
-              <div className="bg-white rounded-xl p-6 border">
-                <div className="text-sm text-gray-500">Approved</div>
-                <div className="text-2xl font-bold">{stats.approved.length}</div>
-              </div>
-              <div className="bg-white rounded-xl p-6 border">
-                <div className="text-sm text-gray-500">Processed</div>
-                <div className="text-2xl font-bold">{stats.processed.length}</div>
-                <div className="text-sm text-gray-500">{formatCurrency(stats.processedAmount)}</div>
-              </div>
-              <div className="bg-white rounded-xl p-6 border">
-                <div className="text-sm text-gray-500">Rejected</div>
-                <div className="text-2xl font-bold">{stats.rejected.length}</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow border overflow-x-auto">
-              <table className="w-full text-left min-w-full">
-                <thead className="bg-gray-50 text-[10px] text-gray-500 uppercase border-b">
-                  <tr>
-                    <th className="px-6 py-4">Refund ID</th>
-                    <th className="px-6 py-4">User</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4">Type</th>
-                    <th className="px-6 py-4">Method</th>
-                    <th className="px-6 py-4">Date</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {loading && (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center text-gray-400">Loading...</td>
-                    </tr>
-                  )}
-                  {!loading && errorMsg && (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center text-red-500">{errorMsg}</td>
-                    </tr>
-                  )}
-                  {!loading && !errorMsg && requests.length === 0 && (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center text-gray-400">No refund requests found</td>
-                    </tr>
-                  )}
-                  {requests.map((request) => (
-                    <tr key={request._id}>
-                      <td className="px-6 py-4 text-xs font-mono">#{request._id?.slice(0, 8).toUpperCase()}</td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="font-medium text-gray-900">{request.user_name || "N/A"}</div>
-                        <div className="text-xs text-gray-500">{request.booking_id || "N/A"}</div>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-bold">{formatCurrency(request.refund_amount || 0)}</td>
-                      <td className="px-6 py-4 text-sm">{request.request_type === "refund" ? "Refund" : "Alternative"}</td>
-                      <td className="px-6 py-4 text-sm">{(request.refund_method || "N/A").toUpperCase()}</td>
-                      <td className="px-6 py-4 text-sm">{request.created_at ? new Date(request.created_at).toLocaleDateString("en-IN") : "-"}</td>
-                      <td className="px-6 py-4 text-sm font-semibold capitalize">{request.refund_status || "pending"}</td>
-                      <td className="px-6 py-4 text-right">
-                        <button onClick={() => openRequest(request)} className="px-3 py-2 text-sm rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100">
-                          Open
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </main>
-        </div>
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader
+        title="Refunds"
+        subtitle="Process and track refund requests."
+        actions={<button className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2 hover:opacity-90"><Plus className="h-4 w-4" /> Add Refund</button>}
+      />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Total Refunds" value="₹45,250" delta="-3.2%" trend="down" icon={RotateCcw} iconColor="red" />
+        <StatCard label="Processed" value="42" delta="This month" icon={CheckCircle2} iconColor="green" />
+        <StatCard label="Pending" value="6" delta="₹12,400" icon={Clock} iconColor="yellow" />
+        <StatCard label="Rejected" value="3" delta="-1 vs last" trend="down" icon={XCircle} iconColor="purple" />
       </div>
 
-      {selected ? (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={closeRequest}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6" onClick={(event) => event.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">Refund Request</h2>
-                <p className="text-sm text-slate-500">{selected.user_name} • {selected.booking_id}</p>
-              </div>
-              <button onClick={closeRequest} className="text-slate-400 hover:text-slate-600">
-                <i data-lucide="x" className="w-5 h-5"></i>
-              </button>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4 mb-6 text-sm">
-              <div className="bg-slate-50 rounded-xl p-4">
-                <p className="text-slate-500 mb-1">Request Type</p>
-                <p className="font-semibold text-slate-900 capitalize">{selected.request_type?.replaceAll("_", " ")}</p>
-              </div>
-              <div className="bg-slate-50 rounded-xl p-4">
-                <p className="text-slate-500 mb-1">Refund Amount</p>
-                <p className="font-semibold text-slate-900">{formatCurrency(selected.refund_amount)}</p>
-              </div>
-              <div className="bg-slate-50 rounded-xl p-4">
-                <p className="text-slate-500 mb-1">Payment Method</p>
-                <p className="font-semibold text-slate-900">{selected.refund_method || "N/A"}</p>
-              </div>
-              <div className="bg-slate-50 rounded-xl p-4">
-                <p className="text-slate-500 mb-1">Status</p>
-                <p className="font-semibold text-slate-900 capitalize">{selected.refund_status}</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Requester Details</label>
-                <div className="rounded-xl border border-slate-200 p-4 text-sm text-slate-700 space-y-1">
-                  <p><strong>Name:</strong> {selected.user_name || "-"}</p>
-                  <p><strong>Phone:</strong> {selected.user_phone || "-"}</p>
-                  <p><strong>Email:</strong> {selected.user_email || "-"}</p>
-                  <p><strong>UPI:</strong> {selected.upi_id || "-"}</p>
-                  <p><strong>Bank:</strong> {selected.bank_name || "-"}</p>
-                  <p><strong>Account:</strong> {selected.bank_account_number || "-"}</p>
-                  <p><strong>IFSC:</strong> {selected.bank_ifsc_code || "-"}</p>
-                  <p><strong>Preferred Area:</strong> {selected.preferred_area || "-"}</p>
-                  <p><strong>Requirements:</strong> {selected.property_requirements || selected.other_details || "-"}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Admin Notes</label>
-                <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={4} className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Add notes for approval / rejection / processing"></textarea>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Transaction Reference</label>
-                <input value={transactionId} onChange={(event) => setTransactionId(event.target.value)} className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Optional payout or refund reference id" />
-              </div>
-
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button onClick={() => updateStatus(selected, "approved")} disabled={!!busyAction} className="px-4 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-                  {busyAction === "approved" ? "Saving..." : "Approve"}
-                </button>
-                <button onClick={() => updateStatus(selected, "rejected")} disabled={!!busyAction} className="px-4 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:opacity-60">
-                  {busyAction === "rejected" ? "Saving..." : "Reject"}
-                </button>
-                <button onClick={() => processRefund(selected)} disabled={!!busyAction} className="px-4 py-3 rounded-xl bg-green-600 text-white hover:bg-green-700 disabled:opacity-60">
-                  {busyAction === "processed" ? "Processing..." : "Process Refund"}
-                </button>
-                <button onClick={closeRequest} className="px-4 py-3 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </>
+      <div className="panel">
+        <TableToolbar searchPlaceholder="Search refunds..." filters={[{ label: "Status", value: "All" }]} />
+        <DataTable data={refunds} columns={[
+          { key: "id", header: "Refund ID", render: (r) => <span className="font-medium">{r.id}</span> },
+          { key: "txn", header: "Transaction", render: (r) => <span className="text-muted-foreground">{r.txn}</span> },
+          { key: "customer", header: "Customer" },
+          { key: "reason", header: "Reason" },
+          { key: "amount", header: "Amount", render: (r) => <span className="font-bold text-destructive">{r.amount}</span> },
+          { key: "date", header: "Date", render: (r) => <span className="text-muted-foreground text-xs">{r.date}</span> },
+          { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+          { key: "actions", header: "", render: () => <button className="p-1.5 rounded hover:bg-muted"><Eye className="h-4 w-4 text-muted-foreground" /></button>, className: "text-right" },
+        ]} />
+      </div>
+    </div>
   );
 }

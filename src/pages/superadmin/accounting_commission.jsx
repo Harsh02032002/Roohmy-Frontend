@@ -1,33 +1,62 @@
-import React from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { StatCard } from "../../components/dashboard/StatCard";
+import { DataTable, TableToolbar, StatusBadge } from "../../components/dashboard/DataTable";
+import { Database, Percent, Wallet, TrendingUp, Download } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-export default function AccountingCommissionPage() {
-  const title = "Roomhy - Accounting Commission";
-  const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-  const links = [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-    { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
-  ];
-  const scripts = [{ src: "https://cdn.tailwindcss.com" }];
+const data = Array.from({ length: 7 }, (_, i) => ({ name: `${20 + i} May`, commission: 35000 + i * 4500 }));
 
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
+const records = [
+  { id: "C-2148", listing: "Green Villa Residency", amount: "₹2,500", rate: "10%", base: "₹25,000", date: "26 May 2025", status: "Paid" },
+  { id: "C-2147", listing: "Silver Heights PG", amount: "₹850", rate: "10%", base: "₹8,500", date: "26 May 2025", status: "Pending" },
+  { id: "C-2146", listing: "Blue Bells Apartment", amount: "₹1,800", rate: "10%", base: "₹18,000", date: "25 May 2025", status: "Paid" },
+  { id: "C-2145", listing: "Sunset Co-Living", amount: "₹1,200", rate: "10%", base: "₹12,000", date: "25 May 2025", status: "Paid" },
+  { id: "C-2144", listing: "Maple House", amount: "₹3,000", rate: "10%", base: "₹30,000", date: "24 May 2025", status: "Pending" },
+  { id: "C-2143", listing: "Royal Apartments", amount: "₹2,200", rate: "10%", base: "₹22,000", date: "24 May 2025", status: "Paid" },
+];
 
+export default function Commission() {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center shadow-sm">
-        <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <LayoutDashboard className="w-8 h-8 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-800">Accounting Commission</h3>
-        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-          This module is currently being synchronized with the master dashboard template.
-          Access level and data integration are in progress.
-        </p>
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader
+        title="Commission"
+        subtitle="Track commission earnings and rates."
+        actions={<button className="h-11 px-4 rounded-xl border border-border bg-card text-sm font-medium flex items-center gap-2 hover:bg-muted"><Download className="h-4 w-4" /> Export</button>}
+      />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Total Commission" value="₹2,85,750" delta="+12.4%" trend="up" icon={Database} iconColor="green" />
+        <StatCard label="Avg Rate" value="10%" delta="Standard" icon={Percent} iconColor="blue" />
+        <StatCard label="Pending" value="₹38,420" delta="14 listings" icon={Wallet} iconColor="yellow" />
+        <StatCard label="Growth" value="+12.4%" delta="vs last week" trend="up" icon={TrendingUp} iconColor="purple" />
       </div>
-    </main>
+
+      <div className="panel">
+        <h3 className="font-semibold mb-4">Commission Trend</h3>
+        <div className="h-64">
+          <ResponsiveContainer>
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v / 1000}K`} />
+              <Tooltip />
+              <Bar dataKey="commission" fill="hsl(var(--chart-2))" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="panel">
+        <TableToolbar searchPlaceholder="Search commissions..." />
+        <DataTable data={records} columns={[
+          { key: "id", header: "ID", render: (r) => <span className="font-medium">{r.id}</span> },
+          { key: "listing", header: "Listing" },
+          { key: "base", header: "Base Amount", render: (r) => <span className="text-muted-foreground">{r.base}</span> },
+          { key: "rate", header: "Rate", render: (r) => <span className="badge-soft bg-info-soft text-info">{r.rate}</span> },
+          { key: "amount", header: "Commission", render: (r) => <span className="font-bold text-success">{r.amount}</span> },
+          { key: "date", header: "Date", render: (r) => <span className="text-muted-foreground text-xs">{r.date}</span> },
+          { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+        ]} />
+      </div>
+    </div>
   );
 }

@@ -1,33 +1,46 @@
 import React from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { StatCard } from "../../components/dashboard/StatCard";
+import { DataTable, StatusBadge, TableToolbar } from "../../components/dashboard/DataTable";
+import { Sparkles, TrendingUp, Eye, MousePointerClick, Plus, Calendar, MoreVertical } from "lucide-react";
 
-export default function PropertyFeaturedPage() {
-  const title = "Roomhy - Property Featured";
-  const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-  const links = [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-    { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
-  ];
-  const scripts = [{ src: "https://cdn.tailwindcss.com" }];
+const featured = [
+  { id: "F-101", title: "Green Villa Residency", owner: "Rahul Sharma", plan: "Premium", views: 12450, clicks: 845, start: "01 May 2025", end: "31 May 2025", status: "Active" },
+  { id: "F-102", title: "Sunset Co-Living", owner: "Neha Singh", plan: "Featured", views: 9820, clicks: 654, start: "05 May 2025", end: "04 Jun 2025", status: "Active" },
+  { id: "F-103", title: "Royal Apartments", owner: "Sneha Iyer", plan: "Premium", views: 15630, clicks: 1245, start: "10 May 2025", end: "09 Jun 2025", status: "Active" },
+  { id: "F-104", title: "Garden View Villa", owner: "Anjali Roy", plan: "Featured", views: 8245, clicks: 432, start: "15 May 2025", end: "14 Jun 2025", status: "Active" },
+  { id: "F-105", title: "Pearl Residency", owner: "Karan Mehta", plan: "Premium", views: 0, clicks: 0, start: "01 Apr 2025", end: "30 Apr 2025", status: "Expired" },
+];
 
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
-
+export default function FeaturedListings() {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center shadow-sm">
-        <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <LayoutDashboard className="w-8 h-8 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-800">Property Featured</h3>
-        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-          This module is currently being synchronized with the master dashboard template.
-          Access level and data integration are in progress.
-        </p>
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader
+        title="Featured Listings"
+        subtitle="Manage promoted and featured property listings."
+        actions={<button className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2 hover:opacity-90"><Plus className="h-4 w-4" /> Add Featured</button>}
+      />
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Active Featured" value="42" delta="+6 this month" trend="up" icon={Sparkles} iconColor="purple" />
+        <StatCard label="Total Views" value="468K" delta="+18.4%" trend="up" icon={Eye} iconColor="blue" />
+        <StatCard label="Total Clicks" value="32.5K" delta="+12.6%" trend="up" icon={MousePointerClick} iconColor="green" />
+        <StatCard label="Conversion Rate" value="6.94%" delta="+0.8%" trend="up" icon={TrendingUp} iconColor="yellow" />
       </div>
-    </main>
+
+      <div className="panel">
+        <TableToolbar searchPlaceholder="Search featured..." filters={[{ label: "Plan", value: "All" }]} />
+        <DataTable data={featured} columns={[
+          { key: "id", header: "ID", render: (r) => <span className="font-medium">{r.id}</span> },
+          { key: "title", header: "Property", render: (r) => <div><div className="font-medium">{r.title}</div><div className="text-xs text-muted-foreground">{r.owner}</div></div> },
+          { key: "plan", header: "Plan", render: (r) => <StatusBadge status={r.plan} /> },
+          { key: "views", header: "Views", render: (r) => <span className="font-medium">{r.views.toLocaleString()}</span> },
+          { key: "clicks", header: "Clicks", render: (r) => <span className="font-medium">{r.clicks.toLocaleString()}</span> },
+          { key: "period", header: "Period", render: (r) => <div className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" />{r.start} → {r.end}</div> },
+          { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+          { key: "actions", header: "", render: () => <button className="p-1.5 rounded hover:bg-muted"><MoreVertical className="h-4 w-4 text-muted-foreground" /></button>, className: "text-right" },
+        ]} />
+      </div>
+    </div>
   );
 }

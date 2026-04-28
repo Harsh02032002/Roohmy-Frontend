@@ -132,40 +132,54 @@ export default function SharedShell() {
         />
 
         <div className="shared-main">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-20 border-b border-gray-200 sticky top-0 shrink-0">
-            <button
-              id="mobile-menu-open"
-              className="md:hidden mr-4 text-slate-500"
-              type="button"
-              onClick={() => setSidebarOpen((open) => !open)}
-            >
-              &#9776;
-            </button>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                Superadmin <span className="text-gray-400">/</span>
-                <span className="text-purple-600">{activeSuperadminLabel}</span>
-              </h2>
-            </div>
+          <header className="bg-white h-20 flex items-center justify-between px-8 shadow-sm z-20 border-b border-gray-100 sticky top-0 shrink-0">
             <div className="flex items-center gap-4">
+              <button
+                id="mobile-menu-open"
+                className="lg:hidden text-slate-500 p-2 hover:bg-slate-50 rounded-lg"
+                type="button"
+                onClick={() => setSidebarOpen((open) => !open)}
+              >
+                <i data-lucide="menu" className="w-6 h-6"></i>
+              </button>
+              
+              {/* Search Bar - Matching Screenshot */}
+              <div className="hidden md:flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 w-80 group focus-within:ring-2 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all">
+                <i data-lucide="search" className="w-4 h-4 text-slate-400"></i>
+                <input 
+                  type="text" 
+                  placeholder="Search anything..." 
+                  className="bg-transparent border-none outline-none text-sm ml-3 w-full text-slate-600 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
               <div className="relative">
                 <button
                   id="notificationBellBtn"
-                  className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="relative p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
                   type="button"
                 >
                   <i data-lucide="bell" className="w-5 h-5"></i>
                   <span
                     id="notificationBadge"
-                    className="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
+                    className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"
                   >
-                    0
                   </span>
                 </button>
               </div>
-              <span className="w-8 h-8 rounded-full border border-slate-200 bg-purple-600 text-white flex items-center justify-center font-bold">
-                SA
-              </span>
+
+              {/* User Profile - Matching Screenshot */}
+              <div className="flex items-center gap-3 pl-6 border-l border-slate-100">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-bold text-slate-800 leading-none">Aman</p>
+                  <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wider">Superadmin</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg shadow-blue-600/20">
+                  A
+                </div>
+              </div>
             </div>
           </header>
           <div className="shared-content overflow-y-auto overflow-x-hidden flex-1 h-full custom-scrollbar">

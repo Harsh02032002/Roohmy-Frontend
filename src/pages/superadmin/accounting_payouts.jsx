@@ -1,33 +1,45 @@
-import React from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { StatCard } from "../../components/dashboard/StatCard";
+import { DataTable, TableToolbar, StatusBadge } from "../../components/dashboard/DataTable";
+import { Send, Wallet, Clock, CheckCircle2, Plus, MoreVertical } from "lucide-react";
 
-export default function AccountingPayoutsPage() {
-  const title = "Roomhy - Accounting Payouts";
-  const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-  const links = [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-    { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
-  ];
-  const scripts = [{ src: "https://cdn.tailwindcss.com" }];
+const payouts = [
+  { id: "PO-3045", recipient: "Rahul Sharma", account: "HDFC ****4521", amount: "₹22,500", method: "Bank Transfer", date: "26 May 2025", status: "Completed" },
+  { id: "PO-3044", recipient: "Priya Verma", account: "ICICI ****8842", amount: "₹7,650", method: "Bank Transfer", date: "26 May 2025", status: "Processing" },
+  { id: "PO-3043", recipient: "Amit Kumar", account: "SBI ****1289", amount: "₹16,200", method: "Bank Transfer", date: "25 May 2025", status: "Completed" },
+  { id: "PO-3042", recipient: "Neha Singh", account: "Axis ****3654", amount: "₹10,800", method: "UPI", date: "25 May 2025", status: "Completed" },
+  { id: "PO-3041", recipient: "Vikram Patel", account: "Kotak ****9921", amount: "₹27,000", method: "Bank Transfer", date: "24 May 2025", status: "Pending" },
+  { id: "PO-3040", recipient: "Sneha Iyer", account: "HDFC ****5544", amount: "₹19,800", method: "UPI", date: "24 May 2025", status: "Failed" },
+];
 
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
-
+export default function Payouts() {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center shadow-sm">
-        <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <LayoutDashboard className="w-8 h-8 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-800">Accounting Payouts</h3>
-        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-          This module is currently being synchronized with the master dashboard template.
-          Access level and data integration are in progress.
-        </p>
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader
+        title="Payouts"
+        subtitle="Manage payouts to property owners."
+        actions={<button className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2 hover:opacity-90"><Plus className="h-4 w-4" /> Process Payout</button>}
+      />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Total Payouts" value="₹12,45,000" delta="+8.3%" trend="up" icon={Send} iconColor="blue" />
+        <StatCard label="Completed" value="284" delta="This month" icon={CheckCircle2} iconColor="green" />
+        <StatCard label="Pending" value="18" delta="₹2,18,500" icon={Clock} iconColor="yellow" />
+        <StatCard label="Available Balance" value="₹4,52,800" delta="Ready to disburse" icon={Wallet} iconColor="purple" />
       </div>
-    </main>
+
+      <div className="panel">
+        <TableToolbar searchPlaceholder="Search payouts..." filters={[{ label: "Status", value: "All" }, { label: "Method", value: "All" }]} />
+        <DataTable data={payouts} columns={[
+          { key: "id", header: "ID", render: (r) => <span className="font-medium">{r.id}</span> },
+          { key: "recipient", header: "Recipient" },
+          { key: "account", header: "Account", render: (r) => <span className="text-muted-foreground text-xs">{r.account}</span> },
+          { key: "amount", header: "Amount", render: (r) => <span className="font-bold">{r.amount}</span> },
+          { key: "method", header: "Method", render: (r) => <span className="text-muted-foreground">{r.method}</span> },
+          { key: "date", header: "Date", render: (r) => <span className="text-muted-foreground text-xs">{r.date}</span> },
+          { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+          { key: "actions", header: "", render: () => <button className="p-1.5 rounded hover:bg-muted"><MoreVertical className="h-4 w-4 text-muted-foreground" /></button>, className: "text-right" },
+        ]} />
+      </div>
+    </div>
   );
 }

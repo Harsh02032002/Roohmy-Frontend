@@ -1,33 +1,56 @@
-import React from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { StatCard } from "../../components/dashboard/StatCard";
+import { DataTable, TableToolbar, StatusBadge } from "../../components/dashboard/DataTable";
+import { FileText, Receipt, CheckCircle2, AlertCircle, Plus, Download, Eye, Send } from "lucide-react";
 
-export default function AccountingInvoicesPage() {
-  const title = "Roomhy - Accounting Invoices";
-  const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-  const links = [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-    { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
-  ];
-  const scripts = [{ src: "https://cdn.tailwindcss.com" }];
+const invoices = [
+  { id: "INV-2025-0512", customer: "Rahul Sharma", amount: "₹25,000", issued: "26 May 2025", due: "10 Jun 2025", status: "Paid" },
+  { id: "INV-2025-0511", customer: "Priya Verma", amount: "₹8,500", issued: "26 May 2025", due: "10 Jun 2025", status: "Paid" },
+  { id: "INV-2025-0510", customer: "Amit Kumar", amount: "₹18,000", issued: "25 May 2025", due: "09 Jun 2025", status: "Pending" },
+  { id: "INV-2025-0509", customer: "Neha Singh", amount: "₹12,000", issued: "25 May 2025", due: "09 Jun 2025", status: "Paid" },
+  { id: "INV-2025-0508", customer: "Vikram Patel", amount: "₹30,000", issued: "20 May 2025", due: "04 Jun 2025", status: "Overdue" },
+  { id: "INV-2025-0507", customer: "Sneha Iyer", amount: "₹22,000", issued: "18 May 2025", due: "02 Jun 2025", status: "Overdue" },
+  { id: "INV-2025-0506", customer: "Karan Mehta", amount: "₹9,500", issued: "15 May 2025", due: "30 May 2025", status: "Draft" },
+];
 
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
-
+export default function Invoices() {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center shadow-sm">
-        <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <LayoutDashboard className="w-8 h-8 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-800">Accounting Invoices</h3>
-        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-          This module is currently being synchronized with the master dashboard template.
-          Access level and data integration are in progress.
-        </p>
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader
+        title="Invoices"
+        subtitle="Create, send and track customer invoices."
+        actions={
+          <>
+            <button className="h-11 px-4 rounded-xl border border-border bg-card text-sm font-medium flex items-center gap-2 hover:bg-muted"><Download className="h-4 w-4" /> Export</button>
+            <button className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2 hover:opacity-90"><Plus className="h-4 w-4" /> Create Invoice</button>
+          </>
+        }
+      />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Total Invoices" value="1,245" delta="+58 this month" trend="up" icon={FileText} iconColor="blue" />
+        <StatCard label="Paid" value="1,180" delta="₹14,82,000" icon={CheckCircle2} iconColor="green" />
+        <StatCard label="Pending" value="53" delta="₹3,28,500" icon={Receipt} iconColor="yellow" />
+        <StatCard label="Overdue" value="12" delta="₹1,25,300" icon={AlertCircle} iconColor="red" />
       </div>
-    </main>
+
+      <div className="panel">
+        <TableToolbar searchPlaceholder="Search invoices..." filters={[{ label: "Status", value: "All" }]} />
+        <DataTable data={invoices} columns={[
+          { key: "id", header: "Invoice", render: (r) => <span className="font-medium">{r.id}</span> },
+          { key: "customer", header: "Customer" },
+          { key: "amount", header: "Amount", render: (r) => <span className="font-bold">{r.amount}</span> },
+          { key: "issued", header: "Issued", render: (r) => <span className="text-muted-foreground text-xs">{r.issued}</span> },
+          { key: "due", header: "Due", render: (r) => <span className="text-muted-foreground text-xs">{r.due}</span> },
+          { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+          { key: "actions", header: "", render: () => (
+            <div className="flex gap-1 justify-end">
+              <button className="p-1.5 rounded hover:bg-muted text-muted-foreground"><Eye className="h-4 w-4" /></button>
+              <button className="p-1.5 rounded hover:bg-muted text-muted-foreground"><Send className="h-4 w-4" /></button>
+              <button className="p-1.5 rounded hover:bg-muted text-muted-foreground"><Download className="h-4 w-4" /></button>
+            </div>
+          ), className: "text-right" },
+        ]} />
+      </div>
+    </div>
   );
 }

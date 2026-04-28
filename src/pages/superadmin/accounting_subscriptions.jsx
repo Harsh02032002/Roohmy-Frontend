@@ -1,33 +1,47 @@
-import React from "react";
-import { useHeadAssets } from "../../utils/useHeadAssets.js";
-import { useTailwindProcessor } from "../../utils/useTailwindProcessor.js";
-import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { StatCard } from "../../components/dashboard/StatCard";
+import { DataTable, TableToolbar, StatusBadge } from "../../components/dashboard/DataTable";
+import { CreditCard, Users, RefreshCw, XCircle, MoreVertical } from "lucide-react";
 
-export default function AccountingSubscriptionsPage() {
-  const title = "Roomhy - Accounting Subscriptions";
-  const metas = [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }];
-  const links = [
-    { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-    { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" }
-  ];
-  const scripts = [{ src: "https://cdn.tailwindcss.com" }];
+const subs = [
+  { id: "SUB-1024", customer: "Rahul Sharma", plan: "Gold", amount: "₹7,999", cycle: "Monthly", next: "26 Jun 2025", status: "Active" },
+  { id: "SUB-1023", customer: "Priya Verma", plan: "Silver", amount: "₹2,999", cycle: "Monthly", next: "25 Jun 2025", status: "Active" },
+  { id: "SUB-1022", customer: "Amit Kumar", plan: "Basic", amount: "₹999", cycle: "Monthly", next: "24 Jun 2025", status: "Active" },
+  { id: "SUB-1021", customer: "Neha Singh", plan: "Silver", amount: "₹2,999", cycle: "Monthly", next: "23 Jun 2025", status: "Active" },
+  { id: "SUB-1020", customer: "Vikram Patel", plan: "Gold", amount: "₹7,999", cycle: "Monthly", next: "—", status: "Cancelled" },
+  { id: "SUB-1019", customer: "Sneha Iyer", plan: "Basic", amount: "₹999", cycle: "Monthly", next: "—", status: "Expired" },
+];
 
-  useHeadAssets({ title, metas, links, scripts, htmlAttrs: { lang: "en" }, bodyAttrs: { class: "bg-slate-50 text-slate-800" } });
-  useTailwindProcessor();
+const planCls = {
+  Gold: "bg-warning-soft text-warning",
+  Silver: "bg-brand-purple-soft text-brand-purple",
+  Basic: "bg-info-soft text-info",
+};
 
+export default function Subscriptions() {
   return (
-    <main className="p-4 md:p-8 space-y-6 max-w-[1600px] mx-auto">
-      <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center shadow-sm">
-        <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <LayoutDashboard className="w-8 h-8 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-800">Accounting Subscriptions</h3>
-        <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-          This module is currently being synchronized with the master dashboard template.
-          Access level and data integration are in progress.
-        </p>
+    <div className="p-4 md:p-8 space-y-6">
+      <PageHeader title="Subscriptions" subtitle="Manage active and past subscription plans." />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard label="Active Subscriptions" value="1,998" delta="+24 this month" trend="up" icon={CreditCard} iconColor="green" />
+        <StatCard label="Total Subscribers" value="2,142" delta="+38" trend="up" icon={Users} iconColor="blue" />
+        <StatCard label="Renewals (30d)" value="312" delta="92% rate" icon={RefreshCw} iconColor="purple" />
+        <StatCard label="Churned" value="18" delta="-4 vs last" trend="down" icon={XCircle} iconColor="red" />
       </div>
-    </main>
+
+      <div className="panel">
+        <TableToolbar searchPlaceholder="Search subscriptions..." filters={[{ label: "Plan", value: "All" }, { label: "Status", value: "All" }]} />
+        <DataTable data={subs} columns={[
+          { key: "id", header: "ID", render: (r) => <span className="font-medium">{r.id}</span> },
+          { key: "customer", header: "Customer" },
+          { key: "plan", header: "Plan", render: (r) => <span className={`badge-soft ${planCls[r.plan]}`}>{r.plan}</span> },
+          { key: "amount", header: "Amount", render: (r) => <span className="font-medium">{r.amount}</span> },
+          { key: "cycle", header: "Cycle", render: (r) => <span className="text-muted-foreground">{r.cycle}</span> },
+          { key: "next", header: "Next Billing", render: (r) => <span className="text-muted-foreground text-xs">{r.next}</span> },
+          { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+          { key: "actions", header: "", render: () => <button className="p-1.5 rounded hover:bg-muted text-muted-foreground"><MoreVertical className="h-4 w-4" /></button>, className: "text-right" },
+        ]} />
+      </div>
+    </div>
   );
 }
