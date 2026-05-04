@@ -4,7 +4,7 @@ import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon, X, Menu, Heart, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend } from "../../utils/api";
+import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend, trackPropertyClick } from "../../utils/api";
 
 export default function OurPropertyPage() {
   const [showFilters, setShowFilters] = useState(true);
@@ -792,7 +792,14 @@ function PropertyCard({ property }) {
         </div>
 
         {/* Mobile details - UNTOUCHED */}
-        <Link to={`/website/property-details/${property.id}`} className="lg:hidden px-3 pb-3">
+        <Link 
+          to={`/website/property-details/${property.id}`} 
+          className="lg:hidden px-3 pb-3"
+          onClick={() => {
+            console.log(`🖱️ UI: Card clicked (Mobile) for ID: ${property.id}`);
+            trackPropertyClick(property.id);
+          }}
+        >
           <h3 className="font-bold text-[16px] text-gray-900 leading-tight mb-0.5 truncate">{property.name}</h3>
           <p className="text-gray-500 text-[12px] mb-1 font-medium">
             {property.area && `${property.area}, `}{property.location}
@@ -812,7 +819,14 @@ function PropertyCard({ property }) {
         {/* Desktop Content Area - HIDDEN ON MOBILE */}
         <div className="hidden lg:flex flex-1 min-w-0 flex-col lg:flex-row h-full">
           {/* Main Info Section */}
-          <Link to={`/website/property-details/${property.id}`} className="flex-1 p-3.5 flex flex-col justify-between">
+          <Link 
+            to={`/website/property-details/${property.id}`} 
+            className="flex-1 p-3.5 flex flex-col justify-between"
+            onClick={() => {
+              console.log(`🖱️ UI: Info section clicked (Desktop) for ID: ${property.id}`);
+              trackPropertyClick(property.id);
+            }}
+          >
             <div className="space-y-1.5">
               <div className="flex justify-between items-start">
                  <h3 className="text-xl font-extrabold text-gray-900 leading-tight line-clamp-1 group-hover:text-[#EE2A24] transition-colors">{property.name}</h3>
@@ -895,7 +909,13 @@ function PropertyCard({ property }) {
 
             <div className="flex gap-2 w-full mt-2">
               <button 
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/website/property-details/${property.id}`); }}
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  e.stopPropagation(); 
+                  console.log(`🖱️ UI: View details button clicked for ID: ${property.id}`);
+                  trackPropertyClick(property.id);
+                  navigate(`/website/property-details/${property.id}`); 
+                }}
                 className="flex-1 py-2 border border-gray-900 text-gray-900 font-bold rounded hover:bg-gray-50 text-[10px] transition-all whitespace-nowrap"
               >
                 View details

@@ -1,289 +1,395 @@
-import { PageHeader } from "../../components/dashboard/PageHeader";
-import { StatCard } from "../../components/dashboard/StatCard";
-import { DateRangePill } from "../../components/dashboard/DateRangePill";
-import { Home, Users, FileText, IndianRupee, Database, Eye, Download, Filter, RotateCcw, ArrowUp, ArrowDown, Building2, MapPin } from "lucide-react";
+import React from "react";
+import { 
+  BarChart3, Building2, Users, TrendingUp, 
+  DollarSign, PieChart as PieChartIcon, 
+  MapPin, ArrowUpRight, ArrowDownRight,
+  Target, Zap, Briefcase, ChevronRight,
+  LayoutDashboard, MoreVertical, Globe, Wallet, AlertCircle,
+  Activity, Star, PieChart, Search, Calendar, Download,
+  Filter, MousePointer2, UserCheck, Inbox, ArrowRight, IndianRupee
+} from "lucide-react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, Cell
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Pie as RePie, Cell, PieChart as RePieChart, LineChart, Line, BarChart, Bar,
+  Legend
 } from "recharts";
 
-const perf = Array.from({ length: 7 }, (_, i) => ({
-  name: `${20 + i} May`,
-  listings: 16000 + i * 800,
-  users: 11000 + i * 700,
-  leads: 7000 + i * 800,
-  revenue: 3000 + i * 400,
-}));
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const cats = [
-  { name: "Listings", value: 12, color: "hsl(var(--chart-1))" },
-  { name: "Users", value: 8, color: "hsl(var(--chart-2))" },
-  { name: "Leads / Bookings", value: 10, color: "hsl(var(--chart-5))" },
-  { name: "Revenue", value: 8, color: "hsl(var(--chart-3))" },
-  { name: "Commission", value: 6, color: "hsl(var(--chart-4))" },
-  { name: "Subscriptions", value: 4, color: "hsl(187 85% 43%)" },
-  { name: "Refunds", value: 4, color: "hsl(280 75% 60%)" },
-  { name: "Others", value: 4, color: "hsl(215 16% 65%)" },
+const revData = [
+  { name: "Dec", rev: 1200000 },
+  { name: "Jan", rev: 1800000 },
+  { name: "Feb", rev: 1500000 },
+  { name: "Mar", rev: 2200000 },
+  { name: "Apr", rev: 1900000 },
+  { name: "May", rev: 2458760 },
 ];
 
-const recentReports = [
-  { name: "Revenue Summary Report", category: "Revenue", date: "26 May 2025, 10:30 AM", by: "Aman (Superadmin)", format: "PDF" },
-  { name: "Listings Performance Report", category: "Listings", date: "26 May 2025, 09:15 AM", by: "Aman (Superadmin)", format: "Excel" },
-  { name: "User Growth Report", category: "Users", date: "26 May 2025, 08:45 AM", by: "Aman (Superadmin)", format: "PDF" },
-  { name: "Leads & Bookings Report", category: "Leads / Bookings", date: "25 May 2025, 07:30 PM", by: "Aman (Superadmin)", format: "Excel" },
-  { name: "Commission Summary Report", category: "Commission", date: "25 May 2025, 06:10 PM", by: "Aman (Superadmin)", format: "PDF" },
+const occupancyData = [
+  { name: "Occupied", value: 2050, color: "#3b82f6", percent: "87.6%" },
+  { name: "Vacant", value: 240, color: "#10b981", percent: "10.3%" },
+  { name: "Maintenance", value: 50, color: "#f59e0b", percent: "2.1%" },
 ];
 
-const catCls = {
-  Revenue: "bg-warning-soft text-warning",
-  Listings: "bg-success-soft text-success",
-  Users: "bg-brand-purple-soft text-brand-purple",
-  "Leads / Bookings": "bg-orange-100 text-orange-600",
-  Commission: "bg-destructive/10 text-destructive",
-};
-
-const shortcuts = [
-  { icon: Home, label: "Listings Report", color: "blue" },
-  { icon: Users, label: "Users Report", color: "green" },
-  { icon: FileText, label: "Leads / Bookings Report", color: "purple" },
-  { icon: IndianRupee, label: "Revenue Report", color: "yellow" },
-  { icon: Database, label: "Commission Report", color: "red" },
-  { icon: FileText, label: "Subscriptions Report", color: "blue" },
-  { icon: FileText, label: "Refunds Report", color: "purple" },
-  { icon: Building2, label: "Performance Report", color: "blue" },
-  { icon: MapPin, label: "Locations Report", color: "green" },
+const revenueReportData = [
+  { name: "Rent Collection", value: 1985430, color: "#3b82f6", percent: "80.7%" },
+  { name: "Service Fees", value: 245300, color: "#10b981", percent: "10.0%" },
+  { name: "Other Charges", value: 145230, color: "#f59e0b", percent: "5.9%" },
+  { name: "Late Fees", value: 82800, color: "#8b5cf6", percent: "3.4%" },
 ];
 
-export default function Reports() {
+const miniLineData = [
+  { v: 10 }, { v: 15 }, { v: 12 }, { v: 20 }, { v: 18 }, { v: 25 }, { v: 22 }
+];
+
+const performanceData = [
+  { name: "Ocean View Apartment", loc: "Mumbai", occ: "98%", rev: "₹ 2,45,000" },
+  { name: "Green Valley Villa", loc: "Bangalore", occ: "96%", rev: "₹ 2,10,350" },
+  { name: "Sunrise Heights", loc: "Pune", occ: "93%", rev: "₹ 1,88,760" },
+  { name: "Lake View Residency", loc: "Hyderabad", occ: "90%", rev: "₹ 1,75,420" },
+  { name: "Skyline Studio", loc: "Delhi", occ: "88%", rev: "₹ 1,60,220" },
+];
+
+const locationData = [
+  { city: "Mumbai", count: 812, val: "₹ 8,45,600", color: "bg-blue-500" },
+  { city: "Bangalore", count: 652, val: "₹ 5,67,230", color: "bg-indigo-500" },
+  { city: "Pune", count: 432, val: "₹ 4,35,120", color: "bg-emerald-500" },
+  { city: "Hyderabad", count: 312, val: "₹ 3,10,450", color: "bg-amber-500" },
+  { city: "Delhi", count: 242, val: "₹ 2,00,360", color: "bg-rose-500" },
+];
+
+export default function ReportsOverview() {
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <PageHeader
-        title="Reports Overview"
-        subtitle="Comprehensive insights and analytics across the platform."
-        actions={
-          <>
-            <DateRangePill value="20 May 2025 - 26 May 2025" />
-            <button className="h-11 px-5 rounded-xl border border-border bg-card font-medium text-sm flex items-center gap-2 hover:bg-muted">
-              <Download className="h-4 w-4" /> Export Report
-            </button>
-          </>
-        }
-      />
-
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard label="Total Listings" value="2,548" delta="+156 vs last week" trend="up" icon={Home} iconColor="blue" />
-        <StatCard label="Total Users" value="18,745" delta="+8.6% vs last week" trend="up" icon={Users} iconColor="green" />
-        <StatCard label="Total Leads / Bookings" value="6,482" delta="+12.3% vs last week" trend="up" icon={FileText} iconColor="purple" />
-        <StatCard label="Total Revenue" value="₹18,75,000" delta="+15.6% vs last week" trend="up" icon={IndianRupee} iconColor="yellow" />
-        <StatCard label="Total Commission" value="₹2,85,750" delta="+12.4% vs last week" trend="up" icon={Database} iconColor="red" />
-        <StatCard label="Total Refunds" value="₹45,250" delta="-3.2% vs last week" trend="down" icon={Eye} iconColor="purple" />
+    <div className="p-8 space-y-12 bg-[#F8FAFC] min-h-full">
+      {/* Header - ENLARGED */}
+      <div className="flex items-center justify-between">
+         <div>
+            <h1 className="text-4xl font-black text-slate-800 tracking-tighter uppercase leading-none">Report & Analytics Overview</h1>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Sovereign Performance & Intelligence Citadel</p>
+         </div>
+         <div className="flex items-center gap-6">
+            <div className="bg-white border border-slate-100 px-6 py-4 rounded-[2rem] flex items-center gap-4 shadow-xl shadow-slate-200/40 cursor-pointer hover:bg-slate-50 transition-all">
+               <Calendar className="w-5 h-5 text-blue-600" />
+               <span className="text-xs font-black text-slate-600 uppercase tracking-tight">May 22 - May 28, 2024</span>
+               <MoreVertical className="w-5 h-5 text-slate-300" />
+            </div>
+         </div>
       </div>
 
-      {/* Filters */}
-      <div className="panel">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 items-end">
-          {[
-            { label: "Date Range", value: "20 May 2025 - 26 May 2025" },
-            { label: "Compare With", value: "13 May 2025 - 19 May 2025" },
-            { label: "Property Type", value: "All Types" },
-            { label: "Location", value: "All Locations" },
-          ].map((f) => (
-            <div key={f.label} className="xl:col-span-1">
-              <label className="text-xs text-muted-foreground mb-1 block">{f.label}</label>
-              <button className="w-full h-11 px-3 rounded-xl border border-border bg-card text-sm text-left flex items-center justify-between">
-                <span className="truncate">{f.value}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
-              </button>
-            </div>
-          ))}
-          <button className="h-11 rounded-xl border border-border bg-card font-medium text-sm flex items-center justify-center gap-2 hover:bg-muted">
-            <Filter className="h-4 w-4" /> Filters
-          </button>
-          <button className="h-11 rounded-xl border border-border bg-card font-medium text-sm flex items-center justify-center gap-2 hover:bg-muted">
-            <RotateCcw className="h-4 w-4" /> Reset
-          </button>
-        </div>
+      {/* Row 1: Hero Stats (6 Cards) - ENLARGED */}
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
+         <StatCard label="Total Properties" value="2,340" trend="+ 12.6%" up icon={Building2} color="blue" />
+         <StatCard label="Total Tenants" value="1,248" trend="+ 9.8%" up icon={Users} color="emerald" />
+         <StatCard label="Occupancy Rate" value="87.6%" trend="+ 4.3%" up icon={Target} color="purple" />
+         <StatCard label="Monthly Revenue" value="₹ 24.58L" trend="+ 14.7%" up icon={IndianRupee} color="amber" />
+         <StatCard label="Net Profit" value="₹ 6.23L" trend="+ 16.2%" up icon={Zap} color="blue" />
+         <StatCard label="Growth Rate" value="15.2%" trend="+ 3.6%" up icon={TrendingUp} color="emerald" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="panel">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-semibold">Performance Summary</h3>
-            <select className="h-8 px-2 rounded-lg border border-border text-xs"><option>This Week</option></select>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer>
-              <LineChart data={perf}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v / 1000}K`} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="listings" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="leads" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="panel">
-          <h3 className="font-semibold mb-4">Reports by Category</h3>
-          <div className="flex items-center gap-4">
-            <div className="relative h-44 w-44 shrink-0">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie data={cats} dataKey="value" innerRadius={50} outerRadius={75} paddingAngle={2}>
-                    {cats.map((c, i) => <Cell key={i} fill={c.color} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <div className="text-xl font-bold">56</div>
-                <div className="text-[10px] text-muted-foreground">Reports</div>
-              </div>
+      {/* Row 2: Revenue, Occupancy & Performance - Back to Compact UI Style */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+         {/* Revenue Overview */}
+         <div className="lg:col-span-5 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-800">Revenue Overview</h3>
+               <select className="bg-slate-50 border-none rounded-xl px-3 py-1.5 text-[9px] font-bold text-slate-500 outline-none"><option>This Month</option></select>
             </div>
-            <div className="flex-1 grid grid-cols-1 gap-1.5 text-xs">
-              {cats.map((c) => (
-                <div key={c.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
-                    <span>{c.name}</span>
-                  </div>
-                  <span className="text-muted-foreground">{c.value} ({((c.value / 56) * 100).toFixed(1)}%)</span>
-                </div>
-              ))}
+            <div className="h-[250px]">
+               <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revData}>
+                     <defs>
+                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                           <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                     </defs>
+                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} dy={10} />
+                     <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} tickFormatter={(v) => `${v/1000000}M`} />
+                     <Tooltip contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                     <Area type="monotone" dataKey="rev" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                  </AreaChart>
+               </ResponsiveContainer>
             </div>
-          </div>
-        </div>
+            <div className="grid grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-50">
+               <MiniSummary label="Total Revenue" value="₹24.58L" />
+               <MiniSummary label="Collection" value="₹24.20L" />
+               <MiniSummary label="Payout" value="₹17.35L" />
+               <MiniSummary label="Profit" value="₹6.23L" color="text-emerald-600 font-bold" />
+            </div>
+         </div>
 
-        <div className="panel">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Top Insights</h3>
-            <button className="text-sm text-primary font-medium">View All</button>
-          </div>
-          <div className="space-y-4">
-            {[
-              { trend: "up", color: "success", title: "Revenue increased by 15.6%", sub: "vs last week" },
-              { trend: "up", color: "info", title: "Leads increased by 12.3%", sub: "vs last week" },
-              { trend: "up", color: "warning", title: "Active users increased by 8.6%", sub: "vs last week" },
-              { trend: "down", color: "destructive", title: "Refunds decreased by 3.2%", sub: "vs last week" },
-            ].map((ins, i) => {
-              const cls = {
-                success: "bg-success-soft text-success",
-                info: "bg-info-soft text-info",
-                warning: "bg-warning-soft text-warning",
-                destructive: "bg-destructive/10 text-destructive",
-              };
-              return (
-                <div key={i} className="flex items-center gap-3">
-                  <div className={`h-9 w-9 rounded-full flex items-center justify-center ${cls[ins.color]}`}>
-                    {ins.trend === "up" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+         {/* Occupancy Rate */}
+         <div className="lg:col-span-3 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col items-center">
+            <h3 className="text-lg font-bold text-slate-800 w-full mb-8">Occupancy Rate</h3>
+            <div className="relative w-44 h-44 mb-8">
+               <ResponsiveContainer width="100%" height="100%">
+                  <RePieChart>
+                     <RePie data={occupancyData} innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value" stroke="none">
+                        {occupancyData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                     </RePie>
+                  </RePieChart>
+               </ResponsiveContainer>
+               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <p className="text-2xl font-black text-slate-800 tracking-tighter leading-none">87.6%</p>
+                  <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">Overall</p>
+               </div>
+            </div>
+            <div className="w-full space-y-3 mb-6">
+               {occupancyData.map((d, i) => (
+                  <div key={i} className="flex items-center justify-between group cursor-pointer">
+                     <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter group-hover:text-slate-800 transition-colors">{d.name}</span>
+                     </div>
+                     <span className="text-[10px] font-bold text-slate-800">{d.percent}</span>
                   </div>
-                  <div>
-                    <div className="text-sm font-medium">{ins.title}</div>
-                    <div className="text-xs text-muted-foreground">{ins.sub}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+               ))}
+            </div>
+            <div className="w-full h-12 border-t border-slate-50 pt-4 flex flex-col">
+               <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 mb-1 tracking-widest uppercase">
+                  <TrendingUp className="w-3 h-3" /> + 4.3% this month
+               </div>
+               <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={miniLineData}><Line type="monotone" dataKey="v" stroke="#10b981" strokeWidth={2} dot={false} /></LineChart>
+               </ResponsiveContainer>
+            </div>
+         </div>
+
+         {/* Top Performance */}
+         <div className="lg:col-span-4 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-800">Top Performance</h3>
+               <button className="text-blue-600 text-[10px] font-bold uppercase hover:underline">View All</button>
+            </div>
+            <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
+               <table className="w-full">
+                  <thead>
+                     <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                        <th className="pb-4 text-left">Property</th>
+                        <th className="pb-4 text-center">Occ</th>
+                        <th className="pb-4 text-right">Yield (₹)</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                     {performanceData.map((p, i) => (
+                        <tr key={i} className="group hover:bg-slate-50 transition-all cursor-pointer">
+                           <td className="py-4">
+                              <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-xl bg-slate-100 overflow-hidden shrink-0 shadow-sm border border-white group-hover:scale-105 transition-all">
+                                    <img src={`https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=100&idx=${i}`} className="w-full h-full object-cover" alt="" />
+                                 </div>
+                                 <p className="text-[11px] font-bold text-slate-800 truncate max-w-[100px]">{p.name}</p>
+                              </div>
+                           </td>
+                           <td className="py-4 text-center"><span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">{p.occ}</span></td>
+                           <td className="py-4 text-right text-[11px] font-bold text-slate-800 tracking-tighter">{p.rev}</td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2 panel">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Recent Reports</h3>
-            <button className="text-sm text-primary font-medium">View All</button>
-          </div>
-          <div className="overflow-x-auto -mx-6">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-muted-foreground border-b border-border">
-                <tr>
-                  <th className="text-left px-6 py-2 font-medium">Report Name</th>
-                  <th className="text-left py-2 font-medium">Category</th>
-                  <th className="text-left py-2 font-medium">Generated On</th>
-                  <th className="text-left py-2 font-medium">Generated By</th>
-                  <th className="text-left py-2 font-medium">Format</th>
-                  <th className="text-right px-6 py-2 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {recentReports.map((r, i) => (
-                  <tr key={i} className="hover:bg-muted/30">
-                    <td className="px-6 py-3 font-medium">{r.name}</td>
-                    <td><span className={`badge-soft ${catCls[r.category] ?? "bg-muted text-muted-foreground"}`}>{r.category}</span></td>
-                    <td className="text-muted-foreground">{r.date}</td>
-                    <td className="text-muted-foreground">{r.by}</td>
-                    <td className="text-muted-foreground">{r.format}</td>
-                    <td className="px-6 text-right">
-                      <button className="p-2 rounded-lg hover:bg-muted text-primary"><Download className="h-4 w-4" /></button>
-                    </td>
+      {/* Row 3: Locations & Growth */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+         <div className="lg:col-span-4 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-800">Location Distribution</h3>
+               <Globe className="w-5 h-5 text-blue-600 opacity-20" />
+            </div>
+            <div className="flex gap-8 items-center">
+               <div className="flex-1 h-64 bg-slate-50 rounded-[2rem] border border-slate-100 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/e8/India_map_blank.svg')] bg-contain bg-no-repeat bg-center opacity-30" />
+                  <div className="absolute top-1/3 left-1/3 w-6 h-6 bg-blue-600/20 rounded-full flex items-center justify-center animate-pulse"><div className="w-2 h-2 bg-blue-600 rounded-full" /></div>
+                  <div className="absolute bottom-1/4 right-1/2 w-8 h-8 bg-indigo-600/20 rounded-full flex items-center justify-center"><div className="w-2.5 h-2.5 bg-indigo-600 rounded-full" /></div>
+                  <div className="absolute top-1/2 right-1/4 w-5 h-5 bg-emerald-600/20 rounded-full flex items-center justify-center"><div className="w-2 h-2 bg-emerald-600 rounded-full" /></div>
+               </div>
+               <div className="w-48 space-y-4 overflow-y-auto max-h-[250px] custom-scrollbar pr-2">
+                  {locationData.map((l, i) => (
+                     <div key={i} className="flex flex-col gap-1 group cursor-pointer">
+                        <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-2">
+                              <div className={cn("w-2 h-2 rounded-full", l.color)} />
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-800 transition-colors">{l.city}</span>
+                           </div>
+                           <span className="text-[10px] font-bold text-slate-800">{l.val}</span>
+                        </div>
+                        <div className="ml-4 h-1 bg-slate-50 rounded-full overflow-hidden">
+                           <div className={cn("h-full", l.color)} style={{ width: `${Math.random() * 60 + 40}%` }} />
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         </div>
+
+         <div className="lg:col-span-4 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <h3 className="text-lg font-bold text-slate-800 mb-8">Growth Intelligence</h3>
+            <div className="grid grid-cols-2 gap-6 h-[250px]">
+               <GrowthCard label="New Assets" value="234" trend="+ 18.6%" color="emerald" data={miniLineData} />
+               <GrowthCard label="New Tenants" value="248" trend="+ 16.4%" color="blue" data={miniLineData} />
+               <GrowthCard label="Revenue flux" value="₹ 24.58L" trend="+ 14.7%" color="orange" data={miniLineData} />
+               <GrowthCard label="Bookings" value="356" trend="+ 19.3%" color="purple" data={miniLineData} />
+            </div>
+         </div>
+
+         <div className="lg:col-span-4 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col">
+            <h3 className="text-lg font-bold text-slate-800 mb-8">Yield Classification</h3>
+            <div className="flex items-center gap-8 flex-1">
+               <div className="relative w-40 h-40 shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                     <RePieChart>
+                        <RePie data={revenueReportData} innerRadius={50} outerRadius={65} paddingAngle={5} dataKey="value" stroke="none">
+                           {revenueReportData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                        </RePie>
+                     </RePieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                     <p className="text-2xl font-black text-slate-800 tracking-tighter leading-none">₹24.58L</p>
+                  </div>
+               </div>
+               <div className="flex-1 space-y-4 overflow-y-auto max-h-[200px] custom-scrollbar pr-2">
+                  {revenueReportData.map((d, i) => (
+                     <div key={i} className="flex items-center justify-between group cursor-pointer">
+                        <div className="flex items-center gap-2">
+                           <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: d.color }} />
+                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-800 transition-colors leading-none">{d.name}</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-800 leading-none">{d.percent}</span>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         </div>
+      </div>
+
+      {/* Row 4: Staff Performance & Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-10">
+         <div className="lg:col-span-8 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-800">Operational Efficiency</h3>
+               <button className="text-blue-600 text-[10px] font-bold uppercase hover:underline">Full Audit</button>
+            </div>
+            <table className="w-full">
+               <thead>
+                  <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                     <th className="pb-6 text-left">Personnel</th>
+                     <th className="pb-6 text-left">Role</th>
+                     <th className="pb-6 text-center">Entities</th>
+                     <th className="pb-6 text-center">Leads</th>
+                     <th className="pb-6 text-right">Performance</th>
                   </tr>
-                ))}
-              </tbody>
+               </thead>
+               <tbody className="divide-y divide-slate-50">
+                  <StaffRow name="Neha Verma" role="Property Manager" managed="156" leads="93" perf="93%" />
+                  <StaffRow name="Rahul Singh" role="Leasing Exec" managed="128" leads="88" perf="88%" />
+                  <StaffRow name="Priya Nair" role="Relationship Mgr" managed="112" leads="82" perf="82%" />
+                  <StaffRow name="Vikram Joshi" role="Support Exec" managed="94" leads="78" perf="78%" />
+               </tbody>
             </table>
-          </div>
-        </div>
+         </div>
 
-        <div className="panel">
-          <h3 className="font-semibold mb-4">Report Shortcuts</h3>
-          <div className="grid grid-cols-1 gap-2.5">
-            {shortcuts.map((s, i) => {
-              const Icon = s.icon;
-              const cls = {
-                blue: "bg-info-soft text-info",
-                green: "bg-success-soft text-success",
-                purple: "bg-brand-purple-soft text-brand-purple",
-                yellow: "bg-warning-soft text-warning",
-                red: "bg-destructive/10 text-destructive",
-              };
-              return (
-                <button key={i} className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:bg-muted/50 text-left">
-                  <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${cls[s.color]}`}><Icon className="h-4 w-4" /></div>
-                  <span className="text-sm font-medium">{s.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <div className="panel">
-        <h3 className="font-semibold mb-1">Schedule Reports</h3>
-        <p className="text-sm text-muted-foreground mb-5">Automate your reports and get them delivered on time.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {[
-            { title: "Weekly Revenue Report", schedule: "Every Monday at 08:00 AM", recipients: "aman@roomhy.com, finance@roomhy.com" },
-            { title: "Monthly Commission Report", schedule: "1st of Every Month at 10:00 AM", recipients: "aman@roomhy.com" },
-            { title: "Monthly User Report", schedule: "1st of Every Month at 10:30 AM", recipients: "team@roomhy.com" },
-          ].map((r, i) => (
-            <div key={i} className="p-4 rounded-xl border border-border">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-lg bg-info-soft text-info flex items-center justify-center"><FileText className="h-4 w-4" /></div>
-                <div className="flex-1">
-                  <div className="font-medium text-sm">{r.title}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{r.schedule}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5 truncate">Recipients: {r.recipients}</div>
-                </div>
-                <span className="badge-soft bg-success-soft text-success">Active</span>
-              </div>
-              <div className="flex justify-end mt-2">
-                <div className="relative w-10 h-5 bg-primary rounded-full">
-                  <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full" />
-                </div>
-              </div>
+         <div className="lg:col-span-4 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col">
+            <h3 className="text-lg font-bold text-slate-800 mb-8 uppercase tracking-widest">Strategic Insights</h3>
+            <div className="grid grid-cols-1 gap-6 flex-1">
+               <InsightTile icon={Users} text="Occupancy rate improved by 6.3% compared to previous cycle." />
+               <InsightTile icon={Globe} text="Mumbai Hub demonstrates highest yield contribution at 34.4%." />
+               <InsightTile icon={Building2} text="Asset acquisition strategy resulted in 18.6% growth." />
+               <InsightTile icon={Zap} text="Fiscal sovereignty verified: Net profit increased by 16.2%." />
             </div>
-          ))}
-          <button className="p-4 rounded-xl border-2 border-dashed border-border hover:bg-muted/50 flex flex-col items-center justify-center gap-2 text-sm text-primary font-medium">
-            <span className="text-2xl">+</span>
-            Schedule New Report
-            <span className="text-xs text-muted-foreground">Create a new scheduled report</span>
-          </button>
-        </div>
+         </div>
       </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, trend, up, icon: Icon, color }) {
+  const colors = {
+    blue: "text-blue-600 bg-blue-50 border-blue-100 shadow-blue-50",
+    emerald: "text-emerald-600 bg-emerald-50 border-emerald-100 shadow-emerald-50",
+    purple: "text-purple-600 bg-purple-50 border-purple-100 shadow-purple-50",
+    amber: "text-amber-600 bg-amber-50 border-amber-100 shadow-amber-50",
+  };
+  return (
+    <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/40 group hover:translate-y-[-5px] transition-all duration-500 flex flex-col justify-between">
+       <div className={cn("w-16 h-16 rounded-3xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm border mb-8", colors[color])}>
+          <Icon className="w-8 h-8" />
+       </div>
+       <div>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 leading-tight">{label}</p>
+          <div className="flex items-end justify-between">
+             <p className="text-4xl font-black text-slate-800 tracking-tighter leading-none">{value}</p>
+             <span className={cn("text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest flex items-center gap-1", up ? "text-emerald-600 bg-emerald-50" : "text-rose-600 bg-rose-50")}>
+                {trend}
+             </span>
+          </div>
+       </div>
+    </div>
+  );
+}
+
+function MiniSummary({ label, value, color }) {
+  return (
+    <div className="min-w-0">
+       <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 truncate">{label}</p>
+       <p className={cn("text-[11px] font-bold truncate tracking-tighter", color || "text-slate-800")}>{value}</p>
+    </div>
+  );
+}
+
+function GrowthCard({ label, value, trend, color, data }) {
+  const colors = {
+    emerald: "text-emerald-600",
+    blue: "text-blue-600",
+    orange: "text-amber-600",
+    purple: "text-purple-600",
+  };
+  return (
+    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500 flex flex-col justify-between">
+       <div className="flex items-center justify-between mb-2">
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+          <span className={cn("text-[8px] font-bold uppercase", colors[color])}>{trend} ↑</span>
+       </div>
+       <p className="text-xl font-bold text-slate-800 tracking-tighter mb-4">{value}</p>
+       <div className="h-8">
+          <ResponsiveContainer width="100%" height="100%">
+             <LineChart data={data}>
+                <Line type="monotone" dataKey="v" stroke={color === "emerald" ? "#10b981" : color === "blue" ? "#3b82f6" : color === "orange" ? "#f59e0b" : "#8b5cf6"} strokeWidth={2} dot={false} />
+             </LineChart>
+          </ResponsiveContainer>
+       </div>
+    </div>
+  );
+}
+
+function StaffRow({ name, role, managed, leads, perf }) {
+  return (
+    <tr className="group hover:bg-slate-50 transition-all duration-500 cursor-pointer">
+       <td className="py-5">
+          <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold shadow-sm border border-white group-hover:scale-110 transition-transform">
+                {name.charAt(0)}
+             </div>
+             <p className="text-[13px] font-bold text-slate-800 tracking-tight">{name}</p>
+          </div>
+       </td>
+       <td className="py-5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{role}</td>
+       <td className="py-5 text-sm font-bold text-slate-800 text-center">{managed}</td>
+       <td className="py-5 text-sm font-bold text-slate-800 text-center">{leads}</td>
+       <td className="py-5 text-right"><span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm">{perf}</span></td>
+    </tr>
+  );
+}
+
+function InsightTile({ icon: Icon, text }) {
+  return (
+    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center gap-4 group hover:bg-blue-600 transition-all duration-500 cursor-pointer">
+       <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-white/20 group-hover:text-white transition-all shadow-sm">
+          <Icon className="w-5 h-5" />
+       </div>
+       <p className="text-[10px] font-bold text-slate-500 leading-tight group-hover:text-white transition-all">{text}</p>
     </div>
   );
 }

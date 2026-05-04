@@ -3,7 +3,7 @@ import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { fetchProperties, getPropertyReviews, getPropertyReviewStats, checkUserReview, submitReview } from "../../utils/api";
+import { fetchProperties, getPropertyReviews, getPropertyReviewStats, checkUserReview, submitReview, trackPropertyView, trackPropertyClick } from "../../utils/api";
 
 // Extract city from property name (e.g., "HOSTEL - Vastrapur, Ahmedabad" -> "Ahmedabad")
 const extractCityFromName = (name) => {
@@ -575,6 +575,12 @@ export default function PropertyDetailsPage() {
           const actualId = foundProperty._id || foundProperty.id;
           setRawPropertyId(actualId);
           console.log('Setting rawPropertyId to:', actualId);
+          
+          // Track view
+          if (actualId) {
+            console.log(`👁️ UI: Tracking view for property details: ${actualId}`);
+            trackPropertyView(actualId);
+          }
           
           const formatted = {
             // Basic fields

@@ -61,20 +61,7 @@ export default function ContactPage() {
       {/* Contact Cards */}
       <section className="py-16 px-4 max-w-5xl mx-auto -mt-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {contactCards.map((card, idx) => (
-            <a
-              key={idx}
-              href={card.href}
-              className="bg-white rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-center group"
-            >
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center text-white mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                <card.icon size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">{card.title}</h3>
-              <p className="text-amber-600 font-semibold mt-2">{card.detail}</p>
-              <p className="text-gray-400 text-sm mt-1">{card.sub}</p>
-            </a>
-          ))}
+          {renderContactCards(contactCards)}
         </div>
       </section>
 
@@ -82,63 +69,61 @@ export default function ContactPage() {
       <section className="py-16 px-4 max-w-3xl mx-auto">
         <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-gray-100">
           <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Send Us a Message</h2>
-            <p className="text-gray-500 mt-2">Fill out the form below and we'll get back to you soon</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">{formDetails.title}</h2>
+            <p className="text-gray-500 mt-2">{formDetails.subtitle}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="text-gray-700 text-sm font-semibold mb-1.5 block">Full Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-800"
-                  placeholder="John Doe"
-                />
-              </div>
-              <div>
-                <label className="text-gray-700 text-sm font-semibold mb-1.5 block">Email Address</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-800"
-                  placeholder="john@example.com"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-gray-700 text-sm font-semibold mb-1.5 block">Subject</label>
-              <input
-                type="text"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-800"
-                placeholder="How can we help?"
-              />
-            </div>
-            <div>
-              <label className="text-gray-700 text-sm font-semibold mb-1.5 block">Message</label>
-              <textarea
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                required
-                rows="5"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-800 resize-none"
-                placeholder="Tell us more..."
-              />
-            </div>
+            {formDetails.fields?.map((field, index) => {
+              if (field.type === 'textarea') {
+                return (
+                  <div key={field.name}>
+                    <label className="text-gray-700 text-sm font-semibold mb-1.5 block">{field.label}</label>
+                    <textarea
+                      value={formData[field.name]}
+                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                      required={field.required}
+                      rows={5}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-800 resize-none"
+                      placeholder={field.placeholder}
+                    />
+                  </div>
+                );
+              }
+              
+              return (
+                <div key={field.name} className={index < 2 && formDetails.fields?.length > 2 ? 'grid grid-cols-1 sm:grid-cols-2 gap-5' : ''}>
+                  <div>
+                    <label className="text-gray-700 text-sm font-semibold mb-1.5 block">{field.label}</label>
+                    <input
+                      type={field.type}
+                      value={formData[field.name]}
+                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                      required={field.required}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-800"
+                      placeholder={field.placeholder}
+                    />
+                  </div>
+                  {index === 1 && formDetails.fields?.length > 2 && <div></div>}
+                </div>
+              );
+            })}
             <button
               type="submit"
-              className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30"
+              disabled={submitting}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-4 rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-amber-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Send size={18} />
-              Send Message
+              {submitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send size={20} />
+                  {formDetails.submitText || 'Send Message'}
+                </>
+              )}
             </button>
           </form>
         </div>

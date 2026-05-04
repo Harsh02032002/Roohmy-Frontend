@@ -1,593 +1,229 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useHtmlPage } from "../../utils/htmlPage";
+import { 
+  Building2, Users, Shield, Clock, Search, 
+  ArrowUpRight, ArrowDownRight, MoreVertical, 
+  Filter, Globe, MapPin, Zap, Sheet, Trash2, 
+  ChevronRight, Phone, Mail, User, Image as ImageIcon,
+  Activity, Home, CheckCircle2, XCircle, Hourglass,
+  Check, X, Eye, ClipboardCheck, AlertTriangle,
+  Camera, Map, Star, Edit3, Trash, UserCheck,
+  RefreshCw, Download, Inbox, CreditCard, Tag,
+  BarChart3, Plus, Loader2, Save, Sparkles, Layers,
+  Box, Globe2, IndianRupee
+} from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { DateRangePill } from "../../components/dashboard/DateRangePill";
+import { fetchJson } from "../../utils/api";
 
-const getApiUrl = () =>
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:5001"
-    : "https://api.roomhy.com";
-
-const navSections = [
-  {
-    label: "Overview",
-    items: [{ href: "/superadmin/superadmin", icon: "layout-dashboard", text: "Dashboard", key: "superadmin" }]
-  },
-  {
-    label: "Management",
-    items: [
-      { href: "/superadmin/manager", icon: "map-pin", text: "Teams", key: "manager" },
-      { href: "/superadmin/owner", icon: "briefcase", text: "Property Owners", key: "owner" },
-      { href: "/superadmin/properties", icon: "home", text: "Properties", key: "properties" },
-      { href: "/superadmin/tenant", icon: "users", text: "Tenants", key: "tenant" },
-      { href: "/superadmin/new_signups", icon: "file-badge", text: "New Signups", key: "new_signups" }
-    ]
-  },
-  {
-    label: "Operations",
-    items: [
-      { href: "/superadmin/enquiry", icon: "help-circle", text: "Enquiries", key: "enquiry" },
-      { href: "/superadmin/websiteenq", icon: "globe", text: "Web Enquiry", key: "websiteenq" },
-      { href: "/superadmin/booking", icon: "calendar-check", text: "Bookings", key: "booking" },
-      { href: "/superadmin/reviews", icon: "star", text: "Reviews", key: "reviews" },
-      { href: "/superadmin/complaint-history", icon: "alert-circle", text: "Complaint History", key: "complaint-history" }
-    ]
-  }
-];
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 export default function SuperadminWebsiteenq() {
-  useHtmlPage({
-    title: "Roomhy - Website Property Enquiries",
-    bodyClass: "text-slate-800",
-    htmlAttrs: { lang: "en" },
-    metas: [
-      { charset: "UTF-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    ],
-    bases: [],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: true },
-      {
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-        rel: "stylesheet"
-      },
-      { rel: "stylesheet", href: "/superadmin/assets/css/websiteenq.css" }
-    ],
-    styles: [],
-    scripts: [
-      { src: "https://cdn.tailwindcss.com" },
-      { src: "https://unpkg.com/lucide@latest" }
-    ],
-    inlineScripts: []
-  });
-
   const [enquiries, setEnquiries] = useState([]);
-  const [managers, setManagers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
-  const [showDetails, setShowDetails] = useState(false);
-  const [showAssign, setShowAssign] = useState(false);
-  const [activeEnquiryId, setActiveEnquiryId] = useState("");
-  const [selectedManager, setSelectedManager] = useState("");
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const apiUrl = getApiUrl();
-
-  useEffect(() => {
-    window.lucide?.createIcons();
-  }, [enquiries, showDetails, showAssign, mobileOpen]);
-
-  useEffect(() => {
-    loadEnquiries();
-  }, []);
-
-  const loadManagers = async (allEnquiries) => {
-    let list = [];
-    try {
-      const res = await fetch(`${apiUrl}/api/website-enquiry/employees/marketing`);
-      const result = await res.json();
-      if (res.ok && result.success) {
-        list = (result.employees || []).map((e) => ({
-          id: e.loginId,
-          loginId: e.loginId,
-          name: e.name,
-          email: e.email || "",
-          phone: e.phone || "",
-          role: e.role || "Marketing Team",
-          area: e.area || e.locationCode || "Unassigned",
-          city: e.city || ""
-        }));
-      }
-    } catch (err) {
-      console.warn("Failed to load marketing employees from backend:", err);
-    }
-
-    if (!list.length) {
-      const cachedEmployees = JSON.parse(localStorage.getItem("roomhy_employees_cache") || "[]");
-      list = cachedEmployees
-        .filter((e) => (e.role || "").toLowerCase() === "marketing team")
-        .map((e) => ({
-          id: e.loginId || e.id,
-          loginId: e.loginId || e.id,
-          name: e.name,
-          email: e.email || "",
-          phone: e.phone || "",
-          role: e.role || "Marketing Team",
-          area: e.area || e.locationCode || "Unassigned",
-          city: e.city || ""
-        }));
-    }
-
-    setManagers(list);
-    const cities = Array.from(new Set((allEnquiries || []).map((e) => e.city).filter(Boolean)));
-    if (!cityFilter && cities.length > 0) setCityFilter("");
-  };
 
   const loadEnquiries = async () => {
-    let list = [];
     try {
-      const response = await fetch(`${apiUrl}/api/website-enquiry/all`);
-      const result = await response.json();
-      if (result.success) {
-        list = result.enquiries.map((e) => ({
-          id: e.enquiry_id,
-          property_type: e.property_type,
-          property_name: e.property_name,
-          city: e.city,
-          locality: e.locality,
-          address: e.address,
-          pincode: e.pincode,
-          description: e.description,
-          amenities: e.amenities,
-          gender_suitability: e.gender_suitability,
-          rent: e.rent,
-          deposit: e.deposit,
-          owner_name: e.owner_name,
-          owner_email: e.owner_email,
-          owner_phone: e.owner_phone,
-          contact_name: e.contact_name,
-          country: e.country,
-          tenants_managed: e.tenants_managed,
-          additional_message: e.additional_message,
-          status: e.status,
-          assigned_to: e.assigned_to,
-          assigned_to_loginId: e.assigned_to_loginId,
-          assigned_email: e.assigned_email,
-          assigned_area: e.assigned_area,
-          notes: e.notes,
-          created_at: e.created_at
-        }));
-      }
-    } catch (error) {
-      console.error("Error loading enquiries:", error);
-      list = [
-        {
-          id: "sample_1",
-          property_type: "pg",
-          property_name: "Sample PG in Kota",
-          city: "kota",
-          locality: "North Campus",
-          address: "123 Main Street",
-          pincode: "324001",
-          description: "Sample property for testing",
-          amenities: ["WiFi", "AC"],
-          gender_suitability: "male",
-          rent: 5000,
-          deposit: 10000,
-          owner_name: "John Doe",
-          owner_email: "john@example.com",
-          owner_phone: "9876543210",
-          status: "pending",
-          assigned_to: null,
-          assigned_area: null,
-          notes: "",
-          created_at: new Date().toISOString()
-        },
-        {
-          id: "sample_2",
-          property_type: "hostel",
-          property_name: "Sample Hostel in Indore",
-          city: "indore",
-          locality: "City Center",
-          address: "456 Hostel Lane",
-          pincode: "452001",
-          description: "Another sample property",
-          amenities: ["Food", "Laundry"],
-          gender_suitability: "female",
-          rent: 4000,
-          deposit: 8000,
-          owner_name: "Jane Smith",
-          owner_email: "jane@example.com",
-          owner_phone: "9876543211",
-          status: "assigned",
-          assigned_to: "Rajesh Kumar",
-          assigned_area: "Indore",
-          notes: "Assigned for follow-up",
-          created_at: new Date().toISOString()
-        }
-      ];
+      setLoading(true);
+      const data = await fetchJson("/api/website-enquiry/all");
+      const list = data?.enquiries || data || [];
+      setEnquiries(list);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-
-    setEnquiries(list);
-    loadManagers(list);
   };
 
-  const filteredEnquiries = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    return enquiries.filter((e) => {
-      const matchSearch = !term ||
-        (e.property_name || "").toLowerCase().includes(term) ||
-        (e.owner_name || "").toLowerCase().includes(term) ||
-        (e.locality || "").toLowerCase().includes(term);
-      const matchStatus = !statusFilter || e.status === statusFilter;
-      const matchCity = !cityFilter || e.city === cityFilter;
-      return matchSearch && matchStatus && matchCity;
-    });
-  }, [enquiries, searchTerm, statusFilter, cityFilter]);
+  useEffect(() => { loadEnquiries(); }, []);
 
-  const grouped = useMemo(() => {
-    const groups = {};
-    filteredEnquiries.forEach((e) => {
-      const key = e.city || "unknown";
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(e);
+  const filteredEnquiries = useMemo(() => {
+    const q = search.toLowerCase();
+    return enquiries.filter(e => {
+      const matchSearch = (e.property_name || "").toLowerCase().includes(q) || 
+                          (e.owner_name || "").toLowerCase().includes(q) ||
+                          (e.locality || "").toLowerCase().includes(q);
+      const matchStatus = !statusFilter || e.status === statusFilter;
+      return matchSearch && matchStatus;
     });
-    return groups;
-  }, [filteredEnquiries]);
+  }, [enquiries, search, statusFilter]);
 
   const stats = useMemo(() => {
     const total = enquiries.length;
-    const pending = enquiries.filter((e) => e.status === "pending").length;
-    const assigned = enquiries.filter((e) => e.status === "assigned").length;
-    const cities = new Set(enquiries.map((e) => e.city)).size;
+    const pending = enquiries.filter(e => e.status === "pending").length;
+    const assigned = enquiries.filter(e => e.status === "assigned").length;
+    const cities = new Set(enquiries.map(e => e.city)).size;
     return { total, pending, assigned, cities };
   }, [enquiries]);
 
-  const openDetails = (id) => {
-    setActiveEnquiryId(id);
-    setShowDetails(true);
-  };
-
-  const closeDetails = () => {
-    setShowDetails(false);
-    setActiveEnquiryId("");
-  };
-
-  const openAssign = (id) => {
-    setActiveEnquiryId(id);
-    setShowAssign(true);
-  };
-
-  const closeAssign = () => {
-    setShowAssign(false);
-    setActiveEnquiryId("");
-    setSelectedManager("");
-  };
-
-  const confirmAssignment = async () => {
-    if (!selectedManager) {
-      alert("Please select an employee");
-      return;
-    }
-    const enquiry = enquiries.find((e) => e.id === activeEnquiryId);
-    const manager = managers.find((m) => String(m.loginId || m.id) === String(selectedManager));
-    if (!enquiry || !manager) return;
-
-    try {
-      const response = await fetch(`${apiUrl}/api/website-enquiry/assign/${encodeURIComponent(activeEnquiryId)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: "assigned",
-          assigned_to: manager.name,
-          assigned_to_loginId: manager.loginId || manager.id,
-          assigned_area: manager.area
-        })
-      });
-      const result = await response.json();
-      if (response.ok && result.success) {
-        closeAssign();
-        await loadEnquiries();
-        const mailMsg = result.email && result.email.attempted
-          ? (result.email.sent ? " Employee email notification sent." : " Employee assigned, but email notification failed.")
-          : " Employee has no email configured.";
-        alert(`Assigned to ${manager.name} successfully!${mailMsg}`);
-      } else {
-        alert("Error assigning enquiry: " + (result.message || "Unknown error"));
-      }
-    } catch (error) {
-      console.error("Error assigning enquiry:", error);
-      alert("Error assigning enquiry. Please try again.");
-    }
-  };
-
-  const currentPage = "websiteenq";
-
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Property Enquiries from Website</h1>
-            <p className="text-sm text-slate-500 mt-1">Manage and assign property enquiries to area managers.</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Enquiries</p>
-                <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
-              </div>
-              <i data-lucide="inbox" className="w-8 h-8 text-blue-500"></i>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-              </div>
-              <i data-lucide="clock" className="w-8 h-8 text-yellow-500"></i>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Assigned</p>
-                <p className="text-2xl font-bold text-green-600">{stats.assigned}</p>
-              </div>
-              <i data-lucide="check-circle" className="w-8 h-8 text-green-500"></i>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Cities</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.cities}</p>
-              </div>
-              <i data-lucide="map-pin" className="w-8 h-8 text-purple-500"></i>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 shadow-sm">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search property name, owner, locality..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="assigned">Assigned</option>
-            </select>
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-            >
-              <option value="">All Cities</option>
-              {Array.from(new Set(enquiries.map((e) => e.city).filter(Boolean))).map((city) => (
-                <option key={city} value={city}>{city.charAt(0).toUpperCase() + city.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {filteredEnquiries.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No enquiries found.</p>
-          ) : (
-            Object.keys(grouped).sort().map((city) => (
-              <div key={city} className="area-section">
-                <div className="area-header">
-                  <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <i data-lucide="map-pin" className="w-5 h-5"></i>
-                    {city.charAt(0).toUpperCase() + city.slice(1)}
-                  </h2>
-                  <p className="text-sm opacity-90 mt-1">{grouped[city].length} enquiries</p>
-                </div>
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <table className="w-full data-table">
-                    <thead>
-                      <tr>
-                        <th>Property</th>
-                        <th>Owner</th>
-                        <th>Locality</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {grouped[city].map((e) => (
-                        <tr key={e.id}>
-                          <td><strong>{e.property_name}</strong></td>
-                          <td>{e.owner_name}</td>
-                          <td>{e.locality || "-"}</td>
-                          <td>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {(e.property_type || "Other").toUpperCase()}
-                            </span>
-                          </td>
-                          <td><small>{e.created_at ? new Date(e.created_at).toLocaleDateString() : "-"}</small></td>
-                          <td>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${e.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}`}>
-                              {e.status === "pending" ? "Pending" : `Assigned to ${e.assigned_to || "?"}`}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="flex gap-2">
-                              <button onClick={() => openDetails(e.id)} className="text-blue-600 hover:text-blue-800 p-1" title="View Details">
-                                <i data-lucide="eye" className="w-4 h-4"></i>
-                              </button>
-                              {e.status === "pending" ? (
-                                <button onClick={() => openAssign(e.id)} className="text-purple-600 hover:text-purple-800 p-1" title="Assign">
-                                  <i data-lucide="user-check" className="w-4 h-4"></i>
-                                </button>
-                              ) : null}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex flex-col gap-2">
+         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Digital Lead Intelligence Hub</h1>
+         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
+            <span>Marketplace Growth</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-blue-600">Website Inbound Ledger</span>
+         </div>
       </div>
-      {showDetails ? (
-        <div className="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
-              <h2 className="text-xl font-bold">Property Details</h2>
-              <button onClick={closeDetails} className="text-gray-400 hover:text-gray-600"><i data-lucide="x" className="w-6 h-6"></i></button>
-            </div>
-            <div className="p-6 space-y-4">
-              {(() => {
-                const enquiry = enquiries.find((e) => e.id === activeEnquiryId);
-                if (!enquiry) return <div className="text-gray-500">No details available.</div>;
-                return (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-600">Property Name</p>
-                        <p className="font-semibold">{enquiry.property_name}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Property Type</p>
-                        <p className="font-semibold">{enquiry.property_type || "N/A"}</p>
-                      </div>
-                    </div>
-                    <hr />
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-600">Owner Name</p>
-                        <p className="font-semibold">{enquiry.owner_name}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Owner Email</p>
-                        <p className="font-semibold">{enquiry.owner_email || "N/A"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Owner Phone</p>
-                        <p className="font-semibold">{enquiry.owner_phone}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Contact Name</p>
-                        <p className="font-semibold">{enquiry.contact_name || "N/A"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Submitted Date</p>
-                        <p className="font-semibold">{enquiry.created_at ? new Date(enquiry.created_at).toLocaleString() : "-"}</p>
-                      </div>
-                    </div>
-                    <hr />
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-600">City</p>
-                        <p className="font-semibold">{(enquiry.city || "").toUpperCase()}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Country</p>
-                        <p className="font-semibold">{enquiry.country || "N/A"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Locality</p>
-                        <p className="font-semibold">{enquiry.locality || "N/A"}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="text-xs text-gray-600">Full Address</p>
-                        <p className="font-semibold">{enquiry.address}, {enquiry.pincode}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Gender Suitability</p>
-                        <p className="font-semibold capitalize">{enquiry.gender_suitability || "Any"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Starting Price</p>
-                        <p className="font-semibold">{"\u20B9"}{(enquiry.rent || 0).toLocaleString()}/month</p>
-                      </div>
-                    </div>
-                    <hr />
-                    <div>
-                      <p className="text-xs text-gray-600">Amenities</p>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {(enquiry.amenities || []).map((a) => (
-                          <span key={a} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{a}</span>
-                        ))}
-                      </div>
-                    </div>
-                    {enquiry.description ? (
-                      <div>
-                        <p className="text-xs text-gray-600">Description</p>
-                        <p className="text-sm">{enquiry.description}</p>
-                      </div>
-                    ) : null}
-                    <div>
-                      <p className="text-xs text-gray-600">Tenants Managed</p>
-                      <p className="text-sm">{enquiry.tenants_managed || 0}</p>
-                    </div>
-                    {enquiry.additional_message ? (
-                      <div>
-                        <p className="text-xs text-gray-600">Additional Message</p>
-                        <p className="text-sm">{enquiry.additional_message}</p>
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {showAssign ? (
-        <div className="modal fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md w-full mx-4">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold">Assign to Employee</h2>
-              <button onClick={closeAssign} className="text-gray-400 hover:text-gray-600"><i data-lucide="x" className="w-6 h-6"></i></button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Select Employee</label>
-                <select
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  value={selectedManager}
-                  onChange={(e) => setSelectedManager(e.target.value)}
-                >
-                  <option value="">Choose Employee...</option>
-                  {managers.map((m) => (
-                    <option key={m.loginId || m.id} value={m.loginId || m.id}>
-                      {m.name} | {m.loginId || m.id} | {m.area || "-"} | {m.city || "-"}
-                    </option>
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+         <p className="text-sm font-bold text-slate-400 max-w-2xl">Monitor platform-wide digital inquiries, track response velocity and optimize inbound lead conversion across regional property portfolios.</p>
+         <button className="bg-slate-800 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase shadow-xl shadow-slate-800/20 hover:bg-slate-900 transition-all flex items-center gap-2">
+            <Download className="w-4 h-4" /> Export Marketplace Data
+         </button>
+      </div>
+
+      {/* Hero Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <StatCardLarge label="Total Inbound" value={stats.total} trend="+ 14.2% Delta" up icon={Inbox} color="blue" />
+        <StatCardLarge label="Awaiting Pulse" value={stats.pending} trend="High Priority" up icon={Hourglass} color="orange" />
+        <StatCardLarge label="Lead Velocity" value="1.8h" trend="Optimized Flow" up icon={Clock} color="green" />
+        <StatCardLarge label="Conv. Efficiency" value="23.4%" trend="+ 4.2% Yield" up icon={Zap} color="indigo" />
+      </div>
+
+      {/* Main Ledger Card */}
+      <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+         <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-10">
+               <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Digital Lead Portfolio</h3>
+               <div className="hidden xl:flex items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+                  {["", "pending", "assigned"].map(f => (
+                    <button 
+                      key={f} onClick={() => setStatusFilter(f)}
+                      className={cn(
+                        "px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all",
+                        statusFilter === f ? "bg-white text-blue-600 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
+                       {f === "" ? "Master Feed" : f}
+                    </button>
                   ))}
-                </select>
-              </div>
-              <div className="flex gap-2 pt-4">
-                <button onClick={confirmAssignment} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium">Assign</button>
-                <button onClick={closeAssign} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-medium">Cancel</button>
-              </div>
+               </div>
             </div>
-          </div>
-        </div>
-      ) : null}
+            <div className="flex items-center gap-4">
+               <div className="relative group w-64">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                  <input 
+                    value={search} onChange={e => setSearch(e.target.value)}
+                    placeholder="Search digital leads..." 
+                    className="bg-slate-50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold shadow-sm w-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" 
+                  />
+               </div>
+               <button onClick={loadEnquiries} className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100">
+                  <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} />
+               </button>
+            </div>
+         </div>
+
+         <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[1200px]">
+               <thead>
+                  <tr className="text-slate-400 text-[10px] font-bold uppercase border-b border-slate-50">
+                     <th className="pb-6">Lead Identity</th>
+                     <th className="pb-6">Target Property</th>
+                     <th className="pb-6">Issuer Information</th>
+                     <th className="pb-6 text-center">Regional Zone</th>
+                     <th className="pb-6 text-center">Revenue Pulse</th>
+                     <th className="pb-6 text-center">Lead Status</th>
+                     <th className="pb-6 text-right">Lead Protocols</th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-slate-50">
+                  {loading ? (
+                    <tr><td colSpan="7" className="py-32 text-center">
+                       <div className="flex flex-col items-center gap-4">
+                          <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Accessing Inbound Vault...</p>
+                       </div>
+                    </td></tr>
+                  ) : filteredEnquiries.map((e, i) => (
+                    <tr key={i} className="group hover:bg-slate-50/50 transition-colors cursor-pointer">
+                       <td className="py-6">
+                          <p className="text-[10px] font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100 shadow-sm inline-block">#{e.id?.substring(0, 8).toUpperCase()}</p>
+                          <p className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-widest leading-none">{new Date(e.created_at || Date.now()).toLocaleDateString()}</p>
+                       </td>
+                       <td className="py-6">
+                          <div className="flex items-center gap-4">
+                             <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-xl transition-all">
+                                <Building2 className="w-6 h-6" />
+                             </div>
+                             <div>
+                                <p className="text-base font-bold text-slate-800">{e.property_name || "Digital Prospect"}</p>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest opacity-70">
+                                   {e.property_type?.toUpperCase()} • {e.gender_suitability} Matrix
+                                </p>
+                             </div>
+                          </div>
+                       </td>
+                       <td className="py-6">
+                          <div className="space-y-1">
+                             <p className="text-sm font-bold text-slate-700">{e.owner_name}</p>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight opacity-60">{e.owner_phone}</p>
+                          </div>
+                       </td>
+                       <td className="py-6 text-center">
+                          <p className="text-xs font-bold text-slate-800 uppercase tracking-widest">{e.city}</p>
+                          <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase opacity-60">{e.locality || "National Zone"}</p>
+                       </td>
+                       <td className="py-6 text-center">
+                          <p className="text-base font-bold text-slate-800 tracking-tighter">₹ {e.rent?.toLocaleString()}</p>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60">Revenue Target</p>
+                       </td>
+                       <td className="py-6 text-center">
+                          <span className={cn(
+                             "text-[9px] font-bold px-3.5 py-1.5 rounded-full border shadow-sm uppercase tracking-widest",
+                             e.status === "pending" ? "bg-amber-50 text-amber-600 border-amber-100 shadow-amber-50" : "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-50"
+                          )}>
+                             {e.status === "pending" ? "Lead Pulse" : `Routed: ${e.assigned_to}`}
+                          </span>
+                       </td>
+                       <td className="py-6 text-right">
+                          <div className="flex items-center justify-end gap-3">
+                             <button className="flex items-center gap-2 bg-blue-50 text-blue-600 px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100">
+                                <UserCheck className="w-4 h-4" /> Route Lead
+                             </button>
+                             <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100 shadow-sm">
+                                <Eye className="w-5 h-5" />
+                             </button>
+                          </div>
+                       </td>
+                    </tr>
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      </div>
     </div>
   );
 }
 
-
+function StatCardLarge({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    blue: "bg-blue-600 shadow-blue-200", 
+    indigo: "bg-indigo-600 shadow-indigo-200", 
+    green: "bg-emerald-600 shadow-emerald-200", 
+    orange: "bg-amber-600 shadow-amber-200" 
+  };
+  
+  return (
+    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col gap-8 group hover:translate-y-[-8px] transition-all duration-500">
+      <div className={cn("w-20 h-20 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl transition-transform group-hover:rotate-6", bgColors[color])}>
+         <Icon className="w-10 h-10" />
+      </div>
+      <div>
+         <p className="text-[11px] font-bold text-slate-400 uppercase mb-4 leading-none truncate tracking-widest">{label}</p>
+         <p className="text-5xl font-bold text-slate-800 tracking-tighter leading-none">{value}</p>
+      </div>
+      <div className={cn(
+        "flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-2xl w-fit shadow-sm border",
+        up ? "text-emerald-600 bg-emerald-50 border-emerald-100" : "text-rose-600 bg-rose-50 border-rose-100"
+      )}>
+         {up ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+         {trend}
+      </div>
+    </div>
+  );
+}

@@ -1,236 +1,309 @@
-import { PageHeader } from "../../components/dashboard/PageHeader";
-import { StatCard } from "../../components/dashboard/StatCard";
-import { DateRangePill } from "../../components/dashboard/DateRangePill";
-import { Wallet, Database, FileText, RotateCcw, Receipt, Download, Plus, FilePlus, Send, RefreshCw, FileBarChart, Calculator, Files, Upload } from "lucide-react";
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  BarChart, Bar, PieChart, Pie, Cell
+import React from "react";
+import { 
+  Wallet, IndianRupee, Database, Receipt, RotateCcw,
+  ArrowUpRight, ArrowDownRight, ChevronRight, Search,
+  Download, Filter, MoreVertical, Building2, Users,
+  FileText, AlertCircle, CheckCircle2, XCircle,
+  TrendingUp, TrendingDown, Calendar, CreditCard,
+  History, Clock, PieChart as PieIcon, BarChart3,
+  Activity, Bell, Send, Inbox, ArrowRight, Briefcase
+} from "lucide-react";
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell
 } from "recharts";
 
-const revenueLine = Array.from({ length: 7 }, (_, i) => ({
-  name: `${20 + i} May`,
-  revenue: 14000 + i * 1100,
-  commission: 3000 + i * 400,
-  payouts: 11000 + i * 600,
-}));
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const incomeBars = Array.from({ length: 7 }, (_, i) => ({
-  name: `${20 + i} May`,
-  income: 16000 + i * 200 - (i === 4 ? 4000 : 0),
-  expenses: 7000 + i * 600,
-}));
-
-const sources = [
-  { name: "Property Listings", value: 1245000, color: "hsl(var(--chart-1))" },
-  { name: "Subscriptions", value: 320000, color: "hsl(var(--chart-2))" },
-  { name: "Featured Listings", value: 210000, color: "hsl(var(--chart-3))" },
-  { name: "Other Sources", value: 100000, color: "hsl(var(--chart-5))" },
+const collectionData = [
+  { name: "Jan", collection: 1200000, payout: 800000 },
+  { name: "Feb", collection: 1800000, payout: 1100000 },
+  { name: "Mar", collection: 1500000, payout: 900000 },
+  { name: "Apr", collection: 2200000, payout: 1400000 },
+  { name: "May", collection: 1900000, payout: 1200000 },
+  { name: "Jun", collection: 2500000, payout: 1600000 },
 ];
 
-const txns = [
-  { id: "TXN-125487", desc: "Property listing payment - Green Villa", type: "Income", amount: "₹25,000", status: "Completed", date: "26 May 2025" },
-  { id: "TXN-125486", desc: "Commission - Green Villa", type: "Commission", amount: "₹2,500", status: "Completed", date: "26 May 2025" },
-  { id: "TXN-125485", desc: "Payout to owner - Green Villa", type: "Payout", amount: "₹22,500", status: "Completed", date: "25 May 2025" },
-  { id: "TXN-125484", desc: "Subscription - Silver Plan", type: "Subscription", amount: "₹8,999", status: "Completed", date: "25 May 2025" },
-  { id: "TXN-125483", desc: "Featured listing - Blue Residency", type: "Income", amount: "₹1,999", status: "Completed", date: "24 May 2025" },
-  { id: "TXN-125482", desc: "Refund - Cancelled Subscription", type: "Refund", amount: "₹8,999", status: "Refunded", date: "24 May 2025" },
-  { id: "TXN-125481", desc: "Payout to owner - Blue Residency", type: "Payout", amount: "₹18,000", status: "Completed", date: "23 May 2025" },
+const dueRentData = [
+  { name: "Paid", value: 75, color: "#10b981" },
+  { name: "Unpaid", value: 25, color: "#f59e0b" },
 ];
 
-const typeCls = {
-  Income: "bg-info-soft text-info",
-  Commission: "bg-success-soft text-success",
-  Payout: "bg-warning-soft text-warning",
-  Subscription: "bg-brand-purple-soft text-brand-purple",
-  Refund: "bg-destructive/10 text-destructive",
-};
+const revenueDistData = [
+  { name: "Service Fees", value: 45, color: "#3b82f6" },
+  { name: "Rent Commission", value: 35, color: "#10b981" },
+  { name: "Other Charges", value: 20, color: "#f59e0b" },
+];
 
-const statusCls = {
-  Completed: "bg-success-soft text-success",
-  Refunded: "bg-destructive/10 text-destructive",
-};
+const transactions = [
+  { id: "#TX-1256", tenant: "Rohit Sharma", property: "Sunrise Residency", amount: "₹12,500", date: "May 28, 2024", status: "Success", type: "Rent" },
+  { id: "#TX-1255", tenant: "Priya Mehta", property: "Green Valley PG", amount: "₹8,000", date: "May 28, 2024", status: "Success", type: "Security" },
+  { id: "#TX-1254", tenant: "Vikram Joshi", property: "Urban Nest", amount: "₹15,000", date: "May 28, 2024", status: "Pending", type: "Rent" },
+  { id: "#TX-1253", tenant: "Neha Singh", property: "Lakeview Apartments", amount: "₹22,000", date: "May 28, 2024", status: "Failed", type: "Rent" },
+];
 
-export default function Accounting() {
+export default function SuperadminAccountingDashboard() {
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <PageHeader
-        title="Accounting Dashboard"
-        subtitle="Overview of financial activities and performance."
-        actions={
-          <>
-            <DateRangePill value="20 May 2025 - 26 May 2025" />
-            <button className="h-11 px-5 rounded-xl border border-border bg-card font-medium text-sm flex items-center gap-2 hover:bg-muted">
-              <Download className="h-4 w-4" /> Export Report
+    <div className="p-8 space-y-8 bg-[#F8FAFC] min-h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+         <div>
+            <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Accounting Overview</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Accounting {">"} Overview</p>
+         </div>
+         <div className="flex items-center gap-4">
+            <div className="bg-white border border-slate-100 px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm cursor-pointer hover:bg-slate-50 transition-all">
+               <Calendar className="w-4 h-4 text-slate-400" />
+               <span className="text-[11px] font-bold text-slate-600">May 22 - May 28, 2024</span>
+               <MoreVertical className="w-4 h-4 text-slate-300" />
+            </div>
+         </div>
+      </div>
+
+      {/* Row 1: Hero Cards (5 Cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+         <StatCard label="Total Collection" value="₹ 45,28,450" trend="+ 12.5%" up icon={IndianRupee} color="blue" />
+         <StatCard label="Total Payout" value="₹ 32,10,200" trend="+ 8.2%" up icon={Wallet} color="rose" />
+         <StatCard label="Roomhy Revenue" value="₹ 13,18,250" trend="+ 15.7%" up icon={BarChart3} color="emerald" />
+         <StatCard label="Due Rents" value="₹ 4,25,000" trend="12 Tenants" up={false} icon={Clock} color="amber" />
+         <StatCard label="Pending Payouts" value="₹ 1,12,000" trend="5 Owners" up={false} icon={RotateCcw} color="rose" />
+      </div>
+
+      {/* Row 2: Intelligence Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+         {/* Trend Chart */}
+         <div className="lg:col-span-7 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-800">Collection vs Payout Trend</h3>
+               <div className="flex gap-4">
+                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-blue-500" /><span className="text-[10px] font-bold text-slate-400 uppercase">Collection</span></div>
+                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-rose-500" /><span className="text-[10px] font-bold text-slate-400 uppercase">Payout</span></div>
+               </div>
+            </div>
+            <div className="h-[300px]">
+               <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={collectionData}>
+                     <defs>
+                        <linearGradient id="colorColl" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                           <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorPay" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1}/>
+                           <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                        </linearGradient>
+                     </defs>
+                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} dy={10} />
+                     <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} tickFormatter={(v) => `₹${v/100000}L`} />
+                     <Tooltip contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                     <Area type="monotone" dataKey="collection" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorColl)" />
+                     <Area type="monotone" dataKey="payout" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorPay)" />
+                  </AreaChart>
+               </ResponsiveContainer>
+            </div>
+         </div>
+
+         {/* Transactions List */}
+         <div className="lg:col-span-5 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-800">Recent Transactions</h3>
+               <button className="text-blue-600 text-[10px] font-bold uppercase hover:underline">View All</button>
+            </div>
+            <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
+               {transactions.map((tx, i) => (
+                  <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-transparent hover:border-slate-100 transition-all cursor-pointer group">
+                     <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold text-blue-600 uppercase">{tx.id}</span>
+                        <span className={cn(
+                           "text-[9px] font-bold px-2 py-0.5 rounded-lg uppercase tracking-widest",
+                           tx.status === "Success" ? "text-emerald-600 bg-emerald-50" : tx.status === "Pending" ? "text-amber-600 bg-amber-50" : "text-rose-600 bg-rose-50"
+                        )}>{tx.status}</span>
+                     </div>
+                     <div className="flex items-center justify-between">
+                        <div>
+                           <p className="text-[11px] font-bold text-slate-800">{tx.tenant}</p>
+                           <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">{tx.property}</p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-xs font-bold text-slate-800">{tx.amount}</p>
+                           <p className="text-[9px] text-slate-300 font-bold uppercase mt-0.5">{tx.date}</p>
+                        </div>
+                     </div>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </div>
+
+      {/* Row 3: Mini Metrics Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+         <MiniStat label="Rent Invoices" value="1,248" icon={Receipt} color="bg-indigo-50 text-indigo-600" />
+         <MiniStat label="Owner Payouts" value="342" icon={Briefcase} color="bg-emerald-50 text-emerald-600" />
+         <MiniStat label="Service Fees" value="₹ 4.2L" icon={Database} color="bg-purple-50 text-purple-600" />
+         <MiniStat label="Refund Requests" value="14" icon={RotateCcw} color="bg-rose-50 text-rose-600" />
+         <MiniStat label="GST Collection" value="₹ 2.1L" icon={FileText} color="bg-blue-50 text-blue-600" />
+      </div>
+
+      {/* Row 4: Analytics Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+         <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <h3 className="text-lg font-bold text-slate-800 mb-8">Due Rent Distribution</h3>
+            <div className="relative w-40 h-40 mx-auto mb-8">
+               <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                     <Pie data={dueRentData} innerRadius={50} outerRadius={65} paddingAngle={5} dataKey="value" stroke="none">
+                        {dueRentData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                     </Pie>
+                  </PieChart>
+               </ResponsiveContainer>
+               <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-2xl font-bold text-slate-800 tracking-tighter">75%</p>
+                  <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Collected</p>
+               </div>
+            </div>
+            <div className="space-y-3">
+               <AnalyticsRow label="Target Collection" value="₹45,28,450" />
+               <AnalyticsRow label="Achieved" value="₹33,96,337" color="text-emerald-600" />
+               <AnalyticsRow label="Shortfall" value="₹11,32,113" color="text-rose-600" />
+            </div>
+         </div>
+
+         <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <h3 className="text-lg font-bold text-slate-800 mb-8">Revenue Sources</h3>
+            <div className="h-40 mb-8">
+               <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueDistData} layout="vertical">
+                     <XAxis type="number" hide />
+                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} />
+                     <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={12}>
+                        {revenueDistData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                     </Bar>
+                  </BarChart>
+               </ResponsiveContainer>
+            </div>
+            <div className="space-y-3">
+               {revenueDistData.map((d, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{d.name}</span>
+                     </div>
+                     <span className="text-[11px] font-bold text-slate-800">{d.value}%</span>
+                  </div>
+               ))}
+            </div>
+         </div>
+
+         <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <h3 className="text-lg font-bold text-slate-800 mb-8">Cash Flow Health</h3>
+            <div className="h-40 mb-8">
+               <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={collectionData}>
+                     <Line type="step" dataKey="payout" stroke="#ef4444" strokeWidth={2} dot={false} />
+                     <Line type="step" dataKey="collection" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                  </LineChart>
+               </ResponsiveContainer>
+            </div>
+            <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+               <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-600 shadow-sm"><TrendingUp className="w-5 h-5" /></div>
+                  <div>
+                     <p className="text-xs font-bold text-slate-800">Forecast: Positive</p>
+                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Stable collection trend expected.</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      {/* Row 5: Alerts & Automation */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pb-8">
+         <div className="lg:col-span-3 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-800">System Automation & Alerts</h3>
+               <button className="text-blue-600 text-[10px] font-bold uppercase hover:underline">Settings</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <AlertTile label="Rent Reminders" text="Automated reminders sent to 452 tenants." icon={Bell} status="Active" />
+               <AlertTile label="Payout Cycle" text="Monthly owner payouts initiated for May." icon={Send} status="Processing" />
+               <AlertTile label="Failed Txns" text="3 payments failed. Re-attempting." icon={Inbox} status="Alert" />
+            </div>
+         </div>
+         <div className="bg-slate-900 rounded-[2rem] p-8 text-white flex flex-col justify-between">
+            <div>
+               <h3 className="text-lg font-bold mb-2">Export Reports</h3>
+               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed mb-6">Generate audit reports for current cycle.</p>
+            </div>
+            <button className="w-full py-4 bg-blue-600 text-white rounded-xl text-[10px] font-bold uppercase shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+               Export Data <Download className="w-4 h-4" />
             </button>
-          </>
-        }
-      />
-
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-        <StatCard label="Total Revenue" value="₹18,75,000" delta="+15.6% vs last week" trend="up" icon={Wallet} iconColor="blue" />
-        <StatCard label="Total Commission" value="₹2,85,750" delta="+12.4% vs last week" trend="up" icon={Database} iconColor="green" />
-        <StatCard label="Total Payouts" value="₹12,45,000" delta="+8.3% vs last week" trend="up" icon={FileText} iconColor="purple" />
-        <StatCard label="Total Refunds" value="₹45,250" delta="-3.2% vs last week" trend="down" icon={RotateCcw} iconColor="orange" />
-        <StatCard label="Outstanding Amount" value="₹1,25,300" delta="-5.6% vs last week" trend="down" icon={Receipt} iconColor="red" />
+         </div>
       </div>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="panel">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-semibold">Revenue Overview</h3>
-            <select className="h-8 px-2 rounded-lg border border-border text-xs"><option>This Week</option></select>
+function StatCard({ label, value, trend, up, icon: Icon, color }) {
+  const colors = {
+    blue: "text-blue-600 bg-blue-50 border-blue-100 shadow-blue-50",
+    emerald: "text-emerald-600 bg-emerald-50 border-emerald-100 shadow-emerald-50",
+    rose: "text-rose-600 bg-rose-50 border-rose-100 shadow-rose-50",
+    amber: "text-amber-600 bg-amber-50 border-amber-100 shadow-amber-50",
+  };
+  return (
+    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 group hover:translate-y-[-5px] transition-all duration-500 flex flex-col justify-between">
+       <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border mb-6", colors[color])}>
+          <Icon className="w-6 h-6" />
+       </div>
+       <div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 leading-tight">{label}</p>
+          <div className="flex items-end justify-between">
+             <p className="text-2xl font-bold text-slate-800 tracking-tighter leading-none">{value}</p>
+             <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-lg uppercase tracking-widest", up ? "text-emerald-600 bg-emerald-50" : "text-rose-600 bg-rose-50")}>
+                {trend}
+             </span>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer>
-              <LineChart data={revenueLine}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v / 1000}K`} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="commission" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="payouts" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+       </div>
+    </div>
+  );
+}
 
-        <div className="panel">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-semibold">Income vs Expenses</h3>
-            <select className="h-8 px-2 rounded-lg border border-border text-xs"><option>This Week</option></select>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer>
-              <BarChart data={incomeBars}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v / 1000}K`} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="income" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expenses" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+function MiniStat({ label, value, icon: Icon, color }) {
+  return (
+    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/40 flex items-center gap-4 group cursor-pointer hover:bg-slate-50 transition-all">
+       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm", color)}>
+          <Icon className="w-5 h-5" />
+       </div>
+       <div>
+          <p className="text-sm font-black text-slate-800 leading-none mb-1">{value}</p>
+          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
+       </div>
+    </div>
+  );
+}
 
-        <div className="panel">
-          <h3 className="font-semibold mb-4">Revenue by Source</h3>
-          <div className="relative h-44">
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie data={sources} dataKey="value" innerRadius={50} outerRadius={75} paddingAngle={2}>
-                  {sources.map((s, i) => <Cell key={i} fill={s.color} />)}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <div className="text-lg font-bold">₹18,75,000</div>
-              <div className="text-[10px] text-muted-foreground">Total</div>
-            </div>
-          </div>
-          <div className="mt-4 space-y-2 text-xs">
-            {sources.map((s) => (
-              <div key={s.name}>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
-                  <span className="font-medium">{s.name}</span>
-                </div>
-                <div className="text-muted-foreground pl-4">₹{s.value.toLocaleString("en-IN")} ({((s.value / 1875000) * 100).toFixed(1)}%)</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+function AnalyticsRow({ label, value, color }) {
+  return (
+    <div className="flex items-center justify-between group">
+       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-800 transition-colors">{label}</span>
+       <span className={cn("text-[11px] font-bold", color || "text-slate-800")}>{value}</span>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2 panel">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Recent Transactions</h3>
-            <button className="text-sm text-primary font-medium">View All</button>
-          </div>
-          <div className="overflow-x-auto -mx-6">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-muted-foreground border-b border-border">
-                <tr>
-                  <th className="text-left px-6 py-2 font-medium">ID</th>
-                  <th className="text-left py-2 font-medium">Description</th>
-                  <th className="text-left py-2 font-medium">Type</th>
-                  <th className="text-left py-2 font-medium">Amount</th>
-                  <th className="text-left py-2 font-medium">Status</th>
-                  <th className="text-left px-6 py-2 font-medium">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {txns.map((t) => (
-                  <tr key={t.id} className="hover:bg-muted/30">
-                    <td className="px-6 py-3 font-medium">{t.id}</td>
-                    <td className="text-muted-foreground">{t.desc}</td>
-                    <td><span className={`badge-soft ${typeCls[t.type]}`}>{t.type}</span></td>
-                    <td className="font-medium">{t.amount}</td>
-                    <td><span className={`badge-soft ${statusCls[t.status]}`}>{t.status}</span></td>
-                    <td className="px-6 text-muted-foreground">{t.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex justify-end pt-4">
-            <button className="text-sm text-primary font-medium">View All Transactions →</button>
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          <div className="panel">
-            <h3 className="font-semibold mb-4">Outstanding Overview</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl border border-border">
-                <div className="icon-bubble bg-destructive/10 text-destructive h-9 w-9 mb-2"><RotateCcw className="h-4 w-4" /></div>
-                <div className="text-xs text-muted-foreground">Total Outstanding</div>
-                <div className="text-lg font-bold">₹1,25,300</div>
-              </div>
-              <div className="p-3 rounded-xl border border-border">
-                <div className="icon-bubble bg-warning-soft text-warning h-9 w-9 mb-2"><Receipt className="h-4 w-4" /></div>
-                <div className="text-xs text-muted-foreground">Overdue Invoices</div>
-                <div className="text-lg font-bold">12</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="panel">
-            <h3 className="font-semibold mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { icon: Plus, label: "Add Transaction", color: "blue" },
-                { icon: FilePlus, label: "Create Invoice", color: "green" },
-                { icon: Send, label: "Process Payout", color: "yellow" },
-                { icon: RefreshCw, label: "Add Refund", color: "red" },
-                { icon: FileBarChart, label: "Generate Report", color: "purple" },
-                { icon: Calculator, label: "Manage Taxes", color: "blue" },
-                { icon: Files, label: "View All Invoices", color: "green" },
-                { icon: Upload, label: "Export Data", color: "purple" },
-              ].map((a, i) => {
-                const Icon = a.icon;
-                const cls = {
-                  blue: "bg-info-soft text-info",
-                  green: "bg-success-soft text-success",
-                  yellow: "bg-warning-soft text-warning",
-                  red: "bg-destructive/10 text-destructive",
-                  purple: "bg-brand-purple-soft text-brand-purple",
-                };
-                return (
-                  <button key={i} className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:bg-muted/50">
-                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${cls[a.color]}`}><Icon className="h-5 w-5" /></div>
-                    <span className="text-xs text-center">{a.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
+function AlertTile({ label, text, icon: Icon, status }) {
+  return (
+    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-xl transition-all">
+       <div className="flex items-center justify-between mb-3">
+          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-blue-600 shadow-sm"><Icon className="w-4 h-4" /></div>
+          <span className={cn(
+             "text-[8px] font-bold px-2 py-0.5 rounded-lg uppercase tracking-widest",
+             status === "Active" ? "text-emerald-600 bg-emerald-50" : status === "Alert" ? "text-rose-600 bg-rose-50" : "text-blue-600 bg-blue-50"
+          )}>{status}</span>
+       </div>
+       <p className="text-xs font-bold text-slate-800 mb-1">{label}</p>
+       <p className="text-[9px] font-bold text-slate-400 leading-tight">{text}</p>
     </div>
   );
 }

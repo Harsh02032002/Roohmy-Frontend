@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 import HowRoomhyWorks from "../../components/website/HowRoomhyWorks";
+import { fetchPropertyTypes } from "../../utils/api";
 
 // Custom hook for navigation history
 function useNavigationHistory() {
@@ -105,6 +106,8 @@ const reviews = [
 export default function WebsiteIndex() {
   const { push, goBack, goNext, canGoBack, canGoNext } = useNavigationHistory();
   const [currentReview, setCurrentReview] = useState(0);
+  const [offerings, setOfferings] = useState([]);
+  const [loadingOfferings, setLoadingOfferings] = useState(true);
   
   useHtmlPage({
     title: "Roomhy - Find Your Student Home",
@@ -137,6 +140,22 @@ export default function WebsiteIndex() {
       setCurrentReview((prev) => (prev + 1) % reviews.length);
     }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Fetch dynamic offerings
+  useEffect(() => {
+    const loadOfferings = async () => {
+      try {
+        setLoadingOfferings(true);
+        const types = await fetchPropertyTypes();
+        setOfferings(types);
+      } catch (error) {
+        console.error("Error loading offerings:", error);
+      } finally {
+        setLoadingOfferings(false);
+      }
+    };
+    loadOfferings();
   }, []);
 
   const nextReview = () => setCurrentReview((prev) => (prev + 1) % reviews.length);
@@ -219,19 +238,37 @@ export default function WebsiteIndex() {
         {/* Offerings Section */}
         <section className="light-card rounded-2xl p-6">
           <h2 className="text-2xl font-bold mb-6 text-gray-900">Our Offerings</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['Hostel', 'PG', 'Apartment', 'List Property'].map((item, idx) => (
-              <a key={item} href={item === 'List Property' ? '/website/list' : `/website/ourproperty?type=${item.toLowerCase()}`} className="group block">
-                <div className="relative rounded-xl shadow-md hover:shadow-lg overflow-hidden h-40 cursor-pointer transition-shadow duration-300">
-                  <img src={`https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990227/roomhy/website/${idx === 0 ? 'angels-hostel' : idx === 1 ? '401230348' : idx === 2 ? 'pg' : 'post'}.jpg`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={item} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent">
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <h3 className="text-white text-center text-sm sm:text-base font-bold">{item}</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {loadingOfferings ? (
+              // Skeleton loaders
+              [1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="animate-pulse bg-gray-200 rounded-xl h-40"></div>
+              ))
+            ) : offerings.length > 0 ? (
+              offerings.map((item, idx) => (
+                <a 
+                  key={idx} 
+                  href={item.link || `/website/ourproperty?type=${item.category.toLowerCase()}`} 
+                  className="group block"
+                >
+                  <div className="relative rounded-xl shadow-md hover:shadow-lg overflow-hidden h-40 cursor-pointer transition-shadow duration-300">
+                    <img 
+                      src={item.images?.[0] || item.image || `https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990227/roomhy/website/${idx === 0 ? 'angels-hostel' : idx === 1 ? '401230348' : idx === 2 ? 'pg' : 'post'}.jpg`} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      alt={item.title} 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="text-white text-center text-sm sm:text-base font-bold">{item.title}</h3>
+                        <p className="text-white/60 text-[10px] text-center line-clamp-1">{item.description}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </a>
-            ))}
+                </a>
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-500">No offerings available</p>
+            )}
           </div>
         </section>
 

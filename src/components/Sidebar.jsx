@@ -1,233 +1,381 @@
-import { NavLink, useLocation } from "react-router-dom";
-import { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { 
-  LayoutDashboard, Users, Building2, Briefcase, Home as HomeIcon, 
-  FileBadge, FolderOpen, HelpCircle, CalendarCheck, Star, 
-  AlertCircle, Globe, Wallet, IndianRupee, RotateCcw, MapPin, 
-  Settings as SettingsIcon, LogOut, ShieldCheck, ChevronDown,
-  DollarSign, BarChart3, Database, MessageSquare, Shield, Activity
+  LayoutDashboard, Users, Building2, Wallet, 
+  MessageSquare, BarChart3, Calendar, Star, 
+  ShieldCheck, Headphones, Settings, LogOut,
+  ChevronDown, ChevronRight, Menu, X, Bell,
+  Search, User, Globe, Target, Home, 
+  UserPlus, ClipboardList, Briefcase, FileText,
+  CreditCard, IndianRupee, RotateCcw, AlertCircle,
+  BarChart, PieChart, Activity, Shield, LayoutGrid,
+  FileSearch, CheckCircle2, History, MessageCircle
 } from "lucide-react";
-
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogoutDialog } from "./superadmin/LogoutDialog";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const NAV = [
-  { label: "Dashboard", to: "/superadmin/superadmin", icon: LayoutDashboard },
   {
-    label: "Team Management", icon: Users,
-    children: [
-      { label: "Teams", to: "/superadmin/manager" },
-      { label: "Property Owners", to: "/superadmin/owner" },
-      { label: "Tenants", to: "/superadmin/tenant" },
-      { label: "New Signups", to: "/superadmin/new_signups" },
-    ],
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/superadmin/superadmin"
   },
   {
-    label: "Property Management", icon: Building2,
+    label: "Home",
+    icon: Home,
     children: [
-      { label: "Dashboard", to: "/superadmin/website" },
-      { label: "All Listings", to: "/superadmin/properties" },
-      { label: "Approval Queue", to: "/superadmin/property/approvals" },
-      { label: "Flagged Listings", to: "/superadmin/property/flagged" },
-      { label: "Categories", to: "/superadmin/property/categories" },
-      { label: "Amenities", to: "/superadmin/property/amenities" },
-      { label: "Pricing Plans", to: "/superadmin/property/pricing" },
-      { label: "Featured Listings", to: "/superadmin/property/featured" },
-      { label: "Locations", to: "/superadmin/property/locations" },
-      { label: "Moderation", to: "/superadmin/property/moderation" },
-      { label: "Analytics", to: "/superadmin/property/analytics" },
-      { label: "Settings", to: "/superadmin/property/settings" },
-    ],
+      { label: "Overview", path: "/superadmin/home-overview" },
+      { label: "Total Properties", path: "/superadmin/properties" },
+      { label: "Total Tenants", path: "/superadmin/tenant" },
+      { label: "Revenue Overview", path: "/superadmin/accounting" },
+      { label: "Alerts (Pending Rent)", path: "/superadmin/rentcollection" }
+    ]
   },
   {
-    label: "Operations", icon: Briefcase,
+    label: "User Management",
+    icon: Users,
     children: [
-      { label: "Web Enquiry", to: "/superadmin/websiteenq" },
-      { label: "Enquiries", to: "/superadmin/enquiry" },
-      { label: "Bookings", to: "/superadmin/booking" },
-      { label: "Reviews", to: "/superadmin/reviews" },
-      { label: "Complaint History", to: "/superadmin/complaint-history" },
-    ],
+      { label: "Overview", path: "/superadmin/user-overview" },
+      { 
+        label: "Team Management", 
+        children: [
+          { label: "All Staff", path: "/superadmin/manager" },
+          { label: "Profile", path: "/superadmin/profile" },
+          { label: "Documents", path: "/superadmin/manager" }
+        ]
+      },
+      { label: "Roles & Permission", path: "/superadmin/settings" },
+      { 
+        label: "Attendance", 
+        children: [
+          { label: "Daily Logs", path: "/superadmin/log" },
+          { label: "Leave", path: "/superadmin/log" },
+          { label: "Shifts", path: "/superadmin/log" }
+        ]
+      },
+      { 
+        label: "Property Owners", 
+        children: [
+          { label: "Add", path: "/superadmin/owner" },
+          { label: "Approved / Pending", path: "/superadmin/owner" },
+          { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
+          { label: "Agreements", path: "/superadmin/owner" }
+        ]
+      },
+      { 
+        label: "Tenants", 
+        children: [
+          { label: "View All Tenants", path: "/superadmin/tenant" },
+          { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
+          { label: "Rent History", path: "/superadmin/rentcollection" },
+          { label: "Agreements", path: "/superadmin/tenant" }
+        ]
+      }
+    ]
   },
   {
-    label: "Accounting", icon: DollarSign,
+    label: "Property Management",
+    icon: Building2,
     children: [
-      { label: "Dashboard", to: "/superadmin/accounting" },
-      { label: "Transactions", to: "/superadmin/accounting/transactions" },
-      { label: "Rent Collections", to: "/superadmin/rentcollection" },
-      { label: "Commission", to: "/superadmin/accounting/commission" },
-      { label: "Subscriptions", to: "/superadmin/accounting/subscriptions" },
-      { label: "Payouts", to: "/superadmin/accounting/payouts" },
-      { label: "Refunds", to: "/superadmin/refund" },
-      { label: "Invoices", to: "/superadmin/accounting/invoices" },
-      { label: "Taxes", to: "/superadmin/accounting/taxes" },
-      { label: "Reports", to: "/superadmin/accounting/reports" },
-      { label: "Settings", to: "/superadmin/accounting/settings" },
-    ],
+      { label: "Overview", path: "/superadmin/property-overview" },
+      { label: "Add Properties", path: "/superadmin/properties" },
+      { label: "Approve / Reject Properties", path: "/superadmin/property_approvals" },
+      { label: "Pending Properties", path: "/superadmin/property_approvals" },
+      { label: "All Properties List", path: "/superadmin/properties" },
+      { label: "Online Leads", path: "/superadmin/enquiry" }
+    ]
   },
   {
-    label: "Reports", icon: BarChart3,
+    label: "Accounting",
+    icon: IndianRupee,
     children: [
-      { label: "Overview", to: "/superadmin/reports" },
-      { label: "Listings", to: "/superadmin/reports/listings" },
-      { label: "Users", to: "/superadmin/reports/users" },
-      { label: "Leads / Bookings", to: "/superadmin/reports/leads" },
-      { label: "Revenue", to: "/superadmin/reports/revenue" },
-      { label: "Commission", to: "/superadmin/reports/commission" },
-      { label: "Subscriptions", to: "/superadmin/reports/subscriptions" },
-      { label: "Refunds", to: "/superadmin/reports/refunds" },
-      { label: "Performance", to: "/superadmin/reports/performance" },
-      { label: "Locations", to: "/superadmin/reports/locations" },
-      { label: "Exports", to: "/superadmin/reports/exports" },
-    ],
+      { label: "Overview", path: "/superadmin/accounting" },
+      { 
+        label: "Transaction Management (Tenants)", 
+        children: [
+          { label: "Monthly Payment Receipt", path: "/superadmin/accounting_invoices" },
+          { label: "Payment History", path: "/superadmin/accounting_transactions" },
+          { label: "Other Charges", path: "/superadmin/accounting_transactions" }
+        ]
+      },
+      { 
+        label: "Transaction Management (Owners)", 
+        children: [
+          { label: "Monthly Payment Receipt", path: "/superadmin/accounting_payouts" },
+          { label: "Payment History", path: "/superadmin/accounting_payouts" },
+          { label: "Service Fee Details", path: "/superadmin/accounting_commission" }
+        ]
+      },
+      { 
+        label: "Owner Payout", 
+        children: [
+          { label: "Payout Cycle", path: "/superadmin/accounting_payouts" },
+          { label: "Manual + Auto Payout Option", path: "/superadmin/accounting_payouts" },
+          { label: "Pending Payouts", path: "/superadmin/accounting_payouts" },
+          { label: "Bank Transfer Tracking", path: "/superadmin/accounting_payouts" },
+          { label: "Cash Received Details", path: "/superadmin/accounting_payouts" },
+          { label: "Failed Payout Alerts", path: "/superadmin/accounting_payouts" }
+        ]
+      },
+      { 
+        label: "Roomhy Overview", 
+        children: [
+          { label: "Fixed Fees", path: "/superadmin/accounting_settings" },
+          { label: "Per Bed Fees", path: "/superadmin/accounting_settings" },
+          { label: "Discount", path: "/superadmin/accounting_settings" }
+        ]
+      },
+      { 
+        label: "Invoice System", 
+        children: [
+          { label: "Auto Invoice Generation", path: "/superadmin/accounting_invoices" },
+          { label: "GST", path: "/superadmin/accounting_taxes" },
+          { label: "Download PDF", path: "/superadmin/accounting_invoices" },
+          { label: "Invoice Numbering System", path: "/superadmin/accounting_settings" }
+        ]
+      },
+      { 
+        label: "Refund Management", 
+        children: [
+          { label: "Booking Amount Refund", path: "/superadmin/refund" },
+          { label: "Partial Refund", path: "/superadmin/refund" },
+          { label: "Refund Approval System", path: "/superadmin/refund" },
+          { label: "Refund History", path: "/superadmin/refund" }
+        ]
+      },
+      { 
+        label: "Alert & Automation", 
+        children: [
+          { label: "Rent Due Reminder", path: "/superadmin/settings" },
+          { label: "Payment Success/Failure Alerts", path: "/superadmin/settings" },
+          { label: "Payout Processed Notification", path: "/superadmin/settings" }
+        ]
+      },
+      { 
+        label: "Analytics", 
+        children: [
+          { label: "Roomhy Monthly Revenue", path: "/superadmin/reports_revenue" },
+          { label: "Owners Monthly Revenue", path: "/superadmin/reports_revenue" },
+          { label: "Due Rents", path: "/superadmin/rentcollection" },
+          { label: "Profit / Loss Report", path: "/superadmin/reports" },
+          { label: "Cashflow Dashboard", path: "/superadmin/accounting" }
+        ]
+      }
+    ]
   },
   {
-    label: "Settings", icon: SettingsIcon,
+    label: "Chats",
+    icon: MessageSquare,
     children: [
-      { label: "General Settings", to: "/superadmin/settings" },
-      { label: "Platform Settings", to: "/superadmin/settings" }, 
-      { label: "Commission Settings", to: "/superadmin/accounting/settings" },
-      { label: "Payment Gateways", to: "/superadmin/accounting/settings" },
-      { label: "Email Settings", to: "/superadmin/settings" },
-      { label: "SMS Settings", to: "/superadmin/settings" },
-      { label: "Roles & Permissions", to: "/superadmin/security" },
-      { label: "Security", to: "/superadmin/security" },
-      { label: "Integrations", to: "/superadmin/settings" },
-      { label: "Logs", to: "/superadmin/log" },
-    ],
+      { label: "Live Conversations", path: "/superadmin/superchat" },
+      { label: "Conversation Details", path: "/superadmin/superchat" },
+      { label: "Moderation & Filters", path: "/superadmin/superchat" },
+      { label: "Alerts & Violations", path: "/superadmin/superchat" },
+      { label: "Templates / Auto Messages", path: "/superadmin/superchat" },
+      { label: "Lead -> Chat Mapping", path: "/superadmin/superchat" },
+      { label: "Analytics", path: "/superadmin/superchat" },
+      { label: "Settings", path: "/superadmin/superchat" }
+    ]
   },
+  {
+    label: "Reports & Analytics",
+    icon: BarChart3,
+    children: [
+      { label: "Overview", path: "/superadmin/reports" },
+      { label: "Property Performance", path: "/superadmin/reports" },
+      { label: "Location Wise Data", path: "/superadmin/reports" },
+      { label: "Occupancy Rate", path: "/superadmin/reports" },
+      { label: "Growth Analytics", path: "/superadmin/reports" },
+      { label: "Staff Performance Reports", path: "/superadmin/reports" },
+      { label: "Revenue Report", path: "/superadmin/reports_revenue" }
+    ]
+  },
+  {
+    label: "Booking & Leads",
+    icon: Calendar,
+    children: [
+      { label: "Overview", path: "/superadmin/booking" },
+      { label: "Total Leads", path: "/superadmin/enquiry" },
+      { label: "Bookings", path: "/superadmin/booking" },
+      { label: "Conversion Rate", path: "/superadmin/booking" },
+      { label: "Top Performing Locations", path: "/superadmin/booking" }
+    ]
+  },
+  {
+    label: "Review",
+    icon: Star,
+    children: [
+      { label: "Overview", path: "/superadmin/reviews" },
+      { label: "All Reviews", path: "/superadmin/reviews" },
+      { label: "Moderation", path: "/superadmin/reviews" },
+      { label: "Analytics", path: "/superadmin/reviews" },
+      { label: "New Review", path: "/superadmin/reviews" }
+    ]
+  },
+  {
+    label: "CRM",
+    icon: Target,
+    path: "/superadmin/enquiry"
+  },
+  {
+    label: "Support",
+    icon: Headphones,
+    children: [
+      { label: "Overview", path: "/superadmin/complaint-history" },
+      { label: "Tenants Complaints", path: "/superadmin/complaint-history" },
+      { label: "Owners Complaints", path: "/superadmin/complaint-history" },
+      { label: "Tickets System", path: "/superadmin/complaint-history" },
+      { label: "Issues Resolutions Tracking", path: "/superadmin/complaint-history" }
+    ]
+  },
+  {
+    label: "Subscription Control",
+    icon: ShieldCheck,
+    path: "/superadmin/pricing"
+  }
 ];
 
-export function Sidebar({ open, onClose, onLogout, isMobile }) {
+export function Sidebar({ open, isMobile, onClose, onLogout }) {
   const location = useLocation();
-  const path = location.pathname;
+  const navigate = useNavigate();
+  const [openMenus, setOpenMenus] = useState({});
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  const findActiveTop = () =>
-    NAV.find((n) => n.children ? n.children.some(c => path === c.to || path.startsWith(c.to + "/")) || path === n.to : path === n.to)?.label;
+  const toggleMenu = (label) => {
+    setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
+  };
 
-  const [expanded, setExpanded] = useState(findActiveTop() ?? null);
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      sessionStorage.clear();
+      localStorage.clear();
+      navigate("/superadmin/index");
+    }
+  };
+
+  const isItemActive = (item) => {
+    if (item.path && location.pathname === item.path) return true;
+    if (item.children) return item.children.some(c => isItemActive(c));
+    return false;
+  };
+
+  const renderNavItems = (items, level = 0) => {
+    return items.map((item) => {
+      const Icon = item.icon;
+      const hasChildren = item.children && item.children.length > 0;
+      const isOpen = openMenus[item.label];
+      const isActive = isItemActive(item);
+
+      return (
+        <div key={item.label} className="space-y-1">
+          {hasChildren ? (
+            <button
+              onClick={() => toggleMenu(item.label)}
+              className={cn(
+                "w-full flex items-center justify-between transition-all group",
+                level === 0 ? "p-4 rounded-2xl" : "p-3 pl-6 rounded-xl",
+                isActive ? (level === 0 ? "bg-blue-600/10 text-blue-500" : "text-blue-500 bg-blue-500/5") : "hover:bg-slate-800/50"
+              )}
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                {Icon && <Icon className={cn("w-5 h-5 shrink-0", isActive ? "text-blue-500" : "text-slate-500 group-hover:text-slate-300")} />}
+                <span className={cn(
+                  "font-bold truncate",
+                  level === 0 ? "text-[14px]" : "text-[12px] opacity-80"
+                )}>{item.label}</span>
+              </div>
+              {isOpen ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />}
+            </button>
+          ) : (
+            <Link
+              to={item.path}
+              className={cn(
+                "w-full flex items-center transition-all group",
+                level === 0 ? "p-4 rounded-2xl gap-4" : "p-3 pl-6 rounded-xl",
+                location.pathname === item.path 
+                  ? (level === 0 ? "bg-blue-600 text-white shadow-xl shadow-blue-600/20" : "text-blue-400 bg-blue-500/10 font-black") 
+                  : "hover:bg-slate-800/50"
+              )}
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                {Icon && <Icon className={cn("w-5 h-5 shrink-0", location.pathname === item.path ? "text-white" : "text-slate-500 group-hover:text-slate-300")} />}
+                <span className={cn(
+                  "font-bold truncate",
+                  level === 0 ? "text-[14px]" : "text-[12px] opacity-80 group-hover:opacity-100"
+                )}>{item.label}</span>
+              </div>
+            </Link>
+          )}
+
+          {hasChildren && isOpen && (
+            <div className={cn(
+              "space-y-1 py-1",
+              level === 0 ? "ml-6 border-l border-slate-800/50" : "ml-4 border-l border-slate-700/30"
+            )}>
+              {renderNavItems(item.children, level + 1)}
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
+
+  const sidebarClasses = cn(
+    "w-80 h-screen bg-[#0F172A] text-slate-300 flex flex-col z-50 border-r border-slate-800/50 shrink-0 transition-transform duration-300",
+    isMobile ? "fixed left-0 top-0" : "relative",
+    isMobile && !open ? "-translate-x-full" : "translate-x-0"
+  );
 
   return (
     <>
-      <LogoutDialog 
-        open={showLogoutDialog} 
-        onClose={() => setShowLogoutDialog(false)} 
-        onConfirm={onLogout} 
-      />
-      {/* Mobile overlay */}
-      <div
-        className={cn(
-          "fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-opacity",
-          open ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
-        onClick={onClose}
-      />
-      <aside
-        className={cn(
-          "bg-[#0B1739] text-gray-300 flex flex-col shrink-0 transition-transform duration-300 shadow-2xl",
-          "w-64 h-full",
-          isMobile ? (open ? "translate-x-0 fixed inset-y-0 left-0 z-40" : "-translate-x-full fixed inset-y-0 left-0 z-40") : "translate-x-0"
-        )}
-      >
+      <aside className={sidebarClasses}>
         {/* Brand */}
-        <div className="h-24 px-6 flex items-center bg-[#0B1739]">
-           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-               Roomhy<span className="text-blue-500">.com</span>
-            </span>
+        <div className="p-8 flex items-center gap-4">
+          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+            <Building2 className="w-7 h-7" />
+          </div>
+          <div className="overflow-hidden">
+            <h1 className="text-2xl font-bold text-white tracking-tight truncate">Roomhy<span className="text-blue-500">.com</span></h1>
+            <p className="text-[10px] font-bold text-slate-500 uppercase mt-1 truncate">Super Admin Panel</p>
+          </div>
+        </div>
+
+        {/* User Profile Mini */}
+        <div className="mx-6 mb-8 p-5 bg-slate-800/30 rounded-[2.5rem] border border-slate-700/30 flex items-center gap-4 group hover:bg-slate-800/50 transition-all cursor-pointer overflow-hidden">
+           <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shrink-0">A</div>
+           <div className="min-w-0">
+              <p className="text-sm font-bold text-white truncate">Aman</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase truncate">Superadmin</p>
            </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1 custom-scrollbar">
-          {NAV.map((item) => {
-            const Icon = item.icon;
-            const isTopActive = item.to === path || (item.children?.some(c => path === c.to || path.startsWith(c.to + "/")) ?? false);
-            const isExpanded = expanded === item.label;
-
-            if (!item.children) {
-              return (
-                <NavLink
-                  key={item.label}
-                  to={item.to}
-                  onClick={onClose}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
-                      isActive
-                        ? "bg-[#2563EB] text-white shadow-lg shadow-blue-600/20"
-                        : "text-slate-400 hover:bg-slate-800/40 hover:text-white"
-                    )
-                  }
-                >
-                  <Icon className={cn("h-5 w-5 transition-colors", isTopActive ? "text-white" : "text-slate-500 group-hover:text-gray-300")} />
-                  <span>{item.label}</span>
-                </NavLink>
-              );
-            }
-
-            return (
-              <div key={item.label} className="space-y-1">
-                <button
-                  onClick={() => setExpanded(isExpanded ? null : item.label)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
-                    isTopActive
-                      ? "bg-[#2563EB] text-white shadow-lg shadow-blue-600/20"
-                      : "text-slate-400 hover:bg-slate-800/40 hover:text-white"
-                  )}
-                >
-                  <Icon className={cn("h-5 w-5 transition-colors", isTopActive ? "text-white" : "text-slate-500 group-hover:text-gray-300")} />
-                  <span className="flex-1 text-left">{item.label}</span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isExpanded && "rotate-180")} />
-                </button>
-                
-                {isExpanded && (
-                  <div className="ml-4 pl-4 border-l border-slate-800 space-y-1 animate-in mt-1 mb-2">
-                    {item.children.map((child) => (
-                      <NavLink
-                        key={child.label}
-                        to={child.to}
-                        onClick={onClose}
-                        className={({ isActive }) =>
-                          cn(
-                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
-                            isActive
-                              ? "text-blue-400 font-medium bg-blue-400/10"
-                              : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/20"
-                          )
-                        }
-                      >
-                        <div className={cn(
-                          "h-1.5 w-1.5 rounded-full",
-                          path === child.to ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" : "bg-slate-700"
-                        )} />
-                        {child.label}
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-6 space-y-2 custom-scrollbar pb-6">
+          {renderNavItems(NAV)}
         </nav>
 
         {/* Footer */}
-        <div className="p-4 space-y-2 bg-[#0B1739]">
-          <button
+        <div className="p-6 border-t border-slate-800/50 mt-auto">
+          <button 
             onClick={() => setShowLogoutDialog(true)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all group"
+            className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 transition-all group"
           >
-            <LogOut className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            Logout
+            <LogOut className="w-5 h-5 shrink-0 group-hover:rotate-12 transition-transform" />
+            <span className="text-[13px] font-bold">Logout</span>
           </button>
-          <div className="pt-4 border-t border-slate-800/50">
-             <p className="text-[10px] text-slate-600 font-medium px-4">© 2024 Roomhy.com | All rights reserved.</p>
-          </div>
         </div>
       </aside>
+
+      <LogoutDialog 
+        open={showLogoutDialog} 
+        onClose={() => setShowLogoutDialog(false)} 
+        onConfirm={handleLogout} 
+      />
     </>
   );
 }
+
+export default Sidebar;

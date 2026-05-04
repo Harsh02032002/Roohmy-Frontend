@@ -39,7 +39,11 @@ export const fetchJson = async (path, options = {}) => {
     ...(options.headers || {}),
     ...getAuthHeader()
   };
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(url, { 
+    credentials: "include", // Essential for CORS with credentials
+    ...options, 
+    headers 
+  });
   if (!res.ok) {
     const text = await res.text();
     const err = new Error(`Request failed: ${res.status} ${res.statusText}`);
@@ -541,6 +545,46 @@ export const fetchTopRatedReviews = async (limit = 6) => {
   }
 };
 
+// Track view on featured listing
+export const trackFeaturedView = async (id) => {
+  try {
+    await fetchJson(`/api/featured/${id}/view`, { method: 'POST' });
+  } catch (error) {
+    console.error('Error tracking view:', error);
+  }
+};
+
+// Track click on featured listing
+export const trackFeaturedClick = async (id) => {
+  try {
+    await fetchJson(`/api/featured/${id}/click`, { method: 'POST' });
+  } catch (error) {
+    console.error('Error tracking click:', error);
+  }
+};
+
+// Track view on property
+export const trackPropertyView = async (id) => {
+  try {
+    console.log(`🌐 API: Tracking View for ID: ${id}`);
+    const res = await fetchJson(`/api/properties/${id}/view`, { method: 'POST' });
+    console.log(`✅ API: View tracked successfully for ${id}`, res);
+  } catch (error) {
+    console.error('❌ API: Error tracking property view:', error);
+  }
+};
+
+// Track click on property
+export const trackPropertyClick = async (id) => {
+  try {
+    console.log(`🌐 API: Tracking Click for ID: ${id}`);
+    const res = await fetchJson(`/api/properties/${id}/click`, { method: 'POST' });
+    console.log(`✅ API: Click tracked successfully for ${id}`, res);
+  } catch (error) {
+    console.error('❌ API: Error tracking property click:', error);
+  }
+};
+
 // Submit website enquiry
 export const submitEnquiry = async (formData) => {
   return fetchJson('/api/website-enquiry/submit', {
@@ -597,16 +641,23 @@ export const submitReview = async (reviewData) => {
 
 // Fetch property types/categories for offerings
 export const fetchPropertyTypes = async () => {
+  // ============================================
+  // REAL API - Uncomment when ready to use database
+  // ============================================
   try {
-    // First try to get from dedicated endpoint
-    const data = await fetchJson('/api/property-types');
-    if (data && data.length > 0) {
-      return data;
+    const response = await fetchJson('/api/property-types');
+    if (response && response.success && response.data && response.data.length > 0) {
+      console.log('✅ Fetched property types from API:', response.data.length);
+      return response.data;
     }
+    console.log('⚠️ Property types API returned empty or failed, using fallback');
   } catch (error) {
-    // Fallback: derive from properties
-    console.log('Property types endpoint not available, using fallback');
+    console.log('❌ Property types endpoint not available, using fallback');
   }
+  // ============================================
+
+  // Fallback: use static data for now
+  console.log('Using static fallback data for property types');
   
   // Fallback: get unique property types from approved properties
   try {

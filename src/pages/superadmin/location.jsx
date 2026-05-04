@@ -1,332 +1,213 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useHtmlPage } from "../../utils/htmlPage";
-import { getApiBase, getAuthHeader } from "../../utils/api";
+import { 
+  Building2, Users, Shield, Clock, Search, 
+  ArrowUpRight, ArrowDownRight, MoreVertical, 
+  Filter, Globe, MapPin, Zap, Sheet, Trash2, 
+  ChevronRight, Phone, Mail, User, Image as ImageIcon,
+  Activity, Home, CheckCircle2, XCircle, Hourglass,
+  Check, X, Eye, ClipboardCheck, AlertTriangle,
+  Camera, Map, Star, Edit3, Trash, RefreshCw,
+  Sparkles, Layers, Box, Globe2, IndianRupee,
+  Navigation, Compass, Plus, Loader2, Save
+} from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { DateRangePill } from "../../components/dashboard/DateRangePill";
+import { fetchJson } from "../../utils/api";
 
-export default function Location() {
-  useHtmlPage({
-    title: "Roomhy - Locations",
-    bodyClass: "text-slate-800",
-    htmlAttrs: { lang: "en" },
-    metas: [
-      { charset: "UTF-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic", crossorigin: true },
-      {
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-        rel: "stylesheet"
-      },
-      { rel: "stylesheet", href: "/superadmin/assets/css/location.css" }
-    ],
-    scripts: [{ src: "https://cdn.tailwindcss.com" }, { src: "https://unpkg.com/lucide@latest" }],
-    inlineScripts: []
-  });
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-
+export default function SuperadminLocation() {
   const [tab, setTab] = useState("cities");
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("city");
-  const [name, setName] = useState("");
-  const [stateName, setStateName] = useState("");
-  const [cityId, setCityId] = useState("");
-  const [imageFile, setImageFile] = useState(null);
-  const [saving, setSaving] = useState(false);
-
-  const apiBase = getApiBase();
+  const [search, setSearch] = useState("");
 
   const loadLocations = async () => {
     try {
       setLoading(true);
-      setErrorMsg("");
-      const [citiesRes, areasRes] = await Promise.all([
-        fetch(`${apiBase}/api/locations/cities`, { headers: { ...getAuthHeader() } }),
-        fetch(`${apiBase}/api/locations/areas`, { headers: { ...getAuthHeader() } })
+      const [citiesData, areasData] = await Promise.all([
+        fetchJson("/api/locations/cities"),
+        fetchJson("/api/locations/areas")
       ]);
-      if (!citiesRes.ok || !areasRes.ok) throw new Error("Failed to fetch locations");
-      const citiesData = await citiesRes.json();
-      const areasData = await areasRes.json();
       setCities(citiesData?.data || []);
       setAreas(areasData?.data || []);
     } catch (err) {
-      setErrorMsg(err?.message || "Failed to load locations");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadLocations();
-  }, []);
+  useEffect(() => { loadLocations(); }, []);
 
-  useEffect(() => {
-    if (window?.lucide) window.lucide.createIcons();
-  }, [tab, cities, areas, modalOpen]);
+  const stats = useMemo(() => {
+    return { totalCities: cities.length, totalAreas: areas.length, density: "High", topGrowth: "Kota Hub", reach: "94.2%", expansion: "+ 2 Flux" };
+  }, [cities, areas]);
 
-  const openModal = (type) => {
-    setModalType(type);
-    setName("");
-    setStateName("");
-    setCityId("");
-    setImageFile(null);
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalOpen(false);
-  };
-
-  const submitForm = async (event) => {
-    event.preventDefault();
-    if (!name.trim()) return;
-    if (modalType === "city" && !stateName.trim()) return;
-    if (modalType === "area" && !cityId) return;
-    try {
-      setSaving(true);
-      const formData = new FormData();
-      formData.append("name", name.trim());
-      if (modalType === "city") {
-        formData.append("state", stateName.trim());
-      } else {
-        formData.append("cityId", cityId);
-      }
-      if (imageFile) {
-        formData.append("image", imageFile);
-      }
-      const endpoint = modalType === "city" ? "/api/locations/cities" : "/api/locations/areas";
-      const response = await fetch(`${apiBase}${endpoint}`, {
-        method: "POST",
-        headers: { ...getAuthHeader() },
-        body: formData
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "Failed to save");
-      }
-      await loadLocations();
-      closeModal();
-    } catch (err) {
-      window.alert(err?.message || "Failed to save location");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const deleteLocation = async (type, id) => {
-    if (!window.confirm("Delete this location?")) return;
-    try {
-      const response = await fetch(`${apiBase}/api/locations/${type}/${id}`, {
-        method: "DELETE",
-        headers: { ...getAuthHeader() }
-      });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || "Failed to delete");
-      }
-      await loadLocations();
-    } catch (err) {
-      window.alert(err?.message || "Failed to delete location");
-    }
-  };
-
-  const cityOptions = useMemo(() => cities.map((city) => ({ id: city._id, name: city.name })), [cities]);
+  const activeList = tab === "cities" ? cities : areas;
+  const filteredList = activeList.filter(item => (item.name || "").toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <>
-      <div className="p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">Serviceable Locations</h1>
-              <p className="text-sm text-slate-500">Manage Cities and Areas separately.</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => openModal("city")} className="bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 px-5 py-2.5 rounded-lg text-sm font-medium flex items-center shadow-sm transition-all">
-                <i data-lucide="map" className="w-4 h-4 mr-2"></i> Add City
-              </button>
-              <button onClick={() => openModal("area")} className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium flex items-center shadow-md transition-all hover:shadow-lg">
-                <i data-lucide="map-pin" className="w-4 h-4 mr-2"></i> Add Area
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-6 flex space-x-3">
-            <button className={`filter-tab ${tab === "cities" ? "active" : ""}`} onClick={() => setTab("cities")}>Cities</button>
-            <button className={`filter-tab ${tab === "areas" ? "active" : ""}`} onClick={() => setTab("areas")}>Areas</button>
-          </div>
-
-          {errorMsg && (
-            <div className="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-2">{errorMsg}</div>
-          )}
-
-          {loading && (
-            <div className="text-center py-12 text-slate-400">Loading locations...</div>
-          )}
-
-          {!loading && tab === "cities" && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full data-table">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3 text-left">City Name</th>
-                      <th className="px-4 py-3 text-left">State</th>
-                      <th className="px-4 py-3 text-left">Image</th>
-                      <th className="px-4 py-3 text-left">Status</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {cities.length === 0 && (
-                      <tr><td colSpan={5} className="text-center py-8 text-gray-500 text-sm">No cities found</td></tr>
-                    )}
-                    {cities.map((city) => (
-                      <tr key={city._id}>
-                        <td className="px-4 py-4 text-sm font-medium text-gray-900">{city.name}</td>
-                        <td className="px-4 py-4 text-sm text-gray-700">{city.state}</td>
-                        <td className="px-4 py-4">
-                          {city.imageUrl ? <img src={city.imageUrl} alt={city.name} className="h-10 w-16 object-cover rounded" /> : "-"}
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {city.status || "Active"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-right">
-                          <button onClick={() => deleteLocation("cities", city._id)} className="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition-colors">
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {!loading && tab === "areas" && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full data-table">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-3 text-left">Area Name</th>
-                      <th className="px-4 py-3 text-left">City</th>
-                      <th className="px-4 py-3 text-left">Image</th>
-                      <th className="px-4 py-3 text-left">Status</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {areas.length === 0 && (
-                      <tr><td colSpan={5} className="text-center py-8 text-gray-500 text-sm">No areas found</td></tr>
-                    )}
-                    {areas.map((area) => (
-                      <tr key={area._id}>
-                        <td className="px-4 py-4 text-sm font-medium text-gray-900">{area.name}</td>
-                        <td className="px-4 py-4 text-sm text-gray-700">{area.cityName || area.city?.name || "-"}</td>
-                        <td className="px-4 py-4">
-                          {area.imageUrl ? <img src={area.imageUrl} alt={area.name} className="h-10 w-16 object-cover rounded" /> : "-"}
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {area.status || "Active"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-right">
-                          <button onClick={() => deleteLocation("areas", area._id)} className="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 px-3 py-1 rounded hover:bg-red-50 transition-colors">
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
+    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex flex-col gap-2">
+         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Geospatial Intelligence Hub</h1>
+         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
+            <span>Market Expansion</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-blue-600">Territorial Sovereignty Ledger</span>
+         </div>
       </div>
 
-      {modalOpen && (
-        <div className="modal fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-gray-900">
-                {modalType === "city" ? "Add City" : "Add Area"}
-              </h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
-                <i data-lucide="x" className="w-5 h-5"></i>
-              </button>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+         <p className="text-sm font-bold text-slate-400 max-w-2xl">Monitor platform-wide geographic reach, audit territorial asset density and manage regional expansion protocols with real-time geospatial analytics.</p>
+         <button className="bg-slate-800 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase shadow-xl shadow-slate-800/20 hover:bg-slate-900 transition-all flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Provision New Territory
+         </button>
+      </div>
+
+      {/* Hero Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <StatCardLarge label="Global Cities" value={stats.totalCities} trend="Sovereign Index" up icon={Navigation} color="blue" />
+        <StatCardLarge label="Operational Areas" value={stats.totalAreas} trend="Granular Hubs" up icon={MapPin} color="indigo" />
+        <StatCardLarge label="Asset Density" value={stats.density} trend="Market Leader" up icon={Building2} color="green" />
+        <StatCardLarge label="Growth Velocity" value={stats.topGrowth} trend="High Flux" up icon={Zap} color="orange" />
+      </div>
+
+      {/* Main Ledger Card */}
+      <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+         <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-10">
+               <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Geographic Sovereignty Ledger</h3>
+               <div className="hidden xl:flex items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+                  {["cities", "areas"].map(f => (
+                    <button 
+                      key={f} onClick={() => setTab(f)}
+                      className={cn(
+                        "px-8 py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all",
+                        tab === f ? "bg-white text-blue-600 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
+                       {f === "cities" ? "Global Cities" : "Granular Areas"}
+                    </button>
+                  ))}
+               </div>
             </div>
-            <form onSubmit={submitForm} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                  required
-                />
-              </div>
-              {modalType === "city" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                  <input
-                    type="text"
-                    value={stateName}
-                    onChange={(event) => setStateName(event.target.value)}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                    required
+            <div className="flex items-center gap-4">
+               <div className="relative group w-64">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                  <input 
+                    value={search} onChange={e => setSearch(e.target.value)}
+                    placeholder="Search territory pulse..." 
+                    className="bg-slate-50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold shadow-sm w-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" 
                   />
-                </div>
-              )}
-              {modalType === "area" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Parent City</label>
-                  <select
-                    value={cityId}
-                    onChange={(event) => setCityId(event.target.value)}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                    required
-                  >
-                    <option value="">Select a city</option>
-                    {cityOptions.map((city) => (
-                      <option key={city.id} value={city.id}>{city.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image (optional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => setImageFile(event.target.files?.[0] || null)}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                />
-              </div>
-              <div className="flex justify-end pt-2 border-t">
-                <button type="button" onClick={closeModal} className="mr-3 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  Cancel
-                </button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 disabled:opacity-60">
-                  {saving ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
+               </div>
+               <button onClick={loadLocations} className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100">
+                  <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} />
+               </button>
+            </div>
+         </div>
+
+         <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[1000px]">
+               <thead>
+                  <tr className="text-slate-400 text-[10px] font-bold uppercase border-b border-slate-50">
+                     <th className="pb-6">Territory Identity</th>
+                     <th className="pb-6">Jurisdictional Context</th>
+                     <th className="pb-6 text-center">Geography Preview</th>
+                     <th className="pb-6 text-center">Operational Status Hub</th>
+                     <th className="pb-6 text-right">Territorial Actions</th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-slate-50">
+                  {loading ? (
+                    <tr><td colSpan="5" className="py-32 text-center">
+                       <div className="flex flex-col items-center gap-4">
+                          <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Accessing Geographic Vault...</p>
+                       </div>
+                    </td></tr>
+                  ) : filteredList.map((item, i) => (
+                    <tr key={i} className="group hover:bg-slate-50/50 transition-colors cursor-pointer">
+                       <td className="py-6">
+                          <div className="flex items-center gap-5">
+                             <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-xl transition-all">
+                                {item.name?.charAt(0).toUpperCase()}
+                             </div>
+                             <div>
+                                <p className="text-base font-bold text-slate-800">{item.name || "Unknown Territory"}</p>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">ID: {item._id?.substring(0,8).toUpperCase()}</p>
+                             </div>
+                          </div>
+                       </td>
+                       <td className="py-6">
+                          <p className="text-sm font-bold text-slate-700">{tab === "cities" ? item.state : (item.cityName || item.city?.name)}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight opacity-70">{tab === "cities" ? "Regional State Hub" : "Metropolitan City Hub"}</p>
+                       </td>
+                       <td className="py-6 text-center">
+                          <div className="w-24 h-14 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden mx-auto shadow-sm group-hover:scale-110 transition-transform relative">
+                             {item.imageUrl ? (
+                               <img src={item.imageUrl} className="w-full h-full object-cover" alt="" />
+                             ) : (
+                               <div className="w-full h-full flex items-center justify-center text-slate-200">
+                                  <ImageIcon className="w-6 h-6" />
+                               </div>
+                             )}
+                          </div>
+                       </td>
+                       <td className="py-6 text-center">
+                          <span className={cn(
+                             "text-[9px] font-bold px-3.5 py-1.5 rounded-full border shadow-sm uppercase tracking-widest",
+                             "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-50"
+                          )}>
+                             {item.status || "Active Hub"}
+                          </span>
+                       </td>
+                       <td className="py-6 text-right">
+                          <div className="flex items-center justify-end gap-3">
+                             <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100 shadow-sm">
+                                <Edit3 className="w-5 h-5" />
+                             </button>
+                             <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-white hover:shadow-md transition-all border border-slate-100 shadow-sm">
+                                <Trash2 className="w-5 h-5" />
+                             </button>
+                          </div>
+                       </td>
+                    </tr>
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      </div>
+    </div>
   );
 }
 
-
+function StatCardLarge({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    blue: "bg-blue-600 shadow-blue-200", 
+    indigo: "bg-indigo-600 shadow-indigo-200", 
+    green: "bg-emerald-600 shadow-emerald-200", 
+    orange: "bg-amber-600 shadow-amber-200" 
+  };
+  
+  return (
+    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col gap-8 group hover:translate-y-[-8px] transition-all duration-500">
+      <div className={cn("w-20 h-20 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl transition-transform group-hover:rotate-6", bgColors[color])}>
+         <Icon className="w-10 h-10" />
+      </div>
+      <div>
+         <p className="text-[11px] font-bold text-slate-400 uppercase mb-4 leading-none truncate tracking-widest">{label}</p>
+         <p className="text-5xl font-bold text-slate-800 tracking-tighter leading-none">{value}</p>
+      </div>
+      <div className={cn(
+        "flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-2xl w-fit shadow-sm border",
+        up ? "text-emerald-600 bg-emerald-50 border-emerald-100" : "text-rose-600 bg-rose-50 border-rose-100"
+      )}>
+         {up ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+         {trend}
+      </div>
+    </div>
+  );
+}

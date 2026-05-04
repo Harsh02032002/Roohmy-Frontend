@@ -32,6 +32,9 @@ const routeEntries = [
   ["/superadmin/platform_reports", "./pages/superadmin/platform_reports.jsx"],
   ["/superadmin/profile", "./pages/superadmin/profile.jsx"],
   ["/superadmin/properties", "./pages/superadmin/properties.jsx"],
+  ["/superadmin/amenities", "./pages/superadmin/AmenitiesManager.jsx"],
+  ["/superadmin/pricing", "./pages/superadmin/PricingPlans.jsx"],
+  ["/superadmin/featured", "./pages/superadmin/FeaturedListings.jsx"],
   ["/superadmin/property/approvals", "./pages/superadmin/property_approvals.jsx"],
   ["/superadmin/property/flagged", "./pages/superadmin/property_flagged.jsx"],
   ["/superadmin/property/categories", "./pages/superadmin/property_categories.jsx"],
@@ -74,6 +77,10 @@ const routeEntries = [
   ["/superadmin/website-db", "./pages/superadmin/website-db.jsx"],
   ["/superadmin/website", "./pages/superadmin/website.jsx"],
   ["/superadmin/websiteenq", "./pages/superadmin/websiteenq.jsx"],
+  ["/superadmin/user-overview", "./pages/superadmin/user-overview.jsx"],
+  ["/superadmin/property-overview", "./pages/superadmin/property-overview.jsx"],
+  ["/superadmin/accounting-overview", "./pages/superadmin/accounting-overview.jsx"],
+  ["/superadmin/home-overview", "./pages/superadmin/home-overview.jsx"],
   
   // Employee Routes
   ["/employee/areaadmin", "./pages/employee/areaadmin.jsx"],

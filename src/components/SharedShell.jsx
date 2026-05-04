@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, Outlet } from "react-router-dom";
 import { resolveSectionFromPath, sharedNavConfig } from "./sharedNavConfig";
+import { Menu, Search, Bell } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 
 const NavItem = ({ to, label }) => (
@@ -132,51 +133,54 @@ export default function SharedShell() {
         />
 
         <div className="shared-main">
-          <header className="bg-white h-20 flex items-center justify-between px-8 shadow-sm z-20 border-b border-gray-100 sticky top-0 shrink-0">
-            <div className="flex items-center gap-4">
+          <header className="bg-white h-20 flex items-center justify-between px-10 shadow-sm z-30 border-b border-slate-100 sticky top-0 shrink-0">
+            <div className="flex items-center gap-8">
               <button
                 id="mobile-menu-open"
-                className="lg:hidden text-slate-500 p-2 hover:bg-slate-50 rounded-lg"
+                className="lg:hidden text-slate-500 p-2 hover:bg-slate-50 rounded-xl transition-all"
                 type="button"
                 onClick={() => setSidebarOpen((open) => !open)}
               >
-                <i data-lucide="menu" className="w-6 h-6"></i>
+                <Menu className="w-6 h-6" />
               </button>
               
-              {/* Search Bar - Matching Screenshot */}
-              <div className="hidden md:flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 w-80 group focus-within:ring-2 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all">
-                <i data-lucide="search" className="w-4 h-4 text-slate-400"></i>
+              {/* Intelligent Search */}
+              <div className="hidden md:flex items-center bg-slate-50 border border-slate-100 rounded-2xl px-5 py-2.5 w-[400px] group focus-within:ring-4 focus-within:ring-blue-500/5 focus-within:border-blue-500 transition-all">
+                <Search className="w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                 <input 
                   type="text" 
                   placeholder="Search anything..." 
-                  className="bg-transparent border-none outline-none text-sm ml-3 w-full text-slate-600 placeholder:text-slate-400"
+                  className="bg-transparent border-none outline-none text-xs font-bold ml-4 w-full text-slate-600 placeholder:text-slate-400 uppercase tracking-widest"
                 />
+                <div className="hidden lg:flex items-center gap-1 bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-sm">
+                   <span className="text-[9px] font-black text-slate-400">CTRL</span>
+                   <span className="text-[9px] font-black text-slate-400">K</span>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-8">
               <div className="relative">
                 <button
                   id="notificationBellBtn"
-                  className="relative p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                  className="relative p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all group"
                   type="button"
                 >
-                  <i data-lucide="bell" className="w-5 h-5"></i>
+                  <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                   <span
                     id="notificationBadge"
-                    className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"
-                  >
-                  </span>
+                    className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm"
+                  />
                 </button>
               </div>
 
-              {/* User Profile - Matching Screenshot */}
-              <div className="flex items-center gap-3 pl-6 border-l border-slate-100">
+              {/* Profile Sovereignty */}
+              <div className="flex items-center gap-4 pl-8 border-l border-slate-100 group cursor-pointer">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold text-slate-800 leading-none">Aman</p>
-                  <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wider">Superadmin</p>
+                  <p className="text-sm font-black text-slate-800 leading-none group-hover:text-blue-600 transition-colors">Aman</p>
+                  <p className="text-[10px] font-black text-slate-400 mt-1.5 uppercase tracking-[0.2em]">Superadmin</p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg shadow-blue-600/20">
+                <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-xl shadow-blue-600/30 group-hover:scale-105 transition-transform">
                   A
                 </div>
               </div>

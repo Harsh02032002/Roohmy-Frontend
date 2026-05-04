@@ -1,209 +1,222 @@
-import React from "react";
-import { useHtmlPage } from "../../utils/htmlPage";
+import React, { useState, useMemo } from "react";
+import { 
+  Building2, Users, Shield, Clock, Search, 
+  ArrowUpRight, ArrowDownRight, MoreVertical, 
+  Filter, Globe, MapPin, Zap, Sheet, Trash2, 
+  ChevronRight, Phone, Mail, User, Image as ImageIcon,
+  Activity, Home, CheckCircle2, XCircle, Hourglass,
+  Check, X, Eye, ClipboardCheck, AlertTriangle,
+  Camera, Map, Star, Edit3, Trash, UserCheck,
+  RefreshCw, Download, Inbox, CreditCard, Tag,
+  BarChart3, Plus, Loader2, IndianRupee, TrendingUp,
+  TrendingDown, Calendar, Wallet, Receipt
+} from "lucide-react";
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, BarChart, Bar
+} from "recharts";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { DateRangePill } from "../../components/dashboard/DateRangePill";
 
-export default function Monthly() {
-  useHtmlPage({
-    title: "Roomhy - Monthly Revenue",
-    bodyClass: "text-slate-800",
-    htmlAttrs: {
-  "lang": "en"
-},
-    metas: [
-  {
-  "charset": "UTF-8"
-},
-  {
-  "name": "viewport",
-  "content": "width=device-width, initial-scale=1.0"
-}
-],
-    bases: [],
-    links: [
-  {
-  "rel": "preconnect",
-  "href": "https://fonts.googleapis.com"
-},
-  {
-  "rel": "preconnect",
-  "href": "https://fonts.gstatic",
-  "crossorigin": true
-},
-  {
-  "href": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-  "rel": "stylesheet"
-},
-  {
-  "rel": "stylesheet",
-  "href": "/superadmin/assets/css/monthly.css"
-}
-],
-    styles: [],
-    scripts: [
-  {
-  "src": "https://cdn.tailwindcss.com"
-},
-  {
-  "src": "https://unpkg.com/lucide@latest"
-}
-],
-    inlineScripts: []
-  });
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
+const revenueBreakdown = [
+  { name: "Rent", value: 650000, color: "#6366f1" },
+  { name: "Deposit", value: 120000, color: "#3b82f6" },
+  { name: "Service", value: 50000, color: "#f59e0b" },
+  { name: "Fines", value: 25000, color: "#ef4444" },
+];
+
+export default function SuperadminMonthly() {
+  const [selectedMonth, setSelectedMonth] = useState("October 2025");
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Page Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Monthly Revenue - Oct 2025</h1>
-            <p className="text-sm text-slate-500 mt-1">Detailed breakdown of earnings and financial performance.</p>
-          </div>
-          
-          <div className="flex items-center bg-white border border-slate-200 rounded-xl shadow-sm p-1.5 w-fit">
-            <button className="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-slate-800 hover:bg-slate-50 rounded-lg flex items-center transition-all">
-              <i data-lucide="chevron-left" className="w-4 h-4 mr-1"></i> Prev
-            </button>
-            <span className="px-5 py-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider">October 2025</span>
-            <button className="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-slate-800 hover:bg-slate-50 rounded-lg flex items-center transition-all">
-              Next <i data-lucide="chevron-right" className="w-4 h-4 ml-1"></i>
-            </button>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest group-hover:text-purple-500 transition-colors">Total Revenue</p>
-            <h3 className="text-3xl font-black text-slate-800 mt-3">₹8,45,000</h3>
-            <p className="text-[10px] font-bold text-green-600 mt-4 flex items-center bg-green-50 w-fit px-2 py-1 rounded-full uppercase tracking-tighter">
-              <i data-lucide="trending-up" className="w-3 h-3 mr-1"></i> +12.5% vs last month
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest group-hover:text-red-500 transition-colors">Total Expenses</p>
-            <h3 className="text-3xl font-black text-slate-800 mt-3">₹1,20,000</h3>
-            <p className="text-[10px] font-bold text-red-500 mt-4 flex items-center bg-red-50 w-fit px-2 py-1 rounded-full uppercase tracking-tighter">
-              <i data-lucide="trending-down" className="w-3 h-3 mr-1"></i> -2.1% vs last month
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest group-hover:text-green-500 transition-colors">Net Profit</p>
-            <h3 className="text-3xl font-black text-green-600 mt-3">₹7,25,000</h3>
-            <p className="text-[10px] font-bold text-slate-400 mt-4 uppercase tracking-tighter">85.8% Margin</p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-500 transition-colors">Active Tenants</p>
-            <h3 className="text-3xl font-black text-slate-800 mt-3">142</h3>
-            <p className="text-[10px] font-bold text-green-600 mt-4 flex items-center bg-green-50 w-fit px-2 py-1 rounded-full uppercase tracking-tighter">
-              <i data-lucide="user-plus" className="w-3 h-3 mr-1"></i> +8 New this month
-            </p>
-          </div>
-        </div>
-
-        {/* Revenue Breakdown Chart */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-10">
+    <div className="p-8 space-y-8 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex items-center justify-between">
+         <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20">
+               <IndianRupee className="w-6 h-6" />
+            </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Revenue Breakdown</h3>
-              <p className="text-xs text-slate-400 mt-1 font-medium">Distribution by category</p>
+               <h1 className="text-2xl font-black text-slate-800 tracking-tight">Economic Intelligence</h1>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Accounting {">"} Monthly Performance</p>
             </div>
-            <button className="text-xs font-bold text-purple-600 hover:text-purple-700 uppercase tracking-widest bg-purple-50 px-4 py-2 rounded-xl transition-all">View Full Report</button>
-          </div>
-          <div className="h-64 w-full flex items-end justify-around p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 relative gap-4">
-            {/* Simulated Bars */}
-            <div className="flex-1 max-w-[100px] bg-purple-500 h-3/4 rounded-2xl relative group cursor-pointer hover:scale-105 transition-all shadow-lg shadow-purple-200 flex justify-center">
-              <span className="absolute bottom-6 text-[10px] text-white font-black uppercase rotate-90 tracking-widest">Rent</span>
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-12 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap z-10 shadow-xl">₹6.5L (76%)</div>
+         </div>
+         <div className="flex items-center gap-4">
+            <div className="flex items-center bg-white border border-slate-100 rounded-2xl shadow-sm p-1.5">
+               <button className="p-2 text-slate-400 hover:text-slate-800 transition-all"><ChevronRight className="w-4 h-4 rotate-180" /></button>
+               <span className="px-6 text-[10px] font-black text-slate-800 uppercase tracking-widest">{selectedMonth}</span>
+               <button className="p-2 text-slate-400 hover:text-slate-800 transition-all"><ChevronRight className="w-4 h-4" /></button>
             </div>
-            <div className="flex-1 max-w-[100px] bg-blue-500 h-1/4 rounded-2xl relative group cursor-pointer hover:scale-105 transition-all shadow-lg shadow-blue-200 flex justify-center">
-              <span className="absolute bottom-6 text-[10px] text-white font-black uppercase rotate-90 tracking-widest">Deposit</span>
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-12 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap z-10 shadow-xl">₹1.2L (14%)</div>
-            </div>
-            <div className="flex-1 max-w-[100px] bg-amber-500 h-1/6 rounded-2xl relative group cursor-pointer hover:scale-105 transition-all shadow-lg shadow-amber-200 flex justify-center">
-              <span className="absolute bottom-6 text-[10px] text-white font-black uppercase rotate-90 tracking-widest">Service</span>
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-12 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap z-10 shadow-xl">₹50k (6%)</div>
-            </div>
-            <div className="flex-1 max-w-[100px] bg-rose-500 h-[10%] rounded-2xl relative group cursor-pointer hover:scale-105 transition-all shadow-lg shadow-rose-200 flex justify-center">
-              <span className="absolute bottom-6 text-[10px] text-white font-black uppercase rotate-90 tracking-widest">Fines</span>
-              <div className="opacity-0 group-hover:opacity-100 absolute -top-12 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap z-10 shadow-xl">₹25k (3%)</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Transactions Table */}
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <h3 className="text-lg font-bold text-slate-800">Recent Transactions</h3>
-            <button className="text-purple-600 hover:text-purple-800 text-xs font-bold uppercase tracking-widest flex items-center bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition-all hover:bg-slate-50">
-              <i data-lucide="download" className="w-4 h-4 mr-2"></i> Download CSV
+            <button className="bg-emerald-600 text-white px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center gap-2">
+               <Download className="w-4 h-4" /> Export Report
             </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/80 text-[10px] text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100">
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Transaction ID</th>
-                  <th className="px-6 py-4">Description</th>
-                  <th className="px-6 py-4">Category</th>
-                  <th className="px-6 py-4">Amount</th>
-                  <th className="px-6 py-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-500 font-medium">24 Oct 2025</td>
-                  <td className="px-6 py-4 font-mono text-[10px] text-slate-400 font-bold">TXN-88291</td>
-                  <td className="px-6 py-4 text-sm text-slate-800 font-medium">Rent Payment - Room 204</td>
-                  <td className="px-6 py-4">
-                    <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded-lg uppercase tracking-wider">Rent</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-bold text-green-600">+₹6,500</td>
-                  <td className="px-6 py-4">
-                    <span className="flex items-center text-[10px] font-bold text-green-600 uppercase tracking-wider">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-                      Completed
-                    </span>
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-500 font-medium">23 Oct 2025</td>
-                  <td className="px-6 py-4 font-mono text-[10px] text-slate-400 font-bold">TXN-88285</td>
-                  <td className="px-6 py-4 text-sm text-slate-800 font-medium">Cleaning Services - Vendor</td>
-                  <td className="px-6 py-4">
-                    <span className="text-[10px] font-bold bg-rose-50 text-rose-600 px-2 py-1 rounded-lg uppercase tracking-wider">Expense</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-bold text-rose-600">-₹2,500</td>
-                  <td className="px-6 py-4">
-                    <span className="flex items-center text-[10px] font-bold text-green-600 uppercase tracking-wider">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2"></span>
-                      Completed
-                    </span>
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-500 font-medium">22 Oct 2025</td>
-                  <td className="px-6 py-4 font-mono text-[10px] text-slate-400 font-bold">TXN-88240</td>
-                  <td className="px-6 py-4 text-sm text-slate-800 font-medium">Security Deposit - New Tenant</td>
-                  <td className="px-6 py-4">
-                    <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg uppercase tracking-wider">Deposit</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-bold text-green-600">+₹15,000</td>
-                  <td className="px-6 py-4">
-                    <span className="flex items-center text-[10px] font-bold text-green-600 uppercase tracking-wider">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2"></span>
-                      Completed
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
+         </div>
+      </div>
+
+      {/* Hero Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+         <StatCardSmall label="Monthly Revenue" value="₹ 8.45L" trend="+ 12.5%" up icon={Wallet} color="emerald" />
+         <StatCardSmall label="Net Profit" value="₹ 7.25L" trend="85.8% Margin" up icon={TrendingUp} color="indigo" />
+         <StatCardSmall label="Total Expenses" value="₹ 1.20L" trend="- 2.1% Drop" up icon={TrendingDown} color="rose" />
+         <StatCardSmall label="Active Tenants" value="142" trend="+ 8 New" up icon={Users} color="blue" />
+         <StatCardSmall label="Collection Rate" value="98.2%" trend="Elite Index" up icon={CheckCircle2} color="emerald" />
+         <StatCardSmall label="Yield Growth" value="+ 4.3%" trend="MoM Increase" up icon={Activity} color="amber" />
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+         {/* Detailed Breakdown */}
+         <div className="xl:col-span-2 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl">
+            <div className="flex items-center justify-between mb-10">
+               <h3 className="text-xl font-black text-slate-800 tracking-tight">Revenue Stream Analysis</h3>
+               <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                     <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Incoming</span>
+                  </div>
+               </div>
+            </div>
+            <div className="h-[300px]">
+               <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueBreakdown}>
+                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} dy={10} />
+                     <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} />
+                     <Tooltip 
+                        cursor={{fill: '#f8fafc'}}
+                        contentStyle={{borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} 
+                     />
+                     <Bar dataKey="value" radius={[10, 10, 0, 0]}>
+                        {revenueBreakdown.map((entry, index) => (
+                           <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                     </Bar>
+                  </BarChart>
+               </ResponsiveContainer>
+            </div>
+         </div>
+
+         {/* Distribution */}
+         <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl">
+            <h3 className="text-xl font-black text-slate-800 tracking-tight mb-8">Segmentation</h3>
+            <div className="h-[250px] relative">
+               <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                     <Pie data={revenueBreakdown} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                        {revenueBreakdown.map((entry, index) => (
+                           <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                     </Pie>
+                  </PieChart>
+               </ResponsiveContainer>
+               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-black text-slate-800">₹ 8.45L</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Revenue</span>
+               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-8">
+               {revenueBreakdown.map((s, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                     <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.name}</p>
+                        <p className="text-sm font-black text-slate-800">₹{(s.value/1000).toFixed(0)}k</p>
+                     </div>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </div>
+
+      {/* Main Ledger */}
+      <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl">
+         <div className="flex items-center justify-between mb-10">
+            <h3 className="text-xl font-black text-slate-800 tracking-tight">Financial Transaction Ledger</h3>
+            <div className="flex items-center gap-4">
+               <button className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all shadow-sm">
+                  <Sheet className="w-4 h-4" /> Export CSV
+               </button>
+            </div>
+         </div>
+
+         <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[1100px]">
+               <thead>
+                  <tr className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-slate-50">
+                     <th className="pb-6">Date & ID</th>
+                     <th className="pb-6">Description</th>
+                     <th className="pb-6 text-center">Category</th>
+                     <th className="pb-6 text-center">Valuation</th>
+                     <th className="pb-6 text-center">Sovereignty Status</th>
+                     <th className="pb-6 text-right">Audit Actions</th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-slate-50">
+                  {[
+                    { date: "24 Oct 2025", id: "TXN-88291", desc: "Rent Payment - Room 204", cat: "Rent", val: "+₹6,500", status: "Completed", color: "emerald" },
+                    { date: "23 Oct 2025", id: "TXN-88285", desc: "Cleaning Services - Vendor", cat: "Expense", val: "-₹2,500", status: "Completed", color: "rose" },
+                    { date: "22 Oct 2025", id: "TXN-88240", desc: "Security Deposit - New Tenant", cat: "Deposit", val: "+₹15,000", status: "Completed", color: "blue" }
+                  ].map((t, i) => (
+                    <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
+                       <td className="py-6">
+                          <p className="text-sm font-black text-slate-800">{t.date}</p>
+                          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{t.id}</p>
+                       </td>
+                       <td className="py-6">
+                          <p className="text-xs font-black text-slate-700">{t.desc}</p>
+                       </td>
+                       <td className="py-6 text-center">
+                          <span className={cn(
+                             "text-[9px] font-black px-3 py-1 rounded-full border shadow-sm uppercase tracking-widest",
+                             t.cat === "Rent" ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+                             t.cat === "Expense" ? "bg-rose-50 text-rose-600 border-rose-100" :
+                             "bg-blue-50 text-blue-600 border-blue-100"
+                          )}>
+                             {t.cat}
+                          </span>
+                       </td>
+                       <td className="py-6 text-center">
+                          <p className={cn("text-sm font-black", t.color === "emerald" ? "text-emerald-600" : "text-rose-600")}>{t.val}</p>
+                       </td>
+                       <td className="py-6 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                             <div className={cn("w-1.5 h-1.5 rounded-full", t.status === "Completed" ? "bg-emerald-500" : "bg-amber-500")} />
+                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.status}</span>
+                          </div>
+                       </td>
+                       <td className="py-6 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                             <button className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all">
+                                <Receipt className="w-4 h-4" />
+                             </button>
+                             <button className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all">
+                                <Eye className="w-4 h-4" />
+                             </button>
+                          </div>
+                       </td>
+                    </tr>
+                  ))}
+               </tbody>
             </table>
-          </div>
-        </div>
+         </div>
       </div>
     </div>
   );
 }
 
-
+function StatCardSmall({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { emerald: "bg-emerald-500 shadow-emerald-200", indigo: "bg-indigo-600 shadow-indigo-200", rose: "bg-rose-500 shadow-rose-200", blue: "bg-blue-500 shadow-blue-200", amber: "bg-amber-500 shadow-amber-200" };
+  return (
+    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg flex items-center gap-5 group hover:-translate-y-1 transition-all">
+       <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl shrink-0 transition-transform group-hover:scale-110", bgColors[color])}>
+          <Icon className="w-7 h-7" />
+       </div>
+       <div className="min-w-0">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate">{label}</p>
+          <p className="text-2xl font-black text-slate-800 mb-0.5 truncate">{value}</p>
+          <p className={cn("text-[9px] font-black", up ? "text-emerald-600" : "text-rose-600")}>{trend} {up ? "↑" : "↓"}</p>
+       </div>
+    </div>
+  );
+}

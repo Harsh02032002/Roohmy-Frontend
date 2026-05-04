@@ -1,742 +1,232 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useHtmlPage } from "../../utils/htmlPage";
+import React, { useEffect, useMemo, useState } from "react";
+import { 
+  Building2, Users, Shield, Clock, Search, 
+  ArrowUpRight, ArrowDownRight, MoreVertical, 
+  Filter, Globe, MapPin, Zap, Sheet, Trash2, 
+  ChevronRight, Phone, Mail, User, Image as ImageIcon,
+  Activity, Home, CheckCircle2, XCircle, Hourglass,
+  Check, X, Eye, ClipboardCheck, AlertTriangle,
+  Camera, Map, Star, Edit3, Trash, Bell, BellOff,
+  RefreshCw, Download, PauseCircle, ShieldCheck,
+  Plus, Loader2, Save, Sparkles, Layers, Box,
+  Globe2, IndianRupee, Inbox
+} from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { DateRangePill } from "../../components/dashboard/DateRangePill";
+import { fetchJson } from "../../utils/api";
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip
+} from "recharts";
 
-const getApiUrl = () =>
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:5001"
-    : "https://api.roomhy.com";
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const navSections = [
-  {
-    label: "Overview",
-    items: [{ href: "/superadmin/superadmin", icon: "layout-dashboard", text: "Dashboard", key: "superadmin" }]
-  },
-  {
-    label: "Management",
-    items: [
-      { href: "/superadmin/manager", icon: "map-pin", text: "Teams", key: "manager" },
-      { href: "/superadmin/owner", icon: "briefcase", text: "Property Owners", key: "owner" },
-      { href: "/superadmin/properties", icon: "home", text: "Properties", key: "properties" },
-      { href: "/superadmin/tenant", icon: "users", text: "Tenants", key: "tenant" },
-      { href: "/superadmin/new_signups", icon: "file-badge", text: "New Signups", key: "new_signups" }
-    ]
-  },
-  {
-    label: "Operations",
-    items: [
-      { href: "/superadmin/websiteenq", icon: "folder-open", text: "Web Enquiry", key: "websiteenq" },
-      { href: "/superadmin/enquiry", icon: "help-circle", text: "Enquiries", key: "enquiry" },
-      { href: "/superadmin/booking", icon: "calendar-check", text: "Bookings", key: "booking" },
-      { href: "/superadmin/reviews", icon: "star", text: "Reviews", key: "reviews" },
-      { href: "/superadmin/complaint-history", icon: "alert-circle", text: "Complaint History", key: "complaint-history" },
-      { href: "/superadmin/superchat", icon: "message-circle", text: "All Chats", key: "chat-analytics" }
-    ]
-  },
-  {
-    label: "Website",
-    items: [{ href: "/superadmin/website", icon: "globe", text: "Live Properties", key: "website" }]
-  }
+const enquiryStatus = [
+  { name: "Approved Flow", value: 1283, color: "#10B981", percent: "45.1%" },
+  { name: "Pending Hub", value: 424, color: "#F59E0B", percent: "14.9%" },
+  { name: "Rejected Protocol", value: 233, color: "#EF4444", percent: "8.2%" },
+  { name: "On Hold Matrix", value: 156, color: "#3B82F6", percent: "5.5%" },
 ];
 
-const toStorageSafeVisit = (visit) => {
-  if (!visit || typeof visit !== "object") return visit;
-
-  const propertyInfo = visit.propertyInfo && typeof visit.propertyInfo === "object"
-    ? {
-        ...visit.propertyInfo,
-        photos: [],
-        professionalPhotos: [],
-        imageBase64: "",
-        image: "",
-        photo_building: [],
-        photo_room: [],
-        photo_bathroom: [],
-        photo_bed: [],
-        photo_extra: []
-      }
-    : visit.propertyInfo;
-
-  return {
-    ...visit,
-    photos: [],
-    professionalPhotos: [],
-    fieldPhotos: [],
-    profPhotos: [],
-    imageBase64: "",
-    image: "",
-    studentReviews: typeof visit.studentReviews === "string" ? visit.studentReviews.slice(0, 500) : visit.studentReviews,
-    internalRemarks: typeof visit.internalRemarks === "string" ? visit.internalRemarks.slice(0, 500) : visit.internalRemarks,
-    cleanlinessNote: typeof visit.cleanlinessNote === "string" ? visit.cleanlinessNote.slice(0, 500) : visit.cleanlinessNote,
-    ownerBehaviour: typeof visit.ownerBehaviour === "string" ? visit.ownerBehaviour.slice(0, 500) : visit.ownerBehaviour,
-    propertyInfo
-  };
-};
+const recentEnquiries = [
+  { id: "ENQ-12845", name: "Sarah Wilson", property: "Sunrise Heights - A101 Hub", status: "Approved Flow", date: "May 28, 2024", email: "sarah.w@email.com", initial: "SW", color: "blue" },
+  { id: "ENQ-12846", name: "Rahul Kapoor", property: "Green Park - B203 Matrix", status: "Pending Hub", date: "May 27, 2024", email: "rahul.k@email.com", initial: "RK", color: "orange" },
+  { id: "ENQ-12847", name: "James Miller", property: "Ocean View - C101 Zone", status: "On Hold Matrix", date: "May 26, 2024", email: "james.m@email.com", initial: "JM", color: "indigo" },
+  { id: "ENQ-12848", name: "Ananya Iyer", property: "Lake View - D404 Pulse", status: "Rejected Protocol", date: "May 25, 2024", email: "ananya.i@email.com", initial: "AI", color: "rose" },
+  { id: "ENQ-12849", name: "David Chen", property: "Prime City - E502 Core", status: "Approved Flow", date: "May 25, 2024", email: "david.c@email.com", initial: "DC", color: "green" },
+];
 
 export default function SuperadminEnquiry() {
-  useHtmlPage({
-    title: "Roomhy - Admin Enquiry",
-    bodyClass: "bg-gray-50 text-slate-800",
-    htmlAttrs: { lang: "en" },
-    metas: [
-      { charset: "UTF-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    ],
-    bases: [],
-    links: [
-      {
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-        rel: "stylesheet"
-      },
-      { rel: "stylesheet", href: "/superadmin/assets/css/enquiry.css" }
-    ],
-    styles: [],
-    scripts: [
-      { src: "https://cdn.tailwindcss.com" },
-      { src: "https://unpkg.com/lucide@latest" },
-      { src: "https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" }
-    ],
-    inlineScripts: []
-  });
-
-  const apiUrl = getApiUrl();
-  const [visits, setVisits] = useState([]);
-  const [roomApprovals, setRoomApprovals] = useState([]);
-  const [activeTab, setActiveTab] = useState("visits");
-  const [currentApprovingId, setCurrentApprovingId] = useState(null);
-  const [showApprove, setShowApprove] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [generatedCreds, setGeneratedCreds] = useState({ loginId: "--", password: "--" });
-  const [galleryImages, setGalleryImages] = useState([]);
-  const [showGallery, setShowGallery] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotif, setShowNotif] = useState(false);
-  const pollRef = useRef(null);
-
-  useEffect(() => {
-    window.lucide?.createIcons();
-  }, [visits, roomApprovals, activeTab, showApprove, showSuccess, showGallery, notifications, showNotif]);
-
-  useEffect(() => {
-    fetchEnquiries();
-    fetchRoomApprovals();
-    startPolling();
-    const interval = setInterval(fetchEnquiries, 15000);
-    return () => {
-      clearInterval(interval);
-      stopPolling();
-    };
-  }, []);
-
-  const startPolling = () => {
-    stopPolling();
-    pollRef.current = setInterval(fetchNotifications, 5000);
-    fetchNotifications();
-  };
-
-  const stopPolling = () => {
-    if (pollRef.current) clearInterval(pollRef.current);
-    pollRef.current = null;
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch(`${apiUrl}/api/notifications?unread=true&toLoginId=superadmin`);
-      const payload = await res.json();
-      const list = Array.isArray(payload) ? payload : (Array.isArray(payload.notifications) ? payload.notifications : []);
-      setNotifications(list);
-      setUnreadCount(list.length);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  };
-
-  const markAllRead = async () => {
-    try {
-      await fetch(`${apiUrl}/api/notifications/mark-all-read`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toLoginId: "superadmin", toRole: "superadmin" })
-      });
-      setNotifications([]);
-      setUnreadCount(0);
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-    }
-  };
-
-  const clearAll = async () => {
-    try {
-      await fetch(`${apiUrl}/api/notifications/delete-read?toLoginId=superadmin`, { method: "DELETE" });
-      setNotifications([]);
-      setUnreadCount(0);
-    } catch (error) {
-      console.error("Error clearing notifications:", error);
-    }
-  };
-
-  const mergeVisitsByIdentity = (primary = [], secondary = []) => {
-    const map = new Map();
-    [...(primary || []), ...(secondary || [])].forEach((visit) => {
-      if (!visit) return;
-      const key = visit._id || visit.visitId;
-      if (!key) return;
-      map.set(key, { ...(map.get(key) || {}), ...visit });
-    });
-    return Array.from(map.values());
-  };
-
-  const persistLocalVisits = (list) => {
-    const safeList = (Array.isArray(list) ? list : []).map(toStorageSafeVisit);
-    const payload = JSON.stringify(safeList);
-
-    try {
-      localStorage.setItem("roomhy_visits", payload);
-    } catch (error) {
-      console.warn("Failed to persist roomhy_visits in localStorage:", error);
-      try {
-        localStorage.removeItem("roomhy_visits");
-      } catch (_) {}
-    }
-
-    try {
-      sessionStorage.setItem("roomhy_visits", payload);
-    } catch (error) {
-      console.warn("Failed to persist roomhy_visits in sessionStorage:", error);
-      try {
-        sessionStorage.removeItem("roomhy_visits");
-      } catch (_) {}
-    }
-  };
-
-  const loadLocalVisits = () => {
-    let localList = [];
-    let sessionList = [];
-    try {
-      localList = JSON.parse(localStorage.getItem("roomhy_visits") || "[]");
-    } catch (_) {}
-    try {
-      sessionList = JSON.parse(sessionStorage.getItem("roomhy_visits") || "[]");
-    } catch (_) {}
-    return mergeVisitsByIdentity(localList, sessionList);
-  };
-
-  const fetchEnquiries = async () => {
-    let list = [];
-    try {
-      const token = sessionStorage.getItem("token") || localStorage.getItem("token") || "";
-      const response = await fetch(`${apiUrl}/api/visits/pending`, {
-        method: "GET",
-        headers: token ? { Authorization: token } : {}
-      });
-      if (!response.ok) throw new Error("API error");
-      const data = await response.json();
-      const allVisits = data.visits || data || [];
-      list = allVisits.filter((v) => ["submitted", "pending", "pending_review"].includes(v.status));
-    } catch (_) {
-      list = loadLocalVisits();
-    }
-    list = list.filter((v) => ["pending", "submitted"].includes(v.status));
-    setVisits(list);
-  };
-
-  const fetchRoomApprovals = () => {
-    const list = loadLocalVisits();
-    const pending = list.filter((v) => v.status === "pending" && (v.type === "room_add" || v.type === "bed_add"));
-    setRoomApprovals(pending);
-  };
-
-  const statusCounts = useMemo(() => {
-    const list = loadLocalVisits();
-    return {
-      approved: list.filter((v) => v.status === "approved").length,
-      hold: list.filter((v) => v.status === "hold").length,
-      rejected: list.filter((v) => v.status === "rejected").length
-    };
-  }, [visits]);
-
-  const openApproveModal = (visitId) => {
-    setCurrentApprovingId(visitId);
-    setShowApprove(true);
-  };
-
-  const confirmApproval = async (shouldUpload) => {
-    if (!currentApprovingId) return;
-    const loginId = `ROOMHY${String(Math.floor(Math.random() * 10000)).padStart(4, "0")}`;
-    const password = Math.random().toString(36).slice(-8);
-    let finalLoginId = loginId;
-    let finalPassword = password;
-    let backendApprovedVisit = null;
-
-    let localVisits = loadLocalVisits();
-    const idx = localVisits.findIndex((v) => v._id === currentApprovingId || v.visitId === currentApprovingId);
-    const visitData = idx !== -1 ? localVisits[idx] : { _id: currentApprovingId, visitId: currentApprovingId };
-
-    try {
-      const token = sessionStorage.getItem("token") || localStorage.getItem("token") || "";
-      const response = await fetch(`${apiUrl}/api/visits/approve`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: token } : {})
-        },
-        body: JSON.stringify({
-          visitId: currentApprovingId,
-          status: "approved",
-          isLiveOnWebsite: shouldUpload,
-          loginId,
-          tempPassword: password,
-          ownerName:
-            visitData.ownerName ||
-            visitData.propertyInfo?.ownerName ||
-            visitData.owner ||
-            visitData.contactPerson ||
-            visitData.name ||
-            visitData.submittedBy ||
-            "Owner",
-          name:
-            visitData.ownerName ||
-            visitData.propertyInfo?.ownerName ||
-            visitData.owner ||
-            visitData.contactPerson ||
-            visitData.name ||
-            visitData.submittedBy ||
-            "Owner"
-        })
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "Approve failed");
-      }
-
-      const data = await response.json();
-      if (!data?.success) {
-        throw new Error(data?.message || "Approve failed");
-      }
-      finalLoginId = data?.credentials?.loginId || finalLoginId;
-      finalPassword = data?.credentials?.tempPassword || finalPassword;
-      backendApprovedVisit = data?.visit || null;
-    } catch (err) {
-      console.warn("Backend sync failed:", err);
-      window.alert(err?.message || "Property approval failed. MongoDB save did not complete.");
-      return;
-    }
-
-    if (idx !== -1) {
-      const resolvedOwnerName =
-        localVisits[idx].ownerName ||
-        localVisits[idx].propertyInfo?.ownerName ||
-        localVisits[idx].owner ||
-        localVisits[idx].contactPerson ||
-        localVisits[idx].name ||
-        localVisits[idx].submittedBy ||
-        "Owner";
-      localVisits[idx].status = "approved";
-      localVisits[idx].isLiveOnWebsite = shouldUpload;
-      localVisits[idx].generatedCredentials = { loginId: finalLoginId, tempPassword: finalPassword };
-      localVisits[idx].ownerName = resolvedOwnerName;
-      persistLocalVisits(localVisits);
-    } else {
-      const backendVisitId =
-        backendApprovedVisit?.visitId || backendApprovedVisit?._id || currentApprovingId;
-      localVisits = mergeVisitsByIdentity(localVisits, [
-        backendApprovedVisit
-          ? {
-              ...backendApprovedVisit,
-              _id: backendVisitId,
-              visitId: backendVisitId,
-              status: "approved",
-              isLiveOnWebsite: shouldUpload,
-              generatedCredentials: { loginId: finalLoginId, tempPassword: finalPassword }
-            }
-          : {
-              _id: currentApprovingId,
-              visitId: currentApprovingId,
-              status: "approved",
-              isLiveOnWebsite: shouldUpload,
-              approvedAt: new Date().toISOString(),
-              submittedAt: new Date().toISOString(),
-              generatedCredentials: { loginId: finalLoginId, tempPassword: finalPassword }
-            }
-      ]);
-      persistLocalVisits(localVisits);
-    }
-
-    setGeneratedCreds({ loginId: finalLoginId, password: finalPassword });
-    setShowApprove(false);
-    setShowSuccess(true);
-    setCurrentApprovingId(null);
-    fetchEnquiries();
-  };
-
-  const holdVisit = async (id) => {
-    const reason = prompt("Enter hold reason:");
-    if (reason === null) return;
-    try {
-      const response = await fetch(`${apiUrl}/api/visits/hold`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitId: id, holdReason: reason })
-      });
-      const data = await response.json();
-      if (data.success) {
-        alert("Visit held successfully");
-        fetchEnquiries();
-      } else {
-        alert("Error holding visit: " + data.message);
-      }
-    } catch (error) {
-      console.error("Error holding visit:", error);
-      alert("Error holding visit: " + error.message);
-    }
-  };
-
-  const viewGallery = (photos) => {
-    setGalleryImages(Array.isArray(photos) ? photos : []);
-    setShowGallery(true);
-  };
-
-  const closeGallery = () => {
-    setShowGallery(false);
-    setGalleryImages([]);
-  };
-
-  const openMap = (id) => {
-    const list = loadLocalVisits();
-    const v = list.find((x) => x._id === id || x.visitId === id);
-    if (!v || !v.latitude || !v.longitude) {
-      alert("No geo-location available for this visit.");
-      return;
-    }
-    const url = `https://www.google.com/maps?q=${v.latitude},${v.longitude}`;
-    window.open(url, "_blank");
-  };
-
-  const exportVisitsExcel = () => {
-    if (!window.XLSX) {
-      alert("Excel export library not loaded.");
-      return;
-    }
-    const rows = visits.map((v) => ({
-      VisitId: v.visitId || v._id,
-      Property: v.propertyName || v.propertyInfo?.name || "-",
-      Owner: v.ownerName || v.propertyInfo?.ownerName || "-",
-      Status: v.status || "-"
-    }));
-    const ws = window.XLSX.utils.json_to_sheet(rows);
-    const wb = window.XLSX.utils.book_new();
-    window.XLSX.utils.book_append_sheet(wb, ws, "Visits");
-    const date = new Date().toISOString().split("T")[0];
-    window.XLSX.writeFile(wb, `Roomhy_Visits_${date}.xlsx`);
-  };
-
-  const approveRoomNotification = (id, approve) => {
-    const list = loadLocalVisits();
-    const idx = list.findIndex((v) => v._id === id);
-    if (idx === -1) return;
-    list[idx].status = approve ? "approved" : "rejected";
-    persistLocalVisits(list);
-    fetchRoomApprovals();
-  };
-
-  const currentPage = "enquiry";
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   return (
-    <>
-      <div className="p-4 md:p-8">
-        <div className="max-w-[1600px] mx-auto space-y-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">Pending Approvals</h1>
-              <p className="text-sm text-slate-500">Review and approve property visit reports and room additions.</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <button onClick={fetchEnquiries} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                <i data-lucide="refresh-cw" className="w-4 h-4"></i> Refresh
-              </button>
-              <button onClick={exportVisitsExcel} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                <i data-lucide="download" className="w-4 h-4"></i> Export
-              </button>
-              <div className="relative">
-                <button onClick={() => setShowNotif((v) => !v)} className="relative p-2 text-slate-400 hover:text-slate-600 hover:bg-gray-100 rounded-lg transition-colors">
-                  <i data-lucide="bell" className="w-5 h-5"></i>
-                  {unreadCount > 0 ? (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
-                  ) : null}
-                </button>
-                {showNotif ? (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg py-2 ring-1 ring-black ring-opacity-5 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-800">Notifications</h3>
-                      <div className="flex gap-2">
-                        <button onClick={markAllRead} className="text-xs text-purple-600 hover:text-purple-800">Mark all read</button>
-                        <button onClick={clearAll} className="text-xs text-gray-400 hover:text-gray-600">Clear</button>
+    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex flex-col gap-2">
+         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">High-Intent Lead Intelligence</h1>
+         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
+            <span>Marketplace CRM</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-blue-600">Enquiry Resolution Hub</span>
+         </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+         <p className="text-sm font-bold text-slate-400 max-w-2xl">Manage all incoming property enquiries, track lead conversion velocity and optimize regional resident onboarding with high-fidelity marketplace analytics.</p>
+         <button className="bg-slate-800 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase shadow-xl shadow-slate-800/20 hover:bg-slate-900 transition-all flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Provision New Inquiry
+         </button>
+      </div>
+
+      {/* Hero Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <StatCardLarge icon={Inbox} color="blue" label="Total Inbound" value="2,845" trend="+ 15.2% Flux" up />
+        <StatCardLarge icon={Hourglass} color="orange" label="Awaiting Pulse" value="424" trend="+ 5.3% Delta" up />
+        <StatCardLarge icon={CheckCircle2} color="green" label="Approved Flow" value="1,283" trend="+ 12.4% Yield" up />
+        <StatCardLarge icon={XCircle} color="red" label="Rejected Index" value="233" trend="- 2.1% Alpha" up={false} />
+        <StatCardLarge icon={PauseCircle} color="indigo" label="On Hold Hub" value="156" trend="+ 1.2% Zeta" up />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Lead Status Matrix */}
+        <div className="lg:col-span-5 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center">
+           <div className="flex items-center justify-between mb-10 w-full">
+              <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Lead Yield Matrix</h3>
+              <select className="bg-slate-50 border-none rounded-2xl px-5 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest outline-none cursor-pointer hover:bg-slate-100 transition-colors">
+                 <option>Monthly Pulse</option>
+              </select>
+           </div>
+           <div className="relative w-80 h-80 mb-10">
+              <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                    <Pie data={enquiryStatus} dataKey="value" innerRadius={90} outerRadius={130} paddingAngle={10} stroke="none">
+                       {enquiryStatus.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} className="drop-shadow-lg" />
+                       ))}
+                    </Pie>
+                 </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                 <p className="text-6xl font-bold text-slate-800 tracking-tighter leading-none">2.8k</p>
+                 <p className="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-widest opacity-60">Master Feed</p>
+              </div>
+           </div>
+           <div className="w-full space-y-4">
+              {enquiryStatus.map(s => (
+                 <div key={s.name} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-md transition-all">
+                    <div className="flex items-center gap-4">
+                       <div className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: s.color}} />
+                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-800 transition-colors">{s.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-slate-800">{s.value.toLocaleString()}</span>
+                      <span className="text-[9px] font-bold text-slate-400 ml-2 px-2 py-0.5 bg-white rounded-lg border border-slate-100 uppercase tracking-tighter">({s.percent})</span>
+                    </div>
+                 </div>
+              ))}
+           </div>
+        </div>
+
+        {/* Recent Lead Intelligence */}
+        <div className="lg:col-span-7 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col overflow-hidden">
+           <div className="flex items-center justify-between mb-10">
+              <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Lead Intelligence Pulse</h3>
+              <div className="flex items-center gap-4">
+                 <div className="relative group w-64">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                    <input 
+                      value={search} onChange={e => setSearch(e.target.value)}
+                      placeholder="Search high-intent leads..." 
+                      className="bg-slate-50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold shadow-sm w-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" 
+                    />
+                 </div>
+                 <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100">
+                    <RefreshCw className="w-5 h-5" />
+                 </button>
+              </div>
+           </div>
+           <div className="space-y-6">
+              {recentEnquiries.map(enq => (
+                <div key={enq.id} className="flex items-center gap-8 group cursor-pointer p-4 bg-slate-50/50 rounded-[2rem] border border-transparent hover:bg-white hover:border-slate-100 hover:shadow-xl transition-all duration-500">
+                   <div className={cn(
+                      "w-20 h-20 rounded-[1.75rem] flex items-center justify-center font-bold text-white text-2xl shadow-xl transition-all group-hover:rotate-6",
+                      enq.color === "blue" ? "bg-blue-600 shadow-blue-100" :
+                      enq.color === "orange" ? "bg-amber-600 shadow-amber-100" :
+                      enq.color === "indigo" ? "bg-indigo-600 shadow-indigo-100" :
+                      enq.color === "rose" ? "bg-rose-600 shadow-rose-100" :
+                      "bg-emerald-600 shadow-emerald-100"
+                   )}>
+                      {enq.initial}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-4 mb-2">
+                        <p className="text-lg font-bold text-slate-800 truncate leading-none">{enq.name}</p>
+                        <span className={cn(
+                           "text-[9px] font-bold px-3 py-1 rounded-full border uppercase shadow-sm tracking-widest",
+                           enq.status === "Approved Flow" ? "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-50" :
+                           enq.status === "Pending Hub" ? "bg-amber-50 text-amber-600 border-amber-100 shadow-amber-50" :
+                           enq.status === "On Hold Matrix" ? "bg-indigo-50 text-indigo-600 border-indigo-100 shadow-indigo-50" : "bg-rose-50 text-rose-600 border-rose-100 shadow-rose-50"
+                        )}>
+                          {enq.status}
+                        </span>
                       </div>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                      {notifications.length === 0 ? (
-                        <div className="px-4 py-8 text-center text-gray-400">
-                          <i data-lucide="bell-off" className="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                          <p>No notifications yet</p>
-                        </div>
-                      ) : (
-                        notifications.slice(0, 20).map((n) => {
-                          const ts = new Date(n.createdAt || Date.now()).toLocaleString();
-                          const title =
-                            n.type === "new_booking" ? "New Booking" :
-                            n.type === "new_enquiry" ? "New Enquiry" :
-                            n.type === "new_signup" ? "New Signup" : "Notification";
-                          const body =
-                            n.type === "new_booking"
-                              ? `Property: ${n.meta?.propertyName || "Unknown"} | Guest: ${n.meta?.guestName || n.meta?.userName || "Unknown"}`
-                              : n.type === "new_enquiry"
-                                ? `${n.meta?.userName || "Someone"} enquired about ${n.meta?.propertyName || "a property"}`
-                                : n.type === "new_signup"
-                                  ? `${n.meta?.firstName || n.meta?.userName || "A user"} signed up (${n.meta?.email || "no email"})`
-                                  : n.from || "New notification";
-                          return (
-                            <div key={n._id} className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0">
-                              <div className="flex items-start gap-3">
-                                <div className="flex-shrink-0 mt-1"><i data-lucide="bell" className="w-5 h-5 text-gray-500"></i></div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-semibold text-gray-900">{title}</p>
-                                  <p className="text-xs text-gray-600 mt-1">{body}</p>
-                                  <p className="text-xs text-gray-400 mt-2">{ts}</p>
-                                </div>
-                                {!n.read ? <span className="flex-shrink-0 w-2 h-2 bg-purple-500 rounded-full"></span> : null}
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="status-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 flex items-center justify-between">
-                <div><p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Approved</p><h3 className="text-3xl font-bold text-gray-900 mt-1">{statusCounts.approved}</h3></div>
-                <div className="bg-green-50 p-4 rounded-full"><i data-lucide="check-circle" className="w-8 h-8 text-green-600"></i></div>
-              </div>
-              <div className="h-1 bg-green-500"></div>
-            </div>
-            <div className="status-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 flex items-center justify-between">
-                <div><p className="text-sm font-medium text-gray-500 uppercase tracking-wider">On Hold</p><h3 className="text-3xl font-bold text-gray-900 mt-1">{statusCounts.hold}</h3></div>
-                <div className="bg-orange-50 p-4 rounded-full"><i data-lucide="pause-circle" className="w-8 h-8 text-orange-600"></i></div>
-              </div>
-              <div className="h-1 bg-orange-500"></div>
-            </div>
-            <div className="status-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 flex items-center justify-between">
-                <div><p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Rejected</p><h3 className="text-3xl font-bold text-gray-900 mt-1">{statusCounts.rejected}</h3></div>
-                <div className="bg-red-50 p-4 rounded-full"><i data-lucide="x-circle" className="w-8 h-8 text-red-600"></i></div>
-              </div>
-              <div className="h-1 bg-red-500"></div>
-            </div>
-          </div>
-
-          <div className="flex border-b border-gray-200 bg-white rounded-t-lg px-4 pt-4 shadow-sm">
-            <button onClick={() => setActiveTab("visits")} className={`px-6 py-3 font-semibold transition-all ${activeTab === "visits" ? "text-purple-600 border-b-2 border-purple-600" : "text-gray-500 border-b-2 border-transparent"}`}>Visit Reports</button>
-            <button onClick={() => setActiveTab("rooms")} className={`px-6 py-3 font-semibold transition-all ${activeTab === "rooms" ? "text-purple-600 border-b-2 border-purple-600" : "text-gray-500 border-b-2 border-transparent"}`}>Room Approvals</button>
-          </div>
-
-          {activeTab === "visits" ? (
-            <div className="bg-white rounded-b-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-gray-50 text-gray-500 text-[10px] uppercase border-b">
-                    <tr>
-                      <th className="px-4 py-3">Visit ID</th>
-                      <th className="px-4 py-3">Visit Date & Time</th>
-                      <th className="px-4 py-3">Staff Name</th>
-                      <th className="px-4 py-3">Staff ID</th>
-                      <th className="px-4 py-3">Property Name</th>
-                      <th className="px-4 py-3">Property Type</th>
-                      <th className="px-4 py-3">Full Address</th>
-                      <th className="px-4 py-3">Area / Locality</th>
-                      <th className="px-4 py-3">Landmark</th>
-                      <th className="px-4 py-3">Nearby Location</th>
-                      <th className="px-4 py-3">Owner Name</th>
-                      <th className="px-4 py-3">Owner Contact</th>
-                      <th className="px-4 py-3">Owner Gmail</th>
-                      <th className="px-4 py-3">Gender</th>
-                      <th className="px-4 py-3">Student Reviews</th>
-                      <th className="px-4 py-3">Employee Rating</th>
-                      <th className="px-4 py-3 text-center">Monthly Rent</th>
-                      <th className="px-4 py-3">Amenities</th>
-                      <th className="px-4 py-3">Cleanliness</th>
-                      <th className="px-4 py-3">Owner Behaviour</th>
-                      <th className="px-4 py-3">Field Photos</th>
-                      <th className="px-4 py-3">Prof. Photos</th>
-                      <th className="px-4 py-3">Geo Status</th>
-                      <th className="px-4 py-3">Map</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Login ID</th>
-                      <th className="px-4 py-3">Password</th>
-                      <th className="px-4 py-3 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {visits.length === 0 ? (
-                      <tr><td colSpan={28} className="px-6 py-12 text-center text-gray-400">No pending reports found.</td></tr>
-                    ) : (
-                      visits.map((v) => {
-                        const prop = v.propertyInfo || {};
-                        const fieldPhotos = v.photos || [];
-                        const profPhotos = v.professionalPhotos || [];
-                        const amenities = (prop.amenities || v.amenities || []).length ? (prop.amenities || v.amenities).join(", ") : "-";
-                        const cleanliness = v.cleanlinessRating || v.cleanliness || "-";
-                        const ownerBehaviour = v.ownerBehaviourPublic || v.ownerBehaviour || "-";
-                        const geoOk = v.latitude && v.longitude ? "OK" : "No Geo";
-                        const loginId = v.generatedCredentials ? v.generatedCredentials.loginId || "-" : "-";
-                        const password = v.generatedCredentials ? v.generatedCredentials.tempPassword || "-" : "-";
-
-                        return (
-                          <tr key={v._id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-3 text-xs font-mono text-gray-600">{v.visitId || v._id?.slice(-8).toUpperCase()}</td>
-                            <td className="px-4 py-3 text-sm text-gray-600">{v.submittedAt ? new Date(v.submittedAt).toLocaleString() : "-"}</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-slate-700">{v.staffName || prop.staffName || "-"}</td>
-                            <td className="px-4 py-3 text-sm">{v.staffId || prop.staffId || "-"}</td>
-                            <td className="px-4 py-3"><div className="text-sm font-bold text-slate-700">{v.propertyName || prop.name || "-"}</div></td>
-                            <td className="px-4 py-3">{v.propertyType || prop.propertyType || "-"}</td>
-                            <td className="px-4 py-3">{v.address || prop.address || "-"}</td>
-                            <td className="px-4 py-3">{v.area || prop.area || "-"}</td>
-                            <td className="px-4 py-3">{v.landmark || prop.landmark || "-"}</td>
-                            <td className="px-4 py-3">{v.nearbyLocation || prop.nearbyLocation || "-"}</td>
-                            <td className="px-4 py-3">{v.ownerName || prop.ownerName || "-"}</td>
-                            <td className="px-4 py-3">{v.contactPhone || prop.contactPhone || "-"}</td>
-                            <td className="px-4 py-3">{v.ownerEmail || prop.ownerEmail || "-"}</td>
-                            <td className="px-4 py-3">{v.gender || "-"}</td>
-                            <td className="px-4 py-3 text-center bg-amber-50 border-x border-amber-200">
-                              <div className="flex items-center justify-center">
-                                <span className="text-lg font-bold text-amber-600">{v.studentReviewsRating ? "\u2605".repeat(Math.floor(v.studentReviewsRating)) + "\u2606".repeat(5 - Math.floor(v.studentReviewsRating)) : "-"}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-center bg-emerald-50 border-x border-emerald-200">
-                              <div className="flex items-center justify-center">
-                                <span className="text-lg font-bold text-emerald-600">{v.employeeRating ? "\u2605".repeat(Math.floor(v.employeeRating)) + "\u2606".repeat(5 - Math.floor(v.employeeRating)) : "-"}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-center font-bold">{"\u20B9"}{v.monthlyRent || prop.monthlyRent || 0}</td>
-                            <td className="px-4 py-3 text-sm">{amenities}</td>
-                            <td className="px-4 py-3">{cleanliness}</td>
-                            <td className="px-4 py-3">{ownerBehaviour}</td>
-                            <td className="px-4 py-3">
-                              <button onClick={() => viewGallery(fieldPhotos)} className="text-[10px] text-purple-600 bg-purple-50 px-2 py-1 rounded border border-purple-200 font-medium hover:bg-purple-100 transition">{fieldPhotos.length}</button>
-                            </td>
-                            <td className="px-4 py-3">
-                              <button onClick={() => viewGallery(profPhotos)} className="text-[10px] text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200 font-medium hover:bg-blue-100 transition">{profPhotos.length}</button>
-                            </td>
-                            <td className="px-4 py-3">{geoOk}</td>
-                            <td className="px-4 py-3">
-                              <button onClick={() => openMap(v.visitId || v._id)} className="text-xs px-2 py-1 bg-gray-50 rounded border text-gray-600 hover:bg-gray-100" disabled={!(v.latitude && v.longitude)}>Map</button>
-                            </td>
-                            <td className="px-4 py-3">{v.status || "-"}</td>
-                            <td className="px-4 py-3 font-mono text-sm text-purple-700">{loginId}</td>
-                            <td className="px-4 py-3 font-mono text-sm">{password}</td>
-                            <td className="px-4 py-3 text-center">
-                              <div className="flex items-center justify-center gap-2">
-                                <button onClick={() => openApproveModal(v.visitId || v._id)} className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors" title="Approve"><i data-lucide="check" className="w-4 h-4"></i></button>
-                                <button onClick={() => holdVisit(v.visitId || v._id)} className="p-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors" title="Hold"><i data-lucide="pause" className="w-4 h-4"></i></button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-b-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-gray-50 text-gray-500 text-[10px] uppercase border-b">
-                    <tr>
-                      <th className="px-6 py-4">Owner Name</th>
-                      <th className="px-6 py-4">Room No</th>
-                      <th className="px-6 py-4">Rent/mo</th>
-                      <th className="px-6 py-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {roomApprovals.length === 0 ? (
-                      <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-400">No room approvals pending.</td></tr>
-                    ) : (
-                      roomApprovals.map((n) => (
-                        <tr key={n._id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 text-sm">{n.submittedBy || n.propertyInfo?.ownerName || "-"}</td>
-                          <td className="px-6 py-4 text-sm font-mono">{n.room?.number || n.room?.id || "-"}</td>
-                          <td className="px-6 py-4 text-right font-bold">{"\u20B9"}{n.room?.rent ?? "-"}</td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <button onClick={() => approveRoomNotification(n._id, true)} className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">Approve</button>
-                              <button onClick={() => approveRoomNotification(n._id, false)} className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm">Reject</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">{enq.property}</p>
+                   </div>
+                   <div className="text-right hidden sm:block">
+                      <p className="text-sm font-bold text-slate-800 leading-none mb-2">{enq.date}</p>
+                      <p className="text-[10px] font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100 shadow-sm inline-block">{enq.id}</p>
+                   </div>
+                   <button className="w-12 h-12 rounded-[1.25rem] bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-all shadow-sm">
+                      <ChevronRight className="w-6 h-6" />
+                   </button>
+                </div>
+              ))}
+           </div>
         </div>
       </div>
-      {showApprove ? (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center shadow-xl">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="upload-cloud" className="w-6 h-6 text-blue-600"></i></div>
-            <h3 className="text-lg font-bold text-gray-900">Approve Property</h3>
-            <p className="text-sm text-gray-600 mb-6">Would you like to upload this property to the website?</p>
-            <div className="flex gap-3">
-              <button onClick={() => confirmApproval(true)} className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition font-medium">Yes, Upload</button>
-              <button onClick={() => confirmApproval(false)} className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition font-medium">No, Keep Offline</button>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
-      {showSuccess ? (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center shadow-xl">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="check" className="w-6 h-6 text-green-600"></i></div>
-            <h3 className="text-lg font-bold text-gray-900">Approved!</h3>
-            <p className="text-sm text-gray-500 mb-4">Credentials generated successfully.</p>
-            <div className="bg-gray-50 p-3 rounded text-left mb-4 border border-gray-200">
-              <div className="text-xs text-gray-500">Login ID:</div><div className="font-mono font-bold text-purple-600">{generatedCreds.loginId}</div>
-              <div className="text-xs text-gray-500 mt-2">Password:</div><div className="font-mono font-bold text-slate-600">{generatedCreds.password}</div>
-            </div>
-            <button onClick={() => { setShowSuccess(false); fetchEnquiries(); }} className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition">Close</button>
-          </div>
-        </div>
-      ) : null}
-
-      {showGallery ? (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60] backdrop-blur-sm" onClick={closeGallery}>
-          <div className="relative w-full max-w-4xl p-4" onClick={(e) => e.stopPropagation()}>
-            <button onClick={closeGallery} className="absolute -top-10 right-0 text-white"><i data-lucide="x" className="w-8 h-8"></i></button>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[80vh] overflow-y-auto p-4">
-              {galleryImages.length > 0 ? galleryImages.map((src, idx) => (
-                <img key={`${src}-${idx}`} src={src} className="w-full h-48 object-cover rounded-xl shadow-lg border border-gray-200" />
-              )) : (
-                <p className="text-white text-center py-20">No images available for this section.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </>
+      {/* Strategic Conversion Suite */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+         <ActionCardLarge icon={CheckCircle2} label="Conversion Pipeline" sub="View approved leads" count="1,283" color="green" btnText="Audit Success" />
+         <ActionCardLarge icon={PauseCircle} label="Awaiting Hub" sub="Review leads on hold" count="156" color="indigo" btnText="Resolve Pulse" />
+         <ActionCardLarge icon={XCircle} label="Rejection Archive" sub="Audit rejected leads" count="233" color="red" btnText="Audit Failures" />
+      </div>
+    </div>
   );
 }
 
+function StatCardLarge({ icon: Icon, color, label, value, trend, up }) {
+  const colors = {
+    blue: "bg-blue-600 shadow-blue-200",
+    orange: "bg-amber-600 shadow-amber-200",
+    green: "bg-emerald-600 shadow-emerald-200",
+    red: "bg-rose-600 shadow-rose-200",
+    indigo: "bg-indigo-600 shadow-indigo-200",
+  };
 
+  return (
+    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col gap-8 group hover:translate-y-[-8px] transition-all duration-500">
+      <div className={cn("w-20 h-20 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl transition-transform group-hover:rotate-6", colors[color])}>
+         <Icon className="w-10 h-10" />
+      </div>
+      <div>
+         <p className="text-[11px] font-bold text-slate-400 uppercase mb-4 leading-none truncate tracking-widest">{label}</p>
+         <p className="text-5xl font-bold text-slate-800 tracking-tighter leading-none">{value}</p>
+      </div>
+      <div className={cn(
+        "flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-2xl w-fit shadow-sm border",
+        up ? "text-emerald-600 bg-emerald-50 border-emerald-100" : "text-rose-600 bg-rose-50 border-rose-100"
+      )}>
+         {up ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+         {trend}
+      </div>
+    </div>
+  );
+}
+
+function ActionCardLarge({ icon: Icon, label, sub, count, color, btnText }) {
+  const colors = {
+    green: "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600",
+    indigo: "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600",
+    red: "bg-rose-50 text-rose-600 group-hover:bg-rose-600",
+  };
+  
+  return (
+    <div className="bg-white rounded-[2.5rem] p-12 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center text-center group cursor-pointer transition-all hover:translate-y-[-8px]">
+       <div className={cn("w-20 h-20 rounded-[1.5rem] flex items-center justify-center mb-10 transition-all group-hover:text-white group-hover:scale-110", colors[color])}>
+          <Icon className="w-10 h-10" />
+       </div>
+       <h4 className="text-xl font-bold text-slate-800 mb-2 leading-tight group-hover:text-blue-600 transition-colors">{label}</h4>
+       <p className="text-[10px] text-slate-400 font-bold uppercase mb-10 tracking-widest opacity-60 group-hover:opacity-100">{sub}</p>
+       
+       <div className="mt-auto flex flex-col items-center">
+          <p className="text-5xl font-bold text-slate-800 tracking-tighter leading-none mb-3">{count}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest opacity-40">Active Records</p>
+       </div>
+       
+       <button className="mt-12 flex items-center gap-3 text-[10px] font-bold text-blue-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+          {btnText} <ArrowUpRight className="w-5 h-5" />
+       </button>
+    </div>
+  );
+}

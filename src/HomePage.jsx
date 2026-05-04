@@ -11,7 +11,7 @@ import MobileBottomNav from './components/website/MobileBottomNav';
 import MobileHamburgerMenu from './components/website/MobileHamburgerMenu';
 import MobilePropertiesSection from './components/website/MobilePropertiesSection';
 import MobileVideoSection from './components/website/MobileVideoSection';
-import { fetchCities, fetchPropertyTypes, fetchProperties } from './utils/api';
+import { fetchCities, fetchPropertyTypes, fetchProperties, trackPropertyClick } from './utils/api';
 
 const cityAreas = {
   'Indore': ['Vijay Nagar', 'Bhawar Kuan', 'Rajwada', 'Palasia'],
@@ -1025,6 +1025,7 @@ export default function HomePage() {
         <Link
           key={property._id}
           to={`/website/property-details/${property._id}`}
+          onClick={() => property._id && trackPropertyClick(property._id)}
           className="flex-shrink-0 w-36 block active:scale-95 transition-transform"
         >
           {/* Standalone image with rating badge */}

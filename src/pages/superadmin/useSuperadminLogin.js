@@ -139,6 +139,7 @@ export const useSuperadminLogin = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ identifier: email, password: pwd }),
+          credentials: "include",
           signal: controller.signal
         });
         clearTimeout(timeoutId);

@@ -1,28 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useHtmlPage } from "../../utils/htmlPage";
+import { 
+  Building2, Users, Shield, Clock, Search, 
+  ArrowUpRight, ArrowDownRight, MoreVertical, 
+  Filter, Globe, MapPin, Zap, Sheet, Trash2, 
+  ChevronRight, Phone, Mail, User, Image as ImageIcon,
+  Activity, Home, CheckCircle2, XCircle, Hourglass,
+  Check, X, Eye, ClipboardCheck, AlertTriangle,
+  Camera, Star, Edit3, Trash, UserCheck,
+  RefreshCw, Download, Inbox, CreditCard, Tag,
+  BarChart3, Plus, Loader2, Sparkles, Globe2,
+  ExternalLink, Layers
+} from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { DateRangePill } from "../../components/dashboard/DateRangePill";
 import { fetchJson } from "../../utils/api";
 
+const cn = (...classes) => classes.filter(Boolean).join(" ");
+
 export default function WebsiteDb() {
-  useHtmlPage({
-    title: "Roomhy - Website Properties",
-    bodyClass: "text-slate-800",
-    htmlAttrs: { lang: "en" },
-    metas: [
-      { charset: "UTF-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    ],
-    links: [
-      {
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-        rel: "stylesheet"
-      },
-      { rel: "stylesheet", href: "/superadmin/assets/css/website-db.css" }
-    ],
-    scripts: [{ src: "https://cdn.tailwindcss.com" }, { src: "https://unpkg.com/lucide@latest" }],
-    inlineScripts: []
-  });
-
-
   const [filter, setFilter] = useState("online");
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,10 +42,6 @@ export default function WebsiteDb() {
   useEffect(() => {
     loadWebsite();
   }, []);
-
-  useEffect(() => {
-    if (window?.lucide) window.lucide.createIcons();
-  }, [properties, filter, galleryOpen]);
 
   const filtered = useMemo(() => {
     return properties.filter((v) =>
@@ -109,127 +100,197 @@ export default function WebsiteDb() {
     URL.revokeObjectURL(link.href);
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[600px] gap-4">
+        <RefreshCw className="w-10 h-10 animate-spin text-blue-600" />
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Syncing Digital Inventory...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Website Properties</h1>
-          <div className="flex items-center gap-4">
-            <button onClick={loadWebsite} className="text-sm text-purple-600 hover:underline flex items-center gap-1"><i data-lucide="refresh-cw" className="w-3 h-3"></i> Refresh</button>
-            <button onClick={exportToCsv} className="text-sm text-gray-600 hover:underline flex items-center gap-1"><i data-lucide="download" className="w-3 h-3"></i> Export</button>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => setFilter("online")} className={`px-3 py-2 rounded ${filter === "online" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"}`}>Online</button>
-          <button onClick={() => setFilter("offline")} className={`px-3 py-2 rounded ${filter === "offline" ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-700"}`}>Offline</button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Total Properties</p>
-            <h3 className="text-3xl font-bold text-gray-900 mt-1">{stats.total}</h3>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">With Photos</p>
-            <h3 className="text-3xl font-bold text-green-600 mt-1">{stats.withPhotos}</h3>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Without Photos</p>
-            <h3 className="text-3xl font-bold text-orange-600 mt-1">{stats.withoutPhotos}</h3>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 text-gray-500 text-[10px] uppercase border-b">
-                <tr>
-                  <th className="px-4 py-3">Property ID</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Property Name</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Area</th>
-                  <th className="px-4 py-3">Owner</th>
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3">Rent</th>
-                  <th className="px-4 py-3">Photos</th>
-                  <th className="px-4 py-3">Web Status</th>
-                  <th className="px-4 py-3 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {loading && (
-                  <tr><td colSpan={11} className="px-6 py-12 text-center text-gray-400">Loading properties...</td></tr>
-                )}
-                {!loading && errorMsg && (
-                  <tr><td colSpan={11} className="px-6 py-12 text-center text-red-500">{errorMsg}</td></tr>
-                )}
-                {!loading && !errorMsg && filtered.length === 0 && (
-                  <tr><td colSpan={11} className="px-6 py-12 text-center text-gray-400">No properties found.</td></tr>
-                )}
-                {filtered.map((v) => {
-                  const prop = v.propertyInfo || {};
-                  const photos = prop.photos || v.photos || [];
-                  const visitId = v.visitId || v._id || "";
-                  const rent = prop.rent || v.monthlyRent || 0;
-                  return (
-                    <tr key={visitId}>
-                      <td className="px-4 py-3 font-mono text-xs text-gray-600">{visitId.slice(-8).toUpperCase()}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">{(v.approvedAt || v.createdAt || "").toString().slice(0, 10) || "-"}</td>
-                      <td className="px-4 py-3 font-semibold text-gray-800">{prop.name || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{prop.type || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{prop.area || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{prop.ownerName || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{prop.ownerPhone || "-"}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">₹{rent}</td>
-                      <td className="px-4 py-3">
-                        {photos.length > 0 ? (
-                          <button onClick={() => openGallery(photos)} className="text-purple-600 hover:underline text-xs">
-                            {photos.length} Photos
-                          </button>
-                        ) : (
-                          <span className="text-xs text-gray-400">None</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${v.isLiveOnWebsite ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"}`}>
-                          {v.isLiveOnWebsite ? "ONLINE" : "OFFLINE"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => toggleLive(v.propertyId || visitId)}
-                          className="text-xs font-medium border border-gray-200 px-3 py-1 rounded hover:bg-gray-50"
-                        >
-                          Toggle
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex flex-col gap-2">
+         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Digital Inventory Intelligence</h1>
+         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
+            <span>Website Management</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-blue-600">Public Asset Visibility</span>
+         </div>
       </div>
 
-      {galleryOpen && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[60]" onClick={() => setGalleryOpen(false)}>
-          <div className="relative w-full max-w-4xl p-4" onClick={(event) => event.stopPropagation()}>
-            <button onClick={() => setGalleryOpen(false)} className="absolute -top-10 right-0 text-white">
-              <i data-lucide="x" className="w-8 h-8"></i>
-            </button>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[80vh] overflow-y-auto p-4 bg-black/20 rounded-lg">
-              {gallery.map((src, idx) => (
-                <img key={idx} src={src} alt={`Photo ${idx + 1}`} className="rounded-md object-cover" />
-              ))}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+         <p className="text-sm font-bold text-slate-400 max-w-2xl">Audit and moderate property visibility on the public website. Track asset distribution and digital health metrics across the global network.</p>
+         <div className="flex items-center gap-4">
+            <div className="flex bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
+               <button onClick={() => setFilter("online")} className={cn("px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all", filter === "online" ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "text-slate-400 hover:text-slate-600")}>Online</button>
+               <button onClick={() => setFilter("offline")} className={cn("px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all", filter === "offline" ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "text-slate-400 hover:text-slate-600")}>Offline</button>
             </div>
-          </div>
+            <button onClick={exportToCsv} className="bg-slate-800 text-white px-6 py-4 rounded-2xl text-[10px] font-bold uppercase shadow-xl shadow-slate-800/20 hover:bg-slate-900 transition-all flex items-center gap-2">
+               <Download className="w-4 h-4" /> Export Ledger
+            </button>
+         </div>
+      </div>
+
+      {/* Hero Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <StatCardLarge label="Total Assets" value={stats.total} trend="Global Index" up icon={Layers} color="blue" />
+        <StatCardLarge label="Asset Photos" value={stats.withPhotos} trend="Visual Density" up icon={Camera} color="green" />
+        <StatCardLarge label="Awaiting Media" value={stats.withoutPhotos} trend="Needs Attention" up={false} icon={AlertTriangle} color="orange" />
+      </div>
+
+      {/* Main Inventory Card */}
+      <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+         <div className="flex items-center justify-between mb-10">
+            <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Public Visibility Ledger</h3>
+            <button onClick={loadWebsite} className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all">
+               <RefreshCw className="w-5 h-5" />
+            </button>
+         </div>
+
+         <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[1400px]">
+               <thead>
+                  <tr className="text-slate-400 text-[10px] font-bold uppercase border-b border-slate-50">
+                     <th className="pb-6">Property Profile</th>
+                     <th className="pb-6">Asset Details</th>
+                     <th className="pb-6">Owner Intelligence</th>
+                     <th className="pb-6 text-center">Rental Index</th>
+                     <th className="pb-6 text-center">Digital Pulse</th>
+                     <th className="pb-6 text-right">Actions</th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-slate-50">
+                  {filtered.map((v) => {
+                    const prop = v.propertyInfo || {};
+                    const photos = prop.photos || v.photos || [];
+                    const visitId = v.visitId || v._id || "";
+                    const rent = prop.rent || v.monthlyRent || 0;
+                    return (
+                      <tr key={visitId} className="group hover:bg-slate-50/50 transition-colors cursor-pointer">
+                         <td className="py-6">
+                            <div className="flex items-center gap-5">
+                               <div className="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden shadow-sm border border-slate-100 group-hover:scale-105 transition-transform duration-500 relative">
+                                  {photos[0] ? (
+                                    <img src={photos[0]} className="w-full h-full object-cover" alt="" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-200">
+                                       <ImageIcon className="w-6 h-6" />
+                                    </div>
+                                  )}
+                                  {photos.length > 0 && (
+                                    <button onClick={(e) => { e.stopPropagation(); openGallery(photos); }} className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white text-[9px] font-bold uppercase backdrop-blur-sm">
+                                       {photos.length} Assets
+                                    </button>
+                                  )}
+                               </div>
+                               <div>
+                                  <p className="text-base font-bold text-slate-800">{prop.name || "Unnamed Asset"}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">ID: {visitId.slice(-8).toUpperCase()}</p>
+                               </div>
+                            </div>
+                         </td>
+                         <td className="py-6">
+                            <div className="space-y-1">
+                               <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">{prop.type || "-"}</p>
+                               <div className="flex items-center gap-1.5 text-slate-400">
+                                  <MapPin className="w-3 h-3" />
+                                  <span className="text-[10px] font-bold">{prop.area || "-"}</span>
+                               </div>
+                            </div>
+                         </td>
+                         <td className="py-6">
+                            <div className="space-y-1">
+                               <p className="text-sm font-bold text-slate-800">{prop.ownerName || "-"}</p>
+                               <div className="flex items-center gap-1.5 text-slate-400">
+                                  <Phone className="w-3 h-3" />
+                                  <span className="text-[10px] font-bold">{prop.ownerPhone || "-"}</span>
+                               </div>
+                            </div>
+                         </td>
+                         <td className="py-6 text-center">
+                            <p className="text-base font-bold text-slate-800 tracking-tighter">₹{rent.toLocaleString()}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">Monthly Yield</p>
+                         </td>
+                         <td className="py-6 text-center">
+                            <span className={cn(
+                              "text-[9px] font-bold px-3 py-1 rounded-full border uppercase shadow-sm",
+                              v.isLiveOnWebsite ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100"
+                            )}>
+                               {v.isLiveOnWebsite ? "Online Hub" : "Offline"}
+                            </span>
+                         </td>
+                         <td className="py-6 text-right">
+                            <div className="flex items-center justify-end gap-3">
+                               <button onClick={() => toggleLive(v.propertyId || visitId)} className="px-6 py-2.5 rounded-xl border border-slate-100 bg-white text-slate-400 hover:text-blue-600 hover:shadow-md transition-all text-[10px] font-bold uppercase">Toggle Pulse</button>
+                               <button className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100">
+                                  <ExternalLink className="w-4 h-4" />
+                               </button>
+                            </div>
+                         </td>
+                      </tr>
+                    );
+                  })}
+               </tbody>
+            </table>
+         </div>
+      </div>
+
+      {/* Modern Gallery Modal */}
+      {galleryOpen && (
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-lg flex items-center justify-center z-[100] p-10 animate-in fade-in duration-300" onClick={() => setGalleryOpen(false)}>
+           <div className="relative w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-8">
+                 <div className="flex items-center gap-4 text-white">
+                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center"><Camera className="w-6 h-6" /></div>
+                    <div>
+                       <h3 className="text-2xl font-bold tracking-tight">Digital Asset Gallery</h3>
+                       <p className="text-[10px] font-bold uppercase opacity-50">{gallery.length} Assets Found</p>
+                    </div>
+                 </div>
+                 <button onClick={() => setGalleryOpen(false)} className="w-12 h-12 rounded-2xl bg-white/10 text-white hover:bg-white/20 transition-all flex items-center justify-center"><X className="w-6 h-6" /></button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 max-h-[70vh] overflow-y-auto p-2 custom-scrollbar">
+                 {gallery.map((src, idx) => (
+                   <div key={idx} className="aspect-square rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl group relative hover:scale-105 transition-all duration-500">
+                      <img src={src} alt={`Asset ${idx + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all" />
+                   </div>
+                 ))}
+              </div>
+           </div>
         </div>
       )}
     </div>
   );
 }
 
-
+function StatCardLarge({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    green: "bg-emerald-600 shadow-emerald-200", 
+    blue: "bg-blue-600 shadow-blue-200", 
+    indigo: "bg-indigo-600 shadow-indigo-200",
+    orange: "bg-amber-600 shadow-amber-200"
+  };
+  
+  return (
+    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col gap-8 group hover:translate-y-[-8px] transition-all duration-500">
+      <div className={cn("w-20 h-20 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl transition-transform group-hover:rotate-6", bgColors[color])}>
+         <Icon className="w-10 h-10" />
+      </div>
+      <div>
+         <p className="text-[11px] font-bold text-slate-400 uppercase mb-4 leading-none truncate">{label}</p>
+         <p className="text-5xl font-bold text-slate-800 tracking-tighter leading-none">{value}</p>
+      </div>
+      <div className={cn(
+        "flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-2xl w-fit",
+        up ? "text-emerald-600 bg-emerald-50 border border-emerald-100" : "text-rose-600 bg-rose-50 border border-rose-100"
+      )}>
+         {up ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+         {trend}
+      </div>
+    </div>
+  );
+}

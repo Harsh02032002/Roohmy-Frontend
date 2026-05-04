@@ -1,540 +1,216 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useHtmlPage } from "../../utils/htmlPage";
+import React from "react";
+import { 
+  Wallet, Clock, CheckCircle2, AlertCircle, ArrowUpRight, 
+  ArrowDownRight, ChevronRight, Search, Filter, 
+  MoreVertical, Download, Plus, Calendar, DollarSign,
+  FileText, Activity, ShieldCheck, CreditCard,
+  Sparkles, Layers, Box, Globe2, IndianRupee,
+  Inbox, ImageIcon, Save
+} from "lucide-react";
+import { PageHeader } from "../../components/dashboard/PageHeader";
+import { DateRangePill } from "../../components/dashboard/DateRangePill";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell
+} from "recharts";
 
-const getApiUrl = () =>
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:5001"
-    : "https://api.roomhy.com";
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const navSections = [
-  {
-    label: "Overview",
-    items: [{ href: "/superadmin/superadmin", icon: "layout-dashboard", text: "Dashboard", key: "superadmin" }]
-  },
-  {
-    label: "Management",
-    items: [
-      { href: "/superadmin/manager", icon: "map-pin", text: "Teams", key: "manager" },
-      { href: "/superadmin/owner", icon: "briefcase", text: "Property Owners", key: "owner" },
-      { href: "/superadmin/properties", icon: "home", text: "Properties", key: "properties" },
-      { href: "/superadmin/tenant", icon: "users", text: "Tenants", key: "tenant" },
-      { href: "/superadmin/new_signups", icon: "file-badge", text: "New Signups", key: "new_signups" }
-    ]
-  },
-  {
-    label: "Operations",
-    items: [
-      { href: "/superadmin/websiteenq", icon: "folder-open", text: "Web Enquiry", key: "websiteenq" },
-      { href: "/superadmin/enquiry", icon: "help-circle", text: "Enquiries", key: "enquiry" },
-      { href: "/superadmin/booking", icon: "calendar-check", text: "Bookings", key: "booking" },
-      { href: "/superadmin/reviews", icon: "star", text: "Reviews", key: "reviews" },
-      { href: "/superadmin/complaint-history", icon: "alert-circle", text: "Complaint History", key: "complaint-history" }
-    ]
-  },
-  {
-    label: "Website",
-    items: [{ href: "/superadmin/website", icon: "globe", text: "Live Properties", key: "website" }]
-  }
+const collectionHealth = [
+  { name: "Collected", value: 842, color: "#10B981", percent: "68.2%" },
+  { name: "Pending", value: 276, color: "#F59E0B", percent: "22.4%" },
+  { name: "Overdue", value: 117, color: "#EF4444", percent: "9.4%" },
 ];
 
-export default function SuperadminRentcollection() {
-  useHtmlPage({
-    title: "Rent Collection - RoomHy",
-    bodyClass: "bg-gray-50 text-slate-800",
-    htmlAttrs: { lang: "en" },
-    metas: [
-      { charset: "UTF-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    ],
-    bases: [],
-    links: [
-      {
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-        rel: "stylesheet"
-      },
-      { rel: "stylesheet", href: "/superadmin/assets/css/rentcollection.css" }
-    ],
-    styles: [],
-    scripts: [
-      { src: "https://cdn.tailwindcss.com" },
-      { src: "https://unpkg.com/lucide@latest" }
-    ],
-    inlineScripts: [],
-    disableMobileSidebar: true
-  });
+const recentCollections = [
+  { id: "TXN-12845", tenant: "Rohit Sharma", property: "Sunrise Heights - A101", amount: "₹ 12,000", status: "Collected", date: "May 28", time: "10:35 AM", initial: "RS", color: "blue" },
+  { id: "TXN-12846", tenant: "Priya Mehta", property: "Green Park - B203", amount: "₹ 8,500", status: "Pending", date: "May 27", time: "09:45 AM", initial: "PM", color: "indigo" },
+  { id: "TXN-12847", tenant: "Amit Patel", property: "Ocean View - C101", amount: "₹ 15,000", status: "Overdue", date: "May 26", time: "11:20 AM", initial: "AP", color: "rose" },
+  { id: "TXN-12848", tenant: "Neha Singh", property: "Lake View - D404", amount: "₹ 9,000", status: "Collected", date: "May 26", time: "04:15 PM", initial: "NS", color: "orange" },
+  { id: "TXN-12849", tenant: "David Chen", property: "Prime City - E502", amount: "₹ 11,000", status: "Collected", date: "May 25", time: "08:30 AM", initial: "DC", color: "green" },
+];
 
-  const apiUrl = getApiUrl();
-  const [tenants, setTenants] = useState([]);
-  const [currentFilter, setCurrentFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [financeOpen, setFinanceOpen] = useState(true);
-  const [toast, setToast] = useState(null);
-  const refreshTimer = useRef(null);
-
-  useEffect(() => {
-    window.lucide?.createIcons();
-  }, [tenants, currentFilter, mobileOpen, financeOpen, toast]);
-
-  useEffect(() => {
-    loadData();
-    const onStorage = (e) => {
-      if (e.key === "roomhy_payment_updated") {
-        loadData();
-        showNotification("Payment status updated!", "success");
-      }
-    };
-    const onPaymentUpdated = () => {
-      loadData();
-    };
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("paymentUpdated", onPaymentUpdated);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("paymentUpdated", onPaymentUpdated);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (refreshTimer.current) clearInterval(refreshTimer.current);
-    refreshTimer.current = setInterval(() => {
-      loadData();
-    }, 30000);
-    return () => {
-      if (refreshTimer.current) clearInterval(refreshTimer.current);
-    };
-  }, []);
-
-  const normKey = (value) => (value || "").toString().trim().toUpperCase();
-
-  const mergeProfile = (owner) => ({
-    ...(owner?.profile || {}),
-    ...(owner?.bankDetails || {}),
-    ...(owner?.bank || {}),
-    ...(owner?.payment || {})
-  });
-
-  const mergeTenantsWithRents = (tenantList, rentList, ownerList) => {
-    const rentMap = {};
-    rentList.forEach((rent) => {
-      if (rent.tenantLoginId) rentMap[rent.tenantLoginId] = rent;
-    });
-
-    const ownerMap = {};
-    ownerList.forEach((owner) => {
-      const keys = [
-        owner.loginId,
-        owner.ownerLoginId,
-        owner._id,
-        owner.id,
-        owner.profile?.loginId
-      ].filter(Boolean);
-      keys.forEach((k) => { ownerMap[normKey(k)] = owner; });
-    });
-
-    return tenantList.map((tenant) => {
-      const ownerCandidateKeys = [
-        tenant.propertyOwnerId,
-        tenant.ownerLoginId,
-        tenant.owner_id,
-        tenant.ownerId,
-        tenant?.property?.ownerLoginId,
-        tenant?.property?.owner_id,
-        tenant?.property?.ownerId,
-        tenant?.property?.owner?.loginId,
-        tenant?.property?.owner?._id,
-        tenant?.property?.owner
-      ].filter(Boolean);
-
-      let owner = null;
-      for (const key of ownerCandidateKeys) {
-        const matched = ownerMap[normKey(key)];
-        if (matched) { owner = matched; break; }
-      }
-      const profile = mergeProfile(owner);
-
-      return {
-        ...tenant,
-        rentAmount: parseFloat(tenant.agreedRent) || 0,
-        rentInfo: rentMap[tenant.loginId] || {
-          paymentStatus: "pending",
-          paidAmount: 0,
-          totalDue: parseFloat(tenant.agreedRent) || 0
-        },
-        ownerInfo: owner || {
-          name: "N/A",
-          phone: "N/A",
-          profile: { bankName: "N/A", accountNumber: "N/A", ifscCode: "N/A", branchName: "N/A" }
-        },
-        ownerProfile: profile
-      };
-    });
-  };
-
-  const loadData = async () => {
-    try {
-      const token =
-        localStorage.getItem("token") ||
-        localStorage.getItem("areaAdminToken") ||
-        localStorage.getItem("superAdminToken");
-      const headers = token ? { Authorization: "Bearer " + token } : {};
-
-      const tenantRes = await fetch(`${apiUrl}/api/tenants`, { headers });
-      if (!tenantRes.ok) {
-        throw new Error(`HTTP ${tenantRes.status}: Failed to fetch tenants`);
-      }
-      const tenantData = await tenantRes.json();
-      let fetchedTenants = [];
-      if (tenantData && tenantData.success && Array.isArray(tenantData.tenants)) {
-        fetchedTenants = tenantData.tenants;
-      } else if (Array.isArray(tenantData)) {
-        fetchedTenants = tenantData;
-      } else if (tenantData.tenants && Array.isArray(tenantData.tenants)) {
-        fetchedTenants = tenantData.tenants;
-      }
-
-      let fetchedRents = [];
-      try {
-        const rentRes = await fetch(`${apiUrl}/api/rents`, { headers });
-        if (rentRes.ok) {
-          const rentData = await rentRes.json();
-          if (rentData && rentData.success && Array.isArray(rentData.rents)) {
-            fetchedRents = rentData.rents;
-          } else if (Array.isArray(rentData)) {
-            fetchedRents = rentData;
-          } else if (rentData.rents && Array.isArray(rentData.rents)) {
-            fetchedRents = rentData.rents;
-          }
-        }
-      } catch (_) {}
-
-      let fetchedOwners = [];
-      try {
-        const ownerRes = await fetch(`${apiUrl}/api/owners`, { headers });
-        if (ownerRes.ok) {
-          const ownerData = await ownerRes.json();
-          if (ownerData && ownerData.success && Array.isArray(ownerData.owners)) {
-            fetchedOwners = ownerData.owners;
-          } else if (Array.isArray(ownerData)) {
-            fetchedOwners = ownerData;
-          } else if (ownerData.owners && Array.isArray(ownerData.owners)) {
-            fetchedOwners = ownerData.owners;
-          }
-        }
-      } catch (err) {
-        try {
-          const cachedOwners = JSON.parse(localStorage.getItem("roomhy_owners_db") || "{}");
-          fetchedOwners = Object.values(cachedOwners).map((owner, idx) => ({
-            loginId: Object.keys(JSON.parse(localStorage.getItem("roomhy_owners_db") || "{}"))[idx],
-            profile: owner.profile || {}
-          }));
-        } catch (_) {}
-      }
-
-      const merged = mergeTenantsWithRents(fetchedTenants, fetchedRents, fetchedOwners);
-      setTenants(merged);
-    } catch (err) {
-      console.error("Error loading data:", err);
-      setTenants([]);
-    }
-  };
-
-  const showNotification = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const sendReminders = async () => {
-    const unpaidTenants = tenants.filter((t) => (t.rentInfo || {}).paymentStatus !== "paid");
-    if (unpaidTenants.length === 0) {
-      showNotification("No unpaid tenants to send reminders", "error");
-      return;
-    }
-    if (!confirm(`Send rent reminders to ${unpaidTenants.length} unpaid tenant(s)? Daily reminders will continue until payment.`)) {
-      return;
-    }
-
-    try {
-      const token =
-        localStorage.getItem("token") ||
-        localStorage.getItem("areaAdminToken") ||
-        localStorage.getItem("superAdminToken");
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers.Authorization = "Bearer " + token;
-
-      let response = await fetch(`${apiUrl}/api/rents/reminders/start-unpaid`, {
-        method: "POST",
-        headers
-      });
-      let data = await response.json().catch(() => ({}));
-
-      if (response.status === 404) {
-        response = await fetch(`${apiUrl}/api/rents/reminders/send`, {
-          method: "POST",
-          headers
-        });
-        data = await response.json().catch(() => ({}));
-      }
-
-      if (!response.ok || data.success === false) {
-        throw new Error(data.message || data.error || "Failed to send reminders");
-      }
-
-      showNotification(data.message || `Reminders sent to ${data.sent || 0} tenant(s)`, "success");
-      await loadData();
-    } catch (err) {
-      console.error("Error sending reminders:", err);
-      showNotification(err.message || "Failed to send reminders", "error");
-    }
-  };
-
-  const filteredTenants = useMemo(() => {
-    let list = tenants;
-    if (currentFilter === "paid") {
-      list = list.filter((t) => (t.rentInfo || {}).paymentStatus === "paid");
-    } else if (currentFilter === "unpaid") {
-      list = list.filter((t) => (t.rentInfo || {}).paymentStatus !== "paid");
-    }
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      list = list.filter((t) => JSON.stringify(t).toLowerCase().includes(term));
-    }
-    return list;
-  }, [tenants, currentFilter, searchTerm]);
-
-  const overallStats = useMemo(() => {
-    let overallTotalRent = 0;
-    let overallCollected = 0;
-    let overallPending = 0;
-
-    tenants.forEach((t) => {
-      const rentInfo = t.rentInfo || {};
-      const rentAmount = parseFloat(t.rentAmount || t.agreedRent || 0);
-      const paid = parseFloat(rentInfo.paidAmount || 0);
-      const total = parseFloat(rentInfo.totalDue || rentAmount);
-      const pending = total - paid;
-
-      overallTotalRent += rentAmount;
-      if (rentInfo.paymentStatus === "paid") {
-        overallCollected += total;
-      } else {
-        overallCollected += paid;
-        overallPending += pending;
-      }
-    });
-
-    const collectionRate = overallTotalRent > 0 ? Math.round((overallCollected / overallTotalRent) * 100) : 0;
-    return { overallTotalRent, overallCollected, overallPending, collectionRate };
-  }, [tenants]);
-
-  const filteredStats = useMemo(() => {
-    let totalRent = 0;
-    let statAmount = 0;
-    let statLabel = "Total Collected";
-
-    if (currentFilter === "paid") statLabel = "Total Collected";
-    if (currentFilter === "unpaid") statLabel = "Total Pending";
-
-    filteredTenants.forEach((t) => {
-      const rentInfo = t.rentInfo || {};
-      const rentAmount = parseFloat(t.rentAmount || t.agreedRent || 0);
-      totalRent += rentAmount;
-      if (currentFilter === "paid") {
-        statAmount += parseFloat(rentInfo.paidAmount || rentInfo.totalDue || 0);
-      } else if (currentFilter === "unpaid") {
-        statAmount += parseFloat(rentInfo.totalDue || 0) - parseFloat(rentInfo.paidAmount || 0);
-      } else if (rentInfo.paymentStatus === "paid") {
-        statAmount += parseFloat(rentInfo.paidAmount || rentInfo.totalDue || 0);
-      }
-    });
-
-    return { totalRent, statAmount, statLabel };
-  }, [filteredTenants, currentFilter]);
-
-  const currentPage = "rentcollection";
-
+export default function SuperadminRentCollection() {
   return (
-    <>
-      {toast ? (
-        <div className={`fixed top-4 right-4 z-[100] px-6 py-3 rounded-2xl shadow-xl border ${toast.type === "success" ? "bg-green-500 border-green-400 text-white" : "bg-red-500 border-red-400 text-white"} animate-in slide-in-from-top-4 duration-300`}>
-          <div className="flex items-center gap-3">
-            <i data-lucide={toast.type === "success" ? "check-circle" : "alert-circle"} className="w-5 h-5"></i>
-            <span className="font-bold text-sm">{toast.message}</span>
-          </div>
+    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex flex-col gap-2">
+         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Revenue Performance Hub</h1>
+         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
+            <span>Accounting Operations</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-blue-600">Rent Collection & Yield Audit</span>
+         </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+         <p className="text-sm font-bold text-slate-400 max-w-2xl">Monitor platform-wide rental yields, audit collection efficiency and manage overdue revenue accounts with real-time performance analytics.</p>
+         <button className="bg-slate-800 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase shadow-xl shadow-slate-800/20 hover:bg-slate-900 transition-all flex items-center gap-2">
+            <Download className="w-4 h-4" /> Export Revenue Audit
+         </button>
+      </div>
+
+      {/* Hero Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <StatCardLarge label="Total Receivables" value="₹ 4.2M" trend="+ 12.5% Yield" up icon={IndianRupee} color="blue" />
+        <StatCardLarge label="Collection Index" value="₹ 3.1M" trend="Optimal Flow" up icon={CheckCircle2} color="green" />
+        <StatCardLarge label="Overdue Capital" value="₹ 260k" trend="Needs Audit" up={false} icon={AlertCircle} color="orange" />
+        <StatCardLarge label="Processing Yield" value="₹ 120k" trend="+ 5.6% Flux" up icon={CreditCard} color="indigo" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Collection Health */}
+        <div className="lg:col-span-5 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center">
+           <div className="flex items-center justify-between w-full mb-10">
+              <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Fiscal Health Index</h3>
+              <div className="flex items-center gap-2">
+                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">This Month</span>
+                 <ChevronRight className="w-3 h-3 text-slate-300" />
+              </div>
+           </div>
+           <div className="relative w-64 h-64 mb-10">
+              <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                    <Pie data={collectionHealth} dataKey="value" innerRadius={70} outerRadius={95} paddingAngle={8} stroke="none">
+                       {collectionHealth.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    </Pie>
+                 </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                 <p className="text-4xl font-bold text-slate-800 tracking-tighter leading-none">₹ 4.2M</p>
+                 <p className="text-[10px] text-slate-400 font-bold uppercase mt-2">Receivable</p>
+              </div>
+           </div>
+           <div className="w-full space-y-4">
+              {collectionHealth.map(item => (
+                <div key={item.name} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group transition-all hover:bg-white hover:shadow-md">
+                   <div className="flex items-center gap-4">
+                      <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{backgroundColor: item.color}} />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-800 transition-colors">{item.name} Hub</span>
+                   </div>
+                   <div className="flex items-center gap-3">
+                      <span className="text-sm font-bold text-slate-800">{item.value.toLocaleString()}</span>
+                      <span className="text-[9px] font-bold text-slate-400 px-2 py-0.5 bg-white rounded-lg border border-slate-100 uppercase tracking-tighter">{item.percent}</span>
+                   </div>
+                </div>
+              ))}
+           </div>
         </div>
-      ) : null}
 
-      <div className="p-4 md:p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Rent Collection</h2>
-            <p className="text-sm md:text-base text-slate-500 mt-1">View all tenant rent information and manage collections.</p>
-          </div>
-
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <div className="flex flex-wrap gap-2 sm:gap-4 mb-4">
-                <button onClick={() => setCurrentFilter("all")} className={`filter-btn w-full sm:w-auto px-4 sm:px-6 py-2 rounded-md font-medium text-sm transition ${currentFilter === "all" ? "active" : ""}`} data-filter="all">
-                  All Tenants
-                </button>
-                <button onClick={() => setCurrentFilter("paid")} className={`filter-btn w-full sm:w-auto px-4 sm:px-6 py-2 rounded-md font-medium text-sm transition ${currentFilter === "paid" ? "active" : ""}`} data-filter="paid">
-                  Paid
-                </button>
-                <button onClick={() => setCurrentFilter("unpaid")} className={`filter-btn w-full sm:w-auto px-4 sm:px-6 py-2 rounded-md font-medium text-sm transition ${currentFilter === "unpaid" ? "active" : ""}`} data-filter="unpaid">
-                  Unpaid
-                </button>
+        {/* Performance Portfolio */}
+        <div className="lg:col-span-7 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+           <div className="flex items-center justify-between mb-10">
+              <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Revenue Performance Portfolio</h3>
+              <div className="relative group w-48">
+                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                 <input 
+                   placeholder="Search..." 
+                   className="w-full bg-slate-50 border-none rounded-xl py-2.5 pl-11 pr-4 text-xs font-bold shadow-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" 
+                 />
               </div>
-              <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-stretch lg:items-center">
-                <input
-                  type="text"
-                  placeholder="Search tenant name, email, or property..."
-                  className="w-full flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <button onClick={loadData} className="w-full sm:w-auto bg-purple-600 text-white px-6 py-2 rounded-md text-sm hover:bg-purple-700">
-                  <i data-lucide="refresh-cw" className="w-4 h-4 inline mr-2"></i> Refresh
-                </button>
-                <button onClick={sendReminders} className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md text-sm hover:bg-blue-700">
-                  <i data-lucide="bell" className="w-4 h-4 inline mr-2"></i> Rent Reminder
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow p-6 mb-6 border border-purple-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Overall Rent Summary (All Tenants)</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                <div className="bg-white rounded-lg p-4 border border-purple-200">
-                  <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Rent</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-purple-600 mt-2">{"\u20B9"}{overallStats.overallTotalRent.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500 mt-2">All Tenants</p>
+           </div>
+           <div className="space-y-6">
+              {recentCollections.map(txn => (
+                <div key={txn.id} className="flex items-center gap-6 group cursor-pointer p-3 rounded-[2rem] hover:bg-slate-50/50 transition-all border border-transparent hover:border-slate-100">
+                   <div className={cn(
+                      "w-16 h-16 rounded-[1.25rem] flex items-center justify-center font-bold text-white text-xl shadow-xl transition-transform group-hover:scale-105",
+                      txn.color === "blue" ? "bg-blue-600 shadow-blue-100" :
+                      txn.color === "indigo" ? "bg-indigo-600 shadow-indigo-100" :
+                      txn.color === "green" ? "bg-emerald-600 shadow-emerald-100" :
+                      txn.color === "orange" ? "bg-amber-600 shadow-amber-100" : "bg-rose-600 shadow-rose-100"
+                   )}>
+                      {txn.initial}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        <p className="text-base font-bold text-slate-800 truncate">{txn.tenant}</p>
+                        <span className={cn(
+                           "text-[9px] font-bold px-3 py-1 rounded-xl border uppercase shadow-sm tracking-widest",
+                           txn.status === "Collected" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                           txn.status === "Pending" ? "bg-amber-50 text-amber-600 border-amber-100" : "bg-rose-50 text-rose-600 border-rose-100"
+                        )}>
+                          {txn.status}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-widest opacity-60">{txn.property}</p>
+                   </div>
+                   <div className="text-right hidden sm:block mr-2">
+                      <p className="text-base font-bold text-slate-800 tracking-tighter">{txn.amount}</p>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{txn.date} • {txn.time}</p>
+                   </div>
+                   <button className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg transition-all border border-slate-100">
+                      <ChevronRight className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                   </button>
                 </div>
-                <div className="bg-white rounded-lg p-4 border border-green-200">
-                  <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Collected</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">{"\u20B9"}{overallStats.overallCollected.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500 mt-2">Paid</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-red-200">
-                  <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Total Pending</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-2">{"\u20B9"}{overallStats.overallPending.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500 mt-2">Unpaid</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 border border-blue-200">
-                  <p className="text-gray-600 text-xs font-medium uppercase tracking-wide">Collection Rate</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-2">{overallStats.collectionRate}%</p>
-                  <p className="text-xs text-gray-500 mt-2">Collected/Total</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <h3 className="text-sm font-bold text-gray-700 mb-4">Filtered View Stats</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Rent</p>
-                  <p className="text-2xl font-bold text-gray-900">{"\u20B9"}{filteredStats.totalRent.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">{filteredStats.statLabel}</p>
-                  <p className="text-2xl font-bold text-green-600">{"\u20B9"}{filteredStats.statAmount.toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1400px]">
-                  <thead className="bg-gray-100 border-b border-gray-200">
-                    <tr>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Tenant Name</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Email</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Phone</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Property</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Room</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Rent Amount</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Payment Status</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Move In Date</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Owner Name</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Owner Phone</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Bank Name</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Account Number</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">IFSC Code</th>
-                      <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">Branch</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {filteredTenants.length === 0 ? (
-                      <tr>
-                        <td colSpan={14} className="text-center py-8 text-gray-500">No {currentFilter !== "all" ? currentFilter : ""} tenants found</td>
-                      </tr>
-                    ) : (
-                      filteredTenants.map((tenant, idx) => {
-                        const moveInDate = tenant.moveInDate ? new Date(tenant.moveInDate).toLocaleDateString() : "N/A";
-                        const initials = (tenant.name || "T").split(" ").map((n) => n[0]).join("").toUpperCase();
-                        const colors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-red-500", "bg-yellow-500", "bg-pink-500"];
-                        const avatarBg = colors[idx % colors.length];
-
-                        const rentInfo = tenant.rentInfo || {};
-                        const tenantPropertyRaw = typeof tenant.property === "object" && tenant.property
-                          ? tenant.property.title || tenant.property.name || ""
-                          : tenant.property || "";
-                        const rentPropertyRaw = rentInfo.propertyName || "";
-                        const isPlaceholderProperty = (value) => {
-                          const v = String(value || "").trim().toLowerCase();
-                          return !v || v === "new" || v === "new property" || v === "unknown";
-                        };
-                        const propertyName = !isPlaceholderProperty(rentPropertyRaw)
-                          ? rentPropertyRaw
-                          : (!isPlaceholderProperty(tenantPropertyRaw) ? tenantPropertyRaw : "Unknown Property");
-                        const paymentStatus = rentInfo.paymentStatus || "pending";
-                        const statusBadgeColor = paymentStatus === "paid" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
-                        const statusText = paymentStatus === "paid" ? "Paid" : "Unpaid";
-                        const rentAmount = parseFloat(tenant.rentAmount || tenant.agreedRent || 0);
-
-                        const roomNo = tenant.roomNo || tenant.room_no || tenant.roomNumber || "N/A";
-                        const ownerInfo = tenant.ownerInfo || {};
-                        const ownerProfile = tenant.ownerProfile || ownerInfo.profile || {};
-                        const ownerName = ownerInfo.name || ownerInfo.ownerName || ownerProfile.name || ownerProfile.ownerName || tenant.ownerName || "N/A";
-                        const ownerPhone = ownerInfo.phone || ownerInfo.mobile || ownerProfile.phone || ownerProfile.mobile || ownerProfile.contactPhone || "N/A";
-                        const bankName = ownerProfile.bankName || ownerProfile.bank || ownerProfile.bank_name || ownerProfile.upiId || ownerProfile.upi || ownerProfile.gpay || ownerProfile.paymentId || "N/A";
-                        const accountNumber = ownerProfile.accountNumber || ownerProfile.accountNo || ownerProfile.account_number || "N/A";
-                        const ifscCode = ownerProfile.ifscCode || ownerProfile.ifsc || ownerProfile.ifsc_code || "N/A";
-                        const branchName = ownerProfile.branchName || ownerProfile.branch || ownerProfile.branch_name || "N/A";
-
-                        return (
-                          <tr key={tenant.loginId || idx} className="hover:bg-gray-50 transition">
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm whitespace-nowrap">
-                              <div className="flex items-center gap-3">
-                                <div className={`avatar ${avatarBg}`}>{initials}</div>
-                                <span className="font-medium text-gray-900">{tenant.name || "N/A"}</span>
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">{tenant.email || "N/A"}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">{tenant.phone || "N/A"}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">{propertyName}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 font-medium whitespace-nowrap">{roomNo}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">{"\u20B9"}{rentAmount.toLocaleString()}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm whitespace-nowrap">
-                              <span className={`status-badge px-3 py-1 rounded-full font-bold text-xs ${statusBadgeColor}`}>{statusText}</span>
-                            </td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">{moveInDate}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 font-medium whitespace-nowrap">{ownerName}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">{ownerPhone}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">{bankName}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 font-mono whitespace-nowrap">{accountNumber}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 font-mono whitespace-nowrap">{ifscCode}</td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap">{branchName}</td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+              ))}
+           </div>
+           <button className="w-full mt-8 py-4 text-[10px] font-bold text-blue-600 uppercase tracking-widest hover:underline transition-all">Audit Full Performance</button>
         </div>
-    </>
+      </div>
+
+      {/* Strategic Fiscal Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <ActionCardLarge icon={Plus} label="Record Yield" sub="Manually audit a rent payment" count="24" color="blue" btnText="Record Flow" />
+        <ActionCardLarge icon={FileText} label="Yield Invoices" sub="Bulk generation of fiscal invoices" count="1.2k" color="green" btnText="Generate Bulk" />
+        <ActionCardLarge icon={Activity} label="Late Fee Audit" sub="Review and commit late fee logic" count="117" color="orange" btnText="Start Audit" />
+        <ActionCardLarge icon={ShieldCheck} label="Fiscal Integrity" sub="Full financial health performance audit" count="4.2M" color="red" btnText="Run Integrity" />
+      </div>
+    </div>
   );
 }
 
+function StatCardLarge({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    green: "bg-emerald-600 shadow-emerald-200", 
+    blue: "bg-blue-600 shadow-blue-200", 
+    indigo: "bg-indigo-600 shadow-indigo-200", 
+    orange: "bg-rose-600 shadow-rose-200" 
+  };
+  
+  return (
+    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col gap-8 group hover:translate-y-[-8px] transition-all duration-500">
+      <div className={cn("w-20 h-20 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl transition-transform group-hover:rotate-6", bgColors[color])}>
+         <Icon className="w-10 h-10" />
+      </div>
+      <div>
+         <p className="text-[11px] font-bold text-slate-400 uppercase mb-4 leading-none truncate tracking-widest">{label}</p>
+         <p className="text-5xl font-bold text-slate-800 tracking-tighter leading-none">{value}</p>
+      </div>
+      <div className={cn(
+        "flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-2xl w-fit shadow-sm border",
+        up ? "text-emerald-600 bg-emerald-50 border-emerald-100" : "text-rose-600 bg-rose-50 border-rose-100"
+      )}>
+         {up ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+         {trend}
+      </div>
+    </div>
+  );
+}
 
+function ActionCardLarge({ icon: Icon, label, sub, count, color, btnText }) {
+  const colors = {
+    blue: "bg-blue-50 text-blue-600 group-hover:bg-blue-600 shadow-blue-50",
+    green: "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 shadow-emerald-50",
+    orange: "bg-amber-50 text-amber-600 group-hover:bg-amber-600 shadow-amber-50",
+    red: "bg-rose-50 text-rose-600 group-hover:bg-rose-600 shadow-rose-50",
+  };
+  
+  return (
+    <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col items-center text-center group cursor-pointer transition-all hover:translate-y-[-8px]">
+       <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all group-hover:text-white group-hover:scale-110", colors[color])}>
+          <Icon className="w-8 h-8" />
+       </div>
+       <h4 className="text-base font-bold text-slate-800 mb-2 leading-tight group-hover:text-blue-600 transition-colors">{label}</h4>
+       <p className="text-[10px] text-slate-400 font-bold uppercase mb-8 opacity-50 tracking-widest">{sub}</p>
+       
+       <div className="mt-auto flex flex-col items-center">
+          <p className="text-3xl font-bold text-slate-800 leading-none mb-2 tracking-tighter">{count}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active Hubs</p>
+       </div>
+       
+       <button className="mt-10 flex items-center gap-2 text-[10px] font-bold text-blue-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+          {btnText} <ArrowUpRight className="w-4 h-4" />
+       </button>
+    </div>
+  );
+}

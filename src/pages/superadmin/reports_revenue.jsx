@@ -1,11 +1,23 @@
+import React from "react";
+import { 
+  Building2, Users, Shield, Clock, Search, 
+  ArrowUpRight, ArrowDownRight, MoreVertical, 
+  Filter, Globe, MapPin, Zap, Sheet, Trash2, 
+  ChevronRight, Phone, Mail, User, Image as ImageIcon,
+  Activity, Home, CheckCircle2, XCircle, Wallet,
+  ArrowUpCircle, ArrowDownCircle, RotateCcw, Plus,
+  Download, Eye, Send, FileText, Receipt, LayoutGrid,
+  IndianRupee, Database, TrendingUp, Calendar,
+  Smartphone, BarChart3, PieChart as PieIcon, LineChart as LineIcon
+} from "lucide-react";
 import { PageHeader } from "../../components/dashboard/PageHeader";
-import { StatCard } from "../../components/dashboard/StatCard";
 import { DateRangePill } from "../../components/dashboard/DateRangePill";
-import { Home, Users, FileText, IndianRupee, Database, Eye, Download, Filter, RotateCcw, ArrowUp, ArrowDown, Building2, MapPin } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, Cell
+  PieChart, Pie, Cell, AreaChart, Area
 } from "recharts";
+
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const perf = Array.from({ length: 7 }, (_, i) => ({
   name: `${20 + i} May`,
@@ -16,274 +28,210 @@ const perf = Array.from({ length: 7 }, (_, i) => ({
 }));
 
 const cats = [
-  { name: "Listings", value: 12, color: "hsl(var(--chart-1))" },
-  { name: "Users", value: 8, color: "hsl(var(--chart-2))" },
-  { name: "Leads / Bookings", value: 10, color: "hsl(var(--chart-5))" },
-  { name: "Revenue", value: 8, color: "hsl(var(--chart-3))" },
-  { name: "Commission", value: 6, color: "hsl(var(--chart-4))" },
-  { name: "Subscriptions", value: 4, color: "hsl(187 85% 43%)" },
-  { name: "Refunds", value: 4, color: "hsl(280 75% 60%)" },
-  { name: "Others", value: 4, color: "hsl(215 16% 65%)" },
+  { name: "Listings", value: 12, color: "#3B82F6", percent: "21.4%" },
+  { name: "Users", value: 8, color: "#10B981", percent: "14.3%" },
+  { name: "Leads", value: 10, color: "#6366F1", percent: "17.8%" },
+  { name: "Revenue", value: 8, color: "#F59E0B", percent: "14.3%" },
+  { name: "Commission", value: 6, color: "#8B5CF6", percent: "10.7%" },
+  { name: "Others", value: 12, color: "#94A3B8", percent: "21.5%" },
 ];
 
 const recentReports = [
-  { name: "Revenue Summary Report", category: "Revenue", date: "26 May 2025, 10:30 AM", by: "Aman (Superadmin)", format: "PDF" },
-  { name: "Listings Performance Report", category: "Listings", date: "26 May 2025, 09:15 AM", by: "Aman (Superadmin)", format: "Excel" },
-  { name: "User Growth Report", category: "Users", date: "26 May 2025, 08:45 AM", by: "Aman (Superadmin)", format: "PDF" },
-  { name: "Leads & Bookings Report", category: "Leads / Bookings", date: "25 May 2025, 07:30 PM", by: "Aman (Superadmin)", format: "Excel" },
-  { name: "Commission Summary Report", category: "Commission", date: "25 May 2025, 06:10 PM", by: "Aman (Superadmin)", format: "PDF" },
-];
-
-const catCls = {
-  Revenue: "bg-warning-soft text-warning",
-  Listings: "bg-success-soft text-success",
-  Users: "bg-brand-purple-soft text-brand-purple",
-  "Leads / Bookings": "bg-orange-100 text-orange-600",
-  Commission: "bg-destructive/10 text-destructive",
-};
-
-const shortcuts = [
-  { icon: Home, label: "Listings Report", color: "blue" },
-  { icon: Users, label: "Users Report", color: "green" },
-  { icon: FileText, label: "Leads / Bookings Report", color: "purple" },
-  { icon: IndianRupee, label: "Revenue Report", color: "yellow" },
-  { icon: Database, label: "Commission Report", color: "red" },
-  { icon: FileText, label: "Subscriptions Report", color: "blue" },
-  { icon: FileText, label: "Refunds Report", color: "purple" },
-  { icon: Building2, label: "Performance Report", color: "blue" },
-  { icon: MapPin, label: "Locations Report", color: "green" },
+  { name: "Revenue Summary Report", category: "Revenue", date: "26 May 2024", time: "10:30 AM", by: "Aman", format: "PDF", color: "blue" },
+  { name: "Listings Performance Report", category: "Listings", date: "26 May 2024", time: "09:15 AM", by: "Aman", format: "Excel", color: "emerald" },
+  { name: "User Growth Report", category: "Users", date: "26 May 2024", time: "08:45 AM", by: "Aman", format: "PDF", color: "indigo" },
+  { name: "Leads & Bookings Report", category: "Leads", date: "25 May 2024", time: "07:30 PM", by: "Aman", format: "Excel", color: "purple" },
 ];
 
 export default function ReportsRevenue() {
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <PageHeader
-        title="Revenue Report"
-        subtitle="Comprehensive financial breakdown of platform earnings."
-        actions={
-          <>
-            <DateRangePill value="20 May 2025 - 26 May 2025" />
-            <button className="h-11 px-5 rounded-xl border border-border bg-card font-medium text-sm flex items-center gap-2 hover:bg-muted">
-              <Download className="h-4 w-4" /> Export Report
-            </button>
-          </>
-        }
-      />
-
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard label="Total Listings" value="2,548" delta="+156 vs last week" trend="up" icon={Home} iconColor="blue" />
-        <StatCard label="Total Users" value="18,745" delta="+8.6% vs last week" trend="up" icon={Users} iconColor="green" />
-        <StatCard label="Total Leads / Bookings" value="6,482" delta="+12.3% vs last week" trend="up" icon={FileText} iconColor="purple" />
-        <StatCard label="Total Revenue" value="₹18,75,000" delta="+15.6% vs last week" trend="up" icon={IndianRupee} iconColor="yellow" />
-        <StatCard label="Total Commission" value="₹2,85,750" delta="+12.4% vs last week" trend="up" icon={Database} iconColor="red" />
-        <StatCard label="Total Refunds" value="₹45,250" delta="-3.2% vs last week" trend="down" icon={Eye} iconColor="purple" />
+    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex flex-col gap-2">
+         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Revenue Intelligence Dashboard</h1>
+         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
+            <span>Reports</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-blue-600">Revenue Analytics</span>
+         </div>
       </div>
 
-      {/* Filters */}
-      <div className="panel">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 items-end">
-          {[
-            { label: "Date Range", value: "20 May 2025 - 26 May 2025" },
-            { label: "Compare With", value: "13 May 2025 - 19 May 2025" },
-            { label: "Property Type", value: "All Types" },
-            { label: "Location", value: "All Locations" },
-          ].map((f) => (
-            <div key={f.label} className="xl:col-span-1">
-              <label className="text-xs text-muted-foreground mb-1 block">{f.label}</label>
-              <button className="w-full h-11 px-3 rounded-xl border border-border bg-card text-sm text-left flex items-center justify-between">
-                <span className="truncate">{f.value}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
-              </button>
-            </div>
-          ))}
-          <button className="h-11 rounded-xl border border-border bg-card font-medium text-sm flex items-center justify-center gap-2 hover:bg-muted">
-            <Filter className="h-4 w-4" /> Filters
-          </button>
-          <button className="h-11 rounded-xl border border-border bg-card font-medium text-sm flex items-center justify-center gap-2 hover:bg-muted">
-            <RotateCcw className="h-4 w-4" /> Reset
-          </button>
-        </div>
+      <p className="text-sm font-bold text-slate-400">Comprehensive financial breakdown of platform earnings, growth velocity and fiscal performance.</p>
+
+      {/* Hero Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <StatCardLarge label="Total Revenue" value="₹ 18.7L" trend="+ 15.6%" up icon={IndianRupee} color="blue" />
+        <StatCardLarge label="Commission" value="₹ 2.8L" trend="+ 12.4%" up icon={Database} color="indigo" />
+        <StatCardLarge label="Total Leads" value="6.4k" trend="+ 12.3%" up icon={FileText} color="purple" />
+        <StatCardLarge label="Total Users" value="18.7k" trend="+ 8.6%" up icon={Users} color="green" />
+        <StatCardLarge label="Total Listings" value="2.5k" trend="+ 156" up icon={Home} color="emerald" />
+        <StatCardLarge label="Refunds" value="₹ 45k" trend="- 3.2%" up={false} icon={RotateCcw} color="red" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="panel">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-semibold">Performance Summary</h3>
-            <select className="h-8 px-2 rounded-lg border border-border text-xs"><option>This Week</option></select>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer>
-              <LineChart data={perf}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v / 1000}K`} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="listings" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="users" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="leads" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Performance Chart */}
+        <div className="lg:col-span-8 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col">
+           <div className="flex items-center justify-between mb-10">
+              <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Financial Growth Velocity</h3>
+              <div className="flex items-center gap-6">
+                 <LegendPill color="#3B82F6" label="Revenue" />
+                 <LegendPill color="#10B981" label="Users" />
+                 <select className="bg-slate-50 border-none rounded-2xl px-5 py-2.5 text-xs font-bold text-slate-500 outline-none cursor-pointer">
+                    <option>This Week</option>
+                 </select>
+              </div>
+           </div>
+           <div className="flex-1 min-h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                 <AreaChart data={perf}>
+                    <defs>
+                       <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                       </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={15} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dx={-15} tickFormatter={v => `${v/1000}k`} />
+                    <Tooltip contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)'}} />
+                    <Area type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={5} fillOpacity={1} fill="url(#colorRev)" />
+                    <Area type="monotone" dataKey="listings" stroke="#10B981" strokeWidth={5} fill="transparent" />
+                 </AreaChart>
+              </ResponsiveContainer>
+           </div>
         </div>
 
-        <div className="panel">
-          <h3 className="font-semibold mb-4">Reports by Category</h3>
-          <div className="flex items-center gap-4">
-            <div className="relative h-44 w-44 shrink-0">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie data={cats} dataKey="value" innerRadius={50} outerRadius={75} paddingAngle={2}>
-                    {cats.map((c, i) => <Cell key={i} fill={c.color} />)}
-                  </Pie>
-                </PieChart>
+        {/* Category Breakdown */}
+        <div className="lg:col-span-4 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col">
+           <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-10">Reports by Category</h3>
+           <div className="relative h-64 w-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                    <Pie data={cats} dataKey="value" innerRadius={80} outerRadius={110} paddingAngle={8} stroke="none">
+                       {cats.map((c, i) => <Cell key={i} fill={c.color} />)}
+                    </Pie>
+                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <div className="text-xl font-bold">56</div>
-                <div className="text-[10px] text-muted-foreground">Reports</div>
+                 <p className="text-4xl font-bold text-slate-800 tracking-tighter">56</p>
+                 <p className="text-[10px] text-slate-400 font-bold uppercase mt-2">Total Reports</p>
               </div>
-            </div>
-            <div className="flex-1 grid grid-cols-1 gap-1.5 text-xs">
-              {cats.map((c) => (
-                <div key={c.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
-                    <span>{c.name}</span>
-                  </div>
-                  <span className="text-muted-foreground">{c.value} ({((c.value / 56) * 100).toFixed(1)}%)</span>
+           </div>
+           <div className="mt-10 space-y-4">
+              {cats.map(c => (
+                <div key={c.name} className="flex items-center justify-between group cursor-default">
+                   <div className="flex items-center gap-3">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: c.color}} />
+                      <span className="text-xs font-bold text-slate-500 group-hover:text-slate-800 transition-colors">{c.name}</span>
+                   </div>
+                   <span className="text-xs font-bold text-slate-800">{c.percent}</span>
                 </div>
               ))}
+           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+         {/* Recent Reports */}
+         <div className="lg:col-span-8 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col">
+            <div className="flex items-center justify-between mb-10">
+               <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Generated Intelligence</h3>
+               <button className="text-xs font-bold text-blue-600 hover:underline uppercase">View Full Archive</button>
             </div>
-          </div>
-        </div>
-
-        <div className="panel">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Top Insights</h3>
-            <button className="text-sm text-primary font-medium">View All</button>
-          </div>
-          <div className="space-y-4">
-            {[
-              { trend: "up", color: "success", title: "Revenue increased by 15.6%", sub: "vs last week" },
-              { trend: "up", color: "info", title: "Leads increased by 12.3%", sub: "vs last week" },
-              { trend: "up", color: "warning", title: "Active users increased by 8.6%", sub: "vs last week" },
-              { trend: "down", color: "destructive", title: "Refunds decreased by 3.2%", sub: "vs last week" },
-            ].map((ins, i) => {
-              const cls = {
-                success: "bg-success-soft text-success",
-                info: "bg-info-soft text-info",
-                warning: "bg-warning-soft text-warning",
-                destructive: "bg-destructive/10 text-destructive",
-              };
-              return (
-                <div key={i} className="flex items-center gap-3">
-                  <div className={`h-9 w-9 rounded-full flex items-center justify-center ${cls[ins.color]}`}>
-                    {ins.trend === "up" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">{ins.title}</div>
-                    <div className="text-xs text-muted-foreground">{ins.sub}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2 panel">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Recent Reports</h3>
-            <button className="text-sm text-primary font-medium">View All</button>
-          </div>
-          <div className="overflow-x-auto -mx-6">
-            <table className="w-full text-sm">
-              <thead className="text-xs text-muted-foreground border-b border-border">
-                <tr>
-                  <th className="text-left px-6 py-2 font-medium">Report Name</th>
-                  <th className="text-left py-2 font-medium">Category</th>
-                  <th className="text-left py-2 font-medium">Generated On</th>
-                  <th className="text-left py-2 font-medium">Generated By</th>
-                  <th className="text-left py-2 font-medium">Format</th>
-                  <th className="text-right px-6 py-2 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {recentReports.map((r, i) => (
-                  <tr key={i} className="hover:bg-muted/30">
-                    <td className="px-6 py-3 font-medium">{r.name}</td>
-                    <td><span className={`badge-soft ${catCls[r.category] ?? "bg-muted text-muted-foreground"}`}>{r.category}</span></td>
-                    <td className="text-muted-foreground">{r.date}</td>
-                    <td className="text-muted-foreground">{r.by}</td>
-                    <td className="text-muted-foreground">{r.format}</td>
-                    <td className="px-6 text-right">
-                      <button className="p-2 rounded-lg hover:bg-muted text-primary"><Download className="h-4 w-4" /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="panel">
-          <h3 className="font-semibold mb-4">Report Shortcuts</h3>
-          <div className="grid grid-cols-1 gap-2.5">
-            {shortcuts.map((s, i) => {
-              const Icon = s.icon;
-              const cls = {
-                blue: "bg-info-soft text-info",
-                green: "bg-success-soft text-success",
-                purple: "bg-brand-purple-soft text-brand-purple",
-                yellow: "bg-warning-soft text-warning",
-                red: "bg-destructive/10 text-destructive",
-              };
-              return (
-                <button key={i} className="flex items-center gap-3 p-2.5 rounded-xl border border-border hover:bg-muted/50 text-left">
-                  <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${cls[s.color]}`}><Icon className="h-4 w-4" /></div>
-                  <span className="text-sm font-medium">{s.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <div className="panel">
-        <h3 className="font-semibold mb-1">Schedule Reports</h3>
-        <p className="text-sm text-muted-foreground mb-5">Automate your reports and get them delivered on time.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {[
-            { title: "Weekly Revenue Report", schedule: "Every Monday at 08:00 AM", recipients: "aman@roomhy.com, finance@roomhy.com" },
-            { title: "Monthly Commission Report", schedule: "1st of Every Month at 10:00 AM", recipients: "aman@roomhy.com" },
-            { title: "Monthly User Report", schedule: "1st of Every Month at 10:30 AM", recipients: "team@roomhy.com" },
-          ].map((r, i) => (
-            <div key={i} className="p-4 rounded-xl border border-border">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-lg bg-info-soft text-info flex items-center justify-center"><FileText className="h-4 w-4" /></div>
-                <div className="flex-1">
-                  <div className="font-medium text-sm">{r.title}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{r.schedule}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5 truncate">Recipients: {r.recipients}</div>
-                </div>
-                <span className="badge-soft bg-success-soft text-success">Active</span>
-              </div>
-              <div className="flex justify-end mt-2">
-                <div className="relative w-10 h-5 bg-primary rounded-full">
-                  <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full" />
-                </div>
-              </div>
+            <div className="space-y-6">
+               {recentReports.map((r, i) => (
+                 <div key={i} className="flex items-center gap-6 group cursor-pointer p-2 rounded-3xl transition-all">
+                    <div className={cn(
+                       "w-16 h-16 rounded-[1.25rem] flex items-center justify-center text-white shadow-xl transition-transform group-hover:scale-105",
+                       r.color === "blue" ? "bg-blue-600 shadow-blue-100" :
+                       r.color === "emerald" ? "bg-emerald-600 shadow-emerald-100" :
+                       r.color === "indigo" ? "bg-indigo-600 shadow-indigo-100" : "bg-purple-600 shadow-purple-100"
+                    )}>
+                       <FileText className="w-8 h-8" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                       <p className="text-base font-bold text-slate-800 truncate">{r.name}</p>
+                       <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{r.date} • {r.time}</p>
+                    </div>
+                    <div className="text-center hidden sm:block mr-4">
+                       <span className="text-[9px] font-bold px-3 py-1 rounded-lg bg-slate-50 border border-slate-100 text-slate-500 uppercase">{r.category}</span>
+                    </div>
+                    <button className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all">
+                       <Download className="w-5 h-5" />
+                    </button>
+                 </div>
+               ))}
             </div>
-          ))}
-          <button className="p-4 rounded-xl border-2 border-dashed border-border hover:bg-muted/50 flex flex-col items-center justify-center gap-2 text-sm text-primary font-medium">
-            <span className="text-2xl">+</span>
-            Schedule New Report
-            <span className="text-xs text-muted-foreground">Create a new scheduled report</span>
-          </button>
+         </div>
+
+         {/* Scheduled Automations */}
+         <div className="lg:col-span-4 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col">
+            <h3 className="text-xl font-bold text-slate-800 tracking-tight mb-10">Active Schedules</h3>
+            <div className="space-y-6 flex-1">
+               <ScheduleCard title="Weekly Revenue" date="Every Monday" />
+               <ScheduleCard title="Monthly Payouts" date="1st of Month" />
+               <ScheduleCard title="User Growth" date="Bi-Weekly" />
+            </div>
+            <button className="mt-10 w-full py-5 rounded-3xl border-2 border-dashed border-slate-100 text-xs font-bold text-slate-400 hover:border-blue-600 hover:text-blue-600 transition-all uppercase">
+               Create New Schedule
+            </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatCardLarge({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    blue: "bg-blue-600 shadow-blue-200", 
+    indigo: "bg-indigo-600 shadow-indigo-200", 
+    purple: "bg-purple-600 shadow-purple-200", 
+    green: "bg-emerald-600 shadow-emerald-200", 
+    emerald: "bg-emerald-600 shadow-emerald-200", 
+    red: "bg-rose-600 shadow-rose-200" 
+  };
+  
+  return (
+    <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col gap-6 group hover:translate-y-[-8px] transition-all duration-500">
+      <div className={cn("w-16 h-16 rounded-[1.25rem] flex items-center justify-center text-white shadow-2xl transition-transform group-hover:rotate-6", bgColors[color])}>
+         <Icon className="w-8 h-8" />
+      </div>
+      <div>
+         <p className="text-[10px] font-bold text-slate-400 uppercase mb-3 leading-none truncate">{label}</p>
+         <p className="text-4xl font-bold text-slate-800 tracking-tighter leading-none">{value}</p>
+      </div>
+      <div className={cn(
+        "flex items-center gap-2 text-[10px] font-bold px-3 py-1.5 rounded-xl w-fit",
+        up ? "text-emerald-600 bg-emerald-50" : "text-rose-600 bg-rose-50"
+      )}>
+         {up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+         {trend}
+      </div>
+    </div>
+  );
+}
+
+function LegendPill({ color, label }) {
+  return (
+    <div className="flex items-center gap-2">
+       <div className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: color}} />
+       <span className="text-[10px] font-bold text-slate-400 uppercase">{label}</span>
+    </div>
+  );
+}
+
+function ScheduleCard({ title, date }) {
+  return (
+    <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 group hover:bg-slate-800 hover:shadow-xl transition-all cursor-pointer">
+       <div className="flex items-center justify-between">
+          <div>
+             <p className="text-sm font-bold text-slate-800 group-hover:text-white transition-colors">{title}</p>
+             <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 group-hover:text-slate-300 transition-colors">{date}</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm group-hover:scale-110 transition-transform">
+             <CheckCircle2 className="w-5 h-5" />
+          </div>
+       </div>
     </div>
   );
 }
