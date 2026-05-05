@@ -9,7 +9,7 @@ import {
   Camera, Map, Star, Edit3, Trash, UserCheck,
   RefreshCw, Download, Inbox, CreditCard, Tag,
   BarChart3, Plus, Loader2, Wifi, Car, Utensils,
-  WashingMachine, Fan, Tv, Couch, ShieldCheck
+  WashingMachine, Fan, Tv, Sofa, ShieldCheck
 } from "lucide-react";
 import { PageHeader } from "../../components/dashboard/PageHeader";
 import { DateRangePill } from "../../components/dashboard/DateRangePill";
@@ -19,7 +19,7 @@ const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const iconMap = {
   wifi: Wifi, car: Car, utensils: Utensils, "washing-machine": WashingMachine,
-  ac: Zap, fan: Fan, shield: ShieldCheck, bed: Home, tv: Tv, couch: Couch,
+  ac: Zap, fan: Fan, shield: ShieldCheck, bed: Home, tv: Tv, couch: Sofa,
   check: CheckCircle2
 };
 
