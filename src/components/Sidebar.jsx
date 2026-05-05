@@ -8,7 +8,8 @@ import {
   UserPlus, ClipboardList, Briefcase, FileText,
   CreditCard, IndianRupee, RotateCcw, AlertCircle,
   BarChart, PieChart, Activity, Shield, LayoutGrid,
-  FileSearch, CheckCircle2, History, MessageCircle
+  FileSearch, CheckCircle2, History, MessageCircle,
+  Headset, ShieldAlert, Zap
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogoutDialog } from "./superadmin/LogoutDialog";
@@ -16,233 +17,236 @@ import { LogoutDialog } from "./superadmin/LogoutDialog";
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const NAV = [
-  {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    path: "/superadmin/superadmin"
-  },
-  {
-    label: "Home",
-    icon: Home,
+  { label: "Dashboard", icon: LayoutDashboard, path: "/superadmin/superadmin" },
+  { 
+    label: "Home", 
+    icon: Home, 
+    path: "/superadmin/home-overview",
     children: [
       { label: "Overview", path: "/superadmin/home-overview" },
       { label: "Total Properties", path: "/superadmin/properties" },
       { label: "Total Tenants", path: "/superadmin/tenant" },
       { label: "Revenue Overview", path: "/superadmin/accounting" },
-      { label: "Alerts (Pending Rent)", path: "/superadmin/rentcollection" }
+      { label: "Alerts (Pending Rent)", path: "/superadmin/rentcollection" },
     ]
   },
-  {
-    label: "User Management",
-    icon: Users,
+  { 
+    label: "User Management", 
+    icon: Users, 
+    path: "/superadmin/user-overview", 
     children: [
-      { label: "Overview", path: "/superadmin/user-overview" },
-      { 
-        label: "Team Management", 
-        children: [
-          { label: "All Staff", path: "/superadmin/manager" },
-          { label: "Profile", path: "/superadmin/profile" },
-          { label: "Documents", path: "/superadmin/manager" }
-        ]
-      },
-      { label: "Roles & Permission", path: "/superadmin/settings" },
-      { 
-        label: "Attendance", 
-        children: [
-          { label: "Daily Logs", path: "/superadmin/log" },
-          { label: "Leave", path: "/superadmin/log" },
-          { label: "Shifts", path: "/superadmin/log" }
-        ]
-      },
-      { 
-        label: "Property Owners", 
-        children: [
-          { label: "Add", path: "/superadmin/owner" },
-          { label: "Approved / Pending", path: "/superadmin/owner" },
-          { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
-          { label: "Agreements", path: "/superadmin/owner" }
-        ]
-      },
-      { 
-        label: "Tenants", 
-        children: [
-          { label: "View All Tenants", path: "/superadmin/tenant" },
-          { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
-          { label: "Rent History", path: "/superadmin/rentcollection" },
-          { label: "Agreements", path: "/superadmin/tenant" }
-        ]
-      }
+        { label: "Overview", path: "/superadmin/user-overview" },
+        { 
+          label: "Team Management", 
+          children: [
+            { 
+              label: "All Staff", 
+              children: [
+                { label: "Profile", path: "/superadmin/profile" },
+                { label: "Documents", path: "/superadmin/manager" },
+              ]
+            }
+          ]
+        },
+        { label: "Roles & Permission", path: "/superadmin/settings" },
+        { 
+          label: "Attendance", 
+          children: [
+            { label: "Daily Logs", path: "/superadmin/log" },
+            { label: "Leave", path: "/superadmin/log" },
+            { label: "Shifts", path: "/superadmin/log" },
+          ]
+        },
+        { 
+          label: "Property Owners", 
+          children: [
+            { label: "Add", path: "/superadmin/owner" },
+            { label: "Approved / Pending", path: "/superadmin/owner" },
+            { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
+            { label: "Agreements", path: "/superadmin/owner" },
+          ]
+        },
+        { 
+          label: "Tenants", 
+          children: [
+            { label: "View All Tenants", path: "/superadmin/tenant" },
+            { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
+            { label: "Rent History", path: "/superadmin/rentcollection" },
+            { label: "Agreements", path: "/superadmin/tenant" },
+          ]
+        },
     ]
   },
-  {
-    label: "Property Management",
-    icon: Building2,
+  { 
+    label: "Property Management", 
+    icon: Building2, 
+    path: "/superadmin/property-overview", 
     children: [
-      { label: "Overview", path: "/superadmin/property-overview" },
-      { label: "Add Properties", path: "/superadmin/properties" },
-      { label: "Approve / Reject Properties", path: "/superadmin/property_approvals" },
-      { label: "Pending Properties", path: "/superadmin/property_approvals" },
-      { label: "All Properties List", path: "/superadmin/properties" },
-      { label: "Online Leads", path: "/superadmin/enquiry" }
+        { label: "Overview", path: "/superadmin/property-overview" },
+        { label: "Add Properties", path: "/superadmin/properties" },
+        { label: "Approve / Reject Properties", path: "/superadmin/property_approvals" },
+        { label: "Pending Properties", path: "/superadmin/property_approvals" },
+        { label: "All Properties List", path: "/superadmin/properties" },
+        { label: "Online Leads", path: "/superadmin/enquiry" },
     ]
   },
-  {
-    label: "Accounting",
-    icon: IndianRupee,
+  { 
+    label: "Accounting", 
+    icon: Wallet, 
+    path: "/superadmin/accounting-overview", 
     children: [
-      { label: "Overview", path: "/superadmin/accounting" },
-      { 
-        label: "Transaction Management (Tenants)", 
-        children: [
-          { label: "Monthly Payment Receipt", path: "/superadmin/accounting_invoices" },
-          { label: "Payment History", path: "/superadmin/accounting_transactions" },
-          { label: "Other Charges", path: "/superadmin/accounting_transactions" }
-        ]
-      },
-      { 
-        label: "Transaction Management (Owners)", 
-        children: [
-          { label: "Monthly Payment Receipt", path: "/superadmin/accounting_payouts" },
-          { label: "Payment History", path: "/superadmin/accounting_payouts" },
-          { label: "Service Fee Details", path: "/superadmin/accounting_commission" }
-        ]
-      },
-      { 
-        label: "Owner Payout", 
-        children: [
-          { label: "Payout Cycle", path: "/superadmin/accounting_payouts" },
-          { label: "Manual + Auto Payout Option", path: "/superadmin/accounting_payouts" },
-          { label: "Pending Payouts", path: "/superadmin/accounting_payouts" },
-          { label: "Bank Transfer Tracking", path: "/superadmin/accounting_payouts" },
-          { label: "Cash Received Details", path: "/superadmin/accounting_payouts" },
-          { label: "Failed Payout Alerts", path: "/superadmin/accounting_payouts" }
-        ]
-      },
-      { 
-        label: "Roomhy Overview", 
-        children: [
-          { label: "Fixed Fees", path: "/superadmin/accounting_settings" },
-          { label: "Per Bed Fees", path: "/superadmin/accounting_settings" },
-          { label: "Discount", path: "/superadmin/accounting_settings" }
-        ]
-      },
-      { 
-        label: "Invoice System", 
-        children: [
-          { label: "Auto Invoice Generation", path: "/superadmin/accounting_invoices" },
-          { label: "GST", path: "/superadmin/accounting_taxes" },
-          { label: "Download PDF", path: "/superadmin/accounting_invoices" },
-          { label: "Invoice Numbering System", path: "/superadmin/accounting_settings" }
-        ]
-      },
-      { 
-        label: "Refund Management", 
-        children: [
-          { label: "Booking Amount Refund", path: "/superadmin/refund" },
-          { label: "Partial Refund", path: "/superadmin/refund" },
-          { label: "Refund Approval System", path: "/superadmin/refund" },
-          { label: "Refund History", path: "/superadmin/refund" }
-        ]
-      },
-      { 
-        label: "Alert & Automation", 
-        children: [
-          { label: "Rent Due Reminder", path: "/superadmin/settings" },
-          { label: "Payment Success/Failure Alerts", path: "/superadmin/settings" },
-          { label: "Payout Processed Notification", path: "/superadmin/settings" }
-        ]
-      },
-      { 
-        label: "Analytics", 
-        children: [
-          { label: "Roomhy Monthly Revenue", path: "/superadmin/reports_revenue" },
-          { label: "Owners Monthly Revenue", path: "/superadmin/reports_revenue" },
-          { label: "Due Rents", path: "/superadmin/rentcollection" },
-          { label: "Profit / Loss Report", path: "/superadmin/reports" },
-          { label: "Cashflow Dashboard", path: "/superadmin/accounting" }
-        ]
-      }
+        { label: "Overview", path: "/superadmin/accounting-overview" },
+        { 
+          label: "Transaction Management (Tenants)", 
+          children: [
+            { label: "Monthly Payment Receipt", path: "/superadmin/accounting_invoices" },
+            { label: "Payment History", path: "/superadmin/accounting_transactions" },
+            { label: "Other Charges", path: "/superadmin/accounting_transactions" },
+          ]
+        },
+        { 
+          label: "Transaction Management (Owners)", 
+          children: [
+            { label: "Monthly Payment Receipt", path: "/superadmin/accounting_payouts" },
+            { label: "Payment History", path: "/superadmin/accounting_payouts" },
+            { label: "Service Fees Details", path: "/superadmin/accounting_commission" },
+          ]
+        },
+        { 
+          label: "Owner Payout", 
+          children: [
+            { label: "Payout Cycle", path: "/superadmin/accounting_payouts" },
+            { label: "Manual + Auto Payout Option", path: "/superadmin/accounting_payouts" },
+            { label: "Pending Payouts", path: "/superadmin/accounting_payouts" },
+            { label: "Bank Transfer Tracking", path: "/superadmin/accounting_payouts" },
+            { label: "Cash Received Details", path: "/superadmin/accounting_payouts" },
+            { label: "Failed Payout Alerts", path: "/superadmin/accounting_payouts" },
+          ]
+        },
+        { 
+          label: "Roomhy Overview", 
+          children: [
+            { label: "Fixed Fees", path: "/superadmin/accounting_settings" },
+            { label: "Per Bed Fees", path: "/superadmin/accounting_settings" },
+            { label: "Discount", path: "/superadmin/accounting_settings" },
+          ]
+        },
+        { 
+          label: "Invoice System", 
+          children: [
+            { label: "Auto Invoice Generation", path: "/superadmin/accounting_invoices" },
+            { label: "GST", path: "/superadmin/accounting_taxes" },
+            { label: "Download PDF", path: "/superadmin/accounting_invoices" },
+            { label: "Invoice Numbering System", path: "/superadmin/accounting_settings" },
+          ]
+        },
+        { 
+          label: "Refund Management", 
+          children: [
+            { label: "Booking Amount Refund", path: "/superadmin/refund" },
+            { label: "Partial Refund", path: "/superadmin/refund" },
+            { label: "Refund Approval System", path: "/superadmin/refund" },
+            { label: "Refund History", path: "/superadmin/refund" },
+          ]
+        },
+        { 
+          label: "Alert & Automation", 
+          children: [
+            { label: "Rent Due Reminder", path: "/superadmin/settings" },
+            { label: "Payment Success/Failure Alerts", path: "/superadmin/settings" },
+            { label: "Payout Processed Notification", path: "/superadmin/settings" },
+          ]
+        },
+        { 
+          label: "Analytics", 
+          children: [
+            { label: "Roomhy Monthly Revenue", path: "/superadmin/reports_revenue" },
+            { label: "Owners Monthly Revenue", path: "/superadmin/reports_revenue" },
+            { label: "Due Rents", path: "/superadmin/rentcollection" },
+            { label: "Profit / Loss Report", path: "/superadmin/reports" },
+            { label: "Cashflow Dashboard", path: "/superadmin/accounting" },
+          ]
+        },
     ]
   },
-  {
-    label: "Chats",
-    icon: MessageSquare,
+  { 
+    label: "Chat Management", 
+    icon: MessageSquare, 
+    path: "/superadmin/superchat",
     children: [
-      { label: "Live Conversations", path: "/superadmin/superchat" },
-      { label: "Conversation Details", path: "/superadmin/superchat" },
-      { label: "Moderation & Filters", path: "/superadmin/superchat" },
-      { label: "Alerts & Violations", path: "/superadmin/superchat" },
-      { label: "Templates / Auto Messages", path: "/superadmin/superchat" },
-      { label: "Lead -> Chat Mapping", path: "/superadmin/superchat" },
-      { label: "Analytics", path: "/superadmin/superchat" },
-      { label: "Settings", path: "/superadmin/superchat" }
+        { label: "Live Conversations", path: "/superadmin/superchat" },
+        { label: "Conversation Details", path: "/superadmin/superchat" },
+        { label: "Moderation & Filters", path: "/superadmin/superchat" },
+        { label: "Alerts & Violations", path: "/superadmin/superchat" },
+        { label: "Templates / Auto Messages", path: "/superadmin/superchat" },
+        { label: "Lead -> Chat Mapping", path: "/superadmin/superchat" },
+        { label: "Analytics", path: "/superadmin/superchat" },
+        { label: "Settings", path: "/superadmin/settings" },
     ]
   },
-  {
-    label: "Reports & Analytics",
-    icon: BarChart3,
+  { 
+    label: "Report & Analytics", 
+    icon: BarChart3, 
+    path: "/superadmin/reports",
     children: [
-      { label: "Overview", path: "/superadmin/reports" },
-      { label: "Property Performance", path: "/superadmin/reports" },
-      { label: "Location Wise Data", path: "/superadmin/reports" },
-      { label: "Occupancy Rate", path: "/superadmin/reports" },
-      { label: "Growth Analytics", path: "/superadmin/reports" },
-      { label: "Staff Performance Reports", path: "/superadmin/reports" },
-      { label: "Revenue Report", path: "/superadmin/reports_revenue" }
+        { label: "Overview", path: "/superadmin/reports" },
+        { label: "Property Performance", path: "/superadmin/reports" },
+        { label: "Location Wise Data", path: "/superadmin/reports" },
+        { label: "Occupancy Rate", path: "/superadmin/reports" },
+        { label: "Growth Analytics", path: "/superadmin/reports" },
+        { label: "Staff Performance Reports", path: "/superadmin/reports" },
+        { label: "Revenue Report", path: "/superadmin/reports" },
     ]
   },
-  {
-    label: "Booking & Leads",
-    icon: Calendar,
+  { 
+    label: "Booking & Leads", 
+    icon: Calendar, 
+    path: "/superadmin/booking",
     children: [
-      { label: "Overview", path: "/superadmin/booking" },
-      { label: "Total Leads", path: "/superadmin/enquiry" },
-      { label: "Bookings", path: "/superadmin/booking" },
-      { label: "Conversion Rate", path: "/superadmin/booking" },
-      { label: "Top Performing Locations", path: "/superadmin/booking" }
+        { label: "Overview", path: "/superadmin/booking" },
+        { label: "Total Leads", path: "/superadmin/booking" },
+        { label: "Bookings", path: "/superadmin/booking" },
+        { label: "Conversion Rate", path: "/superadmin/booking" },
+        { label: "Top Performing Locations", path: "/superadmin/booking" },
     ]
   },
-  {
-    label: "Review",
-    icon: Star,
+  { 
+    label: "Review", 
+    icon: Star, 
+    path: "/superadmin/reviews",
     children: [
-      { label: "Overview", path: "/superadmin/reviews" },
-      { label: "All Reviews", path: "/superadmin/reviews" },
-      { label: "Moderation", path: "/superadmin/reviews" },
-      { label: "Analytics", path: "/superadmin/reviews" },
-      { label: "New Review", path: "/superadmin/reviews" }
+        { label: "Overview", path: "/superadmin/reviews" },
+        { label: "All Reviews", path: "/superadmin/reviews" },
+        { label: "Moderation", path: "/superadmin/reviews" },
+        { label: "Analytics", path: "/superadmin/reviews" },
+        { label: "New Review (Today / Week / Month)", path: "/superadmin/reviews" },
     ]
   },
-  {
-    label: "CRM",
-    icon: Target,
-    path: "/superadmin/enquiry"
-  },
-  {
-    label: "Support",
-    icon: Headphones,
+  { 
+    label: "Support", 
+    icon: Headphones, 
+    path: "/superadmin/complaint-history",
     children: [
-      { label: "Overview", path: "/superadmin/complaint-history" },
-      { label: "Tenants Complaints", path: "/superadmin/complaint-history" },
-      { label: "Owners Complaints", path: "/superadmin/complaint-history" },
-      { label: "Tickets System", path: "/superadmin/complaint-history" },
-      { label: "Issues Resolutions Tracking", path: "/superadmin/complaint-history" }
+        { label: "Overview", path: "/superadmin/complaint-history" },
+        { label: "Tenants Complaints", path: "/superadmin/complaint-history" },
+        { label: "Owners Complaints", path: "/superadmin/complaint-history" },
+        { label: "Tickets System", path: "/superadmin/complaint-history" },
+        { label: "Issues Resolutions Tracking", path: "/superadmin/complaint-history" },
     ]
   },
-  {
-    label: "Subscription Control",
-    icon: ShieldCheck,
-    path: "/superadmin/pricing"
-  }
+  { label: "CRM", icon: Target, path: "/superadmin/enquiry" },
+  { label: "Subscription Control", icon: ShieldCheck, path: "/superadmin/pricing" },
+  { label: "Settings", icon: Settings, path: "/superadmin/settings" },
 ];
 
 export function Sidebar({ open, isMobile, onClose, onLogout }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [openMenus, setOpenMenus] = useState({});
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [openMenus, setOpenMenus] = useState({ "Review": true, "Support": true });
 
-  const toggleMenu = (label) => {
+  const toggleMenu = (e, label) => {
+    e.stopPropagation();
     setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }));
   };
 
@@ -256,9 +260,9 @@ export function Sidebar({ open, isMobile, onClose, onLogout }) {
     }
   };
 
-  const isItemActive = (item) => {
+  const isPathActive = (item) => {
     if (item.path && location.pathname === item.path) return true;
-    if (item.children) return item.children.some(c => isItemActive(c));
+    if (item.children) return item.children.some(c => isPathActive(c));
     return false;
   };
 
@@ -267,53 +271,41 @@ export function Sidebar({ open, isMobile, onClose, onLogout }) {
       const Icon = item.icon;
       const hasChildren = item.children && item.children.length > 0;
       const isOpen = openMenus[item.label];
-      const isActive = isItemActive(item);
+      const isActive = isPathActive(item);
 
       return (
         <div key={item.label} className="space-y-1">
-          {hasChildren ? (
-            <button
-              onClick={() => toggleMenu(item.label)}
-              className={cn(
-                "w-full flex items-center justify-between transition-all group",
-                level === 0 ? "p-4 rounded-2xl" : "p-3 pl-6 rounded-xl",
-                isActive ? (level === 0 ? "bg-blue-600/10 text-blue-500" : "text-blue-500 bg-blue-500/5") : "hover:bg-slate-800/50"
-              )}
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                {Icon && <Icon className={cn("w-5 h-5 shrink-0", isActive ? "text-blue-500" : "text-slate-500 group-hover:text-slate-300")} />}
-                <span className={cn(
-                  "font-bold truncate",
-                  level === 0 ? "text-[14px]" : "text-[12px] opacity-80"
-                )}>{item.label}</span>
-              </div>
-              {isOpen ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />}
-            </button>
-          ) : (
-            <Link
-              to={item.path}
-              className={cn(
-                "w-full flex items-center transition-all group",
-                level === 0 ? "p-4 rounded-2xl gap-4" : "p-3 pl-6 rounded-xl",
-                location.pathname === item.path 
-                  ? (level === 0 ? "bg-blue-600 text-white shadow-xl shadow-blue-600/20" : "text-blue-400 bg-blue-500/10 font-black") 
-                  : "hover:bg-slate-800/50"
-              )}
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                {Icon && <Icon className={cn("w-5 h-5 shrink-0", location.pathname === item.path ? "text-white" : "text-slate-500 group-hover:text-slate-300")} />}
-                <span className={cn(
-                  "font-bold truncate",
-                  level === 0 ? "text-[14px]" : "text-[12px] opacity-80 group-hover:opacity-100"
-                )}>{item.label}</span>
-              </div>
-            </Link>
-          )}
+          <div
+            onClick={(e) => hasChildren ? toggleMenu(e, item.label) : navigate(item.path)}
+            className={cn(
+              "w-full flex items-center justify-between transition-all group cursor-pointer",
+              level === 0 ? "px-4 py-3 rounded-xl mb-0.5" : "px-4 py-1.5 rounded-lg ml-2",
+              isActive && !hasChildren && level === 0
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
+                : isActive && !hasChildren && level > 0
+                  ? "text-blue-400 font-bold"
+                  : isActive && hasChildren
+                    ? "text-white"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+            )}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              {Icon && <Icon size={18} className={cn(isActive ? "text-blue-400" : "text-slate-500 group-hover:text-slate-300")} />}
+              <span className={cn(
+                "font-bold truncate",
+                level === 0 ? "text-sm" : level === 1 ? "text-[11px] opacity-90" : "text-[10px] opacity-70"
+              )} title={item.label}>{item.label}</span>
+            </div>
+            {hasChildren && (
+              isOpen ? <ChevronDown size={12} className="opacity-40" /> : <ChevronRight size={12} className="opacity-40" />
+            )}
+          </div>
 
+          {/* Nested Children with Vertical Connector Line */}
           {hasChildren && isOpen && (
             <div className={cn(
-              "space-y-1 py-1",
-              level === 0 ? "ml-6 border-l border-slate-800/50" : "ml-4 border-l border-slate-700/30"
+              "ml-6 border-l border-slate-800/80 space-y-0.5", 
+              level === 0 ? "pb-2 mt-1" : "pb-1"
             )}>
               {renderNavItems(item.children, level + 1)}
             </div>
@@ -324,7 +316,7 @@ export function Sidebar({ open, isMobile, onClose, onLogout }) {
   };
 
   const sidebarClasses = cn(
-    "w-80 h-screen bg-[#0F172A] text-slate-300 flex flex-col z-50 border-r border-slate-800/50 shrink-0 transition-transform duration-300",
+    "w-72 h-screen bg-[#0F172A] text-slate-300 flex flex-col z-50 shrink-0 transition-transform duration-300",
     isMobile ? "fixed left-0 top-0" : "relative",
     isMobile && !open ? "-translate-x-full" : "translate-x-0"
   );
@@ -332,43 +324,45 @@ export function Sidebar({ open, isMobile, onClose, onLogout }) {
   return (
     <>
       <aside className={sidebarClasses}>
-        {/* Brand */}
-        <div className="p-8 flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
-            <Building2 className="w-7 h-7" />
+        {/* Header - Profile from Screenshot */}
+        <div className="p-6 flex items-center gap-3 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg border-2 border-white/10 shadow-lg shadow-blue-600/20">
+            A
           </div>
-          <div className="overflow-hidden">
-            <h1 className="text-2xl font-bold text-white tracking-tight truncate">Roomhy<span className="text-blue-500">.com</span></h1>
-            <p className="text-[10px] font-bold text-slate-500 uppercase mt-1 truncate">Super Admin Panel</p>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-white leading-none truncate">Aman</p>
+            <p className="text-[10px] text-slate-500 font-medium mt-1 uppercase tracking-widest truncate">Superadmin</p>
           </div>
         </div>
 
-        {/* User Profile Mini */}
-        <div className="mx-6 mb-8 p-5 bg-slate-800/30 rounded-[2.5rem] border border-slate-700/30 flex items-center gap-4 group hover:bg-slate-800/50 transition-all cursor-pointer overflow-hidden">
-           <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-lg font-bold shadow-lg shrink-0">A</div>
-           <div className="min-w-0">
-              <p className="text-sm font-bold text-white truncate">Aman</p>
-              <p className="text-[10px] font-bold text-slate-500 uppercase truncate">Superadmin</p>
-           </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-6 space-y-2 custom-scrollbar pb-6">
+        {/* Navigation - No Numbers, Extreme Left Alignment */}
+        <nav className="flex-1 overflow-y-auto px-4 space-y-0.5 custom-scrollbar pb-6">
           {renderNavItems(NAV)}
+
+          <div className="pt-4 mt-4 border-t border-slate-800/50">
+             <button 
+               onClick={() => setShowLogoutDialog(true)}
+               className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all group"
+             >
+                <LogOut size={18} />
+                <span className="text-sm font-semibold">Logout</span>
+             </button>
+          </div>
         </nav>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-slate-800/50 mt-auto">
-          <button 
-            onClick={() => setShowLogoutDialog(true)}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 transition-all group"
-          >
-            <LogOut className="w-5 h-5 shrink-0 group-hover:rotate-12 transition-transform" />
-            <span className="text-[13px] font-bold">Logout</span>
-          </button>
+        {/* Sidebar Footer Card */}
+        <div className="p-4 mt-auto shrink-0">
+           <div className="bg-[#1E293B] rounded-2xl p-5 border border-slate-800 shadow-xl">
+              <h4 className="text-xs font-bold text-white mb-1">Need Help?</h4>
+              <p className="text-[10px] text-slate-500 mb-4 leading-tight">Contact our support team for specialized assistance</p>
+              <button className="w-full py-2.5 bg-blue-600/10 text-blue-400 border border-blue-600/20 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                Contact Support
+              </button>
+           </div>
         </div>
       </aside>
 
+      {/* Logout Dialog */}
       <LogoutDialog 
         open={showLogoutDialog} 
         onClose={() => setShowLogoutDialog(false)} 

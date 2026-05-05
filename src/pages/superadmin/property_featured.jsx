@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "../../components/dashboard/PageHeader";
-import { StatCard } from "../../components/dashboard/StatCard";
-import { DataTable, StatusBadge, TableToolbar } from "../../components/dashboard/DataTable";
-import { Sparkles, TrendingUp, Eye, MousePointerClick, Plus, Calendar, MoreVertical, Edit, Trash2, X, Loader2 } from "lucide-react";
+import { 
+  Sparkles, TrendingUp, Eye, MousePointerClick, 
+  Plus, Calendar, MoreVertical, Edit, Trash2, 
+  X, Loader2, Search, Filter, RefreshCw,
+  ArrowUpRight, ArrowDownRight, Layers, ChevronRight,
+  Check, Info, MapPin, Globe
+} from "lucide-react";
+
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const getApiUrl = () =>
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
@@ -19,6 +24,7 @@ export default function FeaturedListings() {
     propertyId: "", propertyTitle: "", propertyImage: "", city: "", startDate: "", endDate: "", position: 0, paymentAmount: 0, paymentStatus: "pending", notes: "", isActive: true
   });
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => { fetchData(); }, []);
 
@@ -45,8 +51,7 @@ export default function FeaturedListings() {
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(formData) });
       const data = await res.json();
       if (data.success) { fetchData(); closeModal(); }
-      else { alert(data.message); }
-    } catch (err) { alert("Error saving"); }
+    } catch (err) { console.error(err); }
     finally { setSaving(false); }
   };
 
@@ -56,7 +61,7 @@ export default function FeaturedListings() {
       const res = await fetch(`${getApiUrl()}/api/featured/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) fetchData();
-    } catch (err) { alert("Error deleting"); }
+    } catch (err) { console.error(err); }
   };
 
   const openModal = (item = null) => {
@@ -99,128 +104,232 @@ export default function FeaturedListings() {
     }
   };
 
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString("en-IN") : "-";
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' }) : "-";
   const isExpired = (d) => d && new Date(d) < new Date();
-  const activeCount = featured.filter(l => l.isActive && !isExpired(l.endDate)).length;
-  const totalViews = featured.reduce((sum, f) => sum + (f.views || 0), 0);
-  const totalClicks = featured.reduce((sum, f) => sum + (f.clicks || 0), 0);
-  const conversionRate = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(2) : "0.00";
+  
+  const stats = {
+    activeCount: featured.filter(l => l.isActive && !isExpired(l.endDate)).length,
+    totalViews: featured.reduce((sum, f) => sum + (f.views || 0), 0),
+    totalClicks: featured.reduce((sum, f) => sum + (f.clicks || 0), 0),
+    get conversion() { return this.totalViews > 0 ? ((this.totalClicks / this.totalViews) * 100).toFixed(2) : "0.00" }
+  };
 
-  const tableData = featured.map(f => ({
-    ...f,
-    views: f.views || 0,
-    clicks: f.clicks || 0,
-    start: formatDate(f.startDate),
-    end: formatDate(f.endDate),
-    plan: f.paymentStatus === "paid" ? "Premium" : "Basic",
-    owner: f.city || "-"
-  }));
+  const filteredFeatured = featured.filter(f => f.propertyTitle.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex flex-col items-center justify-center h-[600px] gap-4">
+        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Syncing Featured Intelligence...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <PageHeader
-        title="Featured Listings"
-        subtitle="Manage promoted and featured property listings."
-        actions={<button onClick={() => openModal()} className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2 hover:opacity-90"><Plus className="h-4 w-4" /> Add Featured</button>}
-      />
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard label="Active Featured" value={activeCount.toString()} delta="+6 this month" trend="up" icon={Sparkles} iconColor="purple" />
-        <StatCard label="Total Views" value={totalViews.toString()} delta="+18.4%" trend="up" icon={Eye} iconColor="blue" />
-        <StatCard label="Total Clicks" value={totalClicks.toString()} delta="+12.6%" trend="up" icon={MousePointerClick} iconColor="green" />
-        <StatCard label="Conversion Rate" value={`${conversionRate}%`} delta="+0.8%" trend="up" icon={TrendingUp} iconColor="yellow" />
-      </div>
-
-      <div className="panel">
-        <TableToolbar searchPlaceholder="Search featured..." filters={[{ label: "Plan", value: "All" }]} />
-        <DataTable data={tableData} columns={[
-          { key: "id", header: "ID", render: (r) => <span className="font-medium">F-{String(r._id || "").slice(-4)}</span> },
-          { key: "title", header: "Property", render: (r) => <div><div className="font-medium">{r.propertyTitle}</div><div className="text-xs text-muted-foreground">{r.owner}</div></div> },
-          { key: "plan", header: "Plan", render: (r) => <StatusBadge status={r.plan} /> },
-          { key: "views", header: "Views", render: (r) => <span className="font-medium">{r.views.toLocaleString()}</span> },
-          { key: "clicks", header: "Clicks", render: (r) => <span className="font-medium">{r.clicks.toLocaleString()}</span> },
-          { key: "period", header: "Period", render: (r) => <div className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" />{r.start} - {r.end}</div> },
-          { key: "status", header: "Status", render: (r) => <StatusBadge status={isExpired(r.endDate) ? "Expired" : (r.isActive ? "Active" : "Inactive")} /> },
-          { key: "actions", header: "", render: (r) => (
-            <div className="flex gap-1 justify-end">
-              <button onClick={() => openModal(r)} className="p-1.5 rounded hover:bg-muted"><Edit className="h-4 w-4 text-muted-foreground" /></button>
-              <button onClick={() => handleDelete(r._id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="h-4 w-4 text-red-500" /></button>
+    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full">
+      {/* Header Area */}
+      <div className="flex items-center justify-between">
+         <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Spotlight Hub</h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Premium Inventory Optimization & Global Visibility Performance Matrix</p>
+         </div>
+         <div className="flex items-center gap-3">
+            <div className="relative group w-48">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+               <input 
+                 value={search} onChange={e => setSearch(e.target.value)}
+                 placeholder="Search premiums..." 
+                 className="w-full bg-white border border-slate-100 rounded-xl py-2 pl-9 pr-3 text-[10px] font-bold shadow-sm outline-none focus:ring-2 focus:ring-blue-100 transition-all" 
+               />
             </div>
-          ), className: "text-right" },
-        ]} />
+            <button onClick={() => openModal()} className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">
+               <Sparkles className="w-3.5 h-3.5" /> Boost Asset
+            </button>
+         </div>
       </div>
 
+      {/* Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCardHorizontal label="Active Spots" value={stats.activeCount} trend="+6 Monthly" up icon={Sparkles} color="indigo" />
+        <StatCardHorizontal label="Spotlight Views" value={stats.totalViews.toLocaleString()} trend="+18.4% Delta" up icon={Eye} color="blue" />
+        <StatCardHorizontal label="Click Yield" value={stats.totalClicks.toLocaleString()} trend="+12.6% Yield" up icon={MousePointerClick} color="emerald" />
+        <StatCardHorizontal label="Conversion Index" value={`${stats.conversion}%`} trend="+0.8% Alpha" up icon={TrendingUp} color="amber" />
+      </div>
+
+      {/* Featured Ledger */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 overflow-hidden">
+         <div className="flex items-center justify-between mb-8">
+            <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest leading-none">Visibility Registry</h3>
+            <div className="flex items-center gap-3">
+               <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm">
+                  <Filter className="w-3.5 h-3.5" />
+               </button>
+               <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm">
+                  <RefreshCw className="w-3.5 h-3.5" />
+               </button>
+            </div>
+         </div>
+
+         <div className="overflow-x-auto">
+            <table className="w-full text-left">
+               <thead>
+                  <tr className="text-slate-400 text-[8px] font-bold uppercase border-b border-slate-50">
+                     <th className="pb-4">Asset Identity Hub</th>
+                     <th className="pb-4 text-center">Engagement Pulse</th>
+                     <th className="pb-4">Temporal Cycle</th>
+                     <th className="pb-4">Visibility Status</th>
+                     <th className="pb-4 text-right">Audit Actions</th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-slate-50">
+                  {filteredFeatured.map((f, i) => (
+                    <tr key={i} className="group hover:bg-slate-50 transition-colors cursor-pointer">
+                       <td className="py-3">
+                          <div className="flex items-center gap-3">
+                             <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50 shrink-0 transition-transform group-hover:scale-105">
+                                <img src={f.propertyImage || "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=40"} className="w-full h-full object-cover" alt="" />
+                             </div>
+                             <div className="min-w-0">
+                                <p className="text-[11px] font-bold text-slate-800 leading-tight truncate max-w-[200px]">{f.propertyTitle}</p>
+                                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 truncate">{f.city} • ID-{String(f._id || "").slice(-4)}</p>
+                             </div>
+                          </div>
+                       </td>
+                       <td className="py-3 text-center">
+                          <div className="inline-flex items-center gap-4">
+                             <div className="text-center">
+                                <p className="text-[10px] font-bold text-slate-800 leading-none">{f.views || 0}</p>
+                                <p className="text-[7px] text-slate-400 font-bold uppercase tracking-tighter mt-1">Views</p>
+                             </div>
+                             <div className="text-center">
+                                <p className="text-[10px] font-bold text-blue-600 leading-none">{f.clicks || 0}</p>
+                                <p className="text-[7px] text-slate-400 font-bold uppercase tracking-tighter mt-1">Clicks</p>
+                             </div>
+                          </div>
+                       </td>
+                       <td className="py-3">
+                          <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-600 leading-none">
+                             <Calendar className="w-3 h-3 text-slate-300" />
+                             {formatDate(f.startDate)} — {formatDate(f.endDate)}
+                          </div>
+                       </td>
+                       <td className="py-3">
+                          <span className={cn(
+                             "text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider shadow-sm",
+                             isExpired(f.endDate) ? "bg-rose-50 text-rose-600 border-rose-100" : (f.isActive ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-50 text-slate-400 border-slate-100")
+                          )}>
+                             {isExpired(f.endDate) ? "Cycle Expired" : (f.isActive ? "Live Pulse" : "Inactive Spot")}
+                          </span>
+                       </td>
+                       <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                             <button onClick={() => openModal(f)} className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm"><Edit className="w-3.5 h-3.5" /></button>
+                             <button onClick={() => handleDelete(f._id)} className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-rose-600 transition-all border border-slate-100 shadow-sm"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                       </td>
+                    </tr>
+                  ))}
+               </tbody>
+            </table>
+         </div>
+      </div>
+
+      {/* Modern Boost Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white">
-              <h3 className="text-lg font-semibold">{editingId ? "Edit Featured" : "Add Featured Listing"}</h3>
-              <button onClick={closeModal} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select Property *</label>
-                <select value={formData.propertyId} onChange={handlePropertySelect} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required>
-                  <option value="">Select a property</option>
-                  {properties.map(p => <option key={p._id} value={p._id}>{p.title} - {p.city}</option>)}
-                </select>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
+           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-white shrink-0">
+                 <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-sm"><Sparkles className="w-4 h-4" /></div>
+                    <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest">{editingId ? "Refine Spotlight" : "Activate Asset Boost"}</h3>
+                 </div>
+                 <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-400 transition-all"><X className="w-4 h-4" /></button>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
-                  <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
-                  <input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                  <input type="number" value={formData.position} onChange={(e) => setFormData({ ...formData, position: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment (Rs.)</label>
-                  <input type="number" value={formData.paymentAmount} onChange={(e) => setFormData({ ...formData, paymentAmount: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
-                <select value={formData.paymentStatus} onChange={(e) => setFormData({ ...formData, paymentStatus: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none">
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="expired">Expired</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" rows="2"></textarea>
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} className="w-4 h-4 rounded text-blue-600" />
-                <span className="text-sm">Active</span>
-              </label>
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2">
-                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {editingId ? "Update" : "Add"}
-                </button>
-              </div>
-            </form>
-          </div>
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                 <div>
+                    <label className="block text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-widest leading-none pl-1">Target Inventory</label>
+                    <select value={formData.propertyId} onChange={handlePropertySelect} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm cursor-pointer" required>
+                       <option value="">Select inventory asset...</option>
+                       {properties.map(p => <option key={p._id} value={p._id}>{p.title} • {p.city}</option>)}
+                    </select>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                       <label className="block text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-widest leading-none pl-1">Start Cycle</label>
+                       <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" required />
+                    </div>
+                    <div>
+                       <label className="block text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-widest leading-none pl-1">End Cycle</label>
+                       <input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" required />
+                    </div>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                       <label className="block text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-widest leading-none pl-1">Rank Position</label>
+                       <input type="number" value={formData.position} onChange={(e) => setFormData({ ...formData, position: e.target.value })} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" placeholder="0" />
+                    </div>
+                    <div>
+                       <label className="block text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-widest leading-none pl-1">Fiscal Yield (Rs.)</label>
+                       <input type="number" value={formData.paymentAmount} onChange={(e) => setFormData({ ...formData, paymentAmount: e.target.value })} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-xs font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" placeholder="0.00" />
+                    </div>
+                 </div>
+                 <div>
+                    <label className="block text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-widest leading-none pl-1">Settlement Status</label>
+                    <select value={formData.paymentStatus} onChange={(e) => setFormData({ ...formData, paymentStatus: e.target.value })} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-[10px] font-bold outline-none cursor-pointer shadow-sm">
+                       <option value="pending">Awaiting Pulse</option>
+                       <option value="paid">Verified Paid</option>
+                       <option value="expired">Expired Spot</option>
+                       <option value="cancelled">Cancelled</option>
+                    </select>
+                 </div>
+                 <div className="pt-2">
+                    <label className="flex items-center gap-2 cursor-pointer group p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white transition-all shadow-sm">
+                       <div className={cn("w-4 h-4 rounded border transition-all flex items-center justify-center", formData.isActive ? "bg-blue-600 border-blue-600" : "bg-white border-slate-200")}>
+                          {formData.isActive && <Check className="w-3 h-3 text-white" />}
+                       </div>
+                       <input type="checkbox" className="hidden" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} />
+                       <span className={cn("text-[10px] font-bold uppercase tracking-widest leading-none", formData.isActive ? "text-blue-600" : "text-slate-500")}>Activate Spot Pulse</span>
+                    </label>
+                 </div>
+                 <div className="flex gap-3 pt-4">
+                    <button type="button" onClick={closeModal} className="flex-1 py-2.5 rounded-xl bg-slate-50 text-[9px] font-bold uppercase text-slate-400 hover:bg-slate-100 transition-all">Dismiss</button>
+                    <button type="submit" disabled={saving} className="flex-[2] py-2.5 rounded-xl bg-slate-800 text-[9px] font-bold uppercase text-white shadow-lg shadow-slate-800/10 hover:bg-black transition-all flex items-center justify-center gap-2">
+                       {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                       {editingId ? "Update Intelligence" : "Activate Boost"}
+                    </button>
+                 </div>
+              </form>
+           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function StatCardHorizontal({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100", 
+    blue: "bg-blue-50 text-blue-600 border-blue-100", 
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100", 
+    amber: "bg-amber-50 text-amber-600 border-amber-100" 
+  };
+  
+  return (
+    <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
+      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105", bgColors[color])}>
+         <Icon className="w-5 h-5" />
+      </div>
+      <div className="min-w-0">
+         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">{label}</p>
+         <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">{value}</p>
+         <div className={cn(
+           "flex items-center gap-1 text-[7px] font-bold uppercase",
+           up ? "text-emerald-600" : "text-rose-600"
+         )}>
+            {up ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+            {trend}
+         </div>
+      </div>
     </div>
   );
 }

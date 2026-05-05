@@ -1,31 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, Outlet } from "react-router-dom";
 import { resolveSectionFromPath, sharedNavConfig } from "./sharedNavConfig";
-import { Menu, Search, Bell } from "lucide-react";
+import { Menu, Search, Bell, ChevronRight, X } from "lucide-react";
 import { Sidebar } from "./Sidebar";
-
-const NavItem = ({ to, label }) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `shared-nav-link${isActive ? " is-active" : ""}`
-    }
-  >
-    {label}
-  </NavLink>
-);
-
-const SuperadminNavItem = ({ to, label, icon }) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `sidebar-link${isActive ? " active" : ""}`
-    }
-  >
-    {icon ? <i data-lucide={icon} className="w-5 h-5 mr-3" /> : null}
-    {label}
-  </NavLink>
-);
 
 export default function SharedShell() {
   const location = useLocation();
@@ -42,85 +19,24 @@ export default function SharedShell() {
     [location.pathname]
   );
   const config = section ? sharedNavConfig[section] : null;
-  const activeSuperadminLabel = useMemo(() => {
-    if (!config || section !== "superadmin") return "";
-    const match = config.sections
-      .flatMap((block) => block.links)
-      .find((link) => link.to === location.pathname);
-    return match?.label || "Overview";
-  }, [config, location.pathname, section]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (!window.lucide?.createIcons) return undefined;
-    
-    // Run lucide once on navigation, and once after a short delay for dynamic content
-    window.lucide?.createIcons();
-    const t1 = setTimeout(() => window.lucide?.createIcons(), 100);
-    const t2 = setTimeout(() => window.lucide?.createIcons(), 500);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [location.pathname]);
-
-  useEffect(() => {
     if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 767px)");
+    const mq = window.matchMedia("(max-width: 1024px)");
     const update = () => setIsMobile(mq.matches);
     update();
-    if (mq.addEventListener) {
-      mq.addEventListener("change", update);
-    } else {
-      mq.addListener(update);
-    }
-    return () => {
-      if (mq.removeEventListener) {
-        mq.removeEventListener("change", update);
-      } else {
-        mq.removeListener(update);
-      }
-    };
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
-  useEffect(() => {
-    if (section !== "superadmin") return;
-    document.body.classList.toggle("superadmin-menu-open", sidebarOpen);
-    return () => {
-      document.body.classList.remove("superadmin-menu-open");
-    };
-  }, [section, sidebarOpen]);
-
-  useEffect(() => {
-    if (section !== "superadmin") return undefined;
-    const handler = (e) => {
-      const target = e.target;
-      const trigger = target && target.closest ? target.closest("#mobile-menu-open") : null;
-      if (!trigger) return;
-      e.preventDefault();
-      e.stopPropagation();
-      setSidebarOpen(true);
-    };
-    document.addEventListener("click", handler, true);
-    return () => document.removeEventListener("click", handler, true);
-  }, [section]);
-
-  if (isEmbed) {
-    return <Outlet />;
-  }
-
-  // Tenant pages render a full standalone layout. If an older bundle or
-  // wrapper path still mounts SharedShell, bypass it completely.
-  if (!config) {
-    return <div className="shared-shell"><Outlet /></div>;
-  }
+  if (isEmbed) return <Outlet />;
+  if (!config) return <div className="shared-shell"><Outlet /></div>;
 
   if (section === "superadmin") {
     return (
-      <div className="shared-shell shared-shell-superadmin flex flex-row h-screen w-full min-w-full overflow-hidden" data-section={section}>
-
+      <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden font-inter">
         <Sidebar 
           open={sidebarOpen} 
           isMobile={isMobile}
@@ -132,116 +48,90 @@ export default function SharedShell() {
           }}
         />
 
-        <div className="shared-main">
-          <header className="bg-white h-20 flex items-center justify-between px-10 shadow-sm z-30 border-b border-slate-100 sticky top-0 shrink-0">
-            <div className="flex items-center gap-8">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Top Global Header - Screenshot Perfect */}
+          <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 z-30 shrink-0">
+            <div className="flex items-center gap-4">
               <button
-                id="mobile-menu-open"
-                className="lg:hidden text-slate-500 p-2 hover:bg-slate-50 rounded-xl transition-all"
-                type="button"
-                onClick={() => setSidebarOpen((open) => !open)}
+                className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+                onClick={() => setSidebarOpen(true)}
               >
-                <Menu className="w-6 h-6" />
+                <Menu size={24} />
               </button>
               
-              {/* Intelligent Search */}
-              <div className="hidden md:flex items-center bg-slate-50 border border-slate-100 rounded-2xl px-5 py-2.5 w-[400px] group focus-within:ring-4 focus-within:ring-blue-500/5 focus-within:border-blue-500 transition-all">
-                <Search className="w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              {/* Search Matrix */}
+              <div className="hidden md:flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 w-96 group focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/5 focus-within:border-blue-500 transition-all">
+                <Search size={18} className="text-slate-400 group-focus-within:text-blue-600" />
                 <input 
                   type="text" 
                   placeholder="Search anything..." 
-                  className="bg-transparent border-none outline-none text-xs font-bold ml-4 w-full text-slate-600 placeholder:text-slate-400 uppercase tracking-widest"
+                  className="bg-transparent border-none outline-none text-sm font-medium ml-3 w-full text-slate-700 placeholder:text-slate-400"
                 />
-                <div className="hidden lg:flex items-center gap-1 bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-sm">
-                   <span className="text-[9px] font-black text-slate-400">CTRL</span>
-                   <span className="text-[9px] font-black text-slate-400">K</span>
-                </div>
+                <span className="text-[10px] font-bold text-slate-300 border border-slate-100 px-1.5 py-0.5 rounded-lg ml-2">Ctrl + K</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-6">
               <div className="relative">
-                <button
-                  id="notificationBellBtn"
-                  className="relative p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all group"
-                  type="button"
-                >
-                  <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                  <span
-                    id="notificationBadge"
-                    className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm"
-                  />
+                <button className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group">
+                  <Bell size={20} className="group-hover:rotate-12 transition-transform" />
+                  <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm" />
                 </button>
               </div>
 
-              {/* Profile Sovereignty */}
-              <div className="flex items-center gap-4 pl-8 border-l border-slate-100 group cursor-pointer">
+              {/* Profile Identity - Screenshot Style */}
+              <div className="flex items-center gap-4 pl-6 border-l border-slate-100 group cursor-pointer">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-black text-slate-800 leading-none group-hover:text-blue-600 transition-colors">Aman</p>
-                  <p className="text-[10px] font-black text-slate-400 mt-1.5 uppercase tracking-[0.2em]">Superadmin</p>
+                  <p className="text-sm font-bold text-slate-900 leading-none group-hover:text-blue-600 transition-colors">Aman</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest opacity-60">Superadmin</p>
                 </div>
-                <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-xl shadow-blue-600/30 group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-600/20 group-hover:scale-105 transition-transform">
                   A
                 </div>
               </div>
             </div>
           </header>
-          <div className="shared-content overflow-y-auto overflow-x-hidden flex-1 h-full custom-scrollbar">
+
+          <main className="flex-1 overflow-y-auto custom-scrollbar">
             <Outlet />
-          </div>
+          </main>
         </div>
 
-        {/* Overlay moved to bottom to prevent flex flow issues */}
-        <div
-          className={`shared-superadmin-overlay${sidebarOpen ? " is-open" : ""}`}
-          onClick={() => setSidebarOpen(false)}
-          style={isMobile && sidebarOpen ? { display: "block" } : undefined}
-        />
+        {/* Mobile Overlay */}
+        {isMobile && sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 fade-in"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
       </div>
     );
   }
 
+  // Fallback for other sections
   return (
-    <div className="shared-shell" data-section={section}>
-      <aside className={`shared-sidebar${sidebarOpen ? " open" : ""}`}>
-        <div className="shared-sidebar-header">
-          <div className="shared-brand">
-            <img
-              src="https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png"
-              alt="Roomhy"
-            />
-            <span>{config.title}</span>
-          </div>
-          <button
-            className="shared-sidebar-close"
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-          >
-            Close
-          </button>
-        </div>
-        <nav className="shared-nav">
+    <div className="shared-shell h-screen flex overflow-hidden">
+      <aside className={`w-64 bg-slate-900 text-white shrink-0 transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed lg:relative z-50 h-full`}>
+        <div className="p-6 text-xl font-bold border-b border-white/10">{config.title}</div>
+        <nav className="p-4 space-y-1">
           {config.links.map((link) => (
-            <NavItem key={link.to} to={link.to} label={link.label} />
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => `block px-4 py-2 rounded-lg text-sm font-medium transition-all ${isActive ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              {link.label}
+            </NavLink>
           ))}
         </nav>
       </aside>
-
-      <div className="shared-main">
-        <header className="shared-header">
-          <button
-            className="shared-menu-btn"
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-          >
-            Menu
-          </button>
-          <div className="shared-header-title">{config.title}</div>
-          <div className="shared-header-actions">
-            <span className="shared-user-pill">Roomhy</span>
-          </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 shrink-0 lg:hidden">
+          <button onClick={() => setSidebarOpen(true)}><Menu size={24} /></button>
         </header>
-        <div className="shared-content"><Outlet /></div>
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

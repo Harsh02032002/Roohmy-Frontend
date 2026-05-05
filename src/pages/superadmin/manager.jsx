@@ -50,132 +50,121 @@ export default function Manager() {
   }, [employees]);
 
   return (
-    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
-      {/* Header Area */}
-      <div className="flex flex-col gap-2">
-         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Administrative Intelligence Hub</h1>
-         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
-            <span>Platform Governance</span>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-blue-600">Personnel & Administrative Access</span>
+    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+         <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Personnel Hub</h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Platform Governance & Staff Directory</p>
          </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-         <p className="text-sm font-bold text-slate-400 max-w-2xl">Manage platform-wide administrative roles, audit personnel access velocity and configure departmental governance protocols with audit-ready precision.</p>
-         <button className="bg-slate-800 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase shadow-xl shadow-slate-800/20 hover:bg-slate-900 transition-all flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Provision New Access
+         <button className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">
+            <Plus className="w-3.5 h-3.5" /> New Access
          </button>
       </div>
 
-      {/* Hero Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <StatCardLarge label="Total Workforce" value={stats.total} trend="+ 5.2% Flux" up icon={Users} color="blue" />
-        <StatCardLarge label="Active Pulse" value={stats.active} trend="98% Operational" up icon={Activity} color="green" />
-        <StatCardLarge label="Growth Hub" value={stats.marketing} trend="Marketing Team" up icon={Megaphone} color="indigo" />
-        <StatCardLarge label="Resolution Hub" value="12" trend="Support Velocity" up icon={Headset} color="purple" />
+      {/* Hero Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCardHorizontal label="Workforce" value={stats.total} trend="+5.2% Flux" up icon={Users} color="blue" />
+        <StatCardHorizontal label="Operational" value={stats.active} trend="Optimal" up icon={Activity} color="emerald" />
+        <StatCardHorizontal label="Marketing" value={stats.marketing} trend="Growth Hub" up icon={Megaphone} color="indigo" />
+        <StatCardHorizontal label="Support" value="12" trend="Velocity" up icon={Headset} color="purple" />
       </div>
 
-      {/* Main Directory Card */}
-      <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
-         <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-10">
-               <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Personnel Intelligence Ledger</h3>
-               <div className="hidden xl:flex items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
-                  {["All", "Marketing Team", "Maintenance Team", "Customer Support"].map(team => (
+      {/* Main Directory */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 overflow-hidden">
+         <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-6">
+               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight">Intelligence Ledger</h3>
+               <div className="hidden xl:flex items-center bg-slate-50 p-1 rounded-xl border border-slate-100">
+                  {["All", "Marketing Team", "Maintenance Team"].map(team => (
                     <button 
                       key={team} 
                       onClick={() => setCurrentTeam(team)}
                       className={cn(
-                        "px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all",
-                        currentTeam === team ? "bg-white text-blue-600 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
+                        "px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all",
+                        currentTeam === team ? "bg-white text-blue-600 shadow-sm border border-slate-100" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
-                       {team === "All" ? "Global Staff" : team.split(" ")[0]}
+                       {team === "All" ? "Global" : team.split(" ")[0]}
                     </button>
                   ))}
                </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
                <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
                   <input 
                     value={search} onChange={e => setSearch(e.target.value)}
                     placeholder="Search personnel..." 
-                    className="bg-slate-50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold shadow-sm w-64 outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" 
+                    className="bg-slate-50 border-none rounded-xl py-2 pl-9 pr-3 text-[10px] font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all w-48" 
                   />
                </div>
-               <button onClick={loadEmployees} className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100">
-                  <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} />
+               <button onClick={loadEmployees} className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all">
+                  <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
                </button>
             </div>
          </div>
 
          <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[1000px]">
+            <table className="w-full text-left">
                <thead>
-                  <tr className="text-slate-400 text-[10px] font-bold uppercase border-b border-slate-50">
-                     <th className="pb-6">Personnel Profile</th>
-                     <th className="pb-6">Departmental Hub</th>
-                     <th className="pb-6 text-center">Operational Signature</th>
-                     <th className="pb-6 text-center">Active Pulse</th>
-                     <th className="pb-6 text-right">Governance Actions</th>
+                  <tr className="text-slate-400 text-[8px] font-bold uppercase border-b border-slate-50">
+                     <th className="pb-4">Personnel</th>
+                     <th className="pb-4">Department</th>
+                     <th className="pb-4 text-center">Territory</th>
+                     <th className="pb-4 text-center">Status</th>
+                     <th className="pb-4 text-right">Actions</th>
                   </tr>
                </thead>
                <tbody className="divide-y divide-slate-50">
                   {loading ? (
-                    <tr><td colSpan="5" className="py-32 text-center">
-                       <div className="flex flex-col items-center gap-4">
-                          <RefreshCw className="w-12 h-12 text-blue-600 animate-spin" />
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Accessing Secure Personnel Vault...</p>
-                       </div>
+                    <tr><td colSpan="5" className="py-20 text-center">
+                       <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
+                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Accessing Vault...</p>
                     </td></tr>
                   ) : filteredEmployees.map((e, i) => (
-                    <tr key={i} className="group hover:bg-slate-50/50 transition-colors cursor-pointer">
-                       <td className="py-6">
-                          <div className="flex items-center gap-5">
-                             <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 text-blue-600 flex items-center justify-center font-bold text-xl shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-xl transition-all overflow-hidden">
+                    <tr key={i} className="group hover:bg-slate-50 transition-colors cursor-pointer">
+                       <td className="py-3">
+                          <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 text-blue-600 flex items-center justify-center font-bold text-sm shadow-sm transition-all overflow-hidden shrink-0">
                                 {e.photoDataUrl ? <img src={e.photoDataUrl} className="w-full h-full object-cover" alt="" /> : (e.name || "U").charAt(0).toUpperCase()}
                              </div>
                              <div>
-                                <p className="text-base font-bold text-slate-800">{e.name || "Unknown Personnel"}</p>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">ID: {e.loginId}</p>
+                                <p className="text-[11px] font-bold text-slate-800">{e.name || "Unknown"}</p>
+                                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">ID: {e.loginId}</p>
                              </div>
                           </div>
                        </td>
-                       <td className="py-6">
-                          <div className="space-y-1">
-                             <p className="text-sm font-bold text-slate-700">{e.role}</p>
-                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                                <Mail className="w-3.5 h-3.5 opacity-40" />
-                                {e.email || "No Email Record"}
-                             </div>
+                       <td className="py-3">
+                          <div className="space-y-0.5">
+                             <p className="text-[10px] font-bold text-slate-700">{e.role}</p>
+                             <p className="text-[8px] font-bold text-slate-400 truncate max-w-[150px]">{e.email}</p>
                           </div>
                        </td>
-                       <td className="py-6 text-center">
-                          <div className="inline-flex flex-col items-center gap-1.5 bg-slate-50 border border-slate-100 px-5 py-2.5 rounded-[1.25rem] group-hover:bg-white group-hover:shadow-md transition-all">
-                             <p className="text-xs font-bold text-slate-800">{e.area || "Global Hub"}</p>
-                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{e.city || "Headquarters"}</p>
+                       <td className="py-3 text-center">
+                          <div className="inline-flex flex-col items-center bg-slate-50 px-3 py-1 rounded-lg border border-slate-50">
+                             <p className="text-[9px] font-bold text-slate-800">{e.area || "Global"}</p>
+                             <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest">{e.city || "HQ"}</p>
                           </div>
                        </td>
-                       <td className="py-6 text-center">
+                       <td className="py-3 text-center">
                           <span className={cn(
-                             "text-[9px] font-bold px-3.5 py-1.5 rounded-full border shadow-sm uppercase tracking-widest",
+                             "text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider",
                              e.isActive !== false ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
                           )}>
-                             {e.isActive !== false ? "Operational" : "Restricted"}
+                             {e.isActive !== false ? "Active" : "Locked"}
                           </span>
                        </td>
-                       <td className="py-6 text-right">
-                          <div className="flex items-center justify-end gap-3">
-                             <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100" title="Manage Identity Keys">
-                                <Key className="w-4 h-4" />
+                       <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                             <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100">
+                                <Key className="w-3.5 h-3.5" />
                              </button>
-                             <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-md transition-all border border-slate-100" title="Audit Permissions">
-                                <Shield className="w-4 h-4" />
+                             <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all border border-slate-100">
+                                <Shield className="w-3.5 h-3.5" />
                              </button>
-                             <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-white hover:shadow-md transition-all border border-slate-100">
-                                <LogOut className="w-4 h-4" />
+                             <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-rose-600 transition-all border border-slate-100">
+                                <Trash2 className="w-3.5 h-3.5" />
                              </button>
                           </div>
                        </td>
@@ -183,6 +172,34 @@ export default function Manager() {
                   ))}
                </tbody>
             </table>
+         </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCardHorizontal({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    blue: "bg-blue-50 text-blue-600 border-blue-100", 
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100", 
+    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100", 
+    purple: "bg-purple-50 text-purple-600 border-purple-100" 
+  };
+  
+  return (
+    <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
+      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105", bgColors[color])}>
+         <Icon className="w-5 h-5" />
+      </div>
+      <div className="min-w-0">
+         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">{label}</p>
+         <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">{value}</p>
+         <div className={cn(
+           "flex items-center gap-1 text-[7px] font-bold uppercase",
+           up ? "text-emerald-600" : "text-rose-600"
+         )}>
+            {up ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+            {trend}
          </div>
       </div>
     </div>

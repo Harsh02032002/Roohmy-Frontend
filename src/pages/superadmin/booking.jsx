@@ -1,229 +1,248 @@
 import React from "react";
 import { 
-  CalendarCheck, Users, Target, Zap, 
-  TrendingUp, MousePointer2, ArrowUpRight, 
-  ArrowDownRight, MoreVertical, Search,
-  Phone, Mail, Globe, MapPin, CheckCircle2,
-  Clock, DollarSign, Filter, ChevronRight,
-  PieChart as PieChartIcon, BarChart3, Activity,
-  Smartphone, MessageSquare, ExternalLink,
-  ShieldCheck, Inbox, Timer, TrendingUp as TrendIcon,
-  UserCheck, UserPlus
+  Users, Calendar, Target, TrendingUp, 
+  ArrowUpRight, ArrowDownRight, ChevronRight, 
+  MoreVertical, Search, Filter, Download,
+  Zap, Clock, MapPin, MousePointer2, 
+  CheckCircle2, AlertCircle, BarChart3,
+  PieChart as PieIcon, Phone, Mail, Globe,
+  LayoutGrid, Activity, Star
 } from "lucide-react";
-import { 
+import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, Legend, LineChart, Line
+  PieChart, Pie, Cell, LineChart, Line, BarChart, Bar
 } from "recharts";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const bookingTrend = [
-  { name: "May 22", leads: 120, bookings: 45 },
-  { name: "May 23", leads: 150, bookings: 52 },
-  { name: "May 24", leads: 130, bookings: 48 },
-  { name: "May 25", leads: 180, bookings: 65 },
-  { name: "May 26", leads: 210, bookings: 78 },
-  { name: "May 27", leads: 190, bookings: 70 },
-  { name: "May 28", leads: 230, bookings: 86 },
+// --- EXACT DATA FROM BOOKING & LEADS OVERVIEW SCREENSHOT ---
+
+const leadsVsBookings = [
+  { name: "May 22", leads: 250, bookings: 120 },
+  { name: "May 23", leads: 480, bookings: 180 },
+  { name: "May 24", leads: 420, bookings: 160 },
+  { name: "May 25", leads: 580, bookings: 220 },
+  { name: "May 26", leads: 520, bookings: 200 },
+  { name: "May 27", leads: 650, bookings: 280 },
+  { name: "May 28", leads: 610, bookings: 260 },
 ];
 
-const sourceData = [
-  { name: "Website", value: 1542, color: "#3B82F6" },
-  { name: "WhatsApp", value: 1021, color: "#10B981" },
-  { name: "App", value: 678, color: "#6366F1" },
-  { name: "Referral", value: 448, color: "#F59E0B" },
+const leadSources = [
+  { name: "Website", value: 1542, color: "#3B82F6", percent: "41.8%" },
+  { name: "WhatsApp", value: 1021, color: "#10B981", percent: "27.7%" },
+  { name: "App", value: 678, color: "#F59E0B", percent: "18.4%" },
+  { name: "Referral", value: 448, color: "#6366F1", percent: "12.1%" },
 ];
 
-const statusData = [
-  { name: "New", value: 1245, color: "#3B82F6" },
-  { name: "Contacted", value: 1021, color: "#6366F1" },
-  { name: "Interested", value: 812, color: "#10B981" },
-  { name: "Site Visit", value: 356, color: "#F59E0B" },
-  { name: "Converted", value: 255, color: "#8B5CF6" },
-];
-
-const responseTimeData = [
-  { v: 10 }, { v: 15 }, { v: 12 }, { v: 18 }, { v: 14 }, { v: 22 }, { v: 18 }
-];
-
-const bookingsValueData = [
-  { v: 40 }, { v: 45 }, { v: 42 }, { v: 50 }, { v: 48 }, { v: 55 }, { v: 52 }
-];
-
-const recentLeads = [
-  { name: "Rohan Mehta", location: "Andheri West, Mumbai", source: "Website", budget: "₹20K - ₹25K", status: "New", date: "May 28, 2024", time: "10:35 AM", initial: "RM", color: "blue" },
-  { name: "Priya Sharma", location: "Koramangala, Bangalore", source: "WhatsApp", budget: "₹15K - ₹20K", status: "Contacted", date: "May 28, 2024", time: "09:45 AM", initial: "PS", color: "indigo" },
-  { name: "Amit Verma", location: "Pune", source: "App", budget: "₹18K - ₹22K", status: "Interested", date: "May 28, 2024", time: "09:20 AM", initial: "AV", color: "emerald" },
-  { name: "Neha Singh", location: "Hyderabad", source: "Website", budget: "₹12K - ₹18K", status: "Site Visit", date: "May 28, 2024", time: "08:55 AM", initial: "NS", color: "amber" },
-  { name: "Vikram Joshi", location: "Thane, Mumbai", source: "Referral", budget: "₹22K - ₹28K", status: "New", date: "May 28, 2024", time: "08:30 AM", initial: "VJ", color: "rose" },
+const leadStatus = [
+  { name: "New", value: 1245, color: "#3B82F6", percent: "33.7%" },
+  { name: "Contacted", value: 1021, color: "#10B981", percent: "27.7%" },
+  { name: "Interested", value: 812, color: "#F59E0B", percent: "22.0%" },
+  { name: "Site Visit", value: 356, color: "#6366F1", percent: "9.6%" },
+  { name: "Converted", value: 255, color: "#EC4899", percent: "6.9%" },
 ];
 
 const topLocations = [
-  { city: "Andheri West, Mumbai", leads: 856, bookings: 234, rate: "27.34%", progress: 85 },
-  { city: "Koramangala, Bangalore", leads: 642, bookings: 176, rate: "27.42%", progress: 70 },
-  { city: "Baner, Pune", leads: 512, bookings: 138, rate: "26.95%", progress: 60 },
-  { city: "Whitefield, Bangalore", leads: 478, bookings: 121, rate: "25.31%", progress: 55 },
-  { city: "Indiranagar, Bangalore", leads: 421, bookings: 102, rate: "24.23%", progress: 45 },
+  { name: "Andheri West, Mumbai", leads: 856, bookings: 234, rate: "27.34%" },
+  { name: "Koramangala, Bangalore", leads: 642, bookings: 176, rate: "27.42%" },
+  { name: "Baner, Pune", leads: 512, bookings: 138, rate: "26.95%" },
+  { name: "Whitefield, Bangalore", leads: 478, bookings: 121, rate: "25.31%" },
+  { name: "Indiranagar, Bangalore", leads: 421, bookings: 102, rate: "24.23%" },
 ];
 
-export default function SuperadminBookingLeads() {
+const recentLeads = [
+  { name: "Rohan Mehta", loc: "Andheri West, Mumbai", src: "Website", budget: "₹20K - ₹25K", status: "New", color: "bg-blue-50 text-blue-600", date: "May 28, 2024", time: "10:30 AM" },
+  { name: "Priya Sharma", loc: "Koramangala, Bangalore", src: "WhatsApp", budget: "₹15K - ₹20K", status: "Contacted", color: "bg-emerald-50 text-emerald-600", date: "May 28, 2024", time: "09:45 AM" },
+  { name: "Amit Verma", loc: "Pune", src: "App", budget: "₹18K - ₹22K", status: "Interested", color: "bg-amber-50 text-amber-600", date: "May 28, 2024", time: "09:20 AM" },
+  { name: "Neha Singh", loc: "Hyderabad", src: "Website", budget: "₹12K - ₹18K", status: "Site Visit", color: "bg-purple-50 text-purple-600", date: "May 28, 2024", time: "08:55 AM" },
+  { name: "Vikram Joshi", loc: "Thane, Mumbai", src: "Referral", budget: "₹22K - ₹28K", status: "New", color: "bg-blue-50 text-blue-600", date: "May 28, 2024", time: "08:30 AM" },
+];
+
+const funnelData = [
+  { stage: "Total Leads", count: 3689, percent: "100%", color: "bg-blue-400" },
+  { stage: "Contacted", count: 2458, percent: "66.6%", color: "bg-emerald-400" },
+  { stage: "Interested", count: 1254, percent: "34.0%", color: "bg-amber-400" },
+  { stage: "Site Visit", count: 986, percent: "26.7%", color: "bg-purple-400" },
+  { stage: "Bookings", count: 876, percent: "23.5%", color: "bg-rose-400" },
+];
+
+const topAgents = [
+  { name: "Rahul Singh", rate: "48.6%" },
+  { name: "Priya Nair", rate: "45.2%" },
+  { name: "Amit Patel", rate: "42.7%" },
+];
+
+export default function BookingLeads() {
   return (
-    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
+    <div className="p-8 bg-[#F8FAFC] min-h-full font-inter">
       {/* Header Area */}
-      <div className="flex flex-col gap-2">
-         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Booking & Leads Hub</h1>
-         <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
-            <span>Operations</span>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-blue-600">Booking & Leads Performance</span>
+      <div className="flex items-center justify-between mb-8">
+         <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Booking & Leads Overview</h1>
+            <p className="text-sm text-slate-500 font-medium mt-1">Track your leads, bookings and conversion performance.</p>
+         </div>
+         <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 bg-white border border-slate-100 px-4 py-2.5 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-all">
+               <Calendar className="w-4 h-4 text-slate-400" />
+               <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">May 22 - May 28, 2024</span>
+            </div>
          </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-         {/* Leads Trend */}
-         <div className="lg:col-span-6 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50">
+      {/* Top Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+         <StatCardWide label="Total Leads (Today)" value="128" trend="18.6%" up />
+         <StatCardWide label="Total Leads (This Week)" value="894" trend="16.3%" up />
+         <StatCardWide label="Total Leads (This Month)" value="3,689" trend="21.8%" up />
+         <StatCardWide label="Bookings (Today)" value="32" trend="23.1%" up color="amber" />
+         <StatCardWide label="Bookings (This Week)" value="210" trend="19.4%" up color="amber" />
+         <StatCardWide label="Bookings (This Month)" value="876" trend="24.7%" up color="amber" />
+      </div>
+
+      <div className="grid grid-cols-12 gap-6 mb-8">
+         {/* Leads vs Bookings Trend */}
+         <div className="col-span-12 lg:col-span-6 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-10">
-               <h3 className="text-xl font-bold text-slate-800 tracking-tight">Leads vs Bookings Trend</h3>
-               <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-bold text-slate-500 uppercase outline-none cursor-pointer hover:bg-slate-100 transition-colors">
-                  <option>This Week</option>
-               </select>
+               <h3 className="text-lg font-bold text-slate-900">Leads vs Bookings Trend</h3>
+               <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-4">
+                     <LegendItem color="bg-blue-600" label="Leads" />
+                     <LegendItem color="bg-emerald-600" label="Bookings" />
+                  </div>
+                  <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-xs font-bold text-slate-500 outline-none">
+                     <option>This Week</option>
+                  </select>
+               </div>
             </div>
-            <div className="h-[280px]">
+            <div className="h-[300px]">
                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={bookingTrend}>
-                     <defs>
-                        <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                           <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                        </linearGradient>
-                     </defs>
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dy={15} />
-                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} dx={-15} />
-                     <Tooltip contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)'}} />
-                     <Area type="monotone" dataKey="leads" stroke="#3B82F6" strokeWidth={4} fillOpacity={1} fill="url(#colorLeads)" />
-                     <Area type="monotone" dataKey="bookings" stroke="#10B981" strokeWidth={4} fill="transparent" />
-                  </AreaChart>
+                  <LineChart data={leadsVsBookings}>
+                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11, fontWeight: 600}} dy={15} />
+                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11, fontWeight: 600}} dx={-15} />
+                     <Tooltip />
+                     <Line type="monotone" dataKey="leads" stroke="#3B82F6" strokeWidth={3} dot={{fill: '#3B82F6', r: 4}} activeDot={{r: 6}} />
+                     <Line type="monotone" dataKey="bookings" stroke="#10B981" strokeWidth={3} dot={{fill: '#10B981', r: 4}} activeDot={{r: 6}} />
+                  </LineChart>
                </ResponsiveContainer>
             </div>
          </div>
 
-         {/* Conversion Rate Gauge */}
-         <div className="lg:col-span-3 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center">
-            <div className="w-full flex items-center justify-between mb-8">
-               <h3 className="text-xl font-bold text-slate-800 tracking-tight">Conversion Rate %</h3>
-               <MoreVertical className="w-5 h-5 text-slate-300" />
-            </div>
-            <div className="relative w-full h-[180px] flex items-center justify-center">
-               <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                     <Pie
-                        data={[{ value: 23.45, color: "#3B82F6" }, { value: 76.55, color: "#F1F5F9" }]}
-                        cx="50%" cy="100%"
-                        startAngle={180} endAngle={0}
-                        innerRadius={70} outerRadius={100}
-                        paddingAngle={0} dataKey="value" stroke="none"
-                     >
-                        <Cell fill="#3B82F6" />
-                        <Cell fill="#F1F5F9" />
-                     </Pie>
-                  </PieChart>
-               </ResponsiveContainer>
-               <div className="absolute bottom-0 flex flex-col items-center">
-                  <p className="text-4xl font-bold text-slate-800 leading-none">23.45%</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Conversion Rate</p>
+         {/* Conversion Pulse */}
+         <div className="col-span-12 lg:col-span-3 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col items-center">
+            <h3 className="text-lg font-bold text-slate-900 mb-8 self-start">Conversion Rate %</h3>
+            <div className="relative w-full aspect-square max-w-[200px] flex items-center justify-center">
+               <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="15" fill="transparent" className="text-slate-100" strokeDasharray="502" strokeDashoffset="251" />
+                  <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="15" fill="transparent" className="text-blue-600" strokeDasharray="502" strokeDashoffset={502 - (23.45 / 100) * 251} />
+               </svg>
+               <div className="absolute inset-0 flex flex-col items-center justify-center pt-10">
+                  <p className="text-3xl font-black text-slate-900 tracking-tight">23.45%</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Conversion Rate</p>
                </div>
             </div>
-            <div className="w-full grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-50">
-               <div className="text-center">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Previous Period</p>
-                  <p className="text-sm font-bold text-slate-800">19.02%</p>
+            <div className="mt-auto w-full space-y-4 pt-8">
+               <div className="flex items-center justify-between px-2">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Previous Period</span>
+                  <span className="text-sm font-black text-slate-900">19.02%</span>
                </div>
-               <div className="text-center">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Improvement</p>
-                  <p className="text-sm font-bold text-emerald-600">+4.43%</p>
+               <div className="bg-emerald-50 rounded-2xl p-4 flex items-center justify-between border border-emerald-100/50">
+                  <div className="flex items-center gap-3">
+                     <div className="p-2 bg-emerald-500 rounded-xl text-white">
+                        <TrendingUp size={16} />
+                     </div>
+                     <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest">Improvement</span>
+                  </div>
+                  <span className="text-lg font-black text-emerald-600">+4.43%</span>
                </div>
             </div>
          </div>
 
          {/* Conversion Funnel */}
-         <div className="lg:col-span-3 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50">
-            <div className="flex items-center justify-between mb-10">
-               <h3 className="text-xl font-bold text-slate-800 tracking-tight">Conversion Funnel</h3>
-               <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-bold text-slate-500 uppercase outline-none cursor-pointer hover:bg-slate-100 transition-colors">
+         <div className="col-span-12 lg:col-span-3 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-900">Conversion Funnel</h3>
+               <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-bold text-slate-500 outline-none">
                   <option>This Month</option>
                </select>
             </div>
-            <div className="space-y-2 relative">
-               <FunnelStep label="Total Leads" value="3,689" percent="100%" color="bg-blue-600" width="w-full" />
-               <FunnelStep label="Contacted" value="2,456" percent="66.6%" color="bg-indigo-500" width="w-[90%]" />
-               <FunnelStep label="Interested" value="1,254" percent="34.0%" color="bg-emerald-500" width="w-[80%]" />
-               <FunnelStep label="Site Visit" value="986" percent="26.7%" color="bg-amber-500" width="w-[70%]" />
-               <FunnelStep label="Bookings" value="876" percent="23.5%" color="bg-rose-500" width="w-[60%]" />
+            
+            <div className="flex-1 flex items-center justify-between gap-4 mt-4">
+               {/* Funnel SVG */}
+               <div className="w-1/2 h-full flex items-center">
+                  <svg viewBox="0 0 100 160" className="w-full drop-shadow-md">
+                     <path d="M0,0 L100,0 L92,30 L8,30 Z" fill="#60A5FA" />
+                     <path d="M10,35 L90,35 L82,65 L18,65 Z" fill="#34D399" />
+                     <path d="M20,70 L80,70 L72,100 L28,100 Z" fill="#FBBF24" />
+                     <path d="M30,105 L70,105 L62,135 L38,135 Z" fill="#A78BFA" />
+                     <path d="M40,140 L60,140 L55,160 L45,160 Z" fill="#FB7185" />
+                  </svg>
+               </div>
+
+               {/* Labels List */}
+               <div className="w-1/2 flex flex-col justify-between py-1 h-full min-h-[160px]">
+                  {funnelData.map((f, i) => (
+                     <div key={i} className="flex flex-col">
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tight">{f.stage}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                           <span className="text-[10px] font-black text-slate-900">{f.count.toLocaleString()}</span>
+                           <span className="text-[8px] font-bold text-slate-400">({f.percent})</span>
+                        </div>
+                     </div>
+                  ))}
+               </div>
             </div>
-            <div className="mt-8 pt-8 border-t border-slate-50 flex justify-between items-center">
-               <p className="text-[10px] font-bold text-slate-400 uppercase">Overall Conversion Rate</p>
-               <p className="text-xl font-bold text-emerald-600">23.45%</p>
+
+            <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Overall Conversion Rate</span>
+               <span className="text-xl font-black text-emerald-600">23.45%</span>
             </div>
          </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-6 mb-8">
          {/* Recent Leads */}
-         <div className="lg:col-span-8 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50">
-            <div className="flex items-center justify-between mb-10">
-               <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Recent Leads</h3>
-               <button className="text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:underline">View All</button>
+         <div className="col-span-12 lg:col-span-7 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-lg font-bold text-slate-900">Recent Leads</h3>
+               <button className="text-xs font-bold text-blue-600 hover:underline">View All</button>
             </div>
-            <div className="overflow-x-auto">
-               <table className="w-full text-left border-collapse min-w-[700px]">
+            <div className="overflow-x-auto custom-scrollbar">
+               <table className="w-full text-left">
                   <thead>
-                     <tr className="text-slate-400 text-[10px] font-bold uppercase border-b border-slate-50">
-                        <th className="pb-6">Lead Name</th>
-                        <th className="pb-6">Location</th>
-                        <th className="pb-6 text-center">Source</th>
-                        <th className="pb-6 text-center">Budget</th>
-                        <th className="pb-6 text-center">Status</th>
-                        <th className="pb-6 text-right">Created On</th>
+                     <tr className="border-b border-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th className="pb-4">Lead Name</th>
+                        <th className="pb-4">Location</th>
+                        <th className="pb-4">Source</th>
+                        <th className="pb-4">Budget</th>
+                        <th className="pb-4 text-center">Status</th>
+                        <th className="pb-4 text-right">Created On</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                      {recentLeads.map((lead, i) => (
-                       <tr key={i} className="group hover:bg-slate-50/50 transition-colors cursor-pointer">
-                          <td className="py-6">
-                             <div className="flex items-center gap-4">
-                                <div className={cn(
-                                   "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-lg",
-                                   lead.color === "blue" ? "bg-blue-600" :
-                                   lead.color === "indigo" ? "bg-indigo-600" :
-                                   lead.color === "emerald" ? "bg-emerald-600" :
-                                   lead.color === "amber" ? "bg-amber-600" :
-                                   "bg-rose-600"
-                                )}>
-                                   {lead.initial}
-                                </div>
-                                <span className="text-sm font-bold text-slate-800">{lead.name}</span>
-                             </div>
-                          </td>
-                          <td className="py-6 text-xs font-bold text-slate-500">{lead.location}</td>
-                          <td className="py-6 text-center text-xs font-bold text-slate-500">{lead.source}</td>
-                          <td className="py-6 text-center text-xs font-bold text-slate-800">{lead.budget}</td>
-                          <td className="py-6 text-center">
-                             <span className={cn(
-                                "text-[9px] font-bold px-3 py-1 rounded-lg uppercase shadow-sm",
-                                lead.status === "New" ? "bg-blue-50 text-blue-600" :
-                                lead.status === "Contacted" ? "bg-amber-50 text-amber-600" :
-                                lead.status === "Interested" ? "bg-indigo-50 text-indigo-600" :
-                                "bg-emerald-50 text-emerald-600"
-                             )}>
-                                {lead.status}
-                             </span>
-                          </td>
-                          <td className="py-6 text-right">
-                             <p className="text-xs font-bold text-slate-800">{lead.date}</p>
-                             <p className="text-[9px] font-bold text-slate-400 mt-0.5">{lead.time}</p>
-                          </td>
-                       </tr>
+                        <tr key={i} className="group hover:bg-slate-50/50 transition-all">
+                           <td className="py-4">
+                              <div className="flex items-center gap-3">
+                                 <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+                                    {lead.name.charAt(0)}
+                                 </div>
+                                 <span className="text-xs font-bold text-slate-800">{lead.name}</span>
+                              </div>
+                           </td>
+                           <td className="py-4 text-[10px] font-semibold text-slate-500 max-w-[120px] truncate">{lead.loc}</td>
+                           <td className="py-4 text-[10px] font-bold text-slate-400 uppercase">{lead.src}</td>
+                           <td className="py-4 text-[10px] font-black text-slate-900">{lead.budget}</td>
+                           <td className="py-4 text-center">
+                              <span className={cn("px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider", lead.color)}>
+                                 {lead.status}
+                              </span>
+                           </td>
+                           <td className="py-4 text-right">
+                              <p className="text-[10px] font-bold text-slate-900 leading-none">{lead.date}</p>
+                              <p className="text-[9px] text-slate-400 font-medium mt-1 uppercase tracking-widest">{lead.time}</p>
+                           </td>
+                        </tr>
                      ))}
                   </tbody>
                </table>
@@ -231,136 +250,104 @@ export default function SuperadminBookingLeads() {
          </div>
 
          {/* Top Performing Locations */}
-         <div className="lg:col-span-4 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50">
+         <div className="col-span-12 lg:col-span-5 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col">
             <div className="flex items-center justify-between mb-10">
-               <h3 className="text-xl font-bold text-slate-800 tracking-tight">Top Performing Locations</h3>
-               <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-bold text-slate-500 uppercase outline-none cursor-pointer hover:bg-slate-100 transition-colors">
+               <h3 className="text-lg font-bold text-slate-900">Top Performing Locations</h3>
+               <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-[10px] font-bold text-slate-500 outline-none">
                   <option>This Month</option>
                </select>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-6 flex-1">
                {topLocations.map((loc, i) => (
-                 <div key={i} className="group">
-                    <div className="flex items-center justify-between mb-3">
-                       <div className="flex items-center gap-4">
-                          <span className="text-[10px] font-bold text-slate-300">0{i+1}</span>
-                          <span className="text-xs font-bold text-slate-800 truncate max-w-[120px]">{loc.city}</span>
-                       </div>
-                       <span className="text-xs font-bold text-blue-600">{loc.rate}</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden">
-                       <div 
-                         className="h-full bg-blue-500 rounded-full transition-all duration-1000" 
-                         style={{ width: `${loc.progress}%` }} 
-                       />
-                    </div>
-                    <div className="flex items-center justify-between mt-2 text-[9px] font-bold text-slate-400 uppercase">
-                       <span>{loc.leads} Leads</span>
-                       <span>{loc.bookings} Bookings</span>
-                       <span>Conv. Rate</span>
-                    </div>
-                 </div>
+                  <div key={i} className="space-y-2">
+                     <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <span className="text-xs font-black text-slate-300 w-4">{i + 1}</span>
+                           <span className="text-xs font-black text-slate-900 truncate">{loc.name}</span>
+                        </div>
+                        <div className="flex items-center gap-6">
+                           <div className="text-right">
+                              <p className="text-[10px] font-black text-slate-900 leading-none">{loc.leads}</p>
+                              <p className="text-[8px] text-slate-400 uppercase font-bold mt-1">Leads</p>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-[10px] font-black text-slate-900 leading-none">{loc.bookings}</p>
+                              <p className="text-[8px] text-slate-400 uppercase font-bold mt-1">Bookings</p>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="flex items-center gap-4">
+                        <div className="flex-1 h-1.5 bg-slate-50 rounded-full overflow-hidden shadow-inner">
+                           <div className="h-full bg-blue-500 rounded-full" style={{width: loc.rate}} />
+                        </div>
+                        <span className="text-[10px] font-black text-blue-600 w-12 text-right">{loc.rate}</span>
+                     </div>
+                  </div>
                ))}
             </div>
-            <button className="w-full mt-10 py-4 rounded-2xl bg-white text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all border border-blue-100 shadow-sm flex items-center justify-center gap-2">
-               View All Locations <ChevronRight className="w-4 h-4" />
-            </button>
+            <button className="w-full mt-8 py-3 text-[10px] font-bold text-blue-600 uppercase tracking-widest hover:underline text-left">View All Locations →</button>
          </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
          {/* Lead Sources Donut */}
-         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-6 tracking-widest w-full">Lead Sources <span className="text-slate-300">(This Month)</span></h4>
-            <div className="h-[120px] w-full relative">
-               <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                     <Pie data={sourceData} innerRadius={35} outerRadius={50} paddingAngle={5} dataKey="value">
-                        {sourceData.map((e, i) => <Cell key={i} fill={e.color} />)}
-                     </Pie>
-                  </PieChart>
-               </ResponsiveContainer>
-            </div>
-            <div className="w-full space-y-2 mt-4">
-               {sourceData.map((s, i) => (
-                 <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                       <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.color }} />
-                       <span className="text-[9px] font-bold text-slate-500">{s.name}</span>
-                    </div>
-                    <span className="text-[9px] font-bold text-slate-800">{s.value} <span className="text-slate-400 ml-1">({((s.value/3689)*100).toFixed(1)}%)</span></span>
-                 </div>
-               ))}
-            </div>
-         </div>
-
+         <AnalyticsSmallCard title="Lead Sources (This Month)" total="3,689" data={leadSources} />
          {/* Lead Status Donut */}
-         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-6 tracking-widest w-full">Lead Status <span className="text-slate-300">(This Month)</span></h4>
-            <div className="h-[120px] w-full relative">
+         <AnalyticsSmallCard title="Lead Status (This Month)" total="3,689" data={leadStatus} />
+         {/* Avg. Response Time */}
+         <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col h-full">
+            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Avg. Response Time</h3>
+            <div className="mb-4">
+               <p className="text-2xl font-black text-slate-900 tracking-tight">2h 18m</p>
+               <div className="flex items-center gap-1.5 mt-1">
+                  <ArrowDownRight size={14} className="text-emerald-600" />
+                  <span className="text-[10px] font-bold text-emerald-600">18.6% faster</span>
+               </div>
+            </div>
+            <div className="flex-1 min-h-[100px]">
                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                     <Pie data={statusData} innerRadius={35} outerRadius={50} paddingAngle={5} dataKey="value">
-                        {statusData.map((e, i) => <Cell key={i} fill={e.color} />)}
-                     </Pie>
-                  </PieChart>
-               </ResponsiveContainer>
-            </div>
-            <div className="w-full space-y-2 mt-4">
-               {statusData.map((s, i) => (
-                 <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                       <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.color }} />
-                       <span className="text-[9px] font-bold text-slate-500">{s.name}</span>
-                    </div>
-                    <span className="text-[9px] font-bold text-slate-800">{s.value} <span className="text-slate-400 ml-1">({((s.value/3689)*100).toFixed(1)}%)</span></span>
-                 </div>
-               ))}
-            </div>
-         </div>
-
-         {/* Avg Response Time */}
-         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Avg. Response Time</h4>
-            <p className="text-3xl font-bold text-slate-800">2h 18m</p>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 mt-2">
-               <ArrowDownRight className="w-4 h-4" /> 18.6% from last month
-            </div>
-            <div className="h-[80px] w-full mt-6">
-               <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={responseTimeData}>
-                     <Area type="monotone" dataKey="v" stroke="#10B981" fill="#10B981" fillOpacity={0.1} strokeWidth={3} dot={false} />
-                  </AreaChart>
+                  <LineChart data={leadsVsBookings}>
+                     <Line type="monotone" dataKey="bookings" stroke="#10B981" strokeWidth={2} dot={false} />
+                  </LineChart>
                </ResponsiveContainer>
             </div>
          </div>
-
          {/* Bookings Value */}
-         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
-            <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Bookings Value <span className="text-slate-300">(This Month)</span></h4>
-            <p className="text-2xl font-bold text-slate-800">₹2,48,76,320</p>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 mt-2">
-               <ArrowUpRight className="w-4 h-4" /> 22.4% from last month
+         <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col h-full">
+            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Bookings Value (This Month)</h3>
+            <div className="mb-4">
+               <p className="text-xl font-black text-slate-900 tracking-tight truncate">₹ 2,48,76,320</p>
+               <div className="flex items-center gap-1.5 mt-1">
+                  <ArrowUpRight size={14} className="text-emerald-600" />
+                  <span className="text-[10px] font-bold text-emerald-600">22.4% from last month</span>
+               </div>
             </div>
-            <div className="h-[80px] w-full mt-8">
+            <div className="flex-1 min-h-[100px]">
                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={bookingsValueData}>
-                     <Area type="monotone" dataKey="v" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.1} strokeWidth={3} dot={false} />
-                  </AreaChart>
+                  <BarChart data={leadsVsBookings}>
+                     <Bar dataKey="bookings" fill="#3B82F6" radius={[4, 4, 4, 4]} />
+                  </BarChart>
                </ResponsiveContainer>
             </div>
          </div>
-
          {/* Top Converting Agents */}
-         <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col">
+         <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col h-full">
             <div className="flex items-center justify-between mb-6">
-               <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Top Converting Agents</h4>
-               <button className="text-blue-600 text-[9px] font-bold uppercase hover:underline">View All</button>
+               <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Top Converting Agents</h3>
+               <button className="text-[10px] font-bold text-blue-600 hover:underline">View All</button>
             </div>
-            <div className="space-y-5 flex-1">
-               <AgentRow name="Rahul Singh" rate="48.6%" color="blue" />
-               <AgentRow name="Priya Nair" rate="45.2%" color="emerald" />
-               <AgentRow name="Amit Patel" rate="42.7%" color="indigo" />
+            <div className="space-y-5">
+               {topAgents.map((agent, i) => (
+                  <div key={i} className="space-y-2">
+                     <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-800">{i+1}. {agent.name}</span>
+                        <span className="text-[11px] font-black text-blue-600">{agent.rate}</span>
+                     </div>
+                     <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500 rounded-full" style={{width: agent.rate}} />
+                     </div>
+                  </div>
+               ))}
             </div>
          </div>
       </div>
@@ -368,33 +355,62 @@ export default function SuperadminBookingLeads() {
   );
 }
 
-function FunnelStep({ label, value, percent, color, width }) {
+// --- UTILITY COMPONENTS ---
+
+function StatCardWide({ label, value, trend, up, color }) {
   return (
-    <div className="relative flex flex-col items-center">
-       <div className={cn("h-12 flex items-center justify-between px-6 text-white rounded-xl shadow-lg transition-all hover:scale-[1.02] cursor-default", color, width)}>
-          <span className="text-[10px] font-bold uppercase opacity-80">{label}</span>
-          <div className="text-right">
-             <span className="text-sm font-bold block leading-none">{value}</span>
-             <span className="text-[8px] font-bold opacity-60 uppercase mt-0.5 block">({percent})</span>
-          </div>
+    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col transition-all hover:translate-y-[-4px] hover:shadow-md group">
+       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 shadow-sm", color === "amber" ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600")}>
+          <Users size={18} />
        </div>
+       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">{label}</p>
+       <p className="text-xl font-black text-slate-900 tracking-tight leading-none mb-3">{value}</p>
+       <div className="flex items-center gap-1.5 mt-auto">
+          {up ? <ArrowUpRight size={12} className="text-emerald-600" /> : <ArrowDownRight size={12} className="text-rose-600" />}
+          <span className={cn("text-[10px] font-bold", up ? "text-emerald-600" : "text-rose-600")}>{trend}</span>
+          <span className="text-[10px] text-slate-400 font-medium">from yesterday</span>
+       </div>
+       <button className="mt-4 text-[9px] font-black text-blue-600 uppercase tracking-widest text-left hover:underline">View Details →</button>
     </div>
   );
 }
 
-function AgentRow({ name, rate, color }) {
+function LegendItem({ color, label }) {
   return (
-    <div className="flex items-center justify-between group">
-       <div className="flex items-center gap-3">
-          <div className={cn(
-             "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md",
-             color === "blue" ? "bg-blue-600" : color === "emerald" ? "bg-emerald-600" : "bg-indigo-600"
-          )}>
-             {name.split(' ').map(n => n[0]).join('')}
+    <div className="flex items-center gap-2">
+       <div className={cn("w-2 h-2 rounded-full", color)} />
+       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</span>
+    </div>
+  );
+}
+
+function AnalyticsSmallCard({ title, total, data }) {
+  return (
+    <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col">
+       <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6 leading-tight h-8">{title}</h3>
+       <div className="relative h-28 flex items-center justify-center mb-6">
+          <ResponsiveContainer width="100%" height="100%">
+             <PieChart>
+                <Pie data={data} innerRadius={35} outerRadius={48} paddingAngle={3} dataKey="value" stroke="none">
+                   {data.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                </Pie>
+             </PieChart>
+          </ResponsiveContainer>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+             <p className="text-sm font-black text-slate-900">{total}</p>
           </div>
-          <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{name}</span>
        </div>
-       <span className="text-xs font-bold text-slate-800">{rate}</span>
+       <div className="space-y-2">
+          {data.slice(0, 3).map((item) => (
+             <div key={item.name} className="flex items-center justify-between group">
+                <div className="flex items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full" style={{backgroundColor: item.color}} />
+                   <span className="text-[9px] font-bold text-slate-400 uppercase truncate max-w-[60px]">{item.name}</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-900">{item.percent}</span>
+             </div>
+          ))}
+       </div>
     </div>
   );
 }

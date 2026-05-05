@@ -8,133 +8,125 @@ import {
   ArrowUpCircle, ArrowDownCircle, RotateCcw, Plus,
   Download, Eye, CreditCard, RefreshCw
 } from "lucide-react";
-import { PageHeader } from "../../components/dashboard/PageHeader";
-import { DateRangePill } from "../../components/dashboard/DateRangePill";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const subs = [
-  { id: "SUB-1024", customer: "Rahul Sharma", plan: "Gold", amount: "₹ 7,999", cycle: "Monthly", next: "26 Jun 2024", status: "Active" },
-  { id: "SUB-1023", customer: "Priya Verma", plan: "Silver", amount: "₹ 2,999", cycle: "Monthly", next: "25 Jun 2024", status: "Active" },
-  { id: "SUB-1022", customer: "Amit Kumar", plan: "Basic", amount: "₹ 999", cycle: "Monthly", next: "24 Jun 2024", status: "Active" },
-  { id: "SUB-1021", customer: "Neha Singh", plan: "Silver", amount: "₹ 2,999", cycle: "Monthly", next: "23 Jun 2024", status: "Active" },
-  { id: "SUB-1020", customer: "Vikram Patel", plan: "Gold", amount: "₹ 7,999", cycle: "Monthly", next: "—", status: "Cancelled" },
-  { id: "SUB-1019", customer: "Sneha Iyer", plan: "Basic", amount: "₹ 999", cycle: "Monthly", next: "—", status: "Expired" },
+  { id: "SUB-1024", customer: "Rahul Sharma", plan: "Gold", amount: "₹7,999", cycle: "Monthly", next: "26 Jun", status: "Active" },
+  { id: "SUB-1023", customer: "Priya Verma", plan: "Silver", amount: "₹2,999", cycle: "Monthly", next: "25 Jun", status: "Active" },
+  { id: "SUB-1022", customer: "Amit Kumar", plan: "Basic", amount: "₹999", cycle: "Monthly", next: "24 Jun", status: "Active" },
+  { id: "SUB-1021", customer: "Neha Singh", plan: "Silver", amount: "₹2,999", cycle: "Monthly", next: "23 Jun", status: "Active" },
+  { id: "SUB-1020", customer: "Vikram Patel", plan: "Gold", amount: "₹7,999", cycle: "Monthly", next: "—", status: "Cancelled" },
 ];
 
 export default function Subscriptions() {
   return (
-    <div className="p-8 space-y-8 bg-[#F8FAFC] min-h-full">
+    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full">
       {/* Header Area */}
       <div className="flex items-center justify-between">
-         <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
-               <CreditCard className="w-6 h-6" />
-            </div>
-            <div>
-               <h1 className="text-2xl font-black text-slate-800 tracking-tight">Subscriptions</h1>
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Finance {">"} Recurring Revenue</p>
-            </div>
+         <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Subscription Matrix</h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Finance & Recurring Revenue Intelligence Lifecycle Ledger</p>
          </div>
-         <div className="flex items-center gap-4">
-            <div className="relative group">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-               <input placeholder="Search customer, ID..." className="bg-white border border-slate-100 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold shadow-sm w-64 outline-none focus:border-indigo-500 transition-all" />
-            </div>
-            <DateRangePill value="Growth: +14.2% MRR" />
+         <div className="flex items-center gap-3">
+            <button className="bg-white text-slate-400 border border-slate-100 px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2">
+               <Download className="w-3.5 h-3.5" /> Export MRR
+            </button>
          </div>
       </div>
 
-      {/* Hero Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-         <StatCardSmall label="Active Subs" value="1,998" trend="+ 24 today" up icon={CreditCard} color="emerald" />
-         <StatCardSmall label="Total Users" value="2,142" trend="+ 38 week" up icon={Users} color="blue" />
-         <StatCardSmall label="Renewals (30d)" value="312" trend="92% rate" up icon={RefreshCw} color="indigo" />
-         <StatCardSmall label="Churned" value="18" trend="- 4 vs last" up={false} icon={XCircle} color="rose" />
-         <StatCardSmall label="MRR Growth" value="₹ 8.2L" trend="+ 12.1%" up icon={Zap} color="blue" />
-         <StatCardSmall label="Avg Plan Value" value="₹ 4.1k" trend="+ 2.4%" up icon={Activity} color="indigo" />
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <StatCardHorizontal label="Active Subs" value="1,998" trend="+24 Delta" up icon={CreditCard} color="emerald" />
+        <StatCardHorizontal label="Total Users" value="2,142" trend="+38 Week" up icon={Users} color="blue" />
+        <StatCardHorizontal label="Renewals" value="312" trend="92% Rate" up icon={RefreshCw} color="indigo" />
+        <StatCardHorizontal label="Churned" value="18" trend="-4 Delta" up={false} icon={XCircle} color="rose" />
+        <StatCardHorizontal label="MRR Yield" value="₹8.2L" trend="+12.1% Alpha" up icon={Zap} color="blue" />
+        <StatCardHorizontal label="Avg Plan" value="₹4.1k" trend="+2.4% Zeta" up icon={Activity} color="indigo" />
       </div>
 
       {/* Main Table Card */}
-      <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl">
-         <div className="flex items-center justify-between mb-10">
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">Subscription Directory</h3>
-            <div className="flex items-center gap-4">
-               <select className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-[10px] font-black text-slate-500 outline-none">
-                  <option>All Plans</option>
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 overflow-hidden">
+         <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-6">
+               <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest leading-none">Subscription Registry</h3>
+               <select className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-1.5 text-[8px] font-bold text-slate-500 uppercase outline-none shadow-sm">
+                  <option>All Tiers</option>
                   <option>Gold</option>
                   <option>Silver</option>
                   <option>Basic</option>
                </select>
-               <button className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all">
-                  <Download className="w-4 h-4" /> Export MRR
+            </div>
+            <div className="flex items-center gap-3">
+               <div className="relative group w-48">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+                  <input placeholder="Search customer, ID..." className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-3 text-[10px] font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" />
+               </div>
+               <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm">
+                  <RefreshCw className="w-3.5 h-3.5" />
                </button>
             </div>
          </div>
 
          <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[1000px]">
+            <table className="w-full text-left">
                <thead>
-                  <tr className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-slate-50">
-                     <th className="pb-6">Subscription ID</th>
-                     <th className="pb-6">Customer Profile</th>
-                     <th className="pb-6 text-center">Plan Tier</th>
-                     <th className="pb-6 text-center">Billing Cycle</th>
-                     <th className="pb-6 text-center">Status</th>
-                     <th className="pb-6 text-right">Actions</th>
+                  <tr className="text-slate-400 text-[8px] font-bold uppercase border-b border-slate-50">
+                     <th className="pb-4">Subscription ID</th>
+                     <th className="pb-4">Customer Profile</th>
+                     <th className="pb-4 text-center">Plan Tier</th>
+                     <th className="pb-4 text-center">Billing Cycle</th>
+                     <th className="pb-4 text-center">Audit Status</th>
+                     <th className="pb-4 text-right">Actions</th>
                   </tr>
                </thead>
                <tbody className="divide-y divide-slate-50">
                   {subs.map((s, i) => (
-                    <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
-                       <td className="py-6">
-                          <span className="text-xs font-mono bg-slate-50 text-slate-400 px-2 py-1 rounded-lg border border-slate-100 font-bold group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+                    <tr key={i} className="group hover:bg-slate-50 transition-colors cursor-pointer">
+                       <td className="py-3">
+                          <span className="text-[9px] font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 shadow-sm">
                              {s.id}
                           </span>
                        </td>
-                       <td className="py-6">
-                          <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm shadow-sm group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                       <td className="py-3">
+                          <div className="flex items-center gap-3">
+                             <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs shadow-sm transition-transform group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-indigo-50">
                                 {s.customer.charAt(0)}
                              </div>
-                             <div>
-                                <p className="text-sm font-black text-slate-800">{s.customer}</p>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Next Billing: {s.next}</p>
+                             <div className="min-w-0">
+                                <p className="text-[11px] font-bold text-slate-800 leading-tight truncate max-w-[150px]">{s.customer}</p>
+                                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Next: {s.next}</p>
                              </div>
                           </div>
                        </td>
-                       <td className="py-6 text-center">
+                       <td className="py-3 text-center">
                           <span className={cn(
-                            "text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-tighter",
+                            "text-[8px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider shadow-sm",
                             s.plan === "Gold" ? "bg-amber-50 text-amber-600 border-amber-100" :
-                            s.plan === "Silver" ? "bg-slate-50 text-slate-600 border-slate-200" :
+                            s.plan === "Silver" ? "bg-slate-50 text-slate-400 border-slate-200" :
                             "bg-blue-50 text-blue-600 border-blue-100"
                           )}>
                              {s.plan} Plan
                           </span>
                        </td>
-                       <td className="py-6 text-center">
-                          <p className="text-sm font-black text-slate-800">{s.amount}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">{s.cycle}</p>
+                       <td className="py-3 text-center">
+                          <p className="text-[11px] font-bold text-slate-800 tracking-tight">{s.amount}</p>
+                          <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">{s.cycle}</p>
                        </td>
-                       <td className="py-6 text-center">
+                       <td className="py-3 text-center">
                           <span className={cn(
-                            "text-[9px] font-black px-3 py-1 rounded-full border shadow-sm uppercase tracking-widest",
-                            s.status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : 
-                            s.status === "Cancelled" ? "bg-rose-50 text-rose-600 border-rose-100" :
-                            "bg-slate-50 text-slate-400 border-slate-100"
+                             "text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider shadow-sm",
+                             s.status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : 
+                             s.status === "Cancelled" ? "bg-rose-50 text-rose-600 border-rose-100" :
+                             "bg-slate-50 text-slate-400 border-slate-100"
                           )}>
                              {s.status}
                           </span>
                        </td>
-                       <td className="py-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                             <button className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all">
-                                <Eye className="w-4 h-4" />
-                             </button>
-                             <button className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all">
-                                <MoreVertical className="w-4 h-4" />
-                             </button>
+                       <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                             <button className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all border border-slate-100 shadow-sm"><Eye className="w-3.5 h-3.5" /></button>
+                             <button className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all border border-slate-100 shadow-sm"><MoreVertical className="w-3.5 h-3.5" /></button>
                           </div>
                        </td>
                     </tr>
@@ -147,18 +139,30 @@ export default function Subscriptions() {
   );
 }
 
-function StatCardSmall({ label, value, trend, up, icon: Icon, color }) {
-  const bgColors = { indigo: "bg-indigo-600 shadow-indigo-200", emerald: "bg-emerald-500 shadow-emerald-200", amber: "bg-amber-500 shadow-amber-200", rose: "bg-rose-500 shadow-rose-200", blue: "bg-blue-500 shadow-blue-200" };
+function StatCardHorizontal({ label, value, trend, up, icon: Icon, color }) {
+  const bgColors = { 
+    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100", 
+    blue: "bg-blue-50 text-blue-600 border-blue-100", 
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100", 
+    rose: "bg-rose-50 text-rose-600 border-rose-100" 
+  };
+  
   return (
-    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-lg flex items-center gap-5 group hover:-translate-y-1 transition-all">
-       <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl shrink-0 transition-transform group-hover:scale-110", bgColors[color])}>
-          <Icon className="w-7 h-7" />
-       </div>
-       <div className="min-w-0">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate">{label}</p>
-          <p className="text-2xl font-black text-slate-800 mb-0.5 truncate">{value}</p>
-          <p className={cn("text-[9px] font-black", up ? "text-emerald-600" : "text-rose-600")}>{trend} {up ? "↑" : "↓"}</p>
-       </div>
+    <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
+      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105", bgColors[color])}>
+         <Icon className="w-5 h-5" />
+      </div>
+      <div className="min-w-0">
+         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">{label}</p>
+         <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">{value}</p>
+         <div className={cn(
+           "flex items-center gap-1 text-[7px] font-bold uppercase",
+           up ? "text-emerald-600" : "text-rose-600"
+         )}>
+            {up ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+            {trend}
+         </div>
+      </div>
     </div>
   );
 }
