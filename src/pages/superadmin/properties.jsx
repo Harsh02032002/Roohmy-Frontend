@@ -1,28 +1,69 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import * as LucideIcons from "lucide-react";
 import { 
   Building2, Users, Shield, Clock, Search, 
   ArrowUpRight, ArrowDownRight, MoreVertical, 
   Filter, Globe, MapPin, Zap, Sheet, Trash2, 
-  ChevronRight, Phone, Mail, User, Image as ImageIcon,
-  Activity, Home, CheckCircle2, XCircle, RefreshCw, Layers
+  Pencil, Phone, Mail, User, Image as ImageIcon, ChevronRight,
+  Activity, Home, CheckCircle2, XCircle, RefreshCw, Layers, Plus, UploadCloud, Loader2
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
+const getIconComponent = (iconName) => {
+  const iconKey = iconName.charAt(0).toUpperCase() + iconName.slice(1).replace(/-./g, x => x[1].toUpperCase());
+  return LucideIcons[iconKey] || LucideIcons.Circle;
+};
+
+const iconOptions = [
+  { value: "wifi", label: "WiFi" },
+  { value: "car", label: "Parking" },
+  { value: "dumbbell", label: "Gym" },
+  { value: "waves", label: "Swimming Pool" },
+  { value: "wind", label: "Air Conditioning" },
+  { value: "tv", label: "Television" },
+  { value: "coffee", label: "Kitchen" },
+  { value: "shield", label: "Security" },
+  { value: "zap", label: "Power Backup" },
+  { value: "bed", label: "Bed" },
+  { value: "bath", label: "Bathroom" },
+  { value: "washing-machine", label: "Laundry" },
+  { value: "refrigerator", label: "Fridge" },
+  { value: "armchair", label: "Furniture" },
+  { value: "lock", label: "Lock" },
+  { value: "camera", label: "CCTV" },
+  { value: "tree-deciduous", label: "Garden" },
+  { value: "users", label: "Common Area" },
+  { value: "utensils", label: "Mess" },
+  { value: "bus", label: "Transport" },
+];
+
 export default function SuperadminProperties() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const query = new URLSearchParams(location.search);
+  const view = query.get("view") || "list";
+  const editId = query.get("editId") || null;
+
   const [properties, setProperties] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const getApiUrl = () =>
     window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
       ? "http://localhost:5001" : "https://api.roomhy.com";
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (pNum = 1) => {
     try {
       setLoading(true);
-      const res = await fetch(`${getApiUrl()}/api/properties?t=${Date.now()}`);
+      const res = await fetch(`${getApiUrl()}/api/properties?page=${pNum}&limit=100&t=${Date.now()}`);
       const data = await res.json();
       if (data.success && data.properties) {
           setProperties(data.properties.map(p => ({
@@ -33,13 +74,33 @@ export default function SuperadminProperties() {
             address: p.propertyInfo?.address || p.address || "-",
             ownerName: p.owner?.name || p.propertyInfo?.ownerName || p.ownerName || "-",
             ownerLoginId: p.ownerLoginId || p.generatedCredentials?.loginId || "-",
-            status: p.isLiveOnWebsite ? "Active" : "Inactive",
+            status: p.isLiveOnWebsite ? "Active" : p.status === "inactive" ? "Pending" : "Inactive",
             views: p.views || 0,
             clicks: p.clicks || 0,
             image: p.featuredImage || (p.images && p.images[0]) || ""
           })));
+          setTotalPages(data.totalPages || 1);
+          setTotalRecords(data.total || 0);
+          setPage(data.page || 1);
       }
     } catch (err) { console.error(err); } finally { setLoading(false); }
+  };
+
+  const handleDeleteProperty = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this property? This action cannot be undone.")) return;
+    try {
+      const res = await fetch(`${getApiUrl()}/api/properties/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Property deleted successfully");
+        fetchProperties();
+      } else {
+        toast.error(data.message || "Failed to delete property");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error deleting property");
+    }
   };
 
   useEffect(() => { fetchProperties(); }, []);
@@ -55,7 +116,8 @@ export default function SuperadminProperties() {
   const stats = useMemo(() => {
     const total = properties.length;
     const active = properties.filter(p => p.status === "Active").length;
-    return { total, active, inactive: total - active, views: properties.reduce((a, b) => a + b.views, 0) };
+    const pending = properties.filter(p => p.status === "Pending").length;
+    return { total, active, pending, inactive: total - active - pending, views: properties.reduce((a, b) => a + b.views, 0) };
   }, [properties]);
 
   if (loading) {
@@ -67,23 +129,26 @@ export default function SuperadminProperties() {
     );
   }
 
-  return (
+  const listView = (
     <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Property Directory</h1>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Platform Inventory Pulse & Asset Intelligence</p>
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Property List</h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Manage platform properties and listings</p>
          </div>
          <div className="flex items-center gap-3">
             <div className="relative group w-64">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
                <input 
                  value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                 placeholder="Search assets, owners..." 
+                 placeholder="Search properties, owners..." 
                  className="w-full bg-white border border-slate-100 rounded-xl py-2 pl-9 pr-3 text-[10px] font-bold shadow-sm outline-none focus:ring-2 focus:ring-blue-100 transition-all" 
                />
             </div>
+            <button onClick={() => navigate("?view=add")} className="bg-blue-600 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-blue-200/10 hover:bg-blue-700 transition-all flex items-center gap-2">
+               <Plus className="w-3.5 h-3.5" /> Add Property
+            </button>
             <button className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-emerald-200/10 hover:bg-emerald-700 transition-all flex items-center gap-2">
                <Sheet className="w-3.5 h-3.5" /> Export
             </button>
@@ -92,9 +157,9 @@ export default function SuperadminProperties() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        <StatCardHorizontal icon={Building2} label="Total Assets" value={stats.total} trend="+12.5% Delta" up color="blue" />
+        <StatCardHorizontal icon={Building2} label="Total Properties" value={stats.total} trend="+12.5% Delta" up color="blue" />
         <StatCardHorizontal icon={CheckCircle2} label="Live on Web" value={stats.active} trend="Active Flow" up color="emerald" />
-        <StatCardHorizontal icon={Clock} label="Under Review" value={stats.inactive} trend="Audit Queue" up color="amber" />
+        <StatCardHorizontal icon={Clock} label="Pending Approval" value={stats.pending} trend="Waiting Sync" up color="amber" />
         <StatCardHorizontal icon={Activity} label="Total Views" value={stats.views.toLocaleString()} trend="+25.4% Yield" up color="indigo" />
         <StatCardHorizontal icon={Zap} label="Avg Occupancy" value="84%" trend="Market Lead" up color="blue" />
       </div>
@@ -102,15 +167,16 @@ export default function SuperadminProperties() {
       {/* Main Ledger */}
       <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 overflow-hidden">
          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight">Inventory Ledger</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight">Property List</h3>
             <div className="flex items-center gap-3">
                <select 
                  value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
                  className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-1.5 text-[9px] font-bold text-slate-500 outline-none hover:bg-slate-100 transition-all cursor-pointer"
                >
-                  <option value="all">Global Pulse</option>
-                  <option value="Active">Active Segments</option>
-                  <option value="Inactive">Review Pending</option>
+                  <option value="all">All Properties</option>
+                  <option value="Active">Live on Website</option>
+                  <option value="Pending">Pending Approval</option>
+                  <option value="Inactive">Offline / Draft</option>
                </select>
                <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm">
                   <Filter className="w-4 h-4" />
@@ -122,11 +188,11 @@ export default function SuperadminProperties() {
             <table className="w-full text-left">
                <thead>
                   <tr className="text-slate-400 text-[8px] font-bold uppercase border-b border-slate-50">
-                     <th className="pb-4">Asset Identity</th>
-                     <th className="pb-4">Stakeholder Details</th>
-                     <th className="pb-4 text-center">Engagement Pulse</th>
-                     <th className="pb-4 text-center">Zone</th>
-                     <th className="pb-4 text-center">Pulse Status</th>
+                     <th className="pb-4">Property Details</th>
+                     <th className="pb-4">Owner Details</th>
+                     <th className="pb-4 text-center">Engagement</th>
+                     <th className="pb-4 text-center">Location Code</th>
+                     <th className="pb-4 text-center">Status</th>
                      <th className="pb-4 text-right">Actions</th>
                   </tr>
                </thead>
@@ -172,15 +238,17 @@ export default function SuperadminProperties() {
                        <td className="py-3 text-center">
                           <span className={cn(
                              "text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider",
-                             p.status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
+                             p.status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : 
+                             p.status === "Pending" ? "bg-amber-50 text-amber-600 border-amber-100" :
+                             "bg-rose-50 text-rose-600 border-rose-100"
                           )}>
                              {p.status}
                           </span>
                        </td>
                        <td className="py-3 text-right">
                           <div className="flex items-center justify-end gap-2">
-                             <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm"><ChevronRight className="w-3.5 h-3.5" /></button>
-                             <button className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-rose-600 transition-all border border-slate-100 shadow-sm"><Trash2 className="w-3.5 h-3.5" /></button>
+                             <button onClick={() => navigate(`?view=add&editId=${p.id}`)} className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm"><Pencil className="w-3.5 h-3.5" /></button>
+                             <button onClick={() => handleDeleteProperty(p.id)} className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-rose-600 transition-all border border-slate-100 shadow-sm"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                        </td>
                     </tr>
@@ -189,6 +257,726 @@ export default function SuperadminProperties() {
             </table>
          </div>
       </div>
+
+      {/* Pagination Footer */}
+      <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-100 shadow-md mt-6">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Showing {properties.length} of {totalRecords} Properties</p>
+          <div className="flex items-center gap-2">
+             <button 
+               disabled={page === 1}
+               onClick={() => fetchProperties(page - 1)}
+               className="px-3 py-1.5 rounded-lg border border-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-all"
+             >
+               Previous
+             </button>
+             <div className="flex items-center gap-1">
+                {[...Array(totalPages)].map((_, i) => (
+                   <button 
+                     key={i}
+                     onClick={() => fetchProperties(i + 1)}
+                     className={cn(
+                       "w-8 h-8 rounded-lg text-[10px] font-bold transition-all",
+                       page === i + 1 ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "text-slate-500 hover:bg-slate-50"
+                     )}
+                   >
+                      {i + 1}
+                   </button>
+                ))}
+             </div>
+             <button 
+               disabled={page === totalPages}
+               onClick={() => fetchProperties(page + 1)}
+               className="px-3 py-1.5 rounded-lg border border-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-slate-50 disabled:opacity-30 transition-all"
+             >
+               Next
+             </button>
+          </div>
+       </div>
+    </div>
+  );
+
+  return view === "add" ? <AddPropertyView editId={editId} onBack={() => { fetchProperties(); navigate("?view=list"); }} apiUrl={getApiUrl()} /> : listView;
+}
+
+function AddPropertyView({ onBack, apiUrl, editId }) {
+  const [formData, setFormData] = useState({
+    title: "", address: "", city: "", locality: "", ownerName: "", ownerPhone: "", ownerLoginId: "", 
+    propertyType: "pg", gender: "any", monthlyRent: "", discount: "", description: "",
+    status: "inactive", isLiveOnWebsite: false
+  });
+  
+  // Amenities fetched from DB
+  const [dbAmenities, setDbAmenities] = useState([]);
+  const [selectedDbAmenities, setSelectedDbAmenities] = useState({});
+
+  // Custom dynamic amenities (added inline, not in DB)
+  const [amenities, setAmenities] = useState([]);
+  const [newAmenityName, setNewAmenityName] = useState("");
+  const [newAmenityIcon, setNewAmenityIcon] = useState("wifi");
+  const [newAmenityCategory, setNewAmenityCategory] = useState("basic");
+
+  // Owners fetched from DB
+  const [dbOwners, setDbOwners] = useState([]);
+
+  // Cities and Areas from DB
+  const [dbCities, setDbCities] = useState([]);
+  const [dbAreas, setDbAreas] = useState([]);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingAreas, setLoadingAreas] = useState(false);
+
+  // Modals for adding new City/Area
+  const [showAddCityModal, setShowAddCityModal] = useState(false);
+  const [showAddAreaModal, setShowAddAreaModal] = useState(false);
+  const [newCityName, setNewCityName] = useState("");
+  const [newCityState, setNewCityState] = useState("");
+  const [newAreaName, setNewAreaName] = useState("");
+
+  const fetchCities = async () => {
+    try {
+      setLoadingCities(true);
+      const res = await fetch(`${apiUrl}/api/locations/cities`);
+      const data = await res.json();
+      if (data.success) setDbCities(data.data);
+    } catch (err) { console.error("Failed to load cities", err); }
+    finally { setLoadingCities(false); }
+  };
+
+  const fetchAreas = async (cityName) => {
+    if (!cityName) {
+      setDbAreas([]);
+      return;
+    }
+    try {
+      setLoadingAreas(true);
+      const res = await fetch(`${apiUrl}/api/locations/areas/city/${cityName}`);
+      const data = await res.json();
+      if (data.success) setDbAreas(data.data);
+    } catch (err) { console.error("Failed to load areas", err); }
+    finally { setLoadingAreas(false); }
+  };
+
+  const handleAddCity = async () => {
+    if (!newCityName || !newCityState) return toast.error("City name and state are required");
+    try {
+      const res = await fetch(`${apiUrl}/api/locations/cities`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newCityName, state: newCityState })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("City added successfully");
+        setShowAddCityModal(false);
+        setNewCityName("");
+        setNewCityState("");
+        fetchCities();
+      } else {
+        toast.error(data.message || "Failed to add city");
+      }
+    } catch (err) { console.error(err); toast.error("Error adding city"); }
+  };
+
+  const handleAddArea = async () => {
+    if (!newAreaName || !formData.city) return toast.error("Area name and selected city are required");
+    const cityObj = dbCities.find(c => c.name === formData.city);
+    if (!cityObj) return toast.error("Selected city not found in database");
+
+    try {
+      const res = await fetch(`${apiUrl}/api/locations/areas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newAreaName, cityId: cityObj._id, city: cityObj._id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Area added successfully");
+        setShowAddAreaModal(false);
+        setNewAreaName("");
+        fetchAreas(formData.city);
+      } else {
+        toast.error(data.message || "Failed to add area");
+      }
+    } catch (err) { console.error(err); toast.error("Error adding area"); }
+  };
+
+  useEffect(() => {
+    fetchCities();
+    // Load amenities
+    fetch(`${apiUrl}/api/amenities`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setDbAmenities(data.data);
+          const initial = {};
+          data.data.forEach(a => { initial[a._id] = false; });
+          setSelectedDbAmenities(initial);
+        }
+      })
+      .catch(err => console.error("Failed to load amenities", err));
+
+    // Load owners
+    fetch(`${apiUrl}/api/superadmin/owners`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setDbOwners(data.data);
+        }
+      })
+      .catch(err => console.error("Failed to load owners", err));
+  }, [apiUrl]);
+
+  // Fetch areas when city changes
+  useEffect(() => {
+    if (formData.city) {
+      fetchAreas(formData.city);
+    }
+  }, [formData.city]);
+
+  const handleAddAmenity = () => {
+    if (!newAmenityName.trim()) return;
+    setAmenities([...amenities, { name: newAmenityName.trim(), icon: newAmenityIcon, category: newAmenityCategory }]);
+    setNewAmenityName("");
+  };
+
+  const handleRemoveAmenity = (index) => {
+    setAmenities(amenities.filter((_, i) => i !== index));
+  };
+
+  // Global images
+  const [globalImages, setGlobalImages] = useState([]);
+  const [uploadingGlobal, setUploadingGlobal] = useState(false);
+
+  // Dynamic custom categorized views
+  const [propertyViews, setPropertyViews] = useState([
+    { label: "Main", images: [], uploading: false }
+  ]);
+
+  const [saving, setSaving] = useState(false);
+
+  // Fetch properties for edit mode
+  useEffect(() => {
+    if (editId) {
+      fetch(`${apiUrl}/api/properties/${editId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.property) {
+            const p = data.property;
+            setFormData({
+              title: p.title || p.propertyInfo?.name || p.propertyName || "",
+              address: p.address || p.propertyInfo?.address || "",
+              city: p.city || p.locationCode || p.propertyInfo?.city || "",
+              locality: p.locality || p.propertyInfo?.area || "",
+              ownerName: p.ownerName || p.owner?.name || p.propertyInfo?.ownerName || "",
+              ownerPhone: p.ownerPhone || p.owner?.phone || "",
+              ownerLoginId: p.ownerLoginId || p.owner?.loginId || "",
+              owner: p.owner?._id || p.owner || "",
+              propertyType: p.propertyType || p.propertyInfo?.propertyType || "pg",
+              gender: p.gender || p.propertyInfo?.genderSuitability || "any",
+              monthlyRent: p.monthlyRent || p.rent || p.propertyInfo?.rent || "",
+              discount: p.discount || 0,
+              description: p.description || p.propertyInfo?.description || "",
+              status: p.status || "inactive",
+              isLiveOnWebsite: p.isLiveOnWebsite || false
+            });
+            if (p.images && p.images.length > 0) setGlobalImages(p.images);
+            if (p.propertyViews && p.propertyViews.length > 0) setPropertyViews(p.propertyViews);
+            
+            // Map amenities back
+            if (p.amenities && p.amenities.length > 0) {
+              const mappedDb = {};
+              const customArr = [];
+              p.amenities.forEach(am => {
+                 const name = typeof am === 'string' ? am : am.name;
+                 const icon = typeof am === 'string' ? 'check' : am.icon;
+                 const cat = typeof am === 'string' ? 'basic' : am.category;
+                 // check if exists in dbAmenities (we have an issue here since dbAmenities might not be loaded yet, but it's fine for simple edit)
+                 customArr.push({ name, icon: icon || 'check', category: cat || 'basic' });
+              });
+              setAmenities(customArr);
+            }
+          }
+        })
+        .catch(err => console.error("Failed to fetch property details", err));
+    }
+  }, [editId, apiUrl]);
+
+  const handleGlobalUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploadingGlobal(true);
+    const uploadedUrls = [];
+    for (const file of files) {
+      const data = new FormData();
+      data.append("image", file);
+      try {
+        const res = await fetch(`${apiUrl}/api/upload`, { method: "POST", body: data });
+        const json = await res.json();
+        if (json.url) uploadedUrls.push(json.url);
+      } catch (err) { console.error(err); }
+    }
+    setGlobalImages(prev => [...prev, ...uploadedUrls]);
+    setUploadingGlobal(false);
+  };
+
+  const handleViewUpload = async (e, viewIndex) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    const newViews = [...propertyViews];
+    newViews[viewIndex].uploading = true;
+    setPropertyViews(newViews);
+    const uploadedUrls = [];
+    for (const file of files) {
+      const data = new FormData();
+      data.append("image", file);
+      try {
+        const res = await fetch(`${apiUrl}/api/upload`, { method: "POST", body: data });
+        const json = await res.json();
+        if (json.url) uploadedUrls.push(json.url);
+      } catch (err) { console.error(err); }
+    }
+    const updatedViews = [...propertyViews];
+    updatedViews[viewIndex].uploading = false;
+    updatedViews[viewIndex].images = [...updatedViews[viewIndex].images, ...uploadedUrls];
+    setPropertyViews(updatedViews);
+  };
+
+  const addCustomView = () => {
+    setPropertyViews([...propertyViews, { label: "New Category", images: [], uploading: false }]);
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.title) return alert("Property Title is required!");
+    setSaving(true);
+    
+    // Combine DB amenities and custom inline amenities
+    const dbAmenitiesArr = dbAmenities
+      .filter(a => selectedDbAmenities[a._id])
+      .map(a => ({ name: a.name, icon: a.icon || "circle", category: a.category || "basic" }));
+      
+    const payload = {
+      title: formData.title,
+      property_name: formData.title,
+      description: formData.description,
+      address: formData.address,
+      city: formData.city,
+      locality: formData.locality,
+      owner: formData.owner,
+      ownerName: formData.ownerName,
+      ownerLoginId: formData.ownerLoginId,
+      ownerPhone: formData.ownerPhone,
+      propertyType: formData.propertyType,
+      gender: formData.gender,
+      monthlyRent: parseInt(formData.monthlyRent) || 0,
+      rent: parseInt(formData.monthlyRent) || 0,
+      discount: parseInt(formData.discount) || 0,
+      status: formData.status,
+      isLiveOnWebsite: formData.isLiveOnWebsite,
+      images: globalImages,
+      photos: globalImages, // For backwards compatibility
+      propertyViews: propertyViews.filter(pv => pv.label.trim() && pv.images.length > 0),
+      amenities: [...dbAmenitiesArr, ...amenities],
+      propertyInfo: {
+        name: formData.title,
+        address: formData.address,
+        city: formData.city,
+        area: formData.locality,
+        ownerName: formData.ownerName,
+        ownerPhone: formData.ownerPhone,
+        rent: parseInt(formData.monthlyRent) || 0,
+        description: formData.description,
+        genderSuitability: formData.gender,
+        propertyType: formData.propertyType
+      }
+    };
+
+    try {
+      const url = editId ? `${apiUrl}/api/properties/${editId}` : `${apiUrl}/api/properties/add`;
+      const method = editId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(editId ? "Property Updated Successfully!" : "Property Added Successfully!");
+        onBack();
+      } else {
+        toast.error(data.message || "Failed to save property");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error saving property");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full">
+      <div className="flex items-center justify-between">
+         <div className="flex items-center gap-4">
+            <button onClick={onBack} className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm">
+               <ChevronRight className="w-5 h-5 rotate-180" />
+            </button>
+            <div className="flex flex-col gap-1">
+               <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">{editId ? "Edit Property" : "Add Property"}</h1>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{editId ? "Update property details" : "Fill in property details to create a new listing"}</p>
+            </div>
+         </div>
+         <button onClick={handleSubmit} disabled={saving} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-200/10 hover:bg-blue-700 transition-all flex items-center gap-2 disabled:opacity-50">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+            {saving ? "Saving..." : editId ? "Update Property" : "Add Property"}
+         </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+         {/* Left Column: Details */}
+         <div className="lg:col-span-7 space-y-6">
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50">
+               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight mb-6 flex items-center gap-2"><Building2 className="w-4 h-4 text-blue-600" /> Property Information</h3>
+               <div className="space-y-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Property Name / Title *</label>
+                    <input value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="e.g. Rohini Apartment - 42" />
+                  </div>
+                   <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">City</label>
+                      <div className="flex gap-2">
+                        <select 
+                          value={formData.city} 
+                          onChange={e=>setFormData({...formData, city: e.target.value, locality: ""})} 
+                          className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 transition-all"
+                        >
+                          <option value="">Select City</option>
+                          {dbCities.map(city => (
+                            <option key={city._id} value={city.name}>{city.name}</option>
+                          ))}
+                        </select>
+                        <button onClick={() => setShowAddCityModal(true)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors">
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Locality / Area</label>
+                      <div className="flex gap-2">
+                        <select 
+                          value={formData.locality} 
+                          onChange={e=>setFormData({...formData, locality: e.target.value})} 
+                          className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 transition-all"
+                          disabled={!formData.city}
+                        >
+                          <option value="">{formData.city ? "Select Area" : "Select City First"}</option>
+                          {dbAreas.map(area => (
+                            <option key={area._id} value={area.name}>{area.name}</option>
+                          ))}
+                        </select>
+                        <button 
+                          onClick={() => setShowAddAreaModal(true)} 
+                          className="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors disabled:opacity-50"
+                          disabled={!formData.city}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Full Address</label>
+                    <textarea value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none" placeholder="Enter complete address" rows={2} />
+                  </div>
+                  <div className="pt-4 border-t border-slate-50">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Select Property Owner *</label>
+                      <select 
+                        onChange={(e) => {
+                          const selected = dbOwners.find(o => o._id === e.target.value);
+                          if (selected) {
+                            setFormData({
+                              ...formData, 
+                              owner: selected._id,
+                              ownerName: selected.name, 
+                              ownerPhone: selected.phone || "", 
+                              ownerLoginId: selected.loginId || selected.email || ""
+                            });
+                          } else {
+                            setFormData({...formData, owner: "", ownerName: "", ownerPhone: "", ownerLoginId: ""});
+                          }
+                        }}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                      >
+                        <option value="">-- Select Registered Owner --</option>
+                        {dbOwners.map(owner => (
+                          <option key={owner._id} value={owner._id}>{owner.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Description</label>
+                    <textarea value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none" placeholder="Premium features and detailed description..." rows={3} />
+                  </div>
+
+                  {/* Administrative Controls */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Property Status</label>
+                      <select 
+                        value={formData.status} 
+                        onChange={e => setFormData({...formData, status: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 transition-all"
+                      >
+                        <option value="inactive">Inactive (Draft)</option>
+                        <option value="active">Active (Verified)</option>
+                        <option value="blocked">Blocked</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-3 pt-6">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.isLiveOnWebsite} 
+                          onChange={e => setFormData({...formData, isLiveOnWebsite: e.target.checked})}
+                          className="sr-only peer" 
+                        />
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">Live on Website</p>
+                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Syndicate to public listing</p>
+                      </div>
+                    </div>
+                  </div>
+               </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50">
+               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight mb-6 flex items-center gap-2"><Layers className="w-4 h-4 text-emerald-600" /> Pricing & Features</h3>
+               <div className="grid grid-cols-4 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Type</label>
+                    <select value={formData.propertyType} onChange={e=>setFormData({...formData, propertyType: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                       <option value="pg">PG</option>
+                       <option value="hostel">Hostel</option>
+                       <option value="co-living">Co-Living</option>
+                       <option value="apartment">Apartment</option>
+                       <option value="room">Room</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Gender</label>
+                    <select value={formData.gender} onChange={e=>setFormData({...formData, gender: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                       <option value="any">Any / Unisex</option>
+                       <option value="male">Male Only</option>
+                       <option value="female">Female Only</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Monthly Rent</label>
+                    <input type="number" value={formData.monthlyRent} onChange={e=>setFormData({...formData, monthlyRent: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="₹ 0" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Discount (₹)</label>
+                    <input type="number" value={formData.discount} onChange={e=>setFormData({...formData, discount: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="₹ 0" />
+                  </div>
+               </div>
+               
+               <div className="mt-6 pt-6 border-t border-slate-50">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">Platform Amenities</label>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                     {dbAmenities.length > 0 ? dbAmenities.map(am => {
+                        const IconComponent = getIconComponent(am.icon || "circle");
+                        const isSelected = selectedDbAmenities[am._id];
+                        return (
+                           <label key={am._id} className={cn("flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all", isSelected ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}>
+                              <input type="checkbox" className="hidden" checked={isSelected} onChange={(e) => setSelectedDbAmenities({...selectedDbAmenities, [am._id]: e.target.checked})} />
+                              <IconComponent className="w-4 h-4" />
+                              <span className="text-[11px] font-bold tracking-tight">{am.name}</span>
+                              {isSelected && <CheckCircle2 className="w-3 h-3 text-blue-600 ml-1" />}
+                           </label>
+                        );
+                     }) : <span className="text-xs text-slate-400 italic">Loading platform amenities...</span>}
+                  </div>
+
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">Add Custom Inline Amenity</label>
+                  <div className="flex items-center gap-3 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                     <input 
+                       value={newAmenityName} 
+                       onChange={(e) => setNewAmenityName(e.target.value)} 
+                       placeholder="Amenity Name (e.g. Heated Pool)" 
+                       className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                     />
+                     <div className="relative w-40">
+                        <input 
+                          type="text"
+                          value={newAmenityIcon} 
+                          onChange={(e) => setNewAmenityIcon(e.target.value)}
+                          placeholder="Icon (e.g. leaf, wifi)"
+                          className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-2 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        />
+                        <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">
+                           {(() => { const Icon = getIconComponent(newAmenityIcon); return <Icon className="w-3.5 h-3.5" />; })()}
+                        </div>
+                     </div>
+                     <select 
+                       value={newAmenityCategory} 
+                       onChange={(e) => setNewAmenityCategory(e.target.value)}
+                       className="w-28 bg-white border border-slate-200 rounded-lg px-2 py-2 text-xs font-semibold text-slate-600 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                     >
+                        <option value="basic">Basic</option>
+                        <option value="comfort">Comfort</option>
+                        <option value="luxury">Luxury</option>
+                     </select>
+                     <button type="button" onClick={handleAddAmenity} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-1 whitespace-nowrap">
+                        <Plus className="w-3.5 h-3.5" /> Add Custom
+                     </button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                     {amenities.map((am, idx) => {
+                        const IconComponent = getIconComponent(am.icon);
+                        return (
+                           <div key={idx} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-blue-50 border-blue-200 text-blue-700">
+                              <IconComponent className="w-3.5 h-3.5" />
+                              <span className="text-[10px] font-bold uppercase tracking-wider">{am.name}</span>
+                              <button onClick={() => handleRemoveAmenity(idx)} className="ml-1 text-blue-400 hover:text-rose-500 transition-colors">
+                                 <XCircle className="w-3.5 h-3.5" />
+                              </button>
+                           </div>
+                        );
+                     })}
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         {/* Right Column: Media Uploads */}
+         <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50">
+               <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight mb-2 flex items-center gap-2"><ImageIcon className="w-4 h-4 text-purple-600" /> Property Images</h3>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 leading-relaxed">Upload all property photos and custom categorized views.</p>
+               
+               {/* Global Images */}
+               <div className="mb-8 border-b border-slate-100 pb-6">
+                  <div className="flex items-center justify-between mb-3">
+                     <span className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">All Photos</span>
+                     <span className="text-[9px] font-bold bg-slate-100 px-2 py-0.5 rounded-md text-slate-500">{globalImages.length} Photos</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 mb-3">
+                     {globalImages.map((img, i) => (
+                        <div key={i} className="aspect-square rounded-lg bg-slate-200 overflow-hidden relative group">
+                           <img src={img} className="w-full h-full object-cover" alt="" />
+                           <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <button onClick={() => setGlobalImages(globalImages.filter((_, idx) => idx !== i))} className="text-white hover:text-rose-400"><Trash2 className="w-4 h-4" /></button>
+                           </div>
+                        </div>
+                     ))}
+                     <label className="aspect-square rounded-lg border-2 border-dashed border-blue-200 bg-blue-50/50 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors group">
+                        <input type="file" multiple accept="image/*" className="hidden" onChange={handleGlobalUpload} disabled={uploadingGlobal} />
+                        {uploadingGlobal ? <Loader2 className="w-5 h-5 text-blue-400 animate-spin" /> : <UploadCloud className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />}
+                     </label>
+                  </div>
+               </div>
+
+               {/* Categorized Views */}
+               <div className="space-y-5">
+                  <div className="flex items-center justify-between mb-4">
+                     <span className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">Custom Views / Labels</span>
+                     <button onClick={addCustomView} className="text-[9px] font-bold text-blue-600 uppercase tracking-widest hover:text-blue-700 flex items-center gap-1">
+                        <Plus className="w-3 h-3" /> Add Category
+                     </button>
+                  </div>
+
+                  {propertyViews.map((pv, index) => (
+                     <div key={index} className="bg-slate-50 rounded-xl p-4 border border-slate-100 relative group">
+                        <button onClick={() => setPropertyViews(propertyViews.filter((_, i) => i !== index))} className="absolute top-2 right-2 text-slate-300 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <XCircle className="w-4 h-4" />
+                        </button>
+                        <div className="mb-3 w-3/4">
+                           <input 
+                             value={pv.label} 
+                             onChange={(e) => {
+                               const newViews = [...propertyViews];
+                               newViews[index].label = e.target.value;
+                               setPropertyViews(newViews);
+                             }}
+                             placeholder="e.g. Main, Room, Interior, Building"
+                             className="w-full bg-transparent border-b border-slate-300 focus:border-blue-500 text-[11px] font-bold text-slate-700 uppercase tracking-widest outline-none py-1 transition-colors"
+                           />
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-2">
+                           {pv.images.map((img, i) => (
+                              <div key={i} className="aspect-square rounded-lg bg-slate-200 border border-slate-200 overflow-hidden relative group/img">
+                                 <img src={img} className="w-full h-full object-cover" alt="" />
+                                 <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button onClick={() => {
+                                      const newViews = [...propertyViews];
+                                      newViews[index].images.splice(i, 1);
+                                      setPropertyViews(newViews);
+                                    }} className="text-white hover:text-rose-400"><Trash2 className="w-3 h-3" /></button>
+                                 </div>
+                              </div>
+                           ))}
+                           <label className="aspect-square rounded-lg border-2 border-dashed border-emerald-200 bg-emerald-50/50 flex flex-col items-center justify-center cursor-pointer hover:bg-emerald-50 transition-colors group/upload">
+                              <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => handleViewUpload(e, index)} disabled={pv.uploading} />
+                              {pv.uploading ? <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" /> : <UploadCloud className="w-4 h-4 text-emerald-400 group-hover/upload:scale-110 transition-transform" />}
+                           </label>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         </div>
+      </div>
+      {/* Add City Modal */}
+      {showAddCityModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl border border-slate-100 overflow-hidden">
+              <div className="bg-slate-50 p-6 border-b border-slate-100">
+                 <h4 className="text-sm font-bold text-slate-800 uppercase tracking-tight">Add New City</h4>
+              </div>
+              <div className="p-6 space-y-4">
+                 <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">City Name</label>
+                    <input value={newCityName} onChange={e=>setNewCityName(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm font-semibold outline-none focus:bg-white focus:border-blue-500" placeholder="e.g. Mumbai" />
+                 </div>
+                 <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">State</label>
+                    <input value={newCityState} onChange={e=>setNewCityState(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm font-semibold outline-none focus:bg-white focus:border-blue-500" placeholder="e.g. Maharashtra" />
+                 </div>
+                 <div className="flex gap-3 pt-2">
+                    <button onClick={() => setShowAddCityModal(false)} className="flex-1 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-500 bg-slate-100 hover:bg-slate-200">Cancel</button>
+                    <button onClick={handleAddCity} className="flex-1 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white bg-blue-600 hover:bg-blue-700">Add City</button>
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* Add Area Modal */}
+      {showAddAreaModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl border border-slate-100 overflow-hidden">
+              <div className="bg-slate-50 p-6 border-b border-slate-100">
+                 <h4 className="text-sm font-bold text-slate-800 uppercase tracking-tight">Add New Area to {formData.city}</h4>
+              </div>
+              <div className="p-6 space-y-4">
+                 <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Area Name</label>
+                    <input value={newAreaName} onChange={e=>setNewAreaName(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm font-semibold outline-none focus:bg-white focus:border-blue-500" placeholder="e.g. Andheri West" />
+                 </div>
+                 <div className="flex gap-3 pt-2">
+                    <button onClick={() => setShowAddAreaModal(false)} className="flex-1 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-500 bg-slate-100 hover:bg-slate-200">Cancel</button>
+                    <button onClick={handleAddArea} className="flex-1 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white bg-blue-600 hover:bg-blue-700">Add Area</button>
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }

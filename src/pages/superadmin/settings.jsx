@@ -203,8 +203,8 @@ function Toggle({ active }) {
       active ? "bg-blue-600" : "bg-slate-200"
     )}>
        <div className={cn(
-         "absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300",
-         active ? "right-1 shadow-md" : "left-1"
+          "absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300",
+          active ? "right-1 shadow-md" : "left-1"
        )} />
     </div>
   );

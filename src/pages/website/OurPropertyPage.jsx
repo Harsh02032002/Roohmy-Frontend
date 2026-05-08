@@ -1,7 +1,8 @@
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
-import { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, ChevronRight as ChevronRightIcon, X, Menu, Heart, ChevronDown } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+const { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, X, Menu, Heart, ChevronDown, Clock, Shirt, Cctv, Video, Waves, Fan } = LucideIcons;
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend, trackPropertyClick } from "../../utils/api";
@@ -842,19 +843,35 @@ function PropertyCard({ property }) {
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-gray-600 font-medium py-1">
                 {property.amenities && property.amenities.length > 0 ? (
                   property.amenities.slice(0, 4).map((amenity, idx) => {
-                    const Icon = {
-                      wifi: Wifi,
-                      wind: Wind,
-                      utensils: Utensils,
-                      coffee: Utensils,
-                      tv: Tv,
-                      dumbbell: Dumbbell,
-                      car: Car,
-                      shield: Check,
-                      zap: Zap,
-                      camera: Check,
-                      droplets: Droplets
-                    }[amenity.icon?.toLowerCase()] || Check;
+                    // Dynamic Icon Mapping
+                    const getIcon = (iconName) => {
+                      if (!iconName) return Check;
+                      
+                      const lowerName = iconName.toLowerCase();
+                      
+                      // Manual aliases for common terms
+                      const aliases = {
+                        ac: 'Wind',
+                        food: 'Utensils',
+                        gym: 'Dumbbell',
+                        parking: 'Car',
+                        powerbackup: 'Zap',
+                        laundry: 'Shirt',
+                        water: 'Droplets'
+                      };
+                      
+                      const targetName = aliases[lowerName] || iconName;
+                      
+                      // Convert to PascalCase (e.g. "power-backup" -> "PowerBackup")
+                      const pascalName = targetName
+                        .split(/[-_ ]/)
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join('');
+                        
+                      return LucideIcons[pascalName] || LucideIcons[targetName] || Check;
+                    };
+                    
+                    const Icon = getIcon(amenity.icon);
                     
                     return (
                       <div key={idx} className="flex items-center gap-1.5">

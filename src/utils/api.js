@@ -1232,3 +1232,197 @@ export const deleteReview = async (reviewId) => {
     throw error;
   }
 };
+// ==================== SUPERADMIN API FUNCTIONS ====================
+
+// Fetch overall platform stats
+export const fetchSuperadminStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/stats');
+    return data;
+  } catch (error) {
+    console.error('Error fetching superadmin stats:', error);
+    // Return mock fallback to prevent UI crash
+    return {
+      success: false,
+      stats: { tenants: 0, properties: 0, owners: 0, netRevenue: 0 },
+      recentSignups: []
+    };
+  }
+};
+
+// Fetch user distribution for charts
+export const fetchUserDistribution = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/user-distribution');
+    return data;
+  } catch (error) {
+    console.error('Error fetching user distribution:', error);
+    return { success: false, distribution: { labels: [], data: [] } };
+  }
+};
+
+// Fetch revenue trends for charts
+export const fetchRevenueTrends = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/revenue-trends');
+    return data;
+  } catch (error) {
+    console.error('Error fetching revenue trends:', error);
+    return { success: false, labels: [], data: [] };
+  }
+};
+
+// Fetch audit logs
+export const fetchAuditLogs = async (limit = 200) => {
+  try {
+    const data = await fetchJson(`/api/admin/audit-logs?limit=${limit}`);
+    return data;
+  } catch (error) {
+    console.error('Error fetching audit logs:', error);
+    return { success: false, logs: [] };
+  }
+};
+
+// Fetch accounting overview stats
+export const fetchAccountingOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/accounting/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching accounting stats:', error);
+    return {
+      success: false,
+      summary: { totalCollection: 0, totalPayout: 0, revenue: 0, dueRent: 0, pendingPayout: 0 },
+      trends: [],
+      transactions: [],
+      dueAging: []
+    };
+  }
+};
+
+// Fetch booking and leads overview stats
+export const fetchBookingOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/bookings/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching booking stats:', error);
+    return {
+      success: false,
+      summary: { todayLeads: 0, weekLeads: 0, monthLeads: 0, todayBookings: 0, weekBookings: 0, monthBookings: 0 },
+      funnel: [],
+      recentLeads: [],
+      trends: [],
+      distributions: { sources: [], status: [] }
+    };
+  }
+};
+// Fetch property overview stats
+export const fetchPropertyOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/properties/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching property stats:', error);
+    return {
+      success: false,
+      summary: { total: 0, approved: 0, pending: 0, rejected: 0, newThisMonth: 0 },
+      statusData: [],
+      recentProperties: []
+    };
+  }
+};
+// Fetch user management overview stats
+export const fetchUserOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/users/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    return {
+      success: false,
+      summary: { total: 0, team: 0, owners: 0, tenants: 0, activeToday: 0 },
+      distribution: [],
+      recentUsers: [],
+      kyc: []
+    };
+  }
+};
+
+// Fetch report and analytics overview stats
+export const fetchReportOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/reports/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching report stats:', error);
+    return {
+      success: false,
+      summary: { totalProperties: 0, totalTenants: 0, occupancyRate: 0, monthlyRevenue: 0, netProfit: 0, growthRate: 0 },
+      revenueTrends: [],
+      occupancy: { occupied: 0, vacant: 0, maintenance: 0 },
+      topProperties: [],
+      locationData: []
+    };
+  }
+};
+
+// Fetch review and ratings overview stats
+export const fetchReviewOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/reviews/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching review stats:', error);
+    return {
+      success: false,
+      summary: { today: 0, week: 0, month: 0, avgRating: 0, total: 0, pending: 0 },
+      trends: [],
+      distribution: [],
+      recentReviews: [],
+      topProperties: []
+    };
+  }
+};
+
+// Fetch support and complaint overview stats
+export const fetchSupportOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/support/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching support stats:', error);
+    return {
+      success: false,
+      summary: { total: 0, open: 0, inProgress: 0, resolved: 0, overdue: 0, avgTime: '0 Days' },
+      trends: [],
+      categories: [],
+      sources: [],
+      recentTickets: [],
+      resolutionRate: 0
+    };
+  }
+};
+
+// Fetch home overview stats
+export const fetchHomeOverviewStats = async () => {
+  try {
+    const data = await fetchJson('/api/superadmin/home/overview');
+    return data;
+  } catch (error) {
+    console.error('Error fetching home overview stats:', error);
+    return {
+      success: false,
+      metrics: { properties: 0, tenants: 0, revenue: 0, alerts: 0 },
+      revenueTrend: [],
+      propertyStatus: [],
+      tenantTypes: [],
+      pendingAlerts: [],
+      activities: []
+    };
+  }
+};
+
+
+
+

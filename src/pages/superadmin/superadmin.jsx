@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Users, Building2, Calendar, Wallet, 
   ArrowUpRight, ArrowDownRight, ChevronRight, 
@@ -6,25 +6,26 @@ import {
   Plus, LayoutDashboard, Home, UserCircle, 
   CreditCard, MessageSquare, PieChart as PieIcon,
   ShieldCheck, Settings, LogOut, CheckCircle2,
-  TrendingUp, Activity
+  TrendingUp, Activity, ShoppingBag, DollarSign
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, Legend
+  PieChart, Pie, Cell, BarChart, Bar, Legend, LineChart, Line
 } from "recharts";
+import { fetchSuperadminStats } from "../../utils/api";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-// --- EXACT DATA FROM SCREENSHOT ---
+// --- DATA FROM SCREENSHOT (Kept for non-dynamic parts) ---
 
 const overviewData = [
-  { name: "May 22", users: 1300, bookings: 750, revenue: 500 },
-  { name: "May 23", users: 1600, bookings: 700, revenue: 450 },
-  { name: "May 24", users: 1550, bookings: 780, revenue: 550 },
-  { name: "May 25", users: 2100, bookings: 1100, revenue: 600 },
-  { name: "May 26", users: 2000, bookings: 1300, revenue: 550 },
-  { name: "May 27", users: 2300, bookings: 1350, revenue: 500 },
-  { name: "May 28", users: 1950, bookings: 1300, revenue: 780 },
+  { name: "May 22", users: 1200, bookings: 800, revenue: 500 },
+  { name: "May 23", users: 1500, bookings: 750, revenue: 450 },
+  { name: "May 24", users: 1400, bookings: 950, revenue: 600 },
+  { name: "May 25", users: 1800, bookings: 1100, revenue: 750 },
+  { name: "May 26", users: 1700, bookings: 1050, revenue: 650 },
+  { name: "May 27", users: 2200, bookings: 1300, revenue: 850 },
+  { name: "May 28", users: 2000, bookings: 1200, revenue: 800 },
 ];
 
 const usersByRole = [
@@ -35,92 +36,107 @@ const usersByRole = [
 ];
 
 const propertiesStatus = [
-  { name: "Published", value: 1620, color: "#10B981", percent: "69.2%" },
-  { name: "Pending", value: 420, color: "#3B82F6", percent: "17.9%" },
-  { name: "Draft", value: 200, color: "#F59E0B", percent: "8.5%" },
+  { name: "Published", value: 1620, color: "#3B82F6", percent: "69.2%" },
+  { name: "Pending", value: 420, color: "#F59E0B", percent: "17.9%" },
+  { name: "Draft", value: 200, color: "#6366F1", percent: "8.5%" },
   { name: "Rejected", value: 100, color: "#EF4444", percent: "4.3%" },
 ];
 
 const revenueOverview = [
-  { name: "Week 1", value: 15000 },
-  { name: "Week 2", value: 22000 },
-  { name: "Week 3", value: 32000 },
-  { name: "Week 4", value: 18000 },
-  { name: "Week 5", value: 28000 },
+  { name: "Week 1", revenue: 25000 },
+  { name: "Week 2", revenue: 32000 },
+  { name: "Week 3", revenue: 28000 },
+  { name: "Week 4", revenue: 38000 },
+  { name: "Week 5", revenue: 35000 },
 ];
 
 const recentBookings = [
-  { id: 1, property: "Ocean View Apartment", guest: "John Doe", amount: "$1200", status: "Confirmed", image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=100&h=100&fit=crop" },
-  { id: 2, property: "Luxury Villa in Bali", guest: "Jane Smith", amount: "$2500", status: "Confirmed", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=100&h=100&fit=crop" },
-  { id: 3, property: "Modern Studio City Center", guest: "Mike Johnson", amount: "$800", status: "Pending", image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=100&h=100&fit=crop" },
-  { id: 4, property: "Cozy Apartment", guest: "Emily Davis", amount: "$650", status: "Confirmed", image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=100&h=100&fit=crop" },
+  { name: "Ocean View Apartment", user: "John Doe", price: "$1200", status: "Confirmed" },
+  { name: "Luxury Villa in Bali", user: "Jane Smith", price: "$2500", status: "Confirmed" },
+  { name: "Modern Studio City Center", user: "Mike Johnson", price: "$800", status: "Pending" },
+  { name: "Cozy Apartment", user: "Emily Davis", price: "$650", status: "Confirmed" },
 ];
 
 const recentActivity = [
-  { id: 1, type: "user", title: "New user registered", desc: "Sarah Wilson has registered as a tenant.", time: "2 min ago", icon: Users, color: "bg-emerald-50 text-emerald-600" },
-  { id: 2, type: "property", title: "New property added", desc: "Luxury Sea View Apartment added by John Doe.", time: "15 min ago", icon: Building2, color: "bg-blue-50 text-blue-600" },
-  { id: 3, type: "booking", title: "New booking received", desc: "Booking #BR1234 for Modern Studio City Center.", time: "1 hour ago", icon: Calendar, color: "bg-purple-50 text-purple-600" },
-  { id: 4, type: "payment", title: "Payment received", desc: "Payment of $1200 received for Booking #BR1233.", time: "2 hours ago", icon: Wallet, color: "bg-amber-50 text-amber-600" },
+  { title: "New user registered", desc: "Sarah Wilson has registered as a tenant.", time: "2 min ago", icon: UserCircle, color: "bg-emerald-50 text-emerald-600" },
+  { title: "New property added", desc: "Luxury Sea View Apartment added by John Doe.", time: "15 min ago", icon: Building2, color: "bg-blue-50 text-blue-600" },
+  { title: "New booking received", desc: "Booking #BR1234 for Modern Studio City Center.", time: "1 hour ago", icon: Calendar, color: "bg-purple-50 text-purple-600" },
+  { title: "Payment received", desc: "Payment of $1200 received for Booking #BR1233.", time: "2 hours ago", icon: DollarSign, color: "bg-amber-50 text-amber-600" },
 ];
 
 export default function SuperadminDashboard() {
+  const [stats, setStats] = useState({ totalUsers: 0, properties: 0, bookings: 0, revenue: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      setLoading(true);
+      try {
+        const res = await fetchSuperadminStats();
+        if (res.success) {
+          setStats({
+            totalUsers: (res.stats.tenants || 0) + (res.stats.owners || 0),
+            properties: res.stats.properties || 0,
+            bookings: res.stats.totalBookings || 0,
+            revenue: res.stats.netRevenue || 0
+          });
+        }
+      } catch (error) {
+        console.error("Dashboard Stats Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadStats();
+  }, []);
+
   return (
-    <div className="p-8 bg-[#F8FAFC] min-h-full font-inter">
-      {/* Top Header */}
+    <div className="p-8 bg-[#F8FAFC] min-h-full font-inter text-slate-900">
+      {/* Header Section */}
       <div className="flex items-center justify-between mb-8">
          <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
             <p className="text-sm text-slate-500 mt-1 font-medium">Welcome back, Aman! Here's what's happening with Roomhy.</p>
          </div>
-         <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-white border border-slate-100 px-4 py-2.5 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-all">
-               <Calendar className="w-4 h-4 text-slate-400" />
-               <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">May 22 - May 28, 2024</span>
-            </div>
+         <div className="flex items-center gap-3 bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-all text-xs font-bold text-slate-600">
+            <Calendar className="w-4 h-4 text-slate-400" />
+            <span>May 22 - May 28, 2024</span>
          </div>
       </div>
 
-      {/* Stats Row */}
+      {/* Stats Row - FULLY DYNAMIC */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-         <StatCard label="Total Users" value="12,845" trend="12.5%" up icon={Users} color="blue" />
-         <StatCard label="Total Properties" value="2,340" trend="8.3%" up icon={Building2} color="emerald" />
-         <StatCard label="Total Bookings" value="1,987" trend="15.7%" up icon={Calendar} color="purple" />
-         <StatCard label="Total Revenue" value="$85,674" trend="18.6%" up icon={Wallet} color="amber" />
+         <StatCard label="Total Users" value={stats.totalUsers.toLocaleString()} trend="+ 12.5% from last week" icon={Users} color="blue" up loading={loading} />
+         <StatCard label="Total Properties" value={stats.properties.toLocaleString()} trend="+ 8.3% from last week" icon={Building2} color="emerald" up loading={loading} />
+         <StatCard label="Total Bookings" value={stats.bookings.toLocaleString()} trend="+ 15.7% from last week" icon={ShoppingBag} color="purple" up loading={loading} />
+         <StatCard label="Total Revenue" value={`$${stats.revenue.toLocaleString()}`} trend="+ 18.6% from last week" icon={DollarSign} color="amber" up loading={loading} />
       </div>
 
       <div className="grid grid-cols-12 gap-6 mb-8">
-         {/* Growth Overview Chart */}
+         {/* Overview Chart */}
          <div className="col-span-12 lg:col-span-8 bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+            <div className="flex items-center justify-between mb-8">
                <h3 className="text-lg font-bold text-slate-900">Overview</h3>
-               <div className="flex flex-wrap items-center gap-6">
-                  <div className="flex items-center gap-4">
-                     <LegendItem color="bg-blue-600" label="Users" />
-                     <LegendItem color="bg-emerald-600" label="Bookings" />
-                     <LegendItem color="bg-amber-600" label="Revenue" />
-                  </div>
-                  <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-xs font-bold text-slate-500 outline-none cursor-pointer">
-                     <option>This Week</option>
-                  </select>
-               </div>
+               <select className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-1.5 text-xs font-bold text-slate-500 outline-none cursor-pointer">
+                  <option>This Week</option>
+               </select>
+            </div>
+            <div className="flex items-center gap-6 mb-6">
+               <ChartLegend color="bg-blue-600" label="Users" />
+               <ChartLegend color="bg-emerald-600" label="Bookings" />
+               <ChartLegend color="bg-amber-600" label="Revenue" />
             </div>
             <div className="h-[300px]">
                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={overviewData}>
-                     <defs>
-                        <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                           <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                        </linearGradient>
-                     </defs>
+                  <LineChart data={overviewData}>
                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11, fontWeight: 600}} dy={15} />
                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 11, fontWeight: 600}} dx={-15} />
-                     <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}} />
-                     <Area type="monotone" dataKey="users" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorUsers)" />
-                     <Area type="monotone" dataKey="bookings" stroke="#10B981" strokeWidth={3} fill="none" />
-                     <Area type="monotone" dataKey="revenue" stroke="#F59E0B" strokeWidth={3} fill="none" />
-                  </AreaChart>
+                     <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                     <Line type="monotone" dataKey="users" stroke="#3B82F6" strokeWidth={3} dot={{fill: '#3B82F6', r: 4}} activeDot={{r: 6}} />
+                     <Line type="monotone" dataKey="bookings" stroke="#10B981" strokeWidth={3} dot={{fill: '#10B981', r: 4}} activeDot={{r: 6}} />
+                     <Line type="monotone" dataKey="revenue" stroke="#F59E0B" strokeWidth={3} dot={{fill: '#F59E0B', r: 4}} activeDot={{r: 6}} />
+                  </LineChart>
                </ResponsiveContainer>
             </div>
          </div>
@@ -131,22 +147,24 @@ export default function SuperadminDashboard() {
                <h3 className="text-lg font-bold text-slate-900">Recent Bookings</h3>
                <button className="text-xs font-bold text-blue-600 hover:underline">View All</button>
             </div>
-            <div className="space-y-6 flex-1 overflow-y-auto max-h-[300px] custom-scrollbar pr-2">
-               {recentBookings.map((b) => (
-                  <div key={b.id} className="flex items-center gap-4 group cursor-pointer">
-                     <img src={b.image} className="w-12 h-12 rounded-2xl object-cover shadow-sm transition-transform group-hover:scale-105" alt="" />
-                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-900 truncate">{b.property}</p>
-                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">{b.guest}</p>
+            <div className="space-y-6 flex-1 overflow-y-auto max-h-[350px] custom-scrollbar pr-2">
+               {recentBookings.map((b, i) => (
+                  <div key={i} className="flex items-center gap-4 group">
+                     <div className="w-16 h-12 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                        <Building2 size={20} className="text-slate-300" />
                      </div>
-                     <div className="text-right">
-                        <p className="text-sm font-bold text-slate-900 leading-none">{b.amount}</p>
-                        <span className={cn(
-                           "inline-block mt-2 px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider",
-                           b.status === "Confirmed" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
-                        )}>
-                           {b.status}
-                        </span>
+                     <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                           <h4 className="text-[13px] font-bold text-slate-900 truncate leading-none mb-1.5">{b.name}</h4>
+                           <span className="text-[13px] font-bold text-slate-900">{b.price}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                           <p className="text-[11px] text-slate-400 font-medium truncate">{b.user}</p>
+                           <span className={cn(
+                             "text-[10px] font-bold",
+                             b.status === "Confirmed" ? "text-emerald-500" : "text-amber-500"
+                           )}>{b.status}</span>
+                        </div>
                      </div>
                   </div>
                ))}
@@ -155,7 +173,7 @@ export default function SuperadminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-         {/* Users by Role */}
+         {/* Users by Role Donut */}
          <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-8">
                <h3 className="text-lg font-bold text-slate-900">Users by Role</h3>
@@ -180,7 +198,7 @@ export default function SuperadminDashboard() {
                {usersByRole.map((role) => (
                   <div key={role.name} className="flex items-center justify-between">
                      <div className="flex items-center gap-3">
-                        <div className={cn("w-2 h-2 rounded-full")} style={{backgroundColor: role.color}} />
+                        <div className="w-2 h-2 rounded-full" style={{backgroundColor: role.color}} />
                         <span className="text-xs font-semibold text-slate-500">{role.name}</span>
                      </div>
                      <div className="flex items-center gap-3">
@@ -192,7 +210,7 @@ export default function SuperadminDashboard() {
             </div>
          </div>
 
-         {/* Properties Status */}
+         {/* Properties Status Donut */}
          <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-8">
                <h3 className="text-lg font-bold text-slate-900">Properties Status</h3>
@@ -214,60 +232,69 @@ export default function SuperadminDashboard() {
                </div>
             </div>
             <div className="space-y-3">
-               {propertiesStatus.map((status) => (
-                  <div key={status.name} className="flex items-center justify-between">
+               {propertiesStatus.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between">
                      <div className="flex items-center gap-3">
-                        <div className={cn("w-2 h-2 rounded-full")} style={{backgroundColor: status.color}} />
-                        <span className="text-xs font-semibold text-slate-500">{status.name}</span>
+                        <div className="w-2 h-2 rounded-full" style={{backgroundColor: item.color}} />
+                        <span className="text-xs font-semibold text-slate-500">{item.name}</span>
                      </div>
                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-slate-900">{status.value.toLocaleString()}</span>
-                        <span className="text-[10px] font-bold text-slate-400">({status.percent})</span>
+                        <span className="text-xs font-bold text-slate-900">{item.value.toLocaleString()}</span>
+                        <span className="text-[10px] font-bold text-slate-400">({item.percent})</span>
                      </div>
                   </div>
                ))}
             </div>
          </div>
 
-         {/* Revenue Overview */}
+         {/* Revenue Overview Bar */}
          <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm flex flex-col">
             <div className="flex items-center justify-between mb-8">
                <h3 className="text-lg font-bold text-slate-900">Revenue Overview</h3>
-               <select className="bg-slate-50 border-none rounded-xl px-4 py-2 text-xs font-bold text-slate-500 outline-none cursor-pointer">
+               <select className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-1 text-xs font-bold text-slate-500 outline-none cursor-pointer">
                   <option>This Month</option>
                </select>
             </div>
-            <div className="flex-1 min-h-[250px]">
+            <div className="flex-1 min-h-[200px]">
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenueOverview}>
                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 600}} dy={10} />
-                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 600}} />
+                     <YAxis hide />
                      <Tooltip cursor={{fill: '#F8FAFC'}} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
-                     <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={24} />
+                     <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={24} />
                   </BarChart>
                </ResponsiveContainer>
+            </div>
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-50 text-[11px] font-bold text-slate-400">
+               <span>$40K</span>
+               <span>$30K</span>
+               <span>$20K</span>
+               <span>$10K</span>
+               <span>$0</span>
             </div>
          </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm pb-10">
+      {/* Recent Activity Section */}
+      <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
          <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-bold text-slate-900">Recent Activity</h3>
             <button className="text-xs font-bold text-blue-600 hover:underline">View All</button>
          </div>
-         <div className="space-y-8">
-            {recentActivity.map((activity) => (
-               <div key={activity.id} className="flex items-start gap-4">
-                  <div className={cn("p-2.5 rounded-xl shrink-0 transition-transform hover:scale-110 shadow-sm", activity.color)}>
-                     <activity.icon size={20} />
+         <div className="space-y-6">
+            {recentActivity.map((act, i) => (
+               <div key={i} className="flex items-center gap-4 group">
+                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shadow-sm", act.color)}>
+                     <act.icon size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
-                     <p className="text-sm font-bold text-slate-900">{activity.title}</p>
-                     <p className="text-xs text-slate-500 font-medium mt-1">{activity.desc}</p>
+                     <h4 className="text-[13px] font-bold text-slate-900 leading-none mb-1">{act.title}</h4>
+                     <p className="text-[11px] text-slate-400 font-medium">{act.desc}</p>
                   </div>
-                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">{activity.time}</p>
+                  <div className="text-right shrink-0">
+                     <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{act.time}</span>
+                  </div>
                </div>
             ))}
          </div>
@@ -278,39 +305,43 @@ export default function SuperadminDashboard() {
 
 // --- UTILITY COMPONENTS ---
 
-function StatCard({ label, value, trend, up, icon: Icon, color }) {
-  const colors = {
-    blue: "text-blue-600 bg-blue-50 border-blue-100",
-    emerald: "text-emerald-600 bg-emerald-50 border-emerald-100",
-    purple: "text-purple-600 bg-purple-50 border-purple-100",
-    amber: "text-amber-600 bg-amber-50 border-amber-100",
+function StatCard({ label, value, trend, icon: Icon, color, up, loading }) {
+  const iconColors = {
+    blue: "bg-blue-50 text-blue-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    purple: "bg-purple-50 text-purple-600",
+    amber: "bg-amber-50 text-amber-600",
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:translate-y-[-4px] hover:shadow-md cursor-pointer group">
-       <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", colors[color])}>
-          <Icon size={24} />
+    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col transition-all hover:translate-y-[-4px] hover:shadow-md group">
+       <div className="flex items-center justify-between mb-6">
+          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", iconColors[color])}>
+             <Icon size={22} />
+          </div>
+          <button className="p-1 rounded-lg hover:bg-slate-50 transition-colors">
+             <MoreVertical size={16} className="text-slate-300" />
+          </button>
        </div>
-       <div className="min-w-0">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">{label}</p>
-          <p className="text-2xl font-black text-slate-900 tracking-tight leading-none">{value}</p>
-          <p className={cn(
-             "text-[10px] font-bold mt-2 flex items-center gap-1 leading-none",
-             up ? "text-emerald-600" : "text-rose-600"
-          )}>
-             {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-             {trend} <span className="text-slate-300 font-medium ml-1 lowercase">from last week</span>
-          </p>
+       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{label}</p>
+       {loading ? (
+         <div className="h-8 w-24 bg-slate-100 animate-pulse rounded-lg" />
+       ) : (
+         <h4 className="text-2xl font-black text-slate-900 tracking-tight mb-3">{value}</h4>
+       )}
+       <div className="flex items-center gap-1.5 mt-auto">
+          {up ? <ArrowUpRight size={14} className="text-emerald-500" /> : <ArrowDownRight size={14} className="text-rose-500" />}
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{trend}</span>
        </div>
     </div>
   );
 }
 
-function LegendItem({ color, label }) {
+function ChartLegend({ color, label }) {
   return (
     <div className="flex items-center gap-2">
-       <div className={cn("w-2 h-2 rounded-full shadow-sm", color)} />
-       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</span>
+       <div className={cn("w-2 h-2 rounded-full", color)} />
+       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
     </div>
   );
 }

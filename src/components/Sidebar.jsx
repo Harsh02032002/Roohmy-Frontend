@@ -42,13 +42,13 @@ const NAV = [
             { 
               label: "All Staff", 
               children: [
-                { label: "Profile", path: "/superadmin/profile" },
-                { label: "Documents", path: "/superadmin/manager" },
+                { label: "Profile", path: "/superadmin/manager" },
+                { label: "Documents", path: "/superadmin/profile" },
               ]
             }
           ]
         },
-        { label: "Roles & Permission", path: "/superadmin/settings" },
+        { label: "Roles & Permission", path: "/superadmin/roles-permissions" },
         { 
           label: "Attendance", 
           children: [
@@ -60,10 +60,10 @@ const NAV = [
         { 
           label: "Property Owners", 
           children: [
-            { label: "Add", path: "/superadmin/owner" },
-            { label: "Approved / Pending", path: "/superadmin/owner" },
-            { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
-            { label: "Agreements", path: "/superadmin/owner" },
+            { label: "Add", path: "/superadmin/owner?view=add" },
+            { label: "Approved / Pending", path: "/superadmin/owner?view=pending" },
+            { label: "KYC / Documents", path: "/superadmin/owner?view=kyc" },
+            { label: "Agreements", path: "/superadmin/owner?view=agreements" },
           ]
         },
         { 
@@ -83,11 +83,12 @@ const NAV = [
     path: "/superadmin/property-overview", 
     children: [
         { label: "Overview", path: "/superadmin/property-overview" },
-        { label: "Add Properties", path: "/superadmin/properties" },
-        { label: "Approve / Reject Properties", path: "/superadmin/property_approvals" },
-        { label: "Pending Properties", path: "/superadmin/property_approvals" },
-        { label: "All Properties List", path: "/superadmin/properties" },
+        { label: "Add Properties", path: "/superadmin/properties?view=add" },
+        { label: "Approve / Reject Properties", path: "/superadmin/property/approvals" },
+        { label: "Pending Properties", path: "/superadmin/property/pending" },
+        { label: "All Properties List", path: "/superadmin/properties?view=list" },
         { label: "Online Leads", path: "/superadmin/enquiry" },
+        { label: "Property Categories", path: "/superadmin/property/categories" },
     ]
   },
   { 
@@ -205,7 +206,7 @@ const NAV = [
     children: [
         { label: "Overview", path: "/superadmin/booking" },
         { label: "Total Leads", path: "/superadmin/booking" },
-        { label: "Bookings", path: "/superadmin/booking" },
+        { label: "Bookings", path: "/superadmin/direct-bookings" },
         { label: "Conversion Rate", path: "/superadmin/booking" },
         { label: "Top Performing Locations", path: "/superadmin/booking" },
     ]
@@ -216,10 +217,10 @@ const NAV = [
     path: "/superadmin/reviews",
     children: [
         { label: "Overview", path: "/superadmin/reviews" },
-        { label: "All Reviews", path: "/superadmin/reviews" },
-        { label: "Moderation", path: "/superadmin/reviews" },
-        { label: "Analytics", path: "/superadmin/reviews" },
-        { label: "New Review (Today / Week / Month)", path: "/superadmin/reviews" },
+        { label: "All Reviews", path: "/superadmin/reviews/all" },
+        { label: "Moderation", path: "/superadmin/reviews/moderation" },
+        { label: "Analytics", path: "/superadmin/reviews/analytics" },
+        { label: "New Review Feed", path: "/superadmin/reviews/new" },
     ]
   },
   { 
@@ -228,8 +229,8 @@ const NAV = [
     path: "/superadmin/complaint-history",
     children: [
         { label: "Overview", path: "/superadmin/complaint-history" },
-        { label: "Tenants Complaints", path: "/superadmin/complaint-history" },
-        { label: "Owners Complaints", path: "/superadmin/complaint-history" },
+        { label: "Tenants Complaints", path: "/superadmin/complaints/tenants" },
+        { label: "Owners Complaints", path: "/superadmin/complaints/owners" },
         { label: "Tickets System", path: "/superadmin/complaint-history" },
         { label: "Issues Resolutions Tracking", path: "/superadmin/complaint-history" },
     ]

@@ -183,7 +183,7 @@ export default function WebsiteNavbar() {
                     )}
                   </div>
                   ) : (
-                    <Link to="/login" className="flex items-center space-x-2 hover:text-black transition-colors">
+                    <Link to="/website/login" className="flex items-center space-x-2 hover:text-black transition-colors">
                       <User className="w-5 h-5 text-gray-600" />
                       <span>Login / Signup</span>
                     </Link>

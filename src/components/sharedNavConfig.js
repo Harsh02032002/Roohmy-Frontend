@@ -23,7 +23,7 @@ export const sharedNavConfig = {
         label: "PROPERTY MANAGEMENT",
         links: [
           { label: "All Listings", to: "/superadmin/properties", icon: "building-2" },
-          { label: "Approval Queue", to: "/superadmin/property/approvals", icon: "hourglass" },
+          { label: "Approve / Reject Properties", to: "/superadmin/property/pending", icon: "clock" },
           { label: "Flagged Listings", to: "/superadmin/property/flagged", icon: "flag" },
           { label: "Live Properties", to: "/superadmin/website", icon: "globe" },
           { label: "Locations", to: "/superadmin/location", icon: "map-pin" }

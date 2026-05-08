@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import routes from "./routes";
 import { getOwnerSession } from "./utils/ownerSession";
 import SharedShell from "./components/SharedShell";
+import { Toaster } from "react-hot-toast";
 
 const PageLoader = () => (
   <div className="min-h-[40vh] flex items-center justify-center px-4 py-12 text-sm text-slate-500">
@@ -120,6 +121,7 @@ export default function App() {
       <TranslationProvider>
         <ThemeProvider>
           <Router>
+            <Toaster position="top-right" reverseOrder={false} />
             <RouteChromeCleanup />
             <Suspense fallback={<PageLoader />}>
               <Routes>
