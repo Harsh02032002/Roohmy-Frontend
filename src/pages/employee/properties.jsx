@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 
-const API_BASES = ["https://api.roomhy.com", "http://localhost:5001"];
+const API_BASES = ["https://roohmy-backend-xwa9.vercel.app", "http://localhost:5001"];
 
 const getApiUrl = () =>
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001"
-    : "https://api.roomhy.com";
+    : "https://roohmy-backend-xwa9.vercel.app";
 
 const getStoredToken = () =>
   localStorage.getItem("token") ||

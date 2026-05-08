@@ -79,11 +79,11 @@ const markInlineExecuted = (key) => {
 const wasInlineExecuted = (key) => Boolean(window[inlineExecutedKey]?.[key]);
 
 const getLegacyApiUrl = () => {
-  if (typeof window === "undefined") return "https://api.roomhy.com";
+  if (typeof window === "undefined") return "https://roohmy-backend-xwa9.vercel.app";
   const host = window.location?.hostname;
   return host === "localhost" || host === "127.0.0.1"
     ? "http://localhost:5001"
-    : "https://api.roomhy.com";
+    : "https://roohmy-backend-xwa9.vercel.app";
 };
 
 const websiteFooterHtml = (year) => `

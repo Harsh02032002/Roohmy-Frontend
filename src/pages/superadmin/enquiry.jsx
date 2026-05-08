@@ -26,7 +26,7 @@ const enquiryStatus = [
 
 const getApiUrl = () =>
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://localhost:5001" : "https://api.roomhy.com";
+    ? "http://localhost:5001" : "https://roohmy-backend-xwa9.vercel.app";
 
 export default function SuperadminEnquiry() {
   const [search, setSearch] = useState("");

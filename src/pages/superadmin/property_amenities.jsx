@@ -13,7 +13,7 @@ const cn = (...classes) => classes.filter(Boolean).join(" ");
 const getApiUrl = () =>
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001"
-    : "https://api.roomhy.com";
+    : "https://roohmy-backend-xwa9.vercel.app";
 
 const getIconComponent = (iconName) => {
   const iconKey = iconName.charAt(0).toUpperCase() + iconName.slice(1).replace(/-./g, x => x[1].toUpperCase());

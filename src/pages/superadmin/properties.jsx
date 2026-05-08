@@ -9,6 +9,7 @@ import {
   Activity, Home, CheckCircle2, XCircle, RefreshCw, Layers, Plus, UploadCloud, Loader2
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { getApiBase } from "../../utils/api";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -56,9 +57,7 @@ export default function SuperadminProperties() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
 
-  const getApiUrl = () =>
-    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-      ? "http://localhost:5001" : "https://api.roomhy.com";
+  const getApiUrl = getApiBase;
 
   const fetchProperties = async (pNum = 1) => {
     try {
