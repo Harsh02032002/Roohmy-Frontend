@@ -11,13 +11,13 @@ export const getApiBase = () => {
   
   // Production Vercel deployment
   if (host.includes('vercel.app') || host.includes('roomhy.com')) {
-    return "https://roomhy-backend.vercel.app";
+    return "https://roohmy-backend-xwa9.vercel.app";
   }
   
   // Local development
   return host === "localhost" || host === "127.0.0.1"
     ? "http://localhost:5001"
-    : "https://roomhy-backend.vercel.app";
+    : "https://roohmy-backend-xwa9.vercel.app";
 };
 
 export const getAuthHeader = () => {
