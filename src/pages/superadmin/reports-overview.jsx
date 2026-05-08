@@ -13,7 +13,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Pie as RePie, Cell, PieChart as RePieChart
 } from "recharts";
-import { fetchReportsOverviewStats } from "../../utils/api";
+import { fetchReportOverviewStats } from "../../utils/api";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -55,7 +55,7 @@ export default function ReportsOverview() {
     const loadStats = async () => {
       setLoading(true);
       try {
-        const res = await fetchReportsOverviewStats();
+        const res = await fetchReportOverviewStats();
         if (res.success) {
           setStats(res.summary);
         }
