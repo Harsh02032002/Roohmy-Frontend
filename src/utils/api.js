@@ -89,6 +89,7 @@ const staticPropertiesList = [
     rent: 8000,
     owner_name: "Verified Owner",
     owner_phone: "9000000001",
+    owner_id: "ROOMHY9999",
     gender: "male",
     status: "active",
     isPublished: true,
@@ -161,6 +162,7 @@ const staticPropertiesList = [
     rent: 10000,
     owner_name: "Verified Owner",
     owner_phone: "9000000002",
+    owner_id: "ROOMHY9999",
     gender: "female",
     status: "active",
     isPublished: true,
@@ -234,6 +236,7 @@ const staticPropertiesList = [
     rent: 12000,
     owner_name: "Verified Owner",
     owner_phone: "9000000003",
+    owner_id: "ROOMHY9999",
     gender: "any",
     status: "active",
     isPublished: true,
@@ -261,6 +264,7 @@ const staticPropertiesList = [
     rent: 25000,
     owner_name: "Verified Owner",
     owner_phone: "9000000004",
+    owner_id: "ROOMHY9999",
     gender: "any",
     status: "active",
     isPublished: true,
@@ -283,6 +287,7 @@ const staticPropertiesList = [
     rent: 6000,
     owner_name: "Verified Owner",
     owner_phone: "9000000005",
+    owner_id: "ROOMHY9999",
     gender: "male",
     status: "active",
     isPublished: true,
@@ -305,6 +310,7 @@ const staticPropertiesList = [
     rent: 15000,
     owner_name: "Verified Owner",
     owner_phone: "9000000006",
+    owner_id: "ROOMHY9999",
     gender: "male",
     status: "active",
     isPublished: true,
@@ -327,6 +333,7 @@ const staticPropertiesList = [
     rent: 9000,
     owner_name: "Verified Owner",
     owner_phone: "9000000007",
+    owner_id: "ROOMHY9999",
     gender: "female",
     status: "active",
     isPublished: true,
@@ -349,6 +356,7 @@ const staticPropertiesList = [
     rent: 7000,
     owner_name: "Verified Owner",
     owner_phone: "9000000008",
+    owner_id: "ROOMHY9999",
     gender: "male",
     status: "active",
     isPublished: true,
@@ -371,6 +379,7 @@ const staticPropertiesList = [
     rent: 18000,
     owner_name: "Verified Owner",
     owner_phone: "9000000009",
+    owner_id: "ROOMHY9999",
     gender: "male",
     status: "active",
     isPublished: true,
@@ -393,6 +402,7 @@ const staticPropertiesList = [
     rent: 13000,
     owner_name: "Verified Owner",
     owner_phone: "9000000010",
+    owner_id: "ROOMHY9999",
     gender: "any",
     status: "active",
     isPublished: true,
@@ -460,7 +470,14 @@ export const fetchProperties = async () => {
           image: firstImage,
           
           // Ensure images array exists for PropertyCard
-          images: imagesArray
+          images: imagesArray,
+
+          // Location coordinates
+          latitude: p.latitude || p.propertyInfo?.latitude || p.propertyInfo?.location?.coordinates?.[1] || null,
+          longitude: p.longitude || p.propertyInfo?.longitude || p.propertyInfo?.location?.coordinates?.[0] || null,
+          
+          // Owner info
+          owner_id: p.owner_id || p.ownerLoginId || p.generatedCredentials?.loginId || p.ownerLoginId
         };
       });
     
@@ -481,6 +498,7 @@ export const fetchProperties = async () => {
       ...p,
       property_name: p.property_name,
       city: p.city,
+      location: p.city || 'Unknown',
       owner_name: p.owner_name,
       owner_phone: p.owner_phone,
       propertyName: p.propertyName,
@@ -491,7 +509,10 @@ export const fetchProperties = async () => {
       image: p.images?.[0] || p.featuredImage || `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`,
       
       // Ensure images array exists for PropertyCard
-      images: p.images || []
+      images: p.images || [],
+      
+      // Owner link for bidding
+      owner_id: p.owner_id
     }));
     staticFormatted.total = staticPropertiesList.length;
     return staticFormatted;

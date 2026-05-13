@@ -6,11 +6,16 @@ import { Mail, Phone, MapPin, Send, Clock, MessageCircle, Headphones } from 'luc
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Thank you for your message! We\'ll get back to you within 24 hours.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setSubmitting(true);
+    setTimeout(() => {
+      alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      setSubmitting(false);
+    }, 1500);
   };
 
   const contactCards = [
@@ -18,6 +23,35 @@ export default function ContactPage() {
     { icon: Phone, title: 'Call Us', detail: '+91 99830 05030', sub: 'Mon-Sat, 9AM-7PM IST', href: 'tel:+919983005030', color: 'from-blue-500 to-indigo-500' },
     { icon: MapPin, title: 'Visit Us', detail: 'Vijay Nagar, Indore, MP', sub: 'Walk-ins welcome', href: '#', color: 'from-emerald-500 to-teal-500' },
   ];
+
+  const formDetails = {
+    title: 'Send us a Message',
+    subtitle: 'We usually respond within 2-4 hours during business days.',
+    fields: [
+      { label: 'Full Name', name: 'name', type: 'text', placeholder: 'Enter your name', required: true },
+      { label: 'Email Address', name: 'email', type: 'email', placeholder: 'Enter your email', required: true },
+      { label: 'Subject', name: 'subject', type: 'text', placeholder: 'How can we help?', required: true },
+      { label: 'Message', name: 'message', type: 'textarea', placeholder: 'Tell us more...', required: true },
+    ],
+    submitText: 'Send Message'
+  };
+
+  const renderContactCards = (cards) => {
+    return cards.map((card, index) => (
+      <a 
+        key={index}
+        href={card.href}
+        className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+      >
+        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+          <card.icon size={24} className="text-white" />
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">{card.title}</h3>
+        <p className="text-gray-900 font-medium">{card.detail}</p>
+        <p className="text-gray-500 text-sm mt-1">{card.sub}</p>
+      </a>
+    ));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,7 +114,7 @@ export default function ContactPage() {
                   <div key={field.name}>
                     <label className="text-gray-700 text-sm font-semibold mb-1.5 block">{field.label}</label>
                     <textarea
-                      value={formData[field.name]}
+                      value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                       required={field.required}
                       rows={5}
@@ -92,19 +126,18 @@ export default function ContactPage() {
               }
               
               return (
-                <div key={field.name} className={index < 2 && formDetails.fields?.length > 2 ? 'grid grid-cols-1 sm:grid-cols-2 gap-5' : ''}>
+                <div key={field.name}>
                   <div>
                     <label className="text-gray-700 text-sm font-semibold mb-1.5 block">{field.label}</label>
                     <input
                       type={field.type}
-                      value={formData[field.name]}
+                      value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                       required={field.required}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all text-gray-800"
                       placeholder={field.placeholder}
                     />
                   </div>
-                  {index === 1 && formDetails.fields?.length > 2 && <div></div>}
                 </div>
               );
             })}

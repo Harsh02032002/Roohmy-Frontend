@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { fetchCities, fetchAreas } from '../../utils/api';
 import LocationMapPicker from './LocationMapPicker';
 import FloatingBidNowButton from './FloatingBidNowButton';
+import FastBiddingModal from './FastBiddingModal';
 
 export default function WebsiteNavbar() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function WebsiteNavbar() {
   const [selectedArea, setSelectedArea] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showBidModal, setShowBidModal] = useState(false);
 
   const propertyTypes = ['PG', 'Hostel', 'Flat', 'Villa', 'Shared Room', 'Private Room'];
 
@@ -143,19 +145,20 @@ export default function WebsiteNavbar() {
 
                 {/* Bid Now */}
                 <div className="flex items-center pl-6 ml-6 border-l border-gray-200 h-full">
-                  <Link to="/website/fast-bidding" className="flex items-center space-x-2 text-[#EE4266] hover:text-[#d63a5b] transition-colors">
+                  <button 
+                    onClick={() => setShowBidModal(true)}
+                    className="flex items-center space-x-2 text-[#EE4266] hover:text-[#d63a5b] transition-colors font-bold"
+                  >
                     <span>Bid Now</span>
-                  </Link>
+                  </button>
                 </div>
 
                 {/* Login/User Dropdown */}
                 <div className="flex items-center pl-6 ml-6 border-l border-gray-200 h-full">
                   {isAuthenticated && user ? (
-                  <div
-                    className="relative user-dropdown"
-                    onMouseEnter={() => setShowUserDropdown(true)}
-                    onMouseLeave={() => setShowUserDropdown(false)}
-                  >
+                    <div
+                      className="relative user-dropdown"
+                    >
                     <button
                       onClick={() => setShowUserDropdown(!showUserDropdown)}
                       className="flex items-center gap-2 hover:text-black transition-colors"
@@ -172,6 +175,9 @@ export default function WebsiteNavbar() {
                         </button>
                         <button onClick={() => { setShowUserDropdown(false); navigate('/website/mystays'); }} className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
                           <Home className="w-4 h-4 text-gray-500" /> My Stays
+                        </button>
+                        <button onClick={() => { setShowUserDropdown(false); navigate('/website/chat'); }} className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
+                          <MessageSquare className="w-4 h-4 text-gray-500" /> Chat
                         </button>
                         <button onClick={() => { setShowUserDropdown(false); navigate('/website/reviews'); }} className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
                           <Star className="w-4 h-4 text-gray-500" /> My Reviews
@@ -308,7 +314,13 @@ export default function WebsiteNavbar() {
       )}
 
       {/* Floating BidNow Button - Global */}
-      <FloatingBidNowButton />
+      <FloatingBidNowButton onOpenModal={() => setShowBidModal(true)} />
+
+      {/* Bid Now Modal */}
+      <FastBiddingModal 
+        isOpen={showBidModal} 
+        onClose={() => setShowBidModal(false)} 
+      />
     </>
   );
 }

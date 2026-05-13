@@ -3,6 +3,13 @@ import { fetchJson } from "../../utils/api";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { useHtmlPage } from "../../utils/htmlPage";
 import {
+  Users,
+  BedDouble,
+  IndianRupee,
+  ArrowUpRight,
+  BarChart2
+} from "lucide-react";
+import {
   clearOwnerRuntimeSession,
   fetchOwnerTenants,
   formatDate,
@@ -31,12 +38,17 @@ export default function Admin() {
   const [tenantsCount, setTenantsCount] = useState(0);
   const [rentTotal, setRentTotal] = useState(0);
   const [enquiries, setEnquiries] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
   const notificationCount = useMemo(
-    () => enquiries.filter((item) => ["pending", "hold"].includes(String(item.status || "").toLowerCase())).length,
-    [enquiries]
+    () => {
+      const pendingEnquiries = enquiries.filter((item) => ["pending", "hold"].includes(String(item.status || "").toLowerCase())).length;
+      const unreadNotifs = notifications.filter(n => !n.read).length;
+      return pendingEnquiries + unreadNotifs;
+    },
+    [enquiries, notifications]
   );
 
   useEffect(() => {
@@ -47,18 +59,20 @@ export default function Admin() {
     setLoading(true);
     setErrorMsg("");
     try {
-      const [ownerRes, roomsRes, tenantsRes, rentRes, enquiryRes] = await Promise.all([
+      const [ownerRes, roomsRes, tenantsRes, rentRes, enquiryRes, notificationRes] = await Promise.all([
         fetchJson(`/api/owners/${encodeURIComponent(loginId)}`).catch(() => null),
         fetchJson(`/api/owners/${encodeURIComponent(loginId)}/rooms`),
         fetchOwnerTenants(loginId),
         fetchJson(`/api/owners/${encodeURIComponent(loginId)}/rent`),
-        fetchJson(`/api/owners/${encodeURIComponent(loginId)}/enquiries`)
+        fetchJson(`/api/owners/${encodeURIComponent(loginId)}/enquiries`),
+        fetchJson(`/api/notifications?toLoginId=${encodeURIComponent(loginId)}`)
       ]);
       setOwner((prev) => ({ ...prev, ...(ownerRes || {}) }));
       setRoomsCount((roomsRes?.rooms || []).length);
       setTenantsCount((Array.isArray(tenantsRes) ? tenantsRes : tenantsRes?.tenants || []).length);
       setRentTotal(rentRes?.totalRent || 0);
       setEnquiries(Array.isArray(enquiryRes) ? enquiryRes : enquiryRes?.enquiries || []);
+      setNotifications(Array.isArray(notificationRes) ? notificationRes : []);
     } catch (err) {
       setErrorMsg(err?.body || err?.message || "Failed to load dashboard data.");
     } finally {
@@ -96,10 +110,24 @@ export default function Admin() {
       title="Dashboard"
       navVariant="default"
       notificationCount={notificationCount}
-      notifications={enquiries.slice(0, 5).map((item) => ({
-        title: item.propertyName || item.property?.name || "Enquiry",
-        message: `${item.name || item.tenantName || "Tenant"} | ${item.status || "pending"}`
-      }))}
+      notifications={[
+        ...notifications.slice(0, 10).map(n => {
+          const meta = typeof n.meta === 'string' ? JSON.parse(n.meta) : (n.meta || {});
+          return {
+            ...n,
+            title: meta.title || n.title || (n.type === 'user_filter_match' ? 'New Lead Match' : 'Notification'),
+            message: meta.message || n.message || '',
+            type: n.type,
+            meta: meta
+          };
+        }),
+        ...enquiries.slice(0, 5).map((item) => ({
+          title: item.propertyName || item.property?.name || "Enquiry",
+          message: `${item.name || item.tenantName || "Tenant"} | ${item.status || "pending"}`,
+          type: 'enquiry',
+          meta: { bookingId: item._id }
+        }))
+      ]}
       onLogout={() => {
         clearOwnerRuntimeSession();
         window.location.href = "/propertyowner/ownerlogin";
@@ -116,48 +144,67 @@ export default function Admin() {
       {errorMsg ? <div className="text-sm text-red-600 mb-4">{errorMsg}</div> : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
-          <div className="relative z-10">
-            <p className="text-orange-100 text-sm font-medium">Tenants</p>
-            <h3 className="text-3xl font-bold mt-2">{loading ? "0" : tenantsCount}</h3>
-          </div>
-          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
-            <i data-lucide="users" className="w-12 h-12"></i>
-          </div>
+        {/* Tenants Card - Emerald */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:translate-y-[-4px] hover:shadow-md group">
+           <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-transform group-hover:scale-110">
+              <Users size={24} />
+           </div>
+           <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">Total Tenants</p>
+              <h4 className="text-2xl font-black text-slate-900 tracking-tight leading-none">{loading ? "..." : tenantsCount}</h4>
+              <div className="flex items-center gap-1.5 mt-2">
+                 <ArrowUpRight size={12} className="text-emerald-500" />
+                 <span className="text-[10px] font-bold text-slate-400 truncate">+ 12.5% from last week</span>
+              </div>
+           </div>
         </div>
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
-          <div className="relative z-10">
-            <p className="text-purple-100 text-sm font-medium">Rooms</p>
-            <h3 className="text-3xl font-bold mt-2">{loading ? "0" : roomsCount}</h3>
-          </div>
-          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
-            <i data-lucide="bed-double" className="w-12 h-12"></i>
-          </div>
+
+        {/* Rooms Card - Purple */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:translate-y-[-4px] hover:shadow-md group">
+           <div className="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center transition-transform group-hover:scale-110">
+              <BedDouble size={24} />
+           </div>
+           <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">Total Rooms</p>
+              <h4 className="text-2xl font-black text-slate-900 tracking-tight leading-none">{loading ? "..." : roomsCount}</h4>
+              <div className="flex items-center gap-1.5 mt-2">
+                 <ArrowUpRight size={12} className="text-emerald-500" />
+                 <span className="text-[10px] font-bold text-slate-400 truncate">+ 8.3% from last week</span>
+              </div>
+           </div>
         </div>
-        <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
-          <div className="relative z-10">
-            <p className="text-green-100 text-sm font-medium">Rent Collected</p>
-            <h3 className="text-3xl font-bold mt-2">{`Rs ${loading ? "0" : rentTotal}`}</h3>
-          </div>
-          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
-            <i data-lucide="indian-rupee" className="w-12 h-12"></i>
-          </div>
+
+        {/* Rent Card - Blue */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:translate-y-[-4px] hover:shadow-md group">
+           <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center transition-transform group-hover:scale-110">
+              <IndianRupee size={24} />
+           </div>
+           <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">Rent Collected</p>
+              <h4 className="text-2xl font-black text-slate-900 tracking-tight leading-none">₹{loading ? "0" : rentTotal.toLocaleString()}</h4>
+              <div className="flex items-center gap-1.5 mt-2">
+                 <ArrowUpRight size={12} className="text-emerald-500" />
+                 <span className="text-[10px] font-bold text-slate-400 truncate">+ 18.6% from last week</span>
+              </div>
+           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-gray-800">Occupancy Overview</h3>
-            <select className="text-xs border-gray-300 rounded text-gray-600">
+        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-lg font-bold text-slate-900">Occupancy Overview</h3>
+            <select className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-500 outline-none cursor-pointer">
               <option>This Month</option>
               <option>Last Month</option>
             </select>
           </div>
-          <div className="h-64 w-full flex items-center justify-center bg-gray-50 rounded border border-dashed border-gray-300">
-            <p className="text-gray-400 text-sm flex items-center gap-2">
-              <i data-lucide="bar-chart-2" className="w-5 h-5"></i>
-              Chart Data Loading...
+          <div className="h-72 w-full flex flex-col items-center justify-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-4">
+              <BarChart2 className="w-8 h-8 text-blue-600" />
+            </div>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+              Performance Data Loading...
             </p>
           </div>
         </div>

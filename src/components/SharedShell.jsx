@@ -36,7 +36,7 @@ export default function SharedShell() {
 
   if (section === "superadmin") {
     return (
-      <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden font-inter">
+      <div className="flex h-screen w-full bg-white overflow-hidden font-inter">
         <Sidebar 
           open={sidebarOpen} 
           isMobile={isMobile}
@@ -92,7 +92,7 @@ export default function SharedShell() {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto custom-scrollbar">
+          <main className="flex-1 overflow-y-auto custom-scrollbar p-8">
             <Outlet />
           </main>
         </div>

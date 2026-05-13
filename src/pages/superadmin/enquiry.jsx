@@ -11,6 +11,7 @@ import {
   Plus, Loader2, Save, Sparkles, Layers, Box,
   Globe2, IndianRupee, Inbox, Smartphone, Monitor, Info
 } from "lucide-react";
+import { PageHeader } from "../../components/superadmin/PageHeader";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip
 } from "recharts";
@@ -68,19 +69,20 @@ export default function SuperadminEnquiry() {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full">
-      {/* Header Area */}
-      <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-             <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Enquiry List</h1>
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Track and manage customer leads received from the website</p>
-          </div>
-         <div className="flex items-center gap-3">
-            <button className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">
-               <Plus className="w-3.5 h-3.5" /> Provision Enquiry
-            </button>
-         </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader 
+        title="Enquiry List"
+        subtitle="Track and manage customer leads received from the website."
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Enquiry List", active: true }
+        ]}
+        actions={
+          <button className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">
+             <Plus className="w-3.5 h-3.5" /> Provision Enquiry
+          </button>
+        }
+      />
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">

@@ -10,6 +10,7 @@ import {
   CheckCircle2, AlertCircle, Camera, Fingerprint, Lock, Unlock, UserPlus
 } from "lucide-react";
 import { fetchJson } from "../../utils/api";
+import { PageHeader } from "../../components/superadmin/PageHeader";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -271,7 +272,7 @@ export default function Manager() {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full font-inter">
+    <div className="space-y-6">
       {/* Toast */}
       {toast && (
         <div className={cn(
@@ -283,23 +284,22 @@ export default function Manager() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-         <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Team Management</h1>
-            <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-               <span className="hover:text-blue-600 cursor-pointer">Dashboard</span>
-               <ChevronRight size={10} className="opacity-50" />
-               <span className="text-blue-600">Staff Directory</span>
-            </div>
-         </div>
-         <button 
-           onClick={() => openModal()}
-           className="bg-slate-900 text-white px-5 py-2.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-black transition-all flex items-center gap-2"
-         >
+      <PageHeader 
+        title="Team Management"
+        subtitle="Manage your team members, departments, and access permissions."
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Staff Directory", active: true }
+        ]}
+        actions={
+          <button 
+            onClick={() => openModal()}
+            className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:bg-black transition-all flex items-center gap-2"
+          >
             <UserPlus size={14} /> Add Staff
-         </button>
-      </div>
+          </button>
+        }
+      />
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -132,25 +132,37 @@ export const normalizeBooking = (item = {}) => ({
   ...item,
   ownerLoginId: normalizeOwnerLoginId(item.owner_id || item.ownerId || item.owner_login_id || item.ownerLoginId || item.owner || ""),
   key: item._id || item.id || item.bookingId || item.user_id || Math.random().toString(36).slice(2),
+  bidId: item._id || item.id || "-",
   propertyId: item.property_id || item.propertyId || item.property?._id || "-",
   propertyName: item.property_name || item.propertyName || item.property?.title || "-",
   ownerName: item.owner_name || item.ownerName || item.owner || "-",
   area: item.area || item.property?.area || item.locationCode || "-",
   type: item.request_type || item.type || item.propertyType || "-",
-  rent: item.rent || item.rentAmount || item.price || "-",
+  rent: item.rent || item.rentAmount || item.rent_amount || item.price || item.totalAmount || item.total_amount || "-",
   userId: resolveWebsiteChatUserId(item) || item.user_id || item.userId || item.signup_user_id || "-",
   userName: item.name || item.tenantName || item.fullName || "-",
   phone: item.phone || item.mobile || "-",
   email: item.email || "-",
+  city: item.city || item.filter_criteria?.city || "-",
+  gender: item.gender || item.filter_criteria?.gender || "-",
   minPrice: item.bid_min || item.minPrice || "-",
   maxPrice: item.bid_max || item.maxPrice || "-",
   budgetRange:
     item.budgetRange ||
+    item.filter_criteria?.priceRange ||
     ((item.bid_min || item.bid_max)
       ? `${item.bid_min || "-"} - ${item.bid_max || "-"}`
       : "-"),
   request_type: item.request_type || item.requestType || item.type || "",
-  status: item.status || "pending"
+  status: item.status || "pending",
+  guardianName: item.guardian_name || item.guardianName || "-",
+  guardianPhone: item.guardian_phone || item.guardianPhone || "-",
+  fullAddress: item.address_street ? `${item.address_street}, ${item.address_city || ""}, ${item.address_state || ""}` : (item.address || "-"),
+  visitDate: item.visit_date || item.visitDate || null,
+  visitTime: item.visit_time_slot || item.visitTime || "-",
+  message: item.message || "-",
+  createdAt: item.created_at || item.createdAt || null,
+  checkInDate: item.check_in_date || item.checkInDate || item.start_date || null
 });
 
 const matchesOwnerLoginId = (candidate, ownerId) =>

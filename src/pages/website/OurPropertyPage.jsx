@@ -6,6 +6,9 @@ const { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, Chevro
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend, trackPropertyClick } from "../../utils/api";
+import FastBiddingModal from "../../components/website/FastBiddingModal";
+import { useAuth } from "../../contexts/AuthContext";
+import axios from "axios";
 
 export default function OurPropertyPage() {
   const [showFilters, setShowFilters] = useState(true);
@@ -46,6 +49,9 @@ export default function OurPropertyPage() {
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [sortBy, setSortBy] = useState('Featured');
   const [showSort, setShowSort] = useState(false);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [selectedPropertyForBid, setSelectedPropertyForBid] = useState(null);
+  const { user, isAuthenticated } = useAuth();
   
   // Fetch properties and related data dynamically
   useEffect(() => {
@@ -111,9 +117,12 @@ export default function OurPropertyPage() {
         // Apply filters quickly
         let filtered = formattedProperties;
         
-        if (selectedCity) {
-          filtered = filtered.filter(p => p.location?.toLowerCase() === selectedCity.toLowerCase());
-        }
+        if (selectedCity && selectedCity !== 'All Cities') {
+            filtered = filtered.filter(p => 
+              (p.city && p.city.toLowerCase() === selectedCity.toLowerCase()) ||
+              (p.location && p.location.toLowerCase().includes(selectedCity.toLowerCase()))
+            );
+          }
         
         if (selectedArea) {
           filtered = filtered.filter(p => 
@@ -596,7 +605,15 @@ export default function OurPropertyPage() {
                   ) : properties.length > 0 ? (
                     <>
                       {properties.map((property) => (
-                        <PropertyCard key={property.id} property={property} nearbyColleges={propertyNearbyColleges[property.id]} />
+                        <PropertyCard 
+                          key={property.id} 
+                          property={property} 
+                          nearbyColleges={propertyNearbyColleges[property.id]} 
+                          onBidNow={() => {
+                            setSelectedPropertyForBid(property);
+                            setShowBidModal(true);
+                          }}
+                        />
                       ))}
                       
                       {/* Pagination Controls */}
@@ -725,12 +742,31 @@ export default function OurPropertyPage() {
       <WebsiteFooter />
 
       <MobileBottomNav />
+
+      {/* Fast Bidding Modal */}
+      <FastBiddingModal 
+        isOpen={showBidModal}
+        onClose={() => setShowBidModal(false)}
+        initialData={selectedPropertyForBid ? {
+          city: selectedPropertyForBid.location,
+          area: selectedPropertyForBid.area,
+          property_id: selectedPropertyForBid.id,
+          property_name: selectedPropertyForBid.name,
+          priceRange: `Around ${selectedPropertyForBid.price}`,
+          gender: selectedPropertyForBid.gender
+        } : {
+          city: selectedCity,
+          area: selectedArea,
+          priceRange: (minPrice || maxPrice) ? (maxPrice ? `Less than ${maxPrice}` : `More than ${minPrice}`) : '',
+          gender: selectedGender || 'Any'
+        }}
+      />
     </div>
   );
 }
 
 // Property Card Component - OYO Style
-function PropertyCard({ property }) {
+function PropertyCard({ property, onBidNow }) {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -938,10 +974,14 @@ function PropertyCard({ property }) {
                 View details
               </button>
               <button 
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                className="flex-1 py-2 bg-[#1AB64F] text-white font-bold rounded text-[10px] hover:bg-[#18a245] transition-all shadow-sm whitespace-nowrap"
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  e.stopPropagation(); 
+                  if (onBidNow) onBidNow();
+                }}
+                className="flex-1 py-2 bg-[#EE4266] text-white font-bold rounded text-[10px] hover:bg-[#d63a5b] transition-all shadow-sm whitespace-nowrap"
               >
-                Book Now
+                Bid Now
               </button>
             </div>
           </div>

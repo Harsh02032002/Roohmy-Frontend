@@ -324,17 +324,22 @@ export default function HomePage() {
 
         // Fetch property types/offerings
         const propertyTypesData = await fetchPropertyTypes();
-        if (propertyTypesData && propertyTypesData.length > 0) {
-          setOfferings(propertyTypesData);
-        } else {
+        // FORCE STATIC DATA for now as requested
+        // if (propertyTypesData && propertyTypesData.length > 0) {
+        //   setOfferings(propertyTypesData);
+        // } else {
           setOfferings(staticOfferings);
-        }
+        // }
 
         // Fetch trending properties
         const allProperties = await fetchProperties();
         if (allProperties && allProperties.length > 0) {
-          // Use first 8-12 properties as trending
-          setTrendingProperties(allProperties);
+          // Use first 8-12 properties as trending, filtering out test data
+          const filteredProperties = allProperties.filter(p => {
+            const name = (p.name || p.property_name || '').toLowerCase();
+            return !name.includes('jhvhhjhjv') && !name.includes('test');
+          });
+          setTrendingProperties(filteredProperties);
         } else {
           // Fallback to static if API fails
           setTrendingProperties(featuredProperties);

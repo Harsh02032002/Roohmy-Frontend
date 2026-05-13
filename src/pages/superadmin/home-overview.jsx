@@ -13,6 +13,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line
 } from "recharts";
 import { fetchHomeOverviewStats } from "../../utils/api";
+import { PageHeader } from "../../components/superadmin/PageHeader";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -88,26 +89,22 @@ export default function HomeOverview() {
   }, []);
 
   return (
-    <div className="p-8 bg-[#F8FAFC] min-h-full font-inter text-slate-900">
-      {/* Header Section */}
-      <div className="flex items-center justify-between mb-8">
-         <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Overview</h1>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-400 mt-1">
-               <span>Home</span>
-               <ChevronRight size={12} />
-               <span className="text-slate-600">Overview</span>
-            </div>
-         </div>
-         <div className="flex items-center gap-3 bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm text-xs font-bold text-slate-600">
+    <div className="space-y-6">
+      <PageHeader 
+        title="Overview"
+        subtitle="Welcome back, Aman! Here's an overview of your platform."
+        breadcrumbs={[
+          { label: "Home" },
+          { label: "Overview", active: true }
+        ]}
+        actions={
+          <div className="flex items-center gap-3 bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm text-xs font-bold text-slate-600">
             <Calendar className="w-4 h-4 text-slate-400" />
             <span>May 22 - May 28, 2024</span>
-         </div>
-      </div>
+          </div>
+        }
+      />
 
-      <div className="bg-white border border-slate-50 rounded-2xl p-6 mb-8 text-sm font-medium text-slate-500 shadow-sm">
-         Welcome back, Aman! Here's an overview of your platform.
-      </div>
 
       {/* Stats Row - LIVE CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

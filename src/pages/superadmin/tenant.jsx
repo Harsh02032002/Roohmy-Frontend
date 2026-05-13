@@ -12,6 +12,7 @@ import {
   Home, Hash, Banknote, Wallet
 } from "lucide-react";
 import { fetchJson, getAuthHeader } from "../../utils/api";
+import { PageHeader } from "../../components/superadmin/PageHeader";
 import * as XLSX from 'xlsx';
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
@@ -139,25 +140,24 @@ export default function Tenant() {
   };
 
   return (
-    <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-         <div className="flex flex-col gap-2">
-            <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">View All Tenants</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Resident Lifecycle Governance & Occupancy Intelligence Matrix</p>
-         </div>
-         <div className="flex items-center gap-4">
-            <button className="bg-slate-900 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all flex items-center gap-3 active:scale-95">
-               <Plus className="w-4 h-4" /> Deploy Resident
+    <div className="space-y-6">
+      <PageHeader 
+        title="View All Tenants"
+        subtitle="Resident lifecycle governance & occupancy intelligence matrix."
+        actions={
+          <div className="flex items-center gap-4">
+            <button className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all flex items-center gap-2 active:scale-95">
+               <Plus size={14} /> Deploy Resident
             </button>
             <button 
               onClick={exportToExcel}
-              className="bg-white text-slate-600 border border-slate-100 px-8 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-200 transition-all flex items-center gap-3 active:scale-95"
+              className="bg-white text-slate-600 border border-slate-100 px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-200 transition-all flex items-center gap-2 active:scale-95"
             >
                <Sheet className="w-4 h-4" /> Export Registry
             </button>
-         </div>
-      </div>
+          </div>
+        }
+      />
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

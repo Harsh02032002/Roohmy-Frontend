@@ -1,5 +1,6 @@
 import React from "react";
 import { Users, Calendar, ChevronRight, TrendingUp, ArrowUpRight, MapPin, IndianRupee, Clock, Percent } from "lucide-react";
+import { PageHeader } from "../../components/superadmin/PageHeader";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, RadialBarChart, RadialBar } from "recharts";
 
 const cn = (...c) => c.filter(Boolean).join(" ");
@@ -59,18 +60,17 @@ const sparkData = [
 
 export default function BookingOverview() {
   return (
-    <div className="p-8 bg-[#F8FAFC] min-h-full font-inter text-slate-900">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Booking & Leads Overview</h1>
-          <p className="text-xs text-slate-400 mt-1">Track your leads, bookings and conversion performance.</p>
-        </div>
-        <div className="flex items-center gap-2 bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm text-xs font-bold text-slate-600">
-          <Calendar size={14} className="text-slate-400" />
-          <span>May 22 – May 28, 2024</span>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader 
+        title="Booking & Leads Overview"
+        subtitle="Track your leads, bookings and conversion performance."
+        actions={
+          <div className="flex items-center gap-2 bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm text-xs font-bold text-slate-600">
+            <Calendar size={14} className="text-slate-400" />
+            <span>May 22 – May 28, 2024</span>
+          </div>
+        }
+      />
 
       {/* 6 STAT CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6 mb-8">

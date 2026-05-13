@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
+import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { setWebsiteSession, getWebsiteApiUrl } from "../../utils/websiteSession";
+import { User, Mail, Phone, Lock, ArrowRight, CheckCircle2, Sparkles, Building2, Wallet } from "lucide-react";
 
 export default function WebsiteSignup() {
   const apiUrl = getWebsiteApiUrl();
@@ -178,193 +180,290 @@ export default function WebsiteSignup() {
   }, [apiUrl, otp, pendingPayload, showToast]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans relative">
       <WebsiteNavbar />
 
-      <main className="flex-grow">
-        {/* Hero Section */}
-        <div className="relative h-[200px] bg-gradient-to-r from-blue-50 to-teal-50 border-b border-gray-200">
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              {signupMode ? "Create Your Account" : "Sign In"}
-            </h1>
-            <p className="text-lg text-gray-600">
-              {signupMode ? "Join Roomhy today!" : "Welcome back!"}
-            </p>
-          </div>
+      <main className="flex-grow flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden h-[calc(100vh-80px)]">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+            <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-teal-50 rounded-full blur-3xl opacity-60"></div>
+            <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-rose-50 rounded-full blur-3xl opacity-60"></div>
         </div>
 
-        {/* Auth Section */}
-        <section className="py-16 bg-white">
-          <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-xl shadow-lg p-8 md:p-10">
-              {signupMode ? (
-                // SIGNUP FORM
-                <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Create Account</h2>
-                  <form onSubmit={handleSignupSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="text"
-                        placeholder="First Name"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
-                        required
-                        value={signup.firstName}
-                        onChange={(e) => setSignup({ ...signup, firstName: e.target.value })}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Last Name"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
-                        value={signup.lastName}
-                        onChange={(e) => setSignup({ ...signup, lastName: e.target.value })}
-                      />
-                    </div>
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
-                      required
-                      value={signup.email}
-                      onChange={(e) => setSignup({ ...signup, email: e.target.value })}
-                    />
-                    <input
-                      type="tel"
-                      placeholder="Phone Number (10 digits)"
-                      maxLength="10"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
-                      required
-                      value={signup.phone}
-                      onChange={(e) => setSignup({ ...signup, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                    />
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
-                      required
-                      value={signup.password}
-                      onChange={(e) => setSignup({ ...signup, password: e.target.value })}
-                    />
-                    {verificationVisible && (
-                      <>
-                        <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                          <p>
-                            Code sent to your email
-                            {signupDelivery.whatsapp ? " and WhatsApp" : signupDelivery.sms ? " and phone" : ""}.
-                          </p>
-                          {signupDelivery.demoOtp ? (
-                            <p className="mt-1 font-semibold">Demo OTP: {signupDelivery.demoOtp}</p>
-                          ) : null}
+        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 border border-gray-100 max-h-[90vh]">
+          
+          {/* Left Side: Marketing & Benefits */}
+          <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-teal-900 to-gray-900 text-white relative">
+            <div className="absolute inset-0 opacity-20 pointer-events-none" 
+                 style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/pinstripe.png")` }}>
+            </div>
+            
+            <div className="relative">
+              <h1 className="text-3xl font-extrabold tracking-tight mb-4 leading-tight mt-4">
+                Join the <span className="text-teal-400">future</span> of student housing in India.
+              </h1>
+              
+              <div className="space-y-6 mt-8">
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                    <Building2 className="text-teal-400 w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base">Verified Properties</h3>
+                    <p className="text-xs text-gray-400">Browse thousands of rooms verified by our team for safety.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                    <Wallet className="text-blue-400 w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base">Smart Bidding</h3>
+                    <p className="text-xs text-gray-400">Negotiate rent directly with owners and get the best deal.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="text-rose-400 w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base">Instant Booking</h3>
+                    <p className="text-xs text-gray-400">Lock your room in minutes with zero brokerage.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative mt-auto pt-10 border-t border-white/10">
+               <div className="space-y-2">
+                  <p className="text-xl font-serif italic text-teal-100 opacity-90 leading-relaxed">
+                    "Your study years are for building a <span className="text-teal-400">future</span>. Let us handle building you a home."
+                  </p>
+                  <div className="w-10 h-1 bg-teal-500/30 rounded-full mt-4"></div>
+               </div>
+            </div>
+          </div>
+
+          {/* Right Side: Auth Forms */}
+          <div className="p-8 lg:p-12 flex flex-col justify-center bg-white overflow-y-auto custom-scrollbar">
+            <div className="mb-6 text-center lg:text-left">
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                {signupMode ? "Create Account" : "Sign In"}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {signupMode ? "Take control of your life today." : "Access your bookings and messages."}
+              </p>
+            </div>
+
+            {signupMode ? (
+              // SIGNUP FORM
+              <form onSubmit={handleSignupSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">First Name</label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <User className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
                         </div>
                         <input
                           type="text"
-                          placeholder="6-digit Verification Code"
-                          maxLength="6"
-                          inputMode="numeric"
-                          className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          required
+                          className="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
+                          placeholder="Harsh"
+                          value={signup.firstName}
+                          onChange={(e) => setSignup({ ...signup, firstName: e.target.value })}
                         />
-                        <button
-                          type="button"
-                          onClick={handleVerify}
-                          disabled={loadingVerify}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
-                        >
-                          {loadingVerify ? "Verifying..." : "Verify & Create"}
-                        </button>
-                      </>
-                    )}
+                      </div>
+                   </div>
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Last Name</label>
+                      <input
+                        type="text"
+                        className="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
+                        placeholder="Kaur"
+                        value={signup.lastName}
+                        onChange={(e) => setSignup({ ...signup, lastName: e.target.value })}
+                      />
+                   </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Email Address</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      className="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
+                      placeholder="hello@roomhy.com"
+                      value={signup.email}
+                      onChange={(e) => setSignup({ ...signup, email: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Phone Number</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Phone className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                    </div>
+                    <input
+                      type="tel"
+                      required
+                      maxLength="10"
+                      className="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
+                      placeholder="9876543210"
+                      value={signup.phone}
+                      onChange={(e) => setSignup({ ...signup, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Password</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      className="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
+                      placeholder="••••••••"
+                      value={signup.password}
+                      onChange={(e) => setSignup({ ...signup, password: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {verificationVisible && (
+                  <div className="space-y-3 p-3 bg-teal-50 rounded-2xl border border-teal-100 animate-in fade-in zoom-in-95">
+                    <p className="text-[10px] text-teal-800 font-medium text-center">
+                       Code sent to your email 
+                       {signupDelivery.whatsapp ? " & WhatsApp" : signupDelivery.sms ? " & SMS" : ""}.
+                    </p>
+                    <input
+                      type="text"
+                      placeholder="6-digit code"
+                      maxLength="6"
+                      className="block w-full px-4 py-2 bg-white border border-teal-200 rounded-xl text-center text-base font-bold tracking-[0.5em] outline-none focus:ring-2 focus:ring-teal-500/20"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerify}
+                      disabled={loadingVerify}
+                      className="w-full bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-xl font-bold transition-all text-sm"
+                    >
+                      {loadingVerify ? "Verifying..." : "Verify & Create"}
+                    </button>
+                  </div>
+                )}
+
+                {!verificationVisible && (
                     <button
                       type="submit"
                       disabled={loadingCreate}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
+                      className="group w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 transform hover:-translate-y-1 active:translate-y-0 disabled:bg-gray-400"
                     >
-                      {loadingCreate ? "Sending Code..." : "Create Account"}
+                      {loadingCreate ? (
+                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      ) : (
+                        <>
+                          Create My Account
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
                     </button>
-                  </form>
-                  <p className="text-center mt-6 text-gray-600">
-                    Already have an account?{" "}
-                    <button
-                      onClick={() => { setSignupMode(false); setLoginCodeSent(false); }}
-                      className="text-blue-600 font-semibold hover:underline"
-                    >
-                      Log in
-                    </button>
-                  </p>
-                </>
-              ) : (
-                // LOGIN FORM
-                <>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Sign In</h2>
-                  <form onSubmit={loginCodeSent ? handleLoginVerify : handleLoginRequestCode} className="space-y-4">
+                )}
+
+                <p className="text-center mt-4 text-xs text-gray-500">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setSignupMode(false)}
+                    className="font-bold text-gray-900 hover:text-teal-600 transition-colors underline decoration-2 underline-offset-4 decoration-teal-500/30 hover:decoration-teal-500"
+                  >
+                    Log in
+                  </button>
+                </p>
+              </form>
+            ) : (
+              // LOGIN FORM (Simplified for Signup page toggle)
+              <form onSubmit={loginCodeSent ? handleLoginVerify : handleLoginRequestCode} className="space-y-6">
+                 <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Email Address</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
+                    </div>
                     <input
                       type="email"
-                      placeholder="Email Address"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
+                      className="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
+                      placeholder="hello@roomhy.com"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                     />
-                    {loginCodeSent && (
-                      <input
-                        type="text"
-                        placeholder="6-digit Verification Code"
-                        maxLength="6"
-                        inputMode="numeric"
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-blue-600"
-                        value={loginOtp}
-                        onChange={(e) => setLoginOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      />
-                    )}
-                    <button
-                      type="submit"
-                      disabled={loginCodeSent ? loadingLoginVerify : loadingLoginSend}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
-                    >
-                      {loginCodeSent
-                        ? (loadingLoginVerify ? "Verifying..." : "Verify & Login")
-                        : (loadingLoginSend ? "Sending Code..." : "Send Login Code")}
-                    </button>
-                    {loginCodeSent && (
-                      <button
-                        type="button"
-                        onClick={handleLoginRequestCode}
-                        disabled={loadingLoginSend}
-                        className="w-full text-sm text-blue-600 font-semibold hover:underline"
-                      >
-                        Resend Code
-                      </button>
-                    )}
-                  </form>
-                  <p className="text-center mt-6 text-gray-600">
-                    Don't have an account?{" "}
-                    <button
-                      onClick={() => { setSignupMode(true); setLoginCodeSent(false); }}
-                      className="text-blue-600 font-semibold hover:underline"
-                    >
-                      Sign up
-                    </button>
-                  </p>
-                </>
-              )}
-            </div>
+                  </div>
+                </div>
+
+                {loginCodeSent && (
+                  <div className="space-y-1.5 animate-in slide-in-from-top-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Verification Code</label>
+                    <input
+                      type="text"
+                      maxLength="6"
+                      className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-center text-lg font-bold tracking-[0.5em] focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all"
+                      value={loginOtp}
+                      onChange={(e) => setLoginOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loginCodeSent ? loadingLoginVerify : loadingLoginSend}
+                  className="w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 transform hover:-translate-y-1 active:translate-y-0 disabled:bg-gray-400"
+                >
+                  {loginCodeSent
+                    ? (loadingLoginVerify ? "Verifying..." : "Verify & Login")
+                    : (loadingLoginSend ? "Sending Code..." : "Send Login Code")}
+                </button>
+                
+                <p className="text-center mt-6 text-xs text-gray-500">
+                  Don't have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setSignupMode(true)}
+                    className="font-bold text-gray-900 hover:text-teal-600 transition-colors underline decoration-2 underline-offset-4 decoration-teal-500/30 hover:decoration-teal-500"
+                  >
+                    Sign up
+                  </button>
+                </p>
+              </form>
+            )}
           </div>
-        </section>
+        </div>
       </main>
 
       <WebsiteFooter />
+      <MobileBottomNav />
 
       {/* Toast */}
       {toast && (
         <div
-          className="fixed top-5 right-5 z-50 px-4 py-3 rounded-lg text-white text-sm shadow-lg"
+          className="fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl text-white text-sm font-bold shadow-2xl animate-in slide-in-from-top-4"
           style={{
             background:
               toast.type === "error"
-                ? "#ef4444"
+                ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
                 : toast.type === "success"
-                  ? "#10b981"
-                  : "#3b82f6"
+                  ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                  : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
           }}
         >
           {toast.message}

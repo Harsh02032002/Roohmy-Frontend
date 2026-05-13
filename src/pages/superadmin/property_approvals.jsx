@@ -1,354 +1,425 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Building2, Users, Shield, Clock, Search, 
-  ArrowUpRight, ArrowDownRight, MoreVertical, 
-  Filter, Globe, MapPin, Zap, Sheet, Trash2, 
-  ChevronRight, Phone, Mail, User, Image as ImageIcon,
-  Activity, Home, CheckCircle2, XCircle, Hourglass,
-  Check, X, Eye, ShieldCheck, ClipboardCheck,
-  RefreshCw, AlertCircle, Sparkles, Layers,
-  Box, Globe2, IndianRupee, Inbox
+import {
+  Search, Filter, Download, ChevronDown, MapPin, User,
+  Check, X, Eye, RefreshCw, Clock, CheckCircle2, XCircle,
+  AlertCircle, ChevronLeft, ChevronRight, CalendarDays,
+  IndianRupee, Home, ClipboardList, ArrowRight, Image as ImageIcon
 } from "lucide-react";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
-
 const getApiUrl = () =>
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001" : "https://roohmy-backend-xwa9.vercel.app";
 
-export default function SuperadminPropertyApprovals() {
-  const [queue, setQueue] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProperty, setSelectedProperty] = useState(null);
+const STATUS_TABS = ["All", "Pending", "Approved", "Rejected"];
 
-  const fetchPendingProperties = async () => {
+
+
+export default function SuperadminPropertyApprovals() {
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("Pending");
+  const [selected, setSelected] = useState(null);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 5;
+
+  const fetchProperties = async () => {
     try {
       setLoading(true);
       const res = await fetch(`${getApiUrl()}/api/properties?t=${Date.now()}`);
       const data = await res.json();
       if (data.success && data.properties) {
-        const pending = data.properties.filter(p => !p.isPublished || p.status !== 'active');
-        setQueue(pending.map(p => ({
+        setProperties(data.properties.map(p => ({
           id: p._id,
-          displayId: p.visitId || p.locationCode || p._id.slice(-6).toUpperCase(),
-          title: p.title || p.propertyInfo?.name || p.propertyName || "Unknown Property",
-          owner: p.owner?.name || p.ownerName || p.propertyInfo?.ownerName || "Unknown Owner",
+          propId: `PROP-${p._id.slice(-8).toUpperCase()}`,
+          title: p.title || p.propertyInfo?.name || "Unknown Property",
           type: p.propertyType || "Property",
-          submitted: new Date(p.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' }),
-          status: p.status === "pending_review" ? "Priority Queue" : "Awaiting Pulse",
-          initial: (p.owner?.name || p.ownerName || "U")[0].toUpperCase(),
-          color: ["blue", "indigo", "amber", "rose", "emerald"][Math.floor(Math.random() * 5)],
-          raw: p
+          roomType: p.sharingType || p.roomType || "Single Sharing",
+          owner: p.owner?.name || p.ownerName || "Unknown Owner",
+          location: [p.locality, p.city, p.state].filter(Boolean).join(", ") || "Location N/A",
+          totalRooms: p.totalRooms || p.roomCount || "—",
+          minRent: p.rent || p.minRent || null,
+          maxRent: p.maxRent || null,
+          submittedBy: p.owner?.name || p.ownerName || "Owner",
+          submittedOn: new Date(p.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+          status: p.isPublished ? "Approved" : (p.status === "rejected" ? "Rejected" : "Pending"),
+          photos: p.images || [],
+          raw: p,
         })));
       }
-    } catch (err) {
-      console.error("Error fetching pending properties:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchPendingProperties();
-  }, []);
+  useEffect(() => { fetchProperties(); }, []);
 
   const handleApprove = async (id) => {
     try {
-      const res = await fetch(`${getApiUrl()}/api/properties/${id}/publish`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      });
+      const res = await fetch(`${getApiUrl()}/api/properties/${id}/publish`, { method: "POST", headers: { "Content-Type": "application/json" } });
       const data = await res.json();
       if (data.success || res.ok) {
-        setQueue(queue.filter(q => q.id !== id));
-      } else {
-        alert("Failed to approve property.");
+        setProperties(prev => prev.map(p => p.id === id ? { ...p, status: "Approved" } : p));
+        if (selected?.id === id) setSelected(prev => ({ ...prev, status: "Approved" }));
       }
-    } catch (err) {
-      console.error(err);
-      alert("Error approving property.");
-    }
+    } catch (e) { console.error(e); }
   };
 
-  const filteredQueue = queue.filter(q => 
-    q.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    q.owner.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleReject = async (id) => {
+    setProperties(prev => prev.map(p => p.id === id ? { ...p, status: "Rejected" } : p));
+    if (selected?.id === id) setSelected(prev => ({ ...prev, status: "Rejected" }));
+  };
+
+  const counts = {
+    All: properties.length,
+    Pending: properties.filter(p => p.status === "Pending").length,
+    Approved: properties.filter(p => p.status === "Approved").length,
+    Rejected: properties.filter(p => p.status === "Rejected").length,
+  };
+
+  const filtered = properties.filter(p => {
+    const matchTab = activeTab === "All" || p.status === activeTab;
+    const matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.owner.toLowerCase().includes(search.toLowerCase()) || p.location.toLowerCase().includes(search.toLowerCase());
+    return matchTab && matchSearch;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  const statusBadge = (status) => {
+    if (status === "Approved") return "bg-emerald-50 text-emerald-600 border border-emerald-100";
+    if (status === "Rejected") return "bg-rose-50 text-rose-600 border border-rose-100";
+    return "bg-amber-50 text-amber-600 border border-amber-100";
+  };
+
+  const roomTypeBadge = (type) => {
+    const map = { "Single Sharing": "bg-blue-50 text-blue-600", "Double Sharing": "bg-indigo-50 text-indigo-600", "Triple Sharing": "bg-purple-50 text-purple-600", "Private Room (No Sharing)": "bg-teal-50 text-teal-600", "Co-living": "bg-cyan-50 text-cyan-600" };
+    return map[type] || "bg-slate-50 text-slate-600";
+  };
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const weekStart = todayStart - 7 * 24 * 60 * 60 * 1000;
+
+  const quickFilters = {
+    today: properties.filter(p => new Date(p.raw.createdAt).getTime() >= todayStart).length,
+    week: properties.filter(p => new Date(p.raw.createdAt).getTime() >= weekStart).length,
+    highRent: properties.filter(p => p.minRent >= 15000).length,
+    fewPhotos: properties.filter(p => p.photos.length < 5).length,
+    missingInfo: properties.filter(p => !p.raw.locality || !p.minRent).length
+  };
+
+  const recentActivity = properties
+    .slice()
+    .sort((a, b) => new Date(b.raw.createdAt) - new Date(a.raw.createdAt))
+    .slice(0, 4)
+    .map(p => ({
+      name: p.title,
+      type: p.type,
+      action: p.status === "Approved" ? "approved" : p.status === "Rejected" ? "rejected" : "pending review",
+      time: p.submittedOn,
+      ok: p.status === "Approved" ? true : p.status === "Rejected" ? false : null
+    }));
+
   return (
-    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full">
-      {/* Header Area */}
-      <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-             <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Listing Approval Center</h1>
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Process and approve new property submissions for the public website</p>
-          </div>
-         <div className="flex items-center gap-3">
-            <button className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">
-               <ShieldCheck className="w-3.5 h-3.5" /> Global Audit Pulse
+    <div className="p-6 bg-[#F8FAFC] min-h-full">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-xl font-black text-slate-800 tracking-tight">Pending Approvals</h1>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Review and approve or reject property listings submitted by property owners.</p>
+      </div>
+
+      <div className="grid grid-cols-12 gap-6">
+        {/* Left: Main Content */}
+        <div className="col-span-9 space-y-4">
+
+          {/* Search + Actions Bar */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+              <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search by property name, owner, location or ID..." className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-9 pr-3 text-[10px] font-bold outline-none focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" />
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+              <Filter className="w-3.5 h-3.5" /> Filters
             </button>
-         </div>
-      </div>
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-[10px] font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+              <Download className="w-3.5 h-3.5" /> Export
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-[10px] font-black shadow-sm hover:bg-blue-700 transition-all">
+              Bulk Actions <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCardHorizontal label="Awaiting Pulse" value={queue.length} trend="+5 Priority" up icon={Hourglass} color="amber" />
-        <StatCardHorizontal label="Success Yield" value="12" trend="Audit Clean" up icon={CheckCircle2} color="emerald" />
-        <StatCardHorizontal label="Audit Velocity" value="3.4h" trend="Within SLA" up icon={Clock} color="blue" />
-        <StatCardHorizontal label="Compliance Index" value="98%" trend="+1.2% Alpha" up icon={ShieldCheck} color="indigo" />
-      </div>
-
-      {/* Main Ledger Card */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 overflow-hidden">
-         <div className="flex items-center justify-between mb-8">
-            <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest leading-none">Verification Registry</h3>
-            <div className="flex items-center gap-3">
-               <div className="relative group w-48">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
-                  <input 
-                    value={searchTerm} 
-                    onChange={e => setSearchTerm(e.target.value)} 
-                    placeholder="Search assets..." 
-                    className="w-full bg-slate-50 border-none rounded-xl py-2 pl-9 pr-3 text-[10px] font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" 
-                  />
-               </div>
-               <button onClick={fetchPendingProperties} className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm">
-                  <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-               </button>
+          {/* Tabs + Sort */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              {STATUS_TABS.map(tab => (
+                <button key={tab} onClick={() => { setActiveTab(tab); setPage(1); }}
+                  className={cn("px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
+                    activeTab === tab ? "bg-blue-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100")}>
+                  {tab} {counts[tab] > 0 && <span className={cn("ml-1 px-1.5 py-0.5 rounded-full text-[8px] font-black", activeTab === tab ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500")}>({counts[tab]})</span>}
+                </button>
+              ))}
             </div>
-         </div>
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+              Sort by:
+              <button className="flex items-center gap-1 text-slate-600 hover:text-slate-800">Newest First <ChevronDown className="w-3 h-3" /></button>
+            </div>
+          </div>
 
-         <div className="overflow-x-auto">
-            <table className="w-full text-left">
-               <thead>
-                  <tr className="text-slate-400 text-[8px] font-bold uppercase border-b border-slate-50">
-                     <th className="pb-4">Asset Identity Hub</th>
-                     <th className="pb-4 text-center">Temporal SLA</th>
-                     <th className="pb-4 text-center">Status Index</th>
-                     <th className="pb-4 text-right">Audit Actions</th>
-                  </tr>
-               </thead>
-               <tbody className="divide-y divide-slate-50">
-                  {loading ? (
-                    <tr>
-                      <td colSpan="4" className="py-8 text-center text-slate-400 text-xs font-bold">Scanning Queue...</td>
-                    </tr>
-                  ) : filteredQueue.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="py-8 text-center text-slate-400 text-xs font-bold">No Pending Approvals</td>
-                    </tr>
-                  ) : filteredQueue.map((q, i) => (
-                    <tr key={i} className="group hover:bg-slate-50 transition-colors cursor-pointer">
-                       <td className="py-3">
-                          <div className="flex items-center gap-3">
-                             <div className={cn(
-                                "w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-sm transition-transform group-hover:scale-105",
-                                q.color === "blue" ? "bg-blue-600 shadow-blue-50" :
-                                q.color === "indigo" ? "bg-indigo-600 shadow-indigo-50" :
-                                q.color === "emerald" ? "bg-emerald-600 shadow-emerald-50" :
-                                q.color === "amber" ? "bg-amber-600 shadow-amber-50" :
-                                q.color === "rose" ? "bg-rose-600 shadow-rose-50" : "bg-slate-600 shadow-slate-50"
-                             )}>
-                                {q.initial}
-                             </div>
-                             <div className="min-w-0">
-                                <p className="text-[11px] font-bold text-slate-800 leading-tight truncate max-w-[200px]">{q.title}</p>
-                                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{q.type} • {q.owner}</p>
-                             </div>
-                          </div>
-                       </td>
-                       <td className="py-3 text-center">
-                          <span className={cn(
-                             "text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider shadow-sm",
-                             q.status === "Priority Queue" ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-blue-50 text-blue-600 border-blue-100"
-                          )}>
-                             {q.submitted}
-                          </span>
-                       </td>
-                       <td className="py-3 text-center">
-                          <span className={cn(
-                             "text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider shadow-sm",
-                             q.status === "Priority Queue" ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-slate-50 text-slate-400 border-slate-100"
-                          )}>
-                             {q.status}
-                          </span>
-                       </td>
-                        <td className="py-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                             <button onClick={() => handleApprove(q.id)} className="flex items-center gap-1 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[8px] font-bold uppercase hover:bg-emerald-700 transition-all shadow-sm">
-                                <Check className="w-3.5 h-3.5" /> Approve
-                             </button>
-                             <button className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-rose-600 transition-all border border-slate-100 shadow-sm">
-                                <X className="w-3.5 h-3.5" />
-                             </button>
-                             <button onClick={() => setSelectedProperty(q)} className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm">
-                                <Eye className="w-3.5 h-3.5" />
-                             </button>
-                          </div>
-                       </td>
-                    </tr>
-                  ))}
-               </tbody>
-            </table>
-         </div>
-      </div>
+          {/* Property Cards */}
+          <div className="space-y-3">
+            {loading ? (
+              <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center text-slate-400 text-[10px] font-bold">Loading properties...</div>
+            ) : paginated.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
+                <ClipboardList className="w-8 h-8 text-slate-200 mx-auto mb-3" />
+                <p className="text-[10px] font-bold text-slate-400 uppercase">No properties found</p>
+              </div>
+            ) : paginated.map(p => (
+              <div key={p.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div className="flex">
+                  {/* Thumbnail */}
+                  <div className="w-40 h-32 flex-shrink-0 bg-slate-100 relative">
+                    {p.photos[0] ? (
+                      <img src={p.photos[0]} alt={p.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                        <Home className="w-8 h-8 text-slate-300" />
+                      </div>
+                    )}
+                    <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded text-[7px] font-black text-white flex items-center gap-1">
+                      <ImageIcon className="w-2.5 h-2.5" /> {p.photos.length} Photos
+                    </div>
+                  </div>
 
-      {/* Audit Pulse Tiles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <ActionTile icon={ClipboardCheck} label="Compliance Audit" count="24" color="blue" />
-         <ActionTile icon={ShieldCheck} label="Identity Pulse" count="18" color="indigo" />
-         <ActionTile icon={AlertCircle} label="Risk Assessment" count="03" color="rose" />
-      </div>
+                  {/* Content */}
+                  <div className="flex-1 p-4 grid grid-cols-12 gap-4 items-center">
+                    {/* Property Info */}
+                    <div className="col-span-4">
+                      <div className="flex items-start justify-between mb-1">
+                        <h3 className="text-[11px] font-black text-slate-800 leading-tight">{p.title}</h3>
+                        <span className={cn("ml-2 px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-wide flex-shrink-0", statusBadge(p.status))}>{p.status}</span>
+                      </div>
+                      <span className={cn("inline-block px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-wide mb-2", roomTypeBadge(p.roomType))}>{p.roomType}</span>
+                      <p className="text-[8px] font-bold text-slate-400 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {p.location}</p>
+                      <p className="text-[8px] font-bold text-slate-300 mt-0.5">{p.propId}</p>
+                    </div>
 
-      {/* Property View Modal */}
-      {selectedProperty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 flex flex-col animate-in zoom-in-95 duration-200">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-sm", selectedProperty.color === "blue" ? "bg-blue-600 shadow-blue-50" : selectedProperty.color === "indigo" ? "bg-indigo-600 shadow-indigo-50" : selectedProperty.color === "emerald" ? "bg-emerald-600 shadow-emerald-50" : selectedProperty.color === "amber" ? "bg-amber-600 shadow-amber-50" : selectedProperty.color === "rose" ? "bg-rose-600 shadow-rose-50" : "bg-slate-600 shadow-slate-50")}>
-                  {selectedProperty.initial}
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-800 text-sm leading-tight">{selectedProperty.title}</h3>
-                  <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">{selectedProperty.type} • {selectedProperty.owner}</p>
+                    {/* Stats */}
+                    <div className="col-span-3 space-y-1.5">
+                      <div>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Property Type</p>
+                        <p className="text-[10px] font-black text-slate-700">{p.type}</p>
+                      </div>
+                      <div>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Total Rooms</p>
+                        <p className="text-[10px] font-black text-slate-700">{p.totalRooms} Rooms</p>
+                      </div>
+                      {(p.minRent || p.maxRent) && (
+                        <div>
+                          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Rent Range</p>
+                          <p className="text-[10px] font-black text-slate-700 flex items-center">
+                            <IndianRupee className="w-2.5 h-2.5" />
+                            {p.minRent && `${Number(p.minRent).toLocaleString("en-IN")}`}
+                            {p.maxRent && ` – ₹ ${Number(p.maxRent).toLocaleString("en-IN")}`}
+                            /bed
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Submission Info */}
+                    <div className="col-span-3 space-y-1.5">
+                      <div>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Submitted by</p>
+                        <p className="text-[10px] font-black text-slate-700 flex items-center gap-1"><User className="w-2.5 h-2.5 text-slate-400" /> {p.submittedBy}</p>
+                      </div>
+                      <div>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Submitted on</p>
+                        <p className="text-[10px] font-black text-slate-700">{p.submittedOn}</p>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="col-span-2 flex flex-col gap-2 items-end">
+                      <button onClick={() => setSelected(p)} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[9px] font-black text-slate-600 hover:bg-slate-50 transition-all text-center">
+                        View Details
+                      </button>
+                      {p.status === "Pending" && (
+                        <>
+                          <button onClick={() => handleApprove(p.id)} className="w-full px-3 py-2 rounded-lg bg-emerald-600 text-white text-[9px] font-black hover:bg-emerald-700 transition-all text-center">
+                            Approve
+                          </button>
+                          <button onClick={() => handleReject(p.id)} className="w-full px-3 py-2 rounded-lg border border-rose-200 text-rose-600 text-[9px] font-black hover:bg-rose-50 transition-all text-center">
+                            Reject
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <button onClick={() => setSelectedProperty(null)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all">
-                <X className="w-5 h-5" />
-              </button>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {filtered.length > 0 && (
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-[10px] font-bold text-slate-400">
+                Showing {Math.min((page - 1) * PER_PAGE + 1, filtered.length)} to {Math.min(page * PER_PAGE, filtered.length)} of {filtered.length} entries
+              </p>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition-all">
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map(n => (
+                  <button key={n} onClick={() => setPage(n)} className={cn("w-7 h-7 rounded-lg text-[10px] font-black transition-all", page === n ? "bg-blue-600 text-white" : "border border-slate-200 text-slate-500 hover:bg-slate-50")}>
+                    {n}
+                  </button>
+                ))}
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-700 disabled:opacity-30 transition-all">
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-            
-            <div className="p-6 flex-1 overflow-y-auto space-y-6">
-              
-              {/* Basic Information */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest mb-3">Property Data</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Locality</p>
-                    <p className="text-sm font-bold text-slate-800">{selectedProperty.raw.locality || selectedProperty.raw.city || "Unknown"}</p>
+          )}
+        </div>
+
+        {/* Right: Sidebar */}
+        <div className="col-span-3 space-y-4">
+          {/* Approval Summary */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-4">Approval Summary</h3>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              {[
+                { label: "Pending", val: counts.Pending, color: "text-amber-600 bg-amber-50 border-amber-100" },
+                { label: "Approved", val: counts.Approved, color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
+                { label: "Rejected", val: counts.Rejected, color: "text-rose-600 bg-rose-50 border-rose-100" },
+                { label: "Total", val: counts.All, color: "text-blue-600 bg-blue-50 border-blue-100" },
+              ].map(s => (
+                <div key={s.label} className={cn("rounded-xl border p-3 text-center", s.color)}>
+                  <p className="text-lg font-black leading-none">{s.val}</p>
+                  <p className="text-[8px] font-black uppercase tracking-widest mt-1 opacity-70">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Filters */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-3">Quick Filters</h3>
+            <div className="space-y-2">
+              {[
+                { icon: CalendarDays, label: "Submitted Today", count: quickFilters.today, color: "text-blue-600" },
+                { icon: CalendarDays, label: "Submitted This Week", count: quickFilters.week, color: "text-blue-600" },
+                { icon: IndianRupee, label: "High Rent (₹15,000+)", count: quickFilters.highRent, color: "text-amber-500" },
+                { icon: ImageIcon, label: "Properties with Few Photos (<5)", count: quickFilters.fewPhotos, color: "text-rose-500" },
+                { icon: AlertCircle, label: "Missing Information", count: quickFilters.missingInfo, color: "text-orange-500" },
+              ].map(f => (
+                <button key={f.label} className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-all group text-left">
+                  <div className="flex items-center gap-2">
+                    <f.icon className={cn("w-3.5 h-3.5", f.color)} />
+                    <span className="text-[10px] font-bold text-slate-600 group-hover:text-slate-800">{f.label}</span>
                   </div>
-                  <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Monthly Rent</p>
-                    <p className="text-sm font-bold text-emerald-600 flex items-center">
-                      <IndianRupee className="w-3.5 h-3.5 mr-0.5" />
-                      {selectedProperty.raw.rent || selectedProperty.raw.monthlyRent || "N/A"}
+                  <span className="text-[9px] font-black text-slate-400 bg-slate-100 rounded px-1.5 py-0.5">{f.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-3">Recent Activity</h3>
+            <div className="space-y-3">
+              {recentActivity.map((a, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className={cn("w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
+                    a.ok === true ? "bg-emerald-100" : a.ok === false ? "bg-rose-100" : "bg-amber-100")}>
+                    {a.ok === true ? <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      : a.ok === false ? <XCircle className="w-3 h-3 text-rose-600" />
+                      : <Clock className="w-3 h-3 text-amber-600" />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-slate-700 leading-tight">{a.name}
+                      <span className="ml-1 text-[8px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">{a.type}</span>
                     </p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Gender Suitability</p>
-                    <p className="text-sm font-bold text-slate-800 capitalize">{selectedProperty.raw.gender || "Any"}</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status Index</p>
-                    <p className="text-sm font-bold text-slate-800">{selectedProperty.status}</p>
+                    <p className="text-[9px] font-bold text-slate-400 mt-0.5">{a.action}</p>
+                    <p className="text-[8px] font-bold text-slate-300">{a.time}</p>
                   </div>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              {/* Full Address */}
+          {/* Review Checklist */}
+          <div className="bg-blue-50 rounded-2xl border border-blue-100 p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="w-4 h-4 text-blue-500" />
+              <h3 className="text-[10px] font-black text-blue-700 uppercase tracking-widest">Review Checklist</h3>
+            </div>
+            <p className="text-[9px] font-bold text-blue-500 leading-relaxed mb-3">Verify property details, photos, pricing, amenities, and policies before approving.</p>
+            <button className="flex items-center gap-1 text-[9px] font-black text-blue-600 hover:text-blue-700 transition-all">
+              View Checklist <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Detail Modal */}
+      {selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
-                 <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Full Address</h4>
-                 <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-sm text-slate-600 font-medium">
-                    {selectedProperty.raw.address || "No address provided."}
-                 </div>
+                <h3 className="text-sm font-black text-slate-800">{selected.title}</h3>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{selected.type} • {selected.propId}</p>
               </div>
+              <div className="flex items-center gap-2">
+                <span className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase", statusBadge(selected.status))}>{selected.status}</span>
+                <button onClick={() => setSelected(null)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><X className="w-4 h-4" /></button>
+              </div>
+            </div>
 
-              {/* Images Preview */}
-              {selectedProperty.raw.images && selectedProperty.raw.images.length > 0 && (
-                <div>
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Media Assets ({selectedProperty.raw.images.length})</h4>
-                  <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
-                    {selectedProperty.raw.images.map((img, i) => (
-                      <img key={i} src={img} className="w-24 h-24 object-cover rounded-xl snap-center shrink-0 border border-slate-200" alt="property view" />
-                    ))}
-                  </div>
+            <div className="p-5 overflow-y-auto space-y-5 flex-1">
+              {selected.photos.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {selected.photos.map((img, i) => <img key={i} src={img} className="w-24 h-20 rounded-xl object-cover flex-shrink-0 border border-slate-100" />)}
                 </div>
               )}
-
-              {/* Notice */}
-              <div className="bg-blue-50 text-blue-600 p-4 rounded-xl border border-blue-100 flex items-start gap-3 mt-4">
-                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                <p className="text-xs font-medium">This asset is pending compliance verification. Approving will immediately syndicate this asset to the public ledger.</p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Location", val: selected.location },
+                  { label: "Submitted by", val: selected.submittedBy },
+                  { label: "Total Rooms", val: selected.totalRooms },
+                  { label: "Submitted on", val: selected.submittedOn },
+                  { label: "Property Type", val: selected.type },
+                  { label: "Room Type", val: selected.roomType },
+                ].map(f => (
+                  <div key={f.label} className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">{f.label}</p>
+                    <p className="text-[11px] font-black text-slate-700">{f.val || "—"}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
+                <AlertCircle className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                <p className="text-[10px] font-bold text-blue-600">Approving this property will publish it to the public website immediately.</p>
               </div>
             </div>
-            
-            <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between gap-3">
-              <button onClick={() => {
-                // If there was an edit page, we could redirect there.
-                // For now, we will inform the superadmin they can edit from All Properties List.
-                alert("Edit functionality is accessible from the 'All Properties List' panel (Under Construction).");
-              }} className="px-4 py-2 rounded-xl text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all uppercase tracking-wider flex items-center gap-1.5">
-                 Edit Details
-              </button>
-              
-              <div className="flex gap-2">
-                <button onClick={() => setSelectedProperty(null)} className="px-4 py-2 rounded-xl text-[10px] font-bold text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-all uppercase tracking-wider">
-                  Close
-                </button>
-                <button onClick={() => { handleApprove(selectedProperty.id); setSelectedProperty(null); }} className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold text-white bg-emerald-600 shadow-sm hover:bg-emerald-700 transition-all uppercase tracking-wider">
-                  <Check className="w-4 h-4" /> Force Approve
-                </button>
-              </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-2">
+              <button onClick={() => setSelected(null)} className="px-4 py-2 rounded-xl text-[10px] font-black text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all">Close</button>
+              {selected.status === "Pending" && (
+                <>
+                  <button onClick={() => { handleReject(selected.id); setSelected(null); }} className="px-4 py-2 rounded-xl text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-all">Reject</button>
+                  <button onClick={() => { handleApprove(selected.id); setSelected(null); }} className="px-4 py-2 rounded-xl text-[10px] font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-all flex items-center gap-1.5"><Check className="w-3.5 h-3.5" /> Approve</button>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function StatCardHorizontal({ label, value, trend, up, icon: Icon, color }) {
-  const bgColors = { 
-    blue: "bg-blue-50 text-blue-600 border-blue-100", 
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100", 
-    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100", 
-    amber: "bg-amber-50 text-amber-600 border-amber-100" 
-  };
-  
-  return (
-    <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
-      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105", bgColors[color])}>
-         <Icon className="w-5 h-5" />
-      </div>
-      <div className="min-w-0">
-         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">{label}</p>
-         <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">{value}</p>
-         <div className={cn(
-           "flex items-center gap-1 text-[7px] font-bold uppercase",
-           up ? "text-emerald-600" : "text-rose-600"
-         )}>
-            {up ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-            {trend}
-         </div>
-      </div>
-    </div>
-  );
-}
-
-function ActionTile({ icon: Icon, label, count, color }) {
-  const colors = {
-    blue: "bg-blue-50 text-blue-600",
-    indigo: "bg-indigo-50 text-indigo-600",
-    rose: "bg-rose-50 text-rose-600",
-  };
-  
-  return (
-    <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-center justify-between group cursor-pointer transition-all hover:translate-y-[-2px]">
-       <div className="flex items-center gap-3">
-          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm", colors[color])}>
-             <Icon className="w-5 h-5" />
-          </div>
-          <div>
-             <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-tight">{label}</h4>
-             <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest opacity-60">Active Protocol</p>
-          </div>
-       </div>
-       <div className="text-right">
-          <p className="text-xl font-bold text-slate-800 tracking-tighter leading-none">{count}</p>
-          <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest opacity-40">Hubs</p>
-       </div>
     </div>
   );
 }

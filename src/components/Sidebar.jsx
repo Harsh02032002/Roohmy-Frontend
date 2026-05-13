@@ -83,7 +83,8 @@ const NAV = [
     path: "/superadmin/property-overview", 
     children: [
         { label: "Overview", path: "/superadmin/property-overview" },
-        { label: "Add Properties", path: "/superadmin/properties?view=add" },
+        { label: "Total Properties", path: "/superadmin/total-properties" },
+        { label: "Add Property", path: "/superadmin/add-property" },
         { label: "Approve / Reject Properties", path: "/superadmin/property/approvals" },
         { label: "Pending Properties", path: "/superadmin/property/pending" },
         { label: "All Properties List", path: "/superadmin/properties?view=list" },

@@ -38,8 +38,8 @@ export default {
           foreground: 'hsl(var(--card-foreground))',
         },
         sidebar: {
-          bg: 'hsl(var(--sidebar-bg))',
-          'bg-2': 'hsl(var(--sidebar-bg-2))',
+          DEFAULT: 'hsl(var(--sidebar-bg))',
+          alt: 'hsl(var(--sidebar-bg-2))',
           fg: 'hsl(var(--sidebar-fg))',
           'fg-muted': 'hsl(var(--sidebar-fg-muted))',
           active: 'hsl(var(--sidebar-active))',

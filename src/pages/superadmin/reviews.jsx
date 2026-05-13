@@ -1,5 +1,6 @@
 import React from "react";
 import { Star, MessageSquare, Clock, ThumbsUp, ChevronRight, TrendingUp, Calendar, CheckCircle2, AlertCircle, Building2 } from "lucide-react";
+import { PageHeader } from "../../components/superadmin/PageHeader";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { fetchJson } from "../../utils/api";
 
@@ -96,18 +97,17 @@ export default function ReviewOverview() {
   }, [reviews]);
 
   return (
-    <div className="p-8 bg-[#F8FAFC] min-h-full font-inter text-slate-900">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Review Overview</h1>
-          <p className="text-xs text-slate-400 mt-1">Track, manage and analyze all property reviews and ratings.</p>
-        </div>
-        <div className="flex items-center gap-2 bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm text-xs font-bold text-slate-600">
-          <Calendar size={14} className="text-slate-400" />
-          <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader 
+        title="Review Overview"
+        subtitle="Track, manage and analyze all property reviews and ratings."
+        actions={
+          <div className="flex items-center gap-2 bg-white border border-slate-100 px-4 py-2 rounded-xl shadow-sm text-xs font-bold text-slate-600">
+            <Calendar size={14} className="text-slate-400" />
+            <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+        }
+      />
 
       {/* 6 STAT CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6 mb-8">
