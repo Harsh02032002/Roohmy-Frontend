@@ -2,7 +2,7 @@ import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
 import * as LucideIcons from "lucide-react";
-const { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, X, Menu, Heart, ChevronDown, Clock, Shirt, Cctv, Video, Waves, Fan } = LucideIcons;
+const { Filter, MapPin, Wallet, Home, Users, TrendingUp, Send, RefreshCw, ChevronLeft, ChevronRight, Building2, BookOpen, Star, Check, Phone, Wifi, Utensils, Car, Dumbbell, Tv, Wind, Droplets, Zap, X, Menu, Heart, ChevronDown, Clock, Shirt, Cctv, Video, Waves, Fan, Shield, Bed } = LucideIcons;
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { fetchProperties, searchPropertiesByLocation, getNearbyAreas, getInstitutions, getPriceRangeByType, fetchAllCollegesFromBackend, trackPropertyClick } from "../../utils/api";
@@ -79,18 +79,7 @@ export default function OurPropertyPage() {
         
         // Format properties - nearbyColleges already included from backend
         const formattedProperties = allProperties.map(p => {
-          // Debug: Log what we're getting from API
-          console.log('🔄 OurPropertyPage Transformation:', p.property_name || p.name);
-          console.log('  Location Debug - p.city:', p.city);
-          console.log('  Location Debug - p.propertyInfo?.city:', p.propertyInfo?.city);
-          console.log('  Location Debug - p.location:', p.location);
-          console.log('  p.images:', p.images);
-          console.log('  p.professionalPhotos:', p.professionalPhotos);
-          console.log('  p.image:', p.image);
-          
           const images = p.images || p.professionalPhotos || p.fieldPhotos || [p.image] || ['https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600'];
-          
-          console.log('  Final images for PropertyCard:', images);
           
           return {
             id: p._id || p.visitId || p.propertyName,
@@ -102,15 +91,21 @@ export default function OurPropertyPage() {
             type: p.propertyType || p.property_type || p.propertyInfo?.propertyType || p.type || 'PG',
             gender: p.gender || p.genderSuitability || p.propertyInfo?.genderSuitability || 'Co-ed',
             image: p.image || p.images?.[0] || p.professionalPhotos?.[0] || p.propertyInfo?.image || 'https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600',
-            images: images, // Use the correctly prioritized images array
+            images: images, 
             verified: p.isVerified || p.verified || p.status === 'approved' || true,
             owner: p.owner_name || p.ownerName || p.generatedCredentials?.ownerName || 'Verified Owner',
             beds: p.propertyInfo?.totalSeats || p.beds || 1,
             phone: p.owner_phone || p.contactPhone || p.ownerPhone || 'N/A',
             amenities: p.amenities || p.propertyInfo?.amenities || [],
-            nearbyColleges: p.nearbyColleges || [], // Already populated by backend
+            nearbyColleges: p.nearbyColleges || [],
             latitude: p.latitude || p.propertyInfo?.latitude || p.propertyInfo?.location?.coordinates?.[1] || null,
             longitude: p.longitude || p.propertyInfo?.longitude || p.propertyInfo?.location?.coordinates?.[0] || null,
+            pricing: p.pricing || {},
+            discount: p.discount || p.pricing?.discountPercent || 0,
+            discountPercent: p.discountPercent || p.pricing?.discountPercent || 0,
+            description: p.description || p.propertyInfo?.description || "",
+            securityDeposit: p.pricing?.securityDeposit || p.propertyInfo?.securityDeposit || 0,
+            advanceRent: p.pricing?.advanceRent || p.propertyInfo?.advanceRent || 0,
           };
         });
 
@@ -259,12 +254,10 @@ export default function OurPropertyPage() {
       
       setLoadingColleges(true);
       try {
-        console.log('🎓 Fetching colleges separately...');
         const data = await fetchAllCollegesFromBackend();
         
         if (data.allColleges && data.allColleges.length > 0) {
           setAllColleges(data.allColleges);
-          console.log(`✅ Loaded ${data.allColleges.length} colleges for filter`);
         }
       } catch (error) {
         console.error('Error loading colleges:', error);
@@ -281,7 +274,6 @@ export default function OurPropertyPage() {
   // Pagination handlers
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
-    // Don't clear cache when changing pages - we want to keep it!
   };
 
   const totalPages = Math.ceil(totalProperties.length / propertiesPerPage);
@@ -296,20 +288,17 @@ export default function OurPropertyPage() {
       <WebsiteNavbar />
 
       <main className="min-h-screen">
-{/* --- COMPACT & STYLISH PROPERTIES HEADER --- */}
 <div className="relative w-full py-1 md:py-4 px-4 md:px-6 overflow-hidden border-b border-stone-200/50" 
      style={{
        background: 'linear-gradient(135deg, #FFFAF5 0%, #FDFCFB 50%, #F5F7FA 100%)'
      }}>
   
-  {/* Background Pattern - Subtle Overlay */}
   <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
        style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/pinstripe.png")` }}>
   </div>
 
   <div className="relative max-w-7xl mx-auto flex flex-col items-center text-center">
     
-    {/* MAIN HEADING - "Our Properties" */}
     <div className="flex items-center gap-4 mb-1">
       <div className="h-[1px] w-6 bg-[#C5A059]/40 hidden md:block"></div>
       <h1 className="text-xl md:text-4xl font-bold text-[#1A1A1A] tracking-tight">
@@ -318,21 +307,18 @@ export default function OurPropertyPage() {
       <div className="h-[1px] w-6 bg-[#C5A059]/40 hidden md:block"></div>
     </div>
 
-    {/* Total Properties Count */}
     <div className="mt-1 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full border border-[#C5A059]/20 inline-flex items-center gap-2">
       <span className="text-[11px] md:text-sm font-semibold text-[#1A1A1A]">
         {totalCount > 0 ? totalCount : (totalProperties.length > 0 ? totalProperties.length : 'Loading...')} Properties
       </span>
     </div>
 
-    {/* Bottom Accent Dot */}
     <div className="mt-2 w-1 h-1 rounded-full bg-[#C5A059]/30 md:block hidden"></div>
   </div>
 </div>
 
         <section className="pt-1 pb-4 md:pt-0 md:pb-8 bg-white md:bg-[#F3F5F9] px-3 md:px-0">
           <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-0">
-            {/* Mobile Filter & Sort Trigger */}
             <div className="lg:hidden flex items-center justify-between gap-2 mb-4">
               <button
                 onClick={() => setMobileFilterOpen(true)}
@@ -345,7 +331,6 @@ export default function OurPropertyPage() {
                 )}
               </button>
               
-              {/* Custom Sort Dropdown */}
               <div className="flex-1 relative">
                 <button 
                   onClick={() => setShowSort(!showSort)}
@@ -375,8 +360,6 @@ export default function OurPropertyPage() {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-4 lg:gap-5">
-              {/* Left Sidebar - Filters - Desktop: Always visible, Mobile: Overlay */}
-              {/* Mobile Filter Overlay Backdrop */}
               {mobileFilterOpen && (
                 <div
                   className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -391,7 +374,6 @@ export default function OurPropertyPage() {
                 ${mobileFilterOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
               `}>
                 <div className="bg-white lg:pl-10 lg:pr-5 h-full lg:h-auto lg:sticky lg:top-24 lg:max-h-none lg:overflow-visible w-[300px] lg:w-auto overflow-y-auto lg:rounded-none lg:shadow-none lg:border-0 lg:border-r lg:border-gray-200">
-                  {/* Mobile Filter Header - UNTOUCHED */}
                   <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 lg:hidden">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-blue-600 rounded-lg">
@@ -410,13 +392,11 @@ export default function OurPropertyPage() {
                     </button>
                   </div>
 
-                  {/* Desktop Filter Header - OYO STYLE */}
                   <div className="hidden lg:flex items-center justify-between py-4 border-b border-gray-100">
                     <h3 className="text-2xl font-bold text-gray-900">Filters</h3>
                     <button onClick={() => { setSelectedCity(''); setSelectedType(''); setSelectedGender(''); setMinPrice(''); setMaxPrice(''); setSelectedColleges([]); }} className="text-[#EE2A24] text-xs font-bold hover:underline">Clear All</button>
                   </div>
 
-                  {/* Location Filter - OYO CHECKBOX STYLE */}
                   <div className="py-6 border-b border-gray-100">
                     <label className="block text-sm font-bold text-gray-900 mb-4">Location</label>
                     <div className="space-y-4">
@@ -437,7 +417,6 @@ export default function OurPropertyPage() {
                     </div>
                   </div>
 
-                  {/* Budget Filter - OYO STYLE */}
                   <div className="py-6 border-b border-gray-100">
                     <label className="block text-sm font-bold text-gray-900 mb-6">Price</label>
                     <div className="px-2">
@@ -453,7 +432,6 @@ export default function OurPropertyPage() {
                     </div>
                   </div>
 
-                  {/* Property Type - OYO CHECKBOX STYLE */}
                   <div className="py-6 border-b border-gray-100">
                     <label className="block text-sm font-bold text-gray-900 mb-4">Property Type</label>
                     <div className="space-y-4">
@@ -474,7 +452,6 @@ export default function OurPropertyPage() {
                     </div>
                   </div>
 
-                  {/* Gender Filter - OYO CHECKBOX STYLE */}
                   <div className="py-6 border-b border-gray-100">
                     <label className="block text-sm font-bold text-gray-900 mb-4">Categories</label>
                     <div className="space-y-4">
@@ -495,7 +472,6 @@ export default function OurPropertyPage() {
                     </div>
                   </div>
 
-                  {/* Colleges Section - OYO STYLE */}
                   <div className="py-6">
                     <label className="block text-sm font-bold text-gray-900 mb-4">Nearby Colleges</label>
                     {loadingColleges ? (
@@ -528,7 +504,6 @@ export default function OurPropertyPage() {
                     )}
                   </div>
 
-                  {/* Price Range Info */}
                   {priceRange.count > 0 && (
                     <div className="py-6 border-t border-gray-100">
                       <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -551,13 +526,11 @@ export default function OurPropertyPage() {
                 </div>
               </aside>
 
-              {/* Right Content - Properties */}
               <div className="flex-1">
                 <div className="flex items-center justify-between md:mb-4 mb-0">
                   <div className="hidden md:block text-sm text-gray-600">
                     Showing {((currentPage - 1) * propertiesPerPage) + 1} to {Math.min(currentPage * propertiesPerPage, totalCount)} of {totalCount} properties
                   </div>
-                  {/* Desktop Custom Sort */}
                   <div className="hidden md:block relative min-w-[200px]">
                     <button 
                       onClick={() => setShowSort(!showSort)}
@@ -588,7 +561,6 @@ export default function OurPropertyPage() {
 
                 <div className="flex flex-col gap-0 md:gap-1.5 bg-gray-100 md:bg-transparent pb-16 md:pb-0">
                   {loading ? (
-                    // Skeleton Loaders while loading
                     <>
                       {[1, 2, 3, 4, 5, 6].map((i) => (
                         <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse flex flex-col md:flex-row">
@@ -616,7 +588,6 @@ export default function OurPropertyPage() {
                         />
                       ))}
                       
-                      {/* Pagination Controls */}
                       {totalPages > 1 && (
                         <div className="col-span-full flex justify-center items-center gap-1.5 md:gap-2 mt-6 md:mt-8 flex-wrap">
                           <button
@@ -629,19 +600,16 @@ export default function OurPropertyPage() {
                           </button>
                           
                           <div className="flex gap-1">
-                            {/* Mobile: Show limited pages with ellipsis */}
                             <div className="md:hidden flex gap-1">
                               {(() => {
                                 const pages = [];
                                 const maxVisible = 5;
                                 
                                 if (totalPages <= maxVisible) {
-                                  // Show all pages if less than maxVisible
                                   for (let i = 1; i <= totalPages; i++) {
                                     pages.push(i);
                                   }
                                 } else {
-                                  // Show first, last, and pages around current
                                   if (currentPage <= 3) {
                                     for (let i = 1; i <= 4; i++) {
                                       pages.push(i);
@@ -691,7 +659,6 @@ export default function OurPropertyPage() {
                               })()}
                             </div>
                             
-                            {/* Desktop: Show all pages */}
                             <div className="hidden md:flex gap-1">
                               {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
                                 <button
@@ -743,7 +710,6 @@ export default function OurPropertyPage() {
 
       <MobileBottomNav />
 
-      {/* Fast Bidding Modal */}
       <FastBiddingModal 
         isOpen={showBidModal}
         onClose={() => setShowBidModal(false)}
@@ -765,28 +731,25 @@ export default function OurPropertyPage() {
   );
 }
 
-// Property Card Component - OYO Style
 function PropertyCard({ property, onBidNow }) {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Get all images from property
   const allImages = property.images || property.photos || property.propertyInfo?.photos || [property.image];
   const displayImages = allImages.length > 0 ? allImages : ['https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg?auto=compress&cs=tinysrgb&w=600'];
   
-  // Calculate fake discount
-  const originalPrice = Math.round(property.price * 1.3);
-  const discountPercent = Math.round(((originalPrice - property.price) / originalPrice) * 100);
-
-  const amenityNames = (property.amenities || [])
-    .map(a => (typeof a === 'string' ? a : a?.name || ''))
-    .filter(Boolean)
-    .slice(0, 4);
+  const adminDiscount = property.pricing?.discountPercent || property.discount;
+  const hasAdminDiscount = adminDiscount && parseInt(adminDiscount) > 0;
+  
+  const originalPrice = hasAdminDiscount 
+    ? Math.round(property.price / (1 - (parseInt(adminDiscount) / 100)))
+    : Math.round(property.price * 1.15);
+    
+  const discountPercent = hasAdminDiscount ? parseInt(adminDiscount) : 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all border border-gray-200 hover:border-[#CFE0FF] overflow-hidden mb-0 md:mb-4 lg:h-[185px]">
       <div className="flex flex-col lg:flex-row h-full">
-        {/* Desktop OYO-style Image Section */}
         <div className="hidden lg:flex w-[280px] h-full flex-shrink-0 relative border-r border-gray-100">
           <div className="flex-1 overflow-hidden relative group">
             <img 
@@ -799,7 +762,6 @@ function PropertyCard({ property, onBidNow }) {
             </div>
           </div>
           
-          {/* Vertical Thumbnails */}
           <div className="w-[65px] flex flex-col gap-0.5 p-0.5 bg-gray-50 border-l border-gray-100 h-full overflow-hidden">
             {displayImages.slice(1, 4).map((img, idx) => (
               <div 
@@ -813,7 +775,6 @@ function PropertyCard({ property, onBidNow }) {
           </div>
         </div>
 
-        {/* Mobile image strip - UNTOUCHED */}
         <div className="relative w-full lg:hidden group">
           <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar h-[145px] gap-2 p-2">
             {displayImages.map((img, idx) => (
@@ -828,12 +789,10 @@ function PropertyCard({ property, onBidNow }) {
           </div>
         </div>
 
-        {/* Mobile details - UNTOUCHED */}
         <Link 
           to={`/website/property-details/${property.id}`} 
           className="lg:hidden px-3 pb-3"
           onClick={() => {
-            console.log(`🖱️ UI: Card clicked (Mobile) for ID: ${property.id}`);
             trackPropertyClick(property.id);
           }}
         >
@@ -847,20 +806,21 @@ function PropertyCard({ property, onBidNow }) {
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-[18px] leading-none font-extrabold text-gray-950">₹{property.price?.toLocaleString()}</span>
-            <span className="text-[13px] text-gray-400 font-medium line-through">₹{originalPrice.toLocaleString()}</span>
-            <span className="text-[14px] font-bold text-[#1ab64f]">{discountPercent}% off</span>
+            {discountPercent > 0 && (
+              <>
+                <span className="text-[13px] text-gray-400 font-medium line-through">₹{originalPrice.toLocaleString()}</span>
+                <span className="text-[14px] font-bold text-[#1ab64f]">{discountPercent}% off</span>
+              </>
+            )}
           </div>
           <p className="text-[11px] text-gray-400 font-medium">+ taxes & fees</p>
         </Link>
 
-        {/* Desktop Content Area - HIDDEN ON MOBILE */}
         <div className="hidden lg:flex flex-1 min-w-0 flex-col lg:flex-row h-full">
-          {/* Main Info Section */}
           <Link 
             to={`/website/property-details/${property.id}`} 
             className="flex-1 p-3.5 flex flex-col justify-between"
             onClick={() => {
-              console.log(`🖱️ UI: Info section clicked (Desktop) for ID: ${property.id}`);
               trackPropertyClick(property.id);
             }}
           >
@@ -876,53 +836,74 @@ function PropertyCard({ property, onBidNow }) {
                 {property.area && `${property.area}, `}{property.location}
               </p>
               
+              {property.description && (
+                <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
+                  {property.description}
+                </p>
+              )}
+              
+              <div className="flex items-center gap-3 py-1">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-700 bg-slate-100 px-2 py-0.5 rounded">
+                  <Bed className="w-3.5 h-3.5 text-blue-600" />
+                  {property.beds} Bedrooms
+                </div>
+              </div>
+              
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-gray-600 font-medium py-1">
-                {property.amenities && property.amenities.length > 0 ? (
-                  property.amenities.slice(0, 4).map((amenity, idx) => {
-                    // Dynamic Icon Mapping
-                    const getIcon = (iconName) => {
-                      if (!iconName) return Check;
+                {(property.amenities || []).slice(0, 4).map((amenity, idx) => {
+                    const amenityName = typeof amenity === 'string' ? amenity : (amenity.name || '');
+                    const amenityIcon = typeof amenity === 'string' ? 'check' : (amenity.icon || 'check');
+                    
+                    const getIcon = (iconName, name = '') => {
+                      const lowerName = (name || '').toLowerCase().trim();
+                      const lowerIcon = (iconName || '').toLowerCase().trim();
                       
-                      const lowerName = iconName.toLowerCase();
-                      
-                      // Manual aliases for common terms
-                      const aliases = {
-                        ac: 'Wind',
-                        food: 'Utensils',
-                        gym: 'Dumbbell',
-                        parking: 'Car',
-                        powerbackup: 'Zap',
-                        laundry: 'Shirt',
-                        water: 'Droplets'
+                      const iconMap = { 
+                        wifi: Wifi, 
+                        ac: Wind, 
+                        air: Wind, 
+                        food: Utensils, 
+                        kitchen: Utensils, 
+                        mess: Utensils, 
+                        gym: Dumbbell, 
+                        fitness: Dumbbell, 
+                        parking: Car, 
+                        power: Zap, 
+                        backup: Zap, 
+                        laundry: Shirt, 
+                        washing: Shirt, 
+                        water: Droplets, 
+                        tv: Tv, 
+                        security: Shield, 
+                        cctv: Shield, 
+                        pool: Waves, 
+                        swim: Waves, 
+                        fan: Fan,
+                        bed: Bed,
+                        room: Home
                       };
                       
-                      const targetName = aliases[lowerName] || iconName;
+                      // Check icon name first
+                      if (iconMap[lowerIcon]) return iconMap[lowerIcon];
                       
-                      // Convert to PascalCase (e.g. "power-backup" -> "PowerBackup")
-                      const pascalName = targetName
-                        .split(/[-_ ]/)
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                        .join('');
-                        
+                      // Then check name string
+                      for (const [key, IconComp] of Object.entries(iconMap)) {
+                        if (lowerName.includes(key)) return IconComp;
+                      }
+                      
+                      const targetName = (iconName || 'Check').toLowerCase();
+                      const pascalName = targetName.charAt(0).toUpperCase() + targetName.slice(1).toLowerCase();
                       return LucideIcons[pascalName] || LucideIcons[targetName] || Check;
                     };
                     
-                    const Icon = getIcon(amenity.icon);
-                    
+                    const Icon = getIcon(amenityIcon, amenityName);
                     return (
                       <div key={idx} className="flex items-center gap-1.5">
-                        <Icon className="w-3.5 h-3.5 text-gray-400" />
-                        <span>{amenity.name}</span>
+                        <Icon className="w-3.5 h-3.5 text-blue-600" />
+                        <span className="text-gray-700">{amenityName}</span>
                       </div>
                     );
-                  })
-                ) : (
-                  <>
-                    <div className="flex items-center gap-1.5"><Tv className="w-3.5 h-3.5 text-gray-400" /> <span>TV</span></div>
-                    <div className="flex items-center gap-1.5"><Wifi className="w-3.5 h-3.5 text-gray-400" /> <span>Wifi</span></div>
-                    <div className="flex items-center gap-1.5"><Wind className="w-3.5 h-3.5 text-gray-400" /> <span>AC</span></div>
-                  </>
-                )}
+                  })}
               </div>
 
               <div className="flex items-center gap-2 pt-1.5">
@@ -938,7 +919,6 @@ function PropertyCard({ property, onBidNow }) {
               </div>
             </div>
             
-            {/* Added extra info to fill space */}
             <div className="mt-auto pt-3 border-t border-gray-100/60">
               <div className="flex items-center gap-4 text-[11px] font-bold text-gray-500">
                 <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#1AB64F]" /> No Brokerage</div>
@@ -947,17 +927,20 @@ function PropertyCard({ property, onBidNow }) {
             </div>
           </Link>
 
-          {/* Pricing & Actions Section - Far Right */}
           <div className="w-full lg:w-[210px] flex flex-col items-end justify-between border-l border-gray-100 p-4 bg-gray-50/30">
             <div className="text-right">
               <div className="flex items-baseline justify-end gap-2">
-                <span className="text-xs text-gray-400 line-through font-medium">₹{originalPrice.toLocaleString()}</span>
+                {discountPercent > 0 && (
+                  <span className="text-xs text-gray-400 line-through font-medium">₹{originalPrice.toLocaleString()}</span>
+                )}
                 <div className="text-2xl font-black text-gray-900 tracking-tight">₹{property.price?.toLocaleString()}</div>
               </div>
-              <div className="flex items-center justify-end gap-2 mt-1">
-                <div className="text-xs font-bold text-[#1AB64F] bg-[#E8F7EE] px-1.5 py-0.5 rounded">{discountPercent}% off</div>
-                <p className="text-[10px] text-gray-400 font-medium">+ taxes & fees</p>
-              </div>
+              {discountPercent > 0 && (
+                <div className="flex items-center justify-end gap-2 mt-1">
+                  <div className="text-xs font-bold text-[#1AB64F] bg-[#E8F7EE] px-1.5 py-0.5 rounded">{discountPercent}% off</div>
+                  <p className="text-[10px] text-gray-400 font-medium">+ taxes & fees</p>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 w-full mt-2">
@@ -965,7 +948,6 @@ function PropertyCard({ property, onBidNow }) {
                 onClick={(e) => { 
                   e.preventDefault(); 
                   e.stopPropagation(); 
-                  console.log(`🖱️ UI: View details button clicked for ID: ${property.id}`);
                   trackPropertyClick(property.id);
                   navigate(`/website/property-details/${property.id}`); 
                 }}

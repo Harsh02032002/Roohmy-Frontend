@@ -70,6 +70,7 @@ const NAV = [
           label: "Tenants", 
           children: [
             { label: "View All Tenants", path: "/superadmin/tenant" },
+            { label: "Add Tenant", path: "/superadmin/add-tenant" },
             { label: "KYC / Documents", path: "/superadmin/kyc_verification" },
             { label: "Rent History", path: "/superadmin/rentcollection" },
             { label: "Agreements", path: "/superadmin/tenant" },

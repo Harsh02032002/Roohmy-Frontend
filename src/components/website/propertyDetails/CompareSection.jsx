@@ -65,10 +65,10 @@ export default function CompareSection({ currentProperty }) {
       </div>
 
       <div className="flex gap-4 overflow-x-auto px-4 md:px-0 pb-4 no-scrollbar">
-        {/* Current Property — OYO style with "CURRENT" badge */}
-        <div className="flex-shrink-0 w-[200px]">
+        {/* Current Property — Sticky on the left for comparison */}
+        <div className="sticky left-0 z-20 flex-shrink-0 w-[210px] bg-white pr-4 shadow-[10px_0_15px_-10px_rgba(0,0,0,0.1)]">
           <div className="relative rounded-lg overflow-hidden" style={{ border: '2px solid #EE4266' }}>
-            <div className="absolute top-0 left-0 right-0 z-10 px-2 py-1 text-center text-[10px] font-bold text-white uppercase tracking-wider" style={{ background: '#EE4266' }}>
+            <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-r-full text-[10px] font-bold text-white uppercase tracking-wider shadow-md" style={{ background: '#EE4266' }}>
               ★ Current
             </div>
             <div className="h-[130px] bg-[#f0f0f0]">

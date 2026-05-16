@@ -4,8 +4,11 @@ export default function StickyCTA({ property, onBookNow }) {
   if (!property) return null;
 
   const price = property.price || 0;
-  const originalPrice = property.originalPrice || Math.round(price * 1.25);
-  const discount = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  const discountPercent = parseInt(property.discountPercent) || 0;
+  const originalPrice = discountPercent > 0 
+    ? Math.round(price / (1 - (discountPercent / 100)))
+    : Math.round(price * 1.1);
+  const discount = discountPercent;
 
   return (
     <>

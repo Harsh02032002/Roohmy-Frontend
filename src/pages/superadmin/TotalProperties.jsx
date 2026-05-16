@@ -77,6 +77,24 @@ export default function TotalProperties() {
 
   const [apiStats, setApiStats] = useState({ published: 0, pending: 0, inactive: 0, rejected: 0 });
 
+  // Modal State
+  const [selectedProp, setSelectedProp] = useState(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [fullDetails, setFullDetails] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  const openViewModal = async (p) => {
+    setSelectedProp(p);
+    setViewModalOpen(true);
+    setDetailsLoading(true);
+    try {
+      const res = await fetch(`${apiUrl}/api/properties/${p.id}`);
+      const data = await res.json();
+      if (data.success) setFullDetails(data.property);
+    } catch (e) { console.error(e); }
+    finally { setDetailsLoading(false); }
+  };
+
   const fetchProps = async (pNum=1) => {
     setLoading(true);
     try {
@@ -92,9 +110,9 @@ export default function TotalProperties() {
           gender:     p.gender || p.propertyInfo?.genderSuitability || "any",
           city:       p.propertyInfo?.city || p.city || "-",
           locality:   p.locality || p.propertyInfo?.area || "-",
-          ownerName:  p.owner?.name || p.propertyInfo?.ownerName || p.ownerName || "-",
-          ownerPhone: p.owner?.phone || p.propertyInfo?.ownerPhone || p.ownerPhone || "-",
-          price:      p.monthlyRent || p.rent || p.propertyInfo?.rent || 0,
+          ownerName:  p.owner?.name || p.propertyInfo?.ownerName || p.ownerName || p.contact?.name || "-",
+          ownerPhone: p.owner?.phone || p.propertyInfo?.ownerPhone || p.ownerPhone || p.contact?.number || "-",
+          price:      p.monthlyRent || p.rent || p.propertyInfo?.rent || p.roomTypes?.[0]?.pricePerBed || 0,
           status:     p.isLiveOnWebsite ? "Published" : p.status==="active" ? "Published" : p.status==="blocked" ? "Rejected" : p.status==="inactive" ? "Inactive" : "Pending",
           listedOn:   p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN",{month:"short",day:"numeric",year:"numeric"}) : "-",
           listedTime: p.createdAt ? new Date(p.createdAt).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}) : "",
@@ -347,8 +365,8 @@ export default function TotalProperties() {
                     {/* Actions */}
                     <td className="px-4 py-4">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors" title="View"><Eye className="w-3.5 h-3.5"/></button>
-                        <button onClick={()=>navigate(`/superadmin/properties?view=add&editId=${p.id}`)} className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors" title="Edit"><Pencil className="w-3.5 h-3.5"/></button>
+                        <button onClick={()=>openViewModal(p)} className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors" title="View"><Eye className="w-3.5 h-3.5"/></button>
+                        <button onClick={()=>navigate(`/superadmin/add-property?editId=${p.id}`)} className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors" title="Edit"><Pencil className="w-3.5 h-3.5"/></button>
                         <button className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"><MoreVertical className="w-3.5 h-3.5"/></button>
                       </div>
                     </td>
@@ -391,6 +409,174 @@ export default function TotalProperties() {
           </div>
         </div>
       </div>
+      {/* Property Details Modal */}
+      {viewModalOpen && selectedProp && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+           <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+              {/* Modal Header */}
+              <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
+                       <Building2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                       <h2 className="text-lg font-black text-slate-800 leading-none">{selectedProp.title}</h2>
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Property ID: {selectedProp.propId}</p>
+                    </div>
+                 </div>
+                 <button onClick={()=>{setViewModalOpen(false); setFullDetails(null);}} className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all shadow-sm">
+                    <X className="w-5 h-5" />
+                 </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                 {detailsLoading ? (
+                    <div className="flex flex-col items-center justify-center h-64 gap-4">
+                       <RefreshCw className="w-10 h-10 animate-spin text-blue-600" />
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fetching full dossier...</p>
+                    </div>
+                 ) : fullDetails ? (
+                    <div className="grid grid-cols-12 gap-8">
+                       {/* Left: Images and Detailed Info */}
+                       <div className="col-span-7 space-y-8">
+                          {/* Quick Stats Grid */}
+                          <div className="grid grid-cols-4 gap-4">
+                             {[
+                                { label: "Gender", val: selectedProp.gender, icon: Users, color: "text-blue-600 bg-blue-50" },
+                                { label: "Type", val: selectedProp.type, icon: Home, color: "text-purple-600 bg-purple-50" },
+                                { label: "City", val: selectedProp.city, icon: MapPin, color: "text-emerald-600 bg-emerald-50" },
+                                { label: "Price Starts", val: `₹${selectedProp.price}`, icon: Building2, color: "text-amber-600 bg-amber-50" },
+                             ].map((s, i) => (
+                                <div key={i} className="bg-white border border-slate-100 rounded-2xl p-3 shadow-sm">
+                                   <div className={`w-7 h-7 rounded-lg ${s.color} flex items-center justify-center mb-2`}><s.icon className="w-3.5 h-3.5" /></div>
+                                   <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+                                   <p className="text-[10px] font-black text-slate-800 uppercase truncate mt-0.5">{s.val}</p>
+                                </div>
+                             ))}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                             {fullDetails.images?.length > 0 ? fullDetails.images.slice(0,4).map((img, i) => (
+                                <div key={i} className="aspect-video rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+                                   <img src={img} className="w-full h-full object-cover" alt="" />
+                                </div>
+                             )) : (
+                                <div className="col-span-2 aspect-video bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex items-center justify-center">
+                                   <p className="text-[10px] font-black text-slate-300 uppercase">No gallery images</p>
+                                </div>
+                             )}
+                          </div>
+
+                          {fullDetails.propertyDetails && (
+                          <div className="bg-blue-50/30 rounded-2xl p-6 border border-blue-50/50">
+                             <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-4">Property Specifications</h3>
+                             <div className="grid grid-cols-3 gap-6">
+                                <div><p className="text-[8px] font-bold text-slate-400 uppercase">Total Area</p><p className="text-[10px] font-black text-slate-700 uppercase">{fullDetails.propertyDetails.totalArea || "-"} Sq.ft</p></div>
+                                <div><p className="text-[8px] font-bold text-slate-400 uppercase">Total Floors</p><p className="text-[10px] font-black text-slate-700 uppercase">{fullDetails.propertyDetails.floors || "-"}</p></div>
+                                <div><p className="text-[8px] font-bold text-slate-400 uppercase">Lift Available</p><p className="text-[10px] font-black text-slate-700 uppercase">{fullDetails.propertyDetails.liftAvailable || "No"}</p></div>
+                             </div>
+                          </div>
+                          )}
+                          
+                          <div className="space-y-4">
+                             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest border-l-4 border-blue-600 pl-3">Property Description</h3>
+                             <p className="text-[11px] font-medium text-slate-600 leading-relaxed italic">"{fullDetails.description || "No description provided for this property."}"</p>
+                          </div>
+                       </div>
+
+                       {/* Right: Room Types, Pricing & Policies */}
+                       {/* Right Column */}
+                       <div className="col-span-5 space-y-8">
+                          <section>
+                             <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Room Types & Rent</h3>
+                                <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-100 uppercase tracking-widest">{fullDetails.roomTypes?.length || 0} Types</span>
+                             </div>
+                             <div className="space-y-3">
+                                {fullDetails.roomTypes?.length > 0 ? fullDetails.roomTypes.map((rt, i) => (
+                                   <div key={i} className="flex items-center justify-between p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-blue-200 transition-all group">
+                                      <div>
+                                         <p className="text-[10px] font-black text-slate-800 uppercase group-hover:text-blue-600 transition-colors">{rt.type}</p>
+                                         <p className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">{rt.occupancy} Sharing • {rt.totalRooms} Rooms</p>
+                                      </div>
+                                      <div className="text-right">
+                                         <p className="text-[11px] font-black text-slate-800 leading-none">₹{rt.pricePerBed || rt.rent}</p>
+                                         <p className="text-[7px] font-bold text-slate-400 uppercase mt-1">Per Bed</p>
+                                      </div>
+                                   </div>
+                                )) : (
+                                   <div className="py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-100">
+                                      <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">No room data</p>
+                                   </div>
+                                )}
+                             </div>
+                          </section>
+
+                          <section>
+                             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4">Pricing & Terms</h3>
+                             <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4 shadow-sm">
+                                {[
+                                   { label: "Security Deposit", val: `₹${fullDetails.pricing?.securityDeposit || "N/A"}` },
+                                   { label: "Notice Period", val: `${fullDetails.pricing?.noticePeriod || "0"} Days` },
+                                   { label: "Lock-in Period", val: `${fullDetails.pricing?.lockInPeriod || "0"} Months` },
+                                ].map((row, i) => (
+                                   <div key={i} className="flex justify-between items-center pb-3 border-b border-slate-50 last:border-0 last:pb-0">
+                                      <span className="text-[9px] font-bold text-slate-400 uppercase">{row.label}</span>
+                                      <span className="text-[10px] font-black text-slate-800 uppercase">{row.val}</span>
+                                   </div>
+                                ))}
+                             </div>
+                          </section>
+
+                          <section>
+                             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4">House Policies</h3>
+                             <div className="grid grid-cols-2 gap-2.5">
+                                {[
+                                  { label: "Smoking", val: fullDetails.policies?.smokingAllowed || "N/A" },
+                                  { label: "Alcohol", val: fullDetails.policies?.alcoholAllowed || "N/A" },
+                                  { label: "Pets", val: fullDetails.policies?.petsAllowed || "N/A" },
+                                  { label: "Cooking", val: fullDetails.policies?.cookingAllowed || "N/A" },
+                                  { label: "Visitors", val: fullDetails.policies?.visitorsAllowed || "N/A" },
+                                ].map((p, i) => (
+                                  <div key={i} className="bg-white border border-slate-100 rounded-xl p-3 flex items-center justify-between shadow-sm">
+                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">{p.label}</span>
+                                    <span className={`text-[8px] font-black uppercase tracking-widest ${p.val?.toLowerCase()==='yes'?'text-emerald-600':p.val==='N/A'?'text-slate-400':'text-rose-600'}`}>{p.val}</span>
+                                  </div>
+                                ))}
+                             </div>
+                          </section>
+
+                          <section>
+                             <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4">Amenities</h3>
+                             <div className="flex flex-wrap gap-2">
+                                {fullDetails.amenities?.length > 0 ? fullDetails.amenities.map((am, i) => (
+                                   <span key={i} className="px-3.5 py-1.5 bg-slate-50 border border-slate-100 rounded-xl text-[9px] font-black text-slate-600 uppercase tracking-tight shadow-sm hover:bg-white transition-colors cursor-default">{typeof am === 'string' ? am : am.name}</span>
+                                )) : (
+                                   <p className="text-[9px] font-bold text-slate-400 uppercase italic">No amenities listed</p>
+                                )}
+                             </div>
+                          </section>
+                       </div>
+                    </div>
+                 ) : (
+                    <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+                       <AlertCircle className="w-12 h-12 mb-2 opacity-20" />
+                       <p className="text-xs font-black uppercase tracking-widest">Data unavailable for this property</p>
+                    </div>
+                 )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="px-8 py-5 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-3">
+                 <button onClick={()=>{setViewModalOpen(false); setFullDetails(null);}} className="px-6 py-2.5 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-white transition-all">Close Dossier</button>
+                 <button onClick={()=>{setViewModalOpen(false); navigate(`/superadmin/add-property?editId=${selectedProp.id}`);}} className="bg-blue-600 text-white px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <Pencil className="w-3.5 h-3.5" /> Edit Property
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }

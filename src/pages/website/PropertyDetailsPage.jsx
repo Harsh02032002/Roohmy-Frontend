@@ -29,6 +29,7 @@ import {
   CompareSection,
   StickyCTA,
   PricingBreakdown,
+  RoomTypesSection,
 } from "../../components/website/propertyDetails";
 import PropertyViewsGallery from "../../components/website/propertyDetails/PropertyViewsGallery";
 import AmenitiesSection from "../../components/website/propertyDetails/AmenitiesSection";
@@ -641,13 +642,36 @@ export default function PropertyDetailsPage() {
             })(),
             exclusiveBenefits: foundProperty.exclusiveBenefits || foundProperty.benefits || [],
             propertyViews: foundProperty.propertyViews || [],
+            roomTypes: (foundProperty.roomTypes && foundProperty.roomTypes.length > 0) 
+              ? foundProperty.roomTypes 
+              : (foundProperty.propertyInfo?.roomTypes && foundProperty.propertyInfo.roomTypes.length > 0)
+                ? foundProperty.propertyInfo.roomTypes
+                : foundProperty.roomVariants || [],
             facilities: foundProperty.facilities || {},
             
             // Property details
             propertyType: foundProperty.propertyType || foundProperty.propertyInfo?.propertyType || "pg",
+            description: foundProperty.description || foundProperty.propertyInfo?.description || "",
             monthlyRent: foundProperty.monthlyRent || foundProperty.rent || foundProperty.price || 0,
-            totalRooms: foundProperty.totalRooms || foundProperty.bedrooms || 0,
+            price: foundProperty.monthlyRent || foundProperty.rent || foundProperty.price || 0,
+            pricing: foundProperty.pricing || {},
+            securityDeposit: foundProperty.pricing?.securityDeposit || foundProperty.propertyInfo?.securityDeposit || 0,
+            advanceRent: foundProperty.pricing?.advanceRent || foundProperty.propertyInfo?.advanceRent || 0,
+            discountPercent: foundProperty.pricing?.discountPercent || foundProperty.discountPercent || 0,
+            totalRooms: (() => {
+              const fromRoomTypes = (foundProperty.roomTypes || foundProperty.propertyInfo?.roomTypes || [])
+                .reduce((acc, rt) => acc + parseInt(rt.totalRooms || 0), 0);
+              return fromRoomTypes || foundProperty.totalRooms || foundProperty.propertyDetails?.floors || 0;
+            })(),
             bedsPerRoom: foundProperty.bedsPerRoom || 1,
+            gender: foundProperty.gender || foundProperty.propertyInfo?.genderSuitability || "Co-ed",
+            
+            // New sections
+            propertyDetails: foundProperty.propertyDetails || {},
+            pricing: foundProperty.pricing || {},
+            policies: foundProperty.policies || {},
+            tenantDescription: foundProperty.tenantDescription || "",
+            
             status: foundProperty.status || "active",
             isPublished: foundProperty.isPublished !== undefined ? foundProperty.isPublished : true,
             
@@ -660,6 +684,7 @@ export default function PropertyDetailsPage() {
             originalPrice: foundProperty.originalPrice || null,
           };
 
+          console.log('✅ Debug: Formatted property roomTypes:', formatted.roomTypes);
           setProperty(formatted);
 
           // Fetch nearby institutes from OpenStreetMap if coordinates available
@@ -856,7 +881,7 @@ export default function PropertyDetailsPage() {
               <DescriptionSection
                 description={property.description}
                 amenities={property.amenities}
-                beds={property.beds}
+                beds={property.totalRooms}
                 gender={property.gender}
                 price={property.price}
               />
@@ -867,6 +892,11 @@ export default function PropertyDetailsPage() {
                   amenities={property.amenities}
                   facilities={property.facilities}
                 />
+              </div>
+
+              {/* 5.5. Choose Your Room (Room Types) */}
+              <div className="px-4 md:px-0">
+                <RoomTypesSection roomTypes={property.roomTypes} />
               </div>
 
               {/* 6. Exclusive Benefits Section */}

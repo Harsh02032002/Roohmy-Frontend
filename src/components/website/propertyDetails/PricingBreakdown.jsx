@@ -5,19 +5,21 @@ export default function PricingBreakdown({ property }) {
   const [expanded, setExpanded] = useState(false);
 
   const price = parseInt(property?.price) || 0;
-  const originalPrice = property?.originalPrice || Math.round(price * 1.25);
-  const discount = originalPrice > price ? originalPrice - price : 0;
-  const discountPercent = discount > 0 ? Math.round((discount / originalPrice) * 100) : 0;
+  const discountPercent = parseInt(property?.discountPercent) || 0;
+  const securityDeposit = parseInt(property?.securityDeposit) || 0;
+  const advanceRent = parseInt(property?.advanceRent) || 0;
+  
+  const originalPrice = discountPercent > 0 
+    ? Math.round(price / (1 - (discountPercent / 100)))
+    : Math.round(price * 1.1);
+    
+  const discountAmount = originalPrice - price;
 
-  // Mock pricing details — will use backend data when available
   const pricingItems = [
     { label: "Base Rent", amount: originalPrice, type: "normal" },
-    ...(discount > 0 ? [{ label: `Direct Booking Discount (${discountPercent}%)`, amount: -discount, type: "discount" }] : []),
-    ...(property?.pricingDetails?.offers || []).map(offer => ({
-      label: offer.label || offer.name || "Special Offer",
-      amount: -(offer.amount || 0),
-      type: "discount"
-    })),
+    ...(discountPercent > 0 ? [{ label: `Direct Booking Discount (${discountPercent}%)`, amount: -discountAmount, type: "discount" }] : []),
+    ...(securityDeposit > 0 ? [{ label: "Security Deposit (Refundable)", amount: securityDeposit, type: "normal" }] : []),
+    ...(advanceRent > 0 ? [{ label: "Advance Rent", amount: advanceRent, type: "normal" }] : []),
   ];
 
   const totalAmount = pricingItems.reduce((sum, item) => sum + item.amount, 0);

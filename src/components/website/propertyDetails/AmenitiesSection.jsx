@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wifi, Wind, Droplet, Car, Dumbbell, Tv, Zap, Coffee, Check, Gift, Star, Shield, Shirt, Home, Microwave, Refrigerator, Flame, Lock, MapPin, Briefcase, Users, GraduationCap, IndianRupee, ChevronDown } from 'lucide-react';
+import { Wifi, Wind, Droplet, Car, Dumbbell, Tv, Zap, Coffee, Check, Gift, Star, Shield, Shirt, Home, Microwave, Refrigerator, Flame, Lock, MapPin, Briefcase, Users, GraduationCap, IndianRupee, ChevronDown, Waves } from 'lucide-react';
 
 const CATEGORY_LABELS = {
   basic: 'Basic Amenities',
@@ -80,6 +80,7 @@ const AmenitiesSection = ({ amenities = [], facilities = {} }) => {
     if (lower.includes('fridge') || lower.includes('refrigerator')) return Refrigerator;
     if (lower.includes('security') || lower.includes('cctv')) return Shield;
     if (lower.includes('fire')) return Flame;
+    if (lower.includes('pool')) return Waves;
     return Check;
   };
 

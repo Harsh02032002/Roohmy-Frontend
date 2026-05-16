@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Users, UserCheck, Shield, Clock, MoreVertical, 
   ArrowUpRight, ArrowDownRight, Building2, Search,
@@ -56,6 +57,8 @@ function normalizeTenant(tenant, record) {
     kyc: {
       status: String(kycStatus || "pending").toLowerCase(),
       aadhaarNumber,
+      idProofType: modelKyc.idProof || "",
+      idProofFile: modelKyc.idProofFile || modelKyc.aadhaarFront || tenantKyc.aadhaarFront || "",
       aadhaarFront: modelKyc.aadhaarFront || tenantKyc.aadhaarFront || "",
       aadhaarBack: modelKyc.aadhaarBack || tenantKyc.aadhaarBack || "",
       otpVerified: modelKyc.otpVerified || tenantKyc.otpVerified || false,
@@ -65,6 +68,7 @@ function normalizeTenant(tenant, record) {
 }
 
 export default function Tenant() {
+  const navigate = useNavigate();
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -146,7 +150,10 @@ export default function Tenant() {
         subtitle="Resident lifecycle governance & occupancy intelligence matrix."
         actions={
           <div className="flex items-center gap-4">
-            <button className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all flex items-center gap-2 active:scale-95">
+            <button 
+              onClick={() => navigate("/superadmin/add-tenant")}
+              className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all flex items-center gap-2 active:scale-95"
+            >
                <Plus size={14} /> Deploy Resident
             </button>
             <button 
@@ -340,21 +347,21 @@ export default function Tenant() {
                     </div>
                     <div className="mt-10 grid grid-cols-2 gap-6">
                        <div className="space-y-3">
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Aadhaar Front</p>
-                          {selectedTenant.kyc.aadhaarFront ? (
-                             <img src={selectedTenant.kyc.aadhaarFront} className="w-full h-40 object-cover rounded-2xl border border-slate-100 shadow-sm" alt="Aadhaar Front" />
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                             {selectedTenant.kyc.idProofType || "ID Proof"} Front
+                          </p>
+                          {selectedTenant.kyc.idProofFile ? (
+                             <img src={selectedTenant.kyc.idProofFile} className="w-full h-40 object-cover rounded-2xl border border-slate-100 shadow-sm" alt="ID Proof Front" />
                           ) : (
                              <div className="w-full h-40 bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex items-center justify-center text-slate-300 text-[10px] font-bold uppercase tracking-widest">No Digital Proof</div>
                           )}
                        </div>
-                       <div className="space-y-3">
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Aadhaar Back</p>
-                          {selectedTenant.kyc.aadhaarBack ? (
-                             <img src={selectedTenant.kyc.aadhaarBack} className="w-full h-40 object-cover rounded-2xl border border-slate-100 shadow-sm" alt="Aadhaar Back" />
-                          ) : (
-                             <div className="w-full h-40 bg-slate-50 rounded-2xl border border-dashed border-slate-200 flex items-center justify-center text-slate-300 text-[10px] font-bold uppercase tracking-widest">No Digital Proof</div>
-                          )}
-                       </div>
+                       {selectedTenant.kyc.aadhaarBack && (
+                         <div className="space-y-3">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Aadhaar Back</p>
+                            <img src={selectedTenant.kyc.aadhaarBack} className="w-full h-40 object-cover rounded-2xl border border-slate-100 shadow-sm" alt="Aadhaar Back" />
+                         </div>
+                       )}
                     </div>
                  </section>
               </div>

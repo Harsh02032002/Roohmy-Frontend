@@ -16,6 +16,7 @@ export const sharedNavConfig = {
           { label: "Property Owners", to: "/superadmin/owner", icon: "briefcase" },
           { label: "Properties", to: "/superadmin/properties", icon: "home" },
           { label: "Tenants", to: "/superadmin/tenant", icon: "users" },
+          { label: "Add Tenant", to: "/superadmin/add-tenant", icon: "user-plus" },
           { label: "New Signups", to: "/superadmin/new_signups", icon: "file-badge" }
         ]
       },

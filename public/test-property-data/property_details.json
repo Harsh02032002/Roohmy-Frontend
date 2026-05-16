@@ -1,0 +1,78 @@
+{
+  "step1": {
+    "propertyName": "Royal Blue Heights PG",
+    "propertyType": "hostel",
+    "propertyCategory": "Boys PG",
+    "description": "Premium living space located in the heart of the city. We offer fully furnished rooms with high-speed WiFi, 3-time meals, and 24/7 security. Perfect for students and working professionals looking for a hassle-free stay. Our facility is equipped with modern amenities like a gymnasium, laundry service, and a vibrant common lounge area.",
+    "address": "Plot No. 45, HSR Layout Sector 2, Near BDA Complex",
+    "locality": "HSR Layout",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560102",
+    "contactName": "Rahul Sharma",
+    "contactNumber": "9876543210",
+    "email": "rahul.sharma@roomhy.com"
+  },
+  "step2": {
+    "roomTypes": [
+      {
+        "type": "Single Sharing",
+        "desc": "Private luxury room with balcony",
+        "totalRooms": "5",
+        "totalBeds": "5",
+        "occupancy": 1,
+        "pricePerBed": "15000",
+        "pricePerRoom": "15000"
+      },
+      {
+        "type": "Double Sharing",
+        "desc": "Spacious room with individual cupboards",
+        "totalRooms": "10",
+        "totalBeds": "20",
+        "occupancy": 2,
+        "pricePerBed": "8500",
+        "pricePerRoom": "17000"
+      }
+    ],
+    "totalArea": "4500",
+    "yearBuilt": "2022",
+    "propertyAge": "1-2 Years",
+    "preferredFor": ["students", "professionals"],
+    "genderPref": "Male Only",
+    "floors": "G + 4",
+    "liftAvailable": "Yes",
+    "parkingAvailable": "Yes",
+    "noticePeriod": "30 Days"
+  },
+  "step3": {
+    "amenities": [
+      "WiFi",
+      "Power Backup",
+      "24x7 Water",
+      "CCTV",
+      "Security Guard",
+      "Attached Bathroom",
+      "Study Table",
+      "Kitchen",
+      "Refrigerator",
+      "Laundry"
+    ]
+  },
+  "step5": {
+    "houseRules": {
+      "smokingAllowed": "No",
+      "alcoholAllowed": "No",
+      "petsAllowed": "No",
+      "cookingAllowed": "Yes",
+      "visitorsAllowed": "Yes",
+      "visitorTiming": "9:00 AM - 9:00 PM",
+      "partyAllowed": "No"
+    },
+    "pricing": {
+      "securityDeposit": "10000",
+      "advanceRent": "8500",
+      "lockInPeriod": "3 Months",
+      "discountPercent": "5"
+    }
+  }
+}

@@ -8,3 +8,4 @@ export { default as NearbySection } from "./NearbySection";
 export { default as CompareSection } from "./CompareSection";
 export { default as StickyCTA } from "./StickyCTA";
 export { default as PricingBreakdown } from "./PricingBreakdown";
+export { default as RoomTypesSection } from "./RoomTypesSection";

@@ -84,6 +84,7 @@ const routeEntries = [
   ["/superadmin/superadmin", "./pages/superadmin/superadmin.jsx"],
   ["/superadmin/superchat", "./pages/superadmin/superchat.jsx"],
   ["/superadmin/tenant", "./pages/superadmin/tenant.jsx"],
+  ["/superadmin/add-tenant", "./pages/superadmin/AddTenant.jsx"],
   ["/superadmin/visit", "./pages/superadmin/visit.jsx"],
   ["/superadmin/website-db", "./pages/superadmin/website-db.jsx"],
   ["/superadmin/website", "./pages/superadmin/website.jsx"],
@@ -151,6 +152,25 @@ const routeEntries = [
   ["/propertyowner/settings", "./pages/propertyowner/settings.jsx"],
   ["/propertyowner/tenantrec", "./pages/propertyowner/tenantrec.jsx"],
   ["/propertyowner/tenants", "./pages/propertyowner/tenants.jsx"],
+  
+  // New Demo Panels
+  ["/staff", "./pages/staff-panel/dashboard.jsx"],
+  ["/staff/tenants", "./pages/staff-panel/tenants.jsx"],
+  ["/staff/rooms", "./pages/staff-panel/rooms.jsx"],
+  ["/staff/complaints", "./pages/staff-panel/complaints.jsx"],
+  ["/staff/tasks", "./pages/staff-panel/tasks.jsx"],
+  ["/staff/visitors", "./pages/staff-panel/visitors.jsx"],
+  ["/staff/attendance", "./pages/staff-panel/attendance.jsx"],
+
+  ["/hostelowner", "./pages/owner-panel/dashboard.jsx"],
+  ["/hostelowner/properties", "./pages/owner-panel/properties.jsx"],
+  ["/hostelowner/staff", "./pages/owner-panel/staff.jsx"],
+  ["/hostelowner/expenses", "./pages/owner-panel/expenses.jsx"],
+  ["/hostelowner/rent", "./pages/owner-panel/rent.jsx"],
+  ["/hostelowner/bookings", "./pages/owner-panel/bookings.jsx"],
+  ["/hostelowner/complaints", "./pages/owner-panel/complaints.jsx"],
+  ["/hostelowner/reviews", "./pages/owner-panel/reviews.jsx"],
+  ["/hostelowner/reports", "./pages/owner-panel/reports.jsx"],
   
   // Tenant Routes
   ["/tenant/tenantagreement", "./pages/tenant/tenantagreement.jsx"],
