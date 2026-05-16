@@ -13,8 +13,8 @@ export default function OwnerBookings() {
 
   return (
     <OwnerLayout 
-      title="Acquisition Pipeline"
-      subtitle="You have 3 new requests awaiting your final signature."
+      title="Booking Requests"
+      subtitle="View and manage new room booking applications."
     >
       <div className="space-y-12">
 

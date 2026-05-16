@@ -13,8 +13,8 @@ export default function OwnerComplaints() {
 
   return (
     <OwnerLayout 
-      title="Service Ledger"
-      subtitle="Track and resolve resident complaints across your portfolio."
+      title="Complaints"
+      subtitle="Track and fix issues reported by your residents."
     >
       <div className="space-y-12">
         {/* Modern Support Overview */}

@@ -11,8 +11,8 @@ export default function OwnerProperties() {
 
   return (
     <OwnerLayout 
-      title="Portfolio Management"
-      subtitle="Manage your high-performance property portfolio across India."
+      title="My Properties"
+      subtitle="View and manage all your hostel locations here."
     >
       <div className="space-y-12">
         <div className="flex items-center justify-between gap-6 mb-8">

@@ -14,8 +14,8 @@ export default function OwnerRent() {
 
   return (
     <OwnerLayout 
-      title="Revenue Stream"
-      subtitle="Monitor your monthly rent collections and payment efficiency."
+      title="Rent Collections"
+      subtitle="Track monthly rent payments and pending dues."
     >
       <div className="space-y-12">
         {/* Collection Intelligence Cards */}

@@ -11,8 +11,8 @@ export default function OwnerReviews() {
 
   return (
     <OwnerLayout 
-      title="Tenant Reviews"
-      subtitle="Monitor resident feedback and sentiment across your locations."
+      title="Reviews"
+      subtitle="See what your tenants are saying about your hostels."
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <ReviewStat label="Average Rating" value="4.6" icon={Star} color="text-amber-500" bg="bg-amber-50" />

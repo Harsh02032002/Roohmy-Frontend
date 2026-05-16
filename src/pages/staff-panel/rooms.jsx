@@ -16,8 +16,8 @@ export default function StaffRooms() {
 
   return (
     <StaffLayout 
-      title="Inventory Control"
-      subtitle="Manage your room status, occupancy, and maintenance schedules."
+      title="Room Inventory"
+      subtitle="Check room availability and occupancy status."
     >
       <div className="space-y-12">
         {/* Modern Filter Tabs */}

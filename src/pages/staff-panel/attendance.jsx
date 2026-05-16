@@ -10,7 +10,10 @@ export default function StaffAttendance() {
   ];
 
   return (
-    <StaffLayout title="Staff Attendance">
+    <StaffLayout 
+      title="Attendance"
+      subtitle="Mark your daily attendance and see your shift history."
+    >
       <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="flex items-center gap-6">
           <div className="w-20 h-20 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-lg shadow-blue-100">

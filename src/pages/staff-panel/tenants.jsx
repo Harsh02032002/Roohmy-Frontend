@@ -14,8 +14,8 @@ export default function StaffTenants() {
 
   return (
     <StaffLayout 
-      title="Resident Directory"
-      subtitle="Manage your residents, KYC status, and room assignments."
+      title="Tenants"
+      subtitle="View and manage all residents living in the hostel."
     >
       <div className="space-y-8">
         {/* Top Actions Bar */}
