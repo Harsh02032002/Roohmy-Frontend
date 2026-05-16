@@ -11,7 +11,10 @@ export default function OwnerReports() {
   ];
 
   return (
-    <OwnerLayout title="Financial Reports">
+    <OwnerLayout 
+      title="Financial Reports"
+      subtitle="Analyze your business performance with detailed fiscal reports."
+    >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
         <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-purple-700 p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
           <div className="absolute top-0 right-0 p-10 opacity-10">

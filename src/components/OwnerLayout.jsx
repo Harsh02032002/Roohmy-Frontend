@@ -77,13 +77,13 @@ export default function OwnerLayout({ children, title, subtitle }) {
           <div className="bg-white/5 rounded-[2rem] p-4 border border-white/5 relative group cursor-pointer hover:bg-white/10 transition-all">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-sm italic">
-                AK
+                HO
               </div>
               {sidebarOpen && (
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-black text-white truncate italic leading-none mb-1.5">Aryan Khan</p>
+                  <p className="text-[11px] font-black text-white truncate italic leading-none mb-1.5">Hostel Owner</p>
                   <div className="space-y-1">
-                    <p className="text-[9px] text-slate-400 font-black truncate uppercase tracking-widest italic leading-none">aryan.khan@roomhy.com</p>
+                    <p className="text-[9px] text-slate-400 font-black truncate uppercase tracking-widest italic leading-none">owner@roomhy.com</p>
                     <p className="text-[9px] text-slate-500 font-black truncate uppercase tracking-widest italic leading-none opacity-60">Member Since: Mar 2026</p>
                   </div>
                 </div>
@@ -116,7 +116,7 @@ export default function OwnerLayout({ children, title, subtitle }) {
              <HeaderAction icon={Settings} />
              <div className="w-10 h-10 rounded-xl bg-indigo-50 p-0.5 border border-indigo-100 shadow-sm cursor-pointer hover:scale-105 transition-transform active:scale-95 ml-2">
                 <div className="w-full h-full rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-sm italic">
-                   AK
+                   HO
                 </div>
              </div>
           </div>
@@ -128,10 +128,6 @@ export default function OwnerLayout({ children, title, subtitle }) {
             {/* Page Title & Subtitle Section */}
             {title && (
               <div className="mb-10">
-                <div className="flex items-center gap-2 mb-2">
-                   <div className="h-[1px] w-8 bg-indigo-600/30" />
-                   <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] italic">Perspective</span>
-                </div>
                 <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic mb-2">{title}</h1>
                 {subtitle && <p className="text-sm font-bold text-slate-400 italic uppercase tracking-wider">{subtitle}</p>}
               </div>

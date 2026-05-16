@@ -10,7 +10,10 @@ export default function OwnerStaff() {
   ];
 
   return (
-    <OwnerLayout title="Human Resources">
+    <OwnerLayout 
+      title="Human Resources"
+      subtitle="Manage your on-ground workforce and operational staff."
+    >
       <div className="space-y-12">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
            <div className="flex gap-3">

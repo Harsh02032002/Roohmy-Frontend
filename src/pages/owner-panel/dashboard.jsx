@@ -22,7 +22,7 @@ export default function OwnerDashboard() {
   return (
     <OwnerLayout 
       title="Dashboard" 
-      subtitle="Welcome back, Aryan! Here's your portfolio performance at a glance."
+      subtitle="Welcome back! Here's your portfolio performance at a glance."
     >
       <div className="space-y-10">
         {/* Refined Financial Hero Section - Lighter & Even More Compact */}

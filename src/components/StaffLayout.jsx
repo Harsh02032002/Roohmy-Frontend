@@ -76,9 +76,9 @@ export default function StaffLayout({ children, title, subtitle }) {
               </div>
               {sidebarOpen && (
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-black text-white truncate italic leading-none mb-1.5">John Staff</p>
+                  <p className="text-[11px] font-black text-white truncate italic leading-none mb-1.5">Operations Staff</p>
                   <div className="space-y-1">
-                    <p className="text-[9px] text-slate-400 font-black truncate uppercase tracking-widest italic leading-none">john.staff@roomhy.com</p>
+                    <p className="text-[9px] text-slate-400 font-black truncate uppercase tracking-widest italic leading-none">staff@roomhy.com</p>
                     <p className="text-[9px] text-slate-500 font-black truncate uppercase tracking-widest italic leading-none opacity-60">Member Since: Jan 2026</p>
                   </div>
                 </div>
@@ -124,10 +124,6 @@ export default function StaffLayout({ children, title, subtitle }) {
             {/* Page Title & Subtitle Section */}
             {title && (
               <div className="mb-10">
-                <div className="flex items-center gap-2 mb-2">
-                   <div className="h-[1px] w-8 bg-blue-600/30" />
-                   <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic">Operations Hub</span>
-                </div>
                 <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic mb-2">{title}</h1>
                 {subtitle && <p className="text-sm font-bold text-slate-400 italic uppercase tracking-wider">{subtitle}</p>}
               </div>

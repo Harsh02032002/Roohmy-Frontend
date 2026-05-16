@@ -66,46 +66,58 @@ export default function OwnerExpenses() {
            </div>
         </div>
 
-        {/* Expense List - Premium Table */}
+        {/* Expense Ledger - Premium High-End Table */}
         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/80 border-b border-slate-100">
-              <tr>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Description</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Category</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Property</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center italic">Amount</th>
-                <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right italic">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {expenses.map((e, i) => (
-                <tr key={i} className="hover:bg-slate-50/80 transition-all group cursor-pointer">
-                  <td className="px-8 py-6">
-                    <div className="flex flex-col">
-                      <span className="font-black text-slate-900 italic tracking-tight text-base leading-tight mb-1">{e.title}</span>
-                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-[0.15em] italic">
-                         <Clock size={12} className="text-indigo-500" /> {e.date}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                     <span className="px-3 py-1 bg-slate-50 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-100 shadow-sm italic">{e.category}</span>
-                  </td>
-                  <td className="px-8 py-6 text-xs font-black text-slate-500 uppercase tracking-widest italic">{e.property}</td>
-                  <td className="px-8 py-6 text-center font-black text-slate-900 italic tracking-tighter text-lg">{e.amount}</td>
-                  <td className="px-8 py-6 text-right">
-                    <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${
-                      e.status === 'Paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
-                    }`}>
-                      <div className={`w-1.5 h-1.5 rounded-full ${e.status === 'Paid' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                      {e.status}
-                    </span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-slate-50/50 border-b border-slate-100/50">
+                <tr>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] italic border-r border-slate-100/50">Expense Detail</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] italic border-r border-slate-100/50">Category</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] italic border-r border-slate-100/50">Asset Location</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center italic border-r border-slate-100/50">Value</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-right italic">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {expenses.map((e, i) => (
+                  <tr key={i} className="group hover:bg-slate-50/80 transition-all duration-300 cursor-pointer">
+                    <td className="px-8 py-7 border-r border-slate-50/50">
+                      <div className="flex flex-col">
+                        <span className="font-black text-slate-900 italic tracking-tight text-base leading-none mb-2 group-hover:text-indigo-600 transition-colors">{e.title}</span>
+                        <div className="flex items-center gap-2">
+                           <Clock size={12} className="text-indigo-400" />
+                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">{e.date}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-7 border-r border-slate-50/50">
+                       <span className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-100 shadow-sm italic">{e.category}</span>
+                    </td>
+                    <td className="px-8 py-7 border-r border-slate-50/50">
+                       <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                          <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest italic leading-none">{e.property}</span>
+                       </div>
+                    </td>
+                    <td className="px-8 py-7 text-center border-r border-slate-50/50">
+                       <span className="font-black text-slate-900 italic tracking-tighter text-xl">{e.amount}</span>
+                    </td>
+                    <td className="px-8 py-7 text-right">
+                       <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm transition-all duration-500 ${
+                         e.status === 'Paid' 
+                           ? 'bg-emerald-50 text-emerald-600 border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600' 
+                           : 'bg-amber-50 text-amber-600 border-amber-100 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600'
+                       }`}>
+                         <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${e.status === 'Paid' ? 'bg-emerald-500 group-hover:bg-white' : 'bg-amber-500 group-hover:bg-white'}`} />
+                         {e.status}
+                       </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </OwnerLayout>

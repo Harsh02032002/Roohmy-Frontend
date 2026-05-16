@@ -28,7 +28,7 @@ export default function StaffDashboard() {
   return (
     <StaffLayout 
       title="Operations Hub" 
-      subtitle="Welcome back, John! Here's your property overview for today."
+      subtitle="Welcome back! Here's your property overview for today."
     >
       <div className="space-y-10">
         {/* Refined Light Welcome Hero */}
