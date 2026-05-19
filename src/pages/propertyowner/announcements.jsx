@@ -1,17 +1,192 @@
-import React from "react";
+import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
-export default function Announcements() {
+import { 
+  Bell, Search, Plus, Trash2, Edit3, 
+  CheckCircle2, AlertCircle, Pin
+} from "lucide-react";
+
+export default function AnnouncementsPage() {
   const owner = getOwnerRuntimeSession();
-  if (!owner?.loginId && typeof window !== "undefined") { window.location.href = "/propertyowner/ownerlogin"; return null; }
+  if (!owner?.loginId && typeof window !== "undefined") { 
+    window.location.href = "/propertyowner/ownerlogin"; 
+    return null; 
+  }
+
+  const [search, setSearch] = useState("");
+  const [announcements, setAnnouncements] = useState([
+    { id: 1, title: "Curfew Timing Extension on Weekends", content: "Main gates will remain open until 11:30 PM on Friday and Saturday nights.", date: "18 May 2026", priority: "Normal" },
+    { id: 2, title: "Elevator Annual Servicing Shutdown", content: "The main lift will be shut down for routine elevator testing between 10:00 AM and 04:00 PM tomorrow.", date: "19 May 2026", priority: "Important" }
+  ]);
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [titleInput, setTitleInput] = useState("");
+  const [contentInput, setContentInput] = useState("");
+  const [priorityInput, setPriorityInput] = useState("Normal");
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    if (!titleInput || !contentInput) return;
+    const newAnn = {
+      id: announcements.length + 1,
+      title: titleInput,
+      content: contentInput,
+      date: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }),
+      priority: priorityInput
+    };
+    setAnnouncements([newAnn, ...announcements]);
+    setTitleInput("");
+    setContentInput("");
+    setShowAddModal(false);
+  };
+
+  const handleDelete = (id) => {
+    setAnnouncements(prev => prev.filter(a => a.id !== id));
+  };
+
+  const filteredAnnouncements = announcements.filter(a => 
+    a.title.toLowerCase().includes(search.toLowerCase()) ||
+    a.content.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <PropertyOwnerLayout owner={owner} title="Announcements" onLogout={() => { clearOwnerRuntimeSession(); window.location.href = "/propertyowner/ownerlogin"; }}>
-      <div className="mb-8"><h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Announcements</h1>
-      <p className="mt-1.5 text-[13.5px] text-muted-foreground">Send notices to tenants.</p></div>
-      <div className="rounded-2xl border border-border bg-card p-12 shadow-soft flex flex-col items-center text-center">
-        <div className="w-14 h-14 bg-muted/60 rounded-full flex items-center justify-center mb-3"><span className="text-2xl">📋</span></div>
-        <h3 className="font-serif text-[22px] text-foreground mb-1">Coming Soon</h3>
-        <p className="text-[13.5px] text-muted-foreground">This module is under development.</p>
+    <PropertyOwnerLayout 
+      owner={owner} 
+      title="Hostel Announcements Board" 
+      onLogout={() => { clearOwnerRuntimeSession(); window.location.href = "/propertyowner/ownerlogin"; }}
+    >
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Announcements</h1>
+          <p className="mt-1.5 text-[13.5px] text-muted-foreground">Publish general messages, lift servicing notices, or festival celebrations on the resident portal notice board.</p>
+        </div>
+        <div className="flex items-center gap-2 md:mt-2">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-slate-900 text-white text-[13px] font-medium hover:opacity-90 transition-opacity"
+          >
+            <Plus className="size-4" /> Create Announcement
+          </button>
+        </div>
       </div>
-    </PropertyOwnerLayout>);
+
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search announcements by keyword..."
+            className="w-full h-10 pl-9 pr-3 rounded-xl bg-card border border-border text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+          />
+        </div>
+      </div>
+
+      {/* Grid of Announcements */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredAnnouncements.map((a) => (
+          <div key={a.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <Bell size={20} />
+                </div>
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
+                  a.priority === "Important" 
+                    ? "bg-rose-50 text-rose-600 border-rose-100" 
+                    : "bg-slate-100 text-slate-500 border-slate-200"
+                }`}>
+                  {a.priority}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-[21px] font-bold text-foreground leading-tight">{a.title}</h3>
+                <p className="text-[13px] text-slate-700 mt-3 font-medium bg-muted/40 p-3 rounded-xl border border-border/40">
+                  {a.content}
+                </p>
+              </div>
+
+              <div className="border-t border-border/60 pt-4 flex justify-between items-center text-xs text-muted-foreground">
+                <span>Published:</span>
+                <span className="font-bold text-slate-800">{a.date}</span>
+              </div>
+            </div>
+
+            <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
+              <button 
+                onClick={() => handleDelete(a.id)}
+                className="flex-1 h-10 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <h3 className="font-serif text-[22px] text-foreground mb-4">New Announcement</h3>
+            <form onSubmit={handleAdd} className="space-y-4">
+              <div>
+                <label className="text-[12px] font-bold text-slate-700 block mb-1">Title</label>
+                <input 
+                  type="text" 
+                  value={titleInput} 
+                  onChange={(e) => setTitleInput(e.target.value)}
+                  placeholder="e.g. Festival celebration"
+                  className="w-full h-10 px-3 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[12px] font-bold text-slate-700 block mb-1">Content Details</label>
+                <textarea 
+                  rows={4}
+                  value={contentInput} 
+                  onChange={(e) => setContentInput(e.target.value)}
+                  placeholder="Type notice details..."
+                  className="w-full px-3 py-2 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[12px] font-bold text-slate-700 block mb-1">Priority</label>
+                <select 
+                  value={priorityInput} 
+                  onChange={(e) => setPriorityInput(e.target.value)}
+                  className="w-full h-10 px-3 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                >
+                  <option value="Normal">Normal</option>
+                  <option value="Important">Important</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 h-10 rounded-xl border border-border text-xs font-bold hover:bg-muted"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
+                >
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </PropertyOwnerLayout>
+  );
 }
