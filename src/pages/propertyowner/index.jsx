@@ -33,22 +33,22 @@ export default function Index() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center relative overflow-hidden border border-slate-200">
+      <div className="bg-card rounded-xl shadow-soft w-full max-w-md p-8 text-center relative overflow-hidden border border-border">
         <a href="/website/index" className="inline-flex items-center justify-center mb-6">
           <img src="https://res.cloudinary.com/dpwgvcibj/image/upload/v1768990260/roomhy/website/logoroomhy.png" alt="Roomhy Logo" className="h-12 w-auto" />
         </a>
 
         <div className="mb-6 flex justify-center gap-3">
-          <a href="/propertyowner/ownerlogin" className="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
+          <a href="/propertyowner/ownerlogin" className="px-6 py-3 rounded-xl bg-primary text-white font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
             Owner Login
           </a>
-          <button type="button" onClick={goToTenantLogin} className="px-6 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all">
+          <button type="button" onClick={goToTenantLogin} className="px-6 py-3 rounded-xl bg-muted text-foreground font-bold hover:bg-slate-200 transition-all">
             Tenant Login
           </button>
         </div>
 
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Portal Login</h1>
-        <p className="text-slate-500 text-sm">Choose your role to proceed.</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Portal Login</h1>
+        <p className="text-muted-foreground text-sm">Choose your role to proceed.</p>
       </div>
     </div>
   );

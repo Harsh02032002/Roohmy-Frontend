@@ -7,7 +7,7 @@ import { Plus, X, Upload, Camera, Gift, Check, Wifi, Wind, Droplet, Car, Dumbbel
 export default function PropertyDetails() {
   useHtmlPage({
     title: "Roomhy - Property Details",
-    bodyClass: "text-slate-800",
+    bodyClass: "text-foreground",
     htmlAttrs: { lang: "en" },
     metas: [
       { charset: "UTF-8" },
@@ -284,7 +284,7 @@ const fetchPropertyDetails = async () => {
     >
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-card rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{property?.title}</h2>
@@ -301,7 +301,7 @@ const fetchPropertyDetails = async () => {
         </div>
 
         {/* Quick Facilities */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-card rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Facilities</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(facilities).map(([key, value]) => (
@@ -321,7 +321,7 @@ const fetchPropertyDetails = async () => {
         </div>
 
         {/* Amenities Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-card rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Amenities</h3>
           
           {/* Add New Amenity */}
@@ -384,7 +384,7 @@ const fetchPropertyDetails = async () => {
         </div>
 
         {/* Exclusive Benefits Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-card rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Exclusive Direct Benefits</h3>
           
           {/* Add New Benefit */}
@@ -436,7 +436,7 @@ const fetchPropertyDetails = async () => {
         </div>
 
         {/* Property Views Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-card rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Property Views (Like OYO)</h3>
           
           {/* Add New View */}

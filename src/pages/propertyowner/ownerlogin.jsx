@@ -34,6 +34,9 @@ export default function Ownerlogin() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("loginId");
@@ -194,8 +197,8 @@ export default function Ownerlogin() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center relative overflow-hidden border border-slate-200">
-        <div className="text-3xl font-bold text-blue-600 mb-2">Roomhy</div>
+      <div className="bg-card rounded-xl shadow-soft w-full max-w-md p-8 text-center relative overflow-hidden border border-border">
+        <div className="text-3xl font-bold text-primary mb-2">Roomhy</div>
 
         {step === "login" && (
           <div className="fade-in">
@@ -220,15 +223,22 @@ export default function Ownerlogin() {
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="key" className="w-5 h-5"></i></span>
                 <input
-                  type="password"
-                  className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 transition-colors"
+                  type={showPassword ? "text" : "password"}
+                  className="w-full pl-10 pr-10 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 transition-colors"
                   placeholder="********"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <i data-lucide={showPassword ? "eye-off" : "eye"} className="w-5 h-5"></i>
+                </button>
               </div>
               <div className="mt-2 text-right">
-                <button type="button" onClick={openForgot} className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                <button type="button" onClick={openForgot} className="text-sm text-primary hover:text-blue-700 font-medium">
                   Forgot Password?
                 </button>
               </div>
@@ -240,7 +250,7 @@ export default function Ownerlogin() {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2"
+              className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2"
             >
               {loading ? "Logging in..." : "Login"} <i data-lucide="arrow-right" className="w-4 h-4"></i>
             </button>
@@ -255,23 +265,41 @@ export default function Ownerlogin() {
 
             <div className="mb-4 text-left">
               <label className="text-sm font-medium text-gray-700 mb-2 block">New Password</label>
-              <input
-                type="password"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
-                placeholder="Min 6 chars"
-                value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
-              />
+              <div className="relative">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                  placeholder="Min 6 chars"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <i data-lucide={showNewPassword ? "eye-off" : "eye"} className="w-5 h-5"></i>
+                </button>
+              </div>
             </div>
             <div className="mb-6 text-left">
               <label className="text-sm font-medium text-gray-700 mb-2 block">Confirm Password</label>
-              <input
-                type="password"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <i data-lucide={showConfirmPassword ? "eye-off" : "eye"} className="w-5 h-5"></i>
+                </button>
+              </div>
             </div>
 
             {errorMsg && <div className="error-msg mb-3">{errorMsg}</div>}
@@ -292,7 +320,7 @@ export default function Ownerlogin() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={(event) => {
           if (event.target.id === "forgot-modal") closeForgot();
         }} id="forgot-modal">
-          <div className="bg-white w-full max-w-md rounded-xl border border-gray-200 shadow-xl p-6 relative">
+          <div className="bg-card w-full max-w-md rounded-xl border border-gray-200 shadow-soft p-6 relative">
             <button type="button" onClick={closeForgot} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
               <i data-lucide="x" className="w-5 h-5"></i>
             </button>
@@ -312,7 +340,7 @@ export default function Ownerlogin() {
                   />
                 </div>
                 {forgotError && <div className="error-msg">{forgotError}</div>}
-                <button type="button" onClick={requestOwnerOtp} className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                <button type="button" onClick={requestOwnerOtp} className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors">
                   {loading ? "Sending..." : "Send OTP"}
                 </button>
               </div>
@@ -332,7 +360,7 @@ export default function Ownerlogin() {
                   />
                 </div>
                 {forgotError && <div className="error-msg">{forgotError}</div>}
-                <button type="button" onClick={verifyOwnerOtp} className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                <button type="button" onClick={verifyOwnerOtp} className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors">
                   {loading ? "Verifying..." : "Verify OTP"}
                 </button>
               </div>

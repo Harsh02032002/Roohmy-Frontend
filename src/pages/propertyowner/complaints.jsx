@@ -1,169 +1,77 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { fetchJson } from "../../utils/api";
+import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { useHtmlPage } from "../../utils/htmlPage";
-import { requireOwnerSession } from "../../utils/ownerSession";
+import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { AlertCircle, CheckCircle2, Clock, Plus, Search } from "lucide-react";
+
+const Pill = ({ tone="muted", children }) => {
+  const t = { success:"bg-green-100 text-green-700", warning:"bg-amber-100 text-amber-700", danger:"bg-red-100 text-red-700", muted:"bg-gray-100 text-gray-600" };
+  return <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11.5px] font-medium ${t[tone]||t.muted}`}>{children}</span>;
+};
+
+const StatCard = ({ label, value, icon:Icon, tone="muted" }) => {
+  const bg = { muted:"bg-muted/40", warning:"bg-amber-50", success:"bg-green-50", danger:"bg-red-50" };
+  return (
+    <div className={`rounded-2xl border border-border p-4 shadow-soft ${bg[tone]||bg.muted}`}>
+      <div className="flex items-center justify-between mb-3"><span className="text-[12.5px] text-muted-foreground font-medium">{label}</span>{Icon&&<Icon className="size-4 text-muted-foreground"/>}</div>
+      <div className="font-serif text-[26px] leading-none text-foreground">{value}</div>
+    </div>
+  );
+};
+
+const mock = [
+  { id:1, tenant:"Aarav Sharma", room:"A-101", issue:"Water leakage in bathroom", status:"open", date:"15 May", priority:"high" },
+  { id:2, tenant:"Vihaan Gupta", room:"B-102", issue:"AC not cooling", status:"in-progress", date:"14 May", priority:"medium" },
+  { id:3, tenant:"Aditya Iyer", room:"C-103", issue:"Light bulb replacement needed", status:"resolved", date:"12 May", priority:"low" },
+  { id:4, tenant:"Rohan Mehta", room:"D-104", issue:"WiFi connectivity issues", status:"open", date:"11 May", priority:"medium" },
+];
 
 export default function Complaints() {
-  useHtmlPage({
-    title: "Roomhy - Tenant Complaints Management",
-    bodyClass: "text-slate-800",
-    htmlAttrs: { lang: "en" },
-    metas: [
-      { charset: "UTF-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    ],
-    links: [
-      {
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-        rel: "stylesheet"
-      },
-      { rel: "stylesheet", href: "/propertyowner/assets/css/complaints.css" }
-    ],
-    scripts: [
-      { src: "https://cdn.tailwindcss.com" },
-      { src: "https://unpkg.com/lucide@latest" }
-    ],
-    inlineScripts: []
-  });
-
-  const [owner, setOwner] = useState(null);
-  const [complaints, setComplaints] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [filter, setFilter] = useState("all");
-
-  useEffect(() => {
-    if (window.lucide?.createIcons) window.lucide.createIcons();
-  }, [complaints, filter, loading]);
-
-  useEffect(() => {
-    const session = requireOwnerSession();
-    if (!session) return;
-    setOwner(session);
-    const load = async () => {
-      try {
-        const data = await fetchJson("/api/complaints");
-        const list = Array.isArray(data) ? data : data?.complaints || data?.data || [];
-        setComplaints(list);
-      } catch (err) {
-        setErrorMsg(err?.body || err?.message || "Failed to load complaints.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  const stats = useMemo(() => {
-    const byStatus = { open: 0, taken: 0, resolved: 0, rejected: 0 };
-    complaints.forEach((c) => {
-      const status = String(c.status || "open").toLowerCase();
-      if (status.includes("reject")) byStatus.rejected += 1;
-      else if (status.includes("resolve")) byStatus.resolved += 1;
-      else if (status.includes("taken") || status.includes("progress")) byStatus.taken += 1;
-      else byStatus.open += 1;
-    });
-    return byStatus;
-  }, [complaints]);
-
-  const filtered = useMemo(() => {
-    if (filter === "all") return complaints;
-    return complaints.filter((c) => String(c.status || "open").toLowerCase().includes(filter));
-  }, [complaints, filter]);
-
-  const updateStatus = async (complaint, status) => {
-    try {
-      await fetchJson(`/api/complaints/${complaint._id}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status })
-      });
-      setComplaints((prev) =>
-        prev.map((item) => (item._id === complaint._id ? { ...item, status } : item))
-      );
-    } catch (err) {
-      setErrorMsg(err?.body || err?.message || "Failed to update status.");
-    }
-  };
-
+  const owner = getOwnerRuntimeSession();
+  const [tab, setTab] = useState("all");
+  const [search, setSearch] = useState("");
+  if (!owner?.loginId && typeof window !== "undefined") { window.location.href = "/propertyowner/ownerlogin"; return null; }
+  const filtered = mock.filter(c => (tab==="all"||c.status===tab) && (!search||c.tenant.toLowerCase().includes(search.toLowerCase())||c.issue.toLowerCase().includes(search.toLowerCase())));
   return (
-    <PropertyOwnerLayout owner={owner} title="Tenant Complaints" icon="circle-alert">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Tenant Complaints</h2>
-        <p className="text-gray-500 mt-1">Manage complaints from your tenants.</p>
+    <PropertyOwnerLayout owner={owner} title="Complaints" onLogout={() => { clearOwnerRuntimeSession(); window.location.href = "/propertyowner/ownerlogin"; }}>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Complaints</h1>
+          <p className="mt-1.5 text-[13.5px] text-muted-foreground">Track and resolve tenant complaints from one place.</p>
+        </div>
+        <button className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 md:mt-2"><Plus className="size-4"/> Add Complaint</button>
       </div>
-
-      {errorMsg && <div className="text-sm text-red-600 mb-4">{errorMsg}</div>}
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-red-500">
-          <p className="text-xs text-gray-500 uppercase font-semibold">Open</p>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.open}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-yellow-500">
-          <p className="text-xs text-gray-500 uppercase font-semibold">In Progress</p>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.taken}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-green-500">
-          <p className="text-xs text-gray-500 uppercase font-semibold">Resolved</p>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.resolved}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-gray-400">
-          <p className="text-xs text-gray-500 uppercase font-semibold">Rejected</p>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.rejected}</p>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <StatCard label="Total" value={mock.length} icon={AlertCircle} tone="muted"/>
+        <StatCard label="Open" value={mock.filter(c=>c.status==="open").length} icon={AlertCircle} tone="danger"/>
+        <StatCard label="In Progress" value={mock.filter(c=>c.status==="in-progress").length} icon={Clock} tone="warning"/>
+        <StatCard label="Resolved" value={mock.filter(c=>c.status==="resolved").length} icon={CheckCircle2} tone="success"/>
       </div>
-
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-wrap gap-3">
-        {["all", "open", "taken", "resolved"].map((item) => (
-          <button
-            key={item}
-            type="button"
-            onClick={() => setFilter(item)}
-            className={`filter-btn px-4 py-2 rounded-lg text-sm font-medium ${
-              filter === item ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            {item === "all" ? "All" : item === "taken" ? "In Progress" : item.charAt(0).toUpperCase() + item.slice(1)}
-          </button>
+      <div className="flex flex-wrap items-center gap-1.5 mb-4 border-b border-border">
+        {[{k:"all",l:"All"},{k:"open",l:"Open"},{k:"in-progress",l:"In Progress"},{k:"resolved",l:"Resolved"}].map(({k,l}) => (
+          <button key={k} onClick={()=>setTab(k)} className={`px-3 py-2 text-[13px] font-medium border-b-2 -mb-px transition-colors ${tab===k?"border-primary text-foreground":"border-transparent text-muted-foreground hover:text-foreground"}`}>{l}</button>
         ))}
       </div>
-
-      <div className="space-y-4">
-        {loading && (
-          <div className="text-center py-12 text-gray-400">Loading complaints...</div>
-        )}
-        {!loading && filtered.length === 0 && (
-          <div className="text-center py-12 text-gray-400">No complaints found.</div>
-        )}
-        {!loading && filtered.map((complaint) => (
-          <div key={complaint._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h3 className="font-semibold text-gray-800">{complaint.title || "Complaint"}</h3>
-                <p className="text-sm text-gray-500 mt-1">{complaint.description || "-"}</p>
-                <p className="text-xs text-gray-400 mt-2">
-                  Tenant: {complaint.tenantName || complaint.tenantId || "-"}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 capitalize">
-                  {complaint.status || "open"}
-                </span>
-                <select
-                  value={complaint.status || "open"}
-                  onChange={(e) => updateStatus(complaint, e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-1 text-sm"
-                >
-                  <option value="open">Open</option>
-                  <option value="taken">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="relative mb-4"><Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search complaints…" className="w-full h-10 pl-9 pr-3 rounded-lg bg-card border border-border text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20"/></div>
+      <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
+        <div className="overflow-x-auto">
+          <table className="w-full text-[13px]">
+            <thead><tr className="text-left text-[11.5px] uppercase tracking-wider text-muted-foreground bg-muted/50">
+              <th className="px-4 py-3 font-semibold">Tenant</th><th className="px-4 py-3 font-semibold">Room</th><th className="px-4 py-3 font-semibold">Issue</th><th className="px-4 py-3 font-semibold">Priority</th><th className="px-4 py-3 font-semibold">Status</th><th className="px-4 py-3 font-semibold">Date</th>
+            </tr></thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map(c => (
+                <tr key={c.id} className="hover:bg-muted/40 transition-colors">
+                  <td className="px-4 py-3 font-medium text-foreground">{c.tenant}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{c.room}</td>
+                  <td className="px-4 py-3 text-foreground">{c.issue}</td>
+                  <td className="px-4 py-3"><Pill tone={c.priority==="high"?"danger":c.priority==="medium"?"warning":"muted"}>{c.priority}</Pill></td>
+                  <td className="px-4 py-3"><Pill tone={c.status==="resolved"?"success":c.status==="in-progress"?"warning":"danger"}>{c.status}</Pill></td>
+                  <td className="px-4 py-3 text-muted-foreground">{c.date}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </PropertyOwnerLayout>
   );

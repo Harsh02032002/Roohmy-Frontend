@@ -81,18 +81,18 @@ const ROOM_TYPES_DEFAULT = [
 
 const FormField = ({ label, value, onChange, placeholder, type = "text", suffix, prefix, className, list }) => (
   <div className={cn("flex flex-col", className)}>
-    <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">{label}</label>
-    <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 focus-within:bg-white focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
-      {prefix && <span className="text-[10px] font-black text-slate-400 mr-2">{prefix}</span>}
+    <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">{label}</label>
+    <div className="flex items-center bg-muted/50 border border-border rounded-xl px-4 py-2.5 focus-within:bg-card focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+      {prefix && <span className="text-[10px] font-black text-muted-foreground mr-2">{prefix}</span>}
       <input 
         type={type} 
         value={value} 
         onChange={onChange} 
         placeholder={placeholder} 
         list={list}
-        className="w-full bg-transparent text-[10px] font-black text-slate-800 outline-none placeholder:text-slate-300"
+        className="w-full bg-transparent text-[10px] font-black text-foreground outline-none placeholder:text-muted-foreground/60"
       />
-      {suffix && <span className="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-tight">{suffix}</span>}
+      {suffix && <span className="text-[10px] font-black text-muted-foreground ml-2 uppercase tracking-tight">{suffix}</span>}
     </div>
   </div>
 );
@@ -477,14 +477,14 @@ export default function AddPropertyWizard() {
   if (submitted) {
     return (
       <PropertyOwnerLayout>
-      <div className="min-h-full bg-white flex items-center justify-center p-8">
-        <div className="bg-white rounded-3xl p-12 border border-slate-100 shadow-2xl max-w-lg w-full text-center">
-          <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-emerald-100">
-            <CheckCircle2 className="w-10 h-10 text-emerald-600" />
+      <div className="min-h-full bg-card flex items-center justify-center p-8">
+        <div className="bg-card rounded-3xl p-12 border border-border shadow-2xl max-w-lg w-full text-center">
+          <div className="w-20 h-20 bg-success/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-success/20">
+            <CheckCircle2 className="w-10 h-10 text-success" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3 uppercase tracking-tight">Property Added Successfully!</h2>
-          <p className="text-xs font-bold text-slate-400 mb-8 uppercase">Your listing is now live and visible to potential tenants.</p>
-          <button onClick={() => navigate("/propertyowner/properties")} className="w-full bg-blue-600 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100">Go to Properties</button>
+          <h2 className="text-2xl font-bold text-foreground mb-3 uppercase tracking-tight">Property Added Successfully!</h2>
+          <p className="text-xs font-bold text-muted-foreground mb-8 uppercase">Your listing is now live and visible to potential tenants.</p>
+          <button onClick={() => navigate("/propertyowner/properties")} className="w-full bg-primary text-white px-8 py-4 rounded-xl text-[11px] font-medium uppercase tracking-wider shadow-lg shadow-blue-100">Go to Properties</button>
         </div>
       </div>
       </PropertyOwnerLayout>
@@ -493,7 +493,7 @@ export default function AddPropertyWizard() {
 
   return (
     <PropertyOwnerLayout>
-    <div className="min-h-full bg-white">
+    <div className="min-h-full bg-card">
       {/* Top Header Actions */}
       <div className="px-8 pt-8">
         <PageHeader 
@@ -506,11 +506,11 @@ export default function AddPropertyWizard() {
           ]}
           actions={
             <div className="flex items-center gap-3">
-              <button className="px-6 py-2.5 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
+              <button className="px-6 py-2.5 rounded-xl border border-border text-[11px] font-medium uppercase tracking-wider text-foreground/80 hover:bg-muted/50 transition-all flex items-center gap-2">
                  <Save className="w-3.5 h-3.5" /> Save as Draft
               </button>
               <button onClick={() => step < 6 ? setStep(s => s + 1) : handleSubmit()} 
-                className="bg-blue-600 text-white px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                className="bg-primary text-white px-8 py-2.5 rounded-xl text-[11px] font-medium uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
                 {step === 6 ? "Submit Property" : `Next: ${STEPS[step]?.label}`} <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -519,23 +519,23 @@ export default function AddPropertyWizard() {
       </div>
 
       {/* Stepper */}
-      <div className="bg-white border-b border-slate-100 px-8 py-8">
+      <div className="bg-card border-b border-border px-8 py-8">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between">
           {STEPS.map((s, i) => (
             <React.Fragment key={s.num}>
               <button onClick={() => setStep(s.num)} className="flex flex-col items-center gap-3 relative group outline-none">
                 <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black transition-all",
-                  step >= s.num ? "bg-blue-600 text-white shadow-xl shadow-blue-100" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200")}>
+                  step >= s.num ? "bg-primary text-white shadow-soft shadow-blue-100" : "bg-muted text-muted-foreground group-hover:bg-slate-200")}>
                   {step > s.num ? <Check className="w-4 h-4" /> : s.num}
                 </div>
                 <div className="text-center">
-                   <p className={cn("text-[10px] font-black uppercase tracking-tight", step >= s.num ? "text-blue-600" : "text-slate-400")}>{s.label}</p>
-                   <p className="text-[8px] font-bold text-slate-300 mt-0.5 leading-none">{s.sub}</p>
+                   <p className={cn("text-[10px] font-black uppercase tracking-tight", step >= s.num ? "text-primary" : "text-muted-foreground")}>{s.label}</p>
+                   <p className="text-[8px] font-bold text-muted-foreground/60 mt-0.5 leading-none">{s.sub}</p>
                 </div>
-                {step === s.num && <div className="absolute -bottom-8 w-1.5 h-1.5 bg-blue-600 rounded-full" />}
+                {step === s.num && <div className="absolute -bottom-8 w-1.5 h-1.5 bg-primary rounded-full" />}
               </button>
               {i < STEPS.length - 1 && (
-                <div className={cn("flex-1 h-[2px] mx-6 -mt-8 transition-all duration-500", step > s.num ? "bg-blue-600" : "bg-slate-50")} />
+                <div className={cn("flex-1 h-[2px] mx-6 -mt-8 transition-all duration-500", step > s.num ? "bg-primary" : "bg-muted/50")} />
               )}
             </React.Fragment>
           ))}
@@ -548,26 +548,26 @@ export default function AddPropertyWizard() {
           
           {step === 1 && (
             <>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
-                <h2 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-8">Basic Information</h2>
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
+                <h2 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-8">Basic Information</h2>
                 <div className="space-y-6">
                   <div>
-                    <label className="text-[10px] font-black text-slate-800 uppercase mb-4 block tracking-tight">Property Type *</label>
+                    <label className="text-[10px] font-black text-foreground uppercase mb-4 block tracking-tight">Property Type *</label>
                     <div className="grid grid-cols-3 gap-4">
                       {PROPERTY_TYPES.map(pt => {
                         const Icon = pt.icon;
                         const active = propertyType === pt.value;
                         return (
                           <button key={pt.value} onClick={() => setPropertyType(pt.value)}
-                            className={cn("p-5 rounded-2xl border-2 text-left transition-all relative group",
-                              active ? "border-blue-600 bg-blue-50/50" : "border-slate-100 hover:border-slate-200"
+                            className={cn("p-5 rounded-xl border-2 text-left transition-all relative group",
+                              active ? "border-blue-600 bg-primary/10/50" : "border-border hover:border-border"
                             )}>
-                            {active && <div className="absolute top-4 right-4 bg-blue-600 rounded-full p-0.5 shadow-lg shadow-blue-100"><Check className="w-3 h-3 text-white" /></div>}
-                            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all", active ? "bg-blue-600 text-white shadow-lg shadow-blue-100" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200")}>
+                            {active && <div className="absolute top-4 right-4 bg-primary rounded-full p-0.5 shadow-lg shadow-blue-100"><Check className="w-3 h-3 text-white" /></div>}
+                            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all", active ? "bg-primary text-white shadow-lg shadow-blue-100" : "bg-muted text-muted-foreground group-hover:bg-slate-200")}>
                               <Icon className="w-5 h-5" />
                             </div>
-                            <p className="text-[12px] font-black text-slate-800 leading-tight">{pt.label}</p>
-                            <p className="text-[10px] text-slate-400 font-bold mt-0.5">{pt.sub}</p>
+                            <p className="text-[12px] font-black text-foreground leading-tight">{pt.label}</p>
+                            <p className="text-[10px] text-muted-foreground font-bold mt-0.5">{pt.sub}</p>
                           </button>
                         );
                       })}
@@ -578,8 +578,8 @@ export default function AddPropertyWizard() {
                 <div className="grid grid-cols-2 gap-6 mt-8">
                     <FormField label="Property Name *" value={propertyName} onChange={e => setPropertyName(e.target.value)} placeholder="e.g. Cozy Stay Girls Hostel" />
                     <div>
-                      <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Property Category *</label>
-                      <select value={propertyCategory} onChange={e => setPropertyCategory(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-[10px] font-black text-slate-800 outline-none hover:bg-white focus:border-blue-200 focus:ring-2 focus:ring-blue-500/10 transition-all">
+                      <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">Property Category *</label>
+                      <select value={propertyCategory} onChange={e => setPropertyCategory(e.target.value)} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-4 text-[10px] font-black text-foreground outline-none hover:bg-card focus:border-blue-200 focus:ring-2 focus:ring-blue-500/10 transition-all">
                         <option value="">Select category</option>
                         <option>Boys PG</option>
                         <option>Girls PG</option>
@@ -589,14 +589,14 @@ export default function AddPropertyWizard() {
                   </div>
 
                   <div className="mt-8">
-                    <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Description *</label>
-                    <textarea rows={5} value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe your property..." className="w-full bg-slate-50 border border-slate-100 rounded-xl py-4 px-4 text-[10px] font-black text-slate-800 outline-none resize-none hover:bg-white focus:border-blue-200 focus:ring-2 focus:ring-blue-500/10 transition-all" />
-                    <p className="text-right text-[9px] font-bold text-slate-300 mt-2">{description.length}/600</p>
+                    <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">Description *</label>
+                    <textarea rows={5} value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe your property..." className="w-full bg-muted/50 border border-border rounded-xl py-4 px-4 text-[10px] font-black text-foreground outline-none resize-none hover:bg-card focus:border-blue-200 focus:ring-2 focus:ring-blue-500/10 transition-all" />
+                    <p className="text-right text-[9px] font-bold text-muted-foreground/60 mt-2">{description.length}/600</p>
                   </div>
                  </div>
 
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
-                <h2 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-8">Location Details</h2>
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
+                <h2 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-8">Location Details</h2>
                 <div className="space-y-6">
                   <FormField label="Address *" value={address} onChange={e => setAddress(e.target.value)} placeholder="House/building name, Street address" />
                   <div className="grid grid-cols-4 gap-4">
@@ -618,17 +618,17 @@ export default function AddPropertyWizard() {
                   </div>
 
                   {/* Landmark and Google Map Location */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-50 mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border/50 mt-6">
                     <div className="flex flex-col">
-                      <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Nearby Landmarks (optional)</label>
+                      <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">Nearby Landmarks (optional)</label>
                       <div className="flex gap-3 items-center">
-                        <div className="flex-1 flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 focus-within:bg-white focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+                        <div className="flex-1 flex items-center bg-muted/50 border border-border rounded-xl px-4 py-2.5 focus-within:bg-card focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
                           <input 
                             type="text" 
                             value={landmark} 
                             onChange={e => setLandmark(e.target.value)} 
                             placeholder="e.g. Near Christ University, Koramangala 4th Block" 
-                            className="w-full bg-transparent text-[10px] font-black text-slate-800 outline-none placeholder:text-slate-400"
+                            className="w-full bg-transparent text-[10px] font-black text-foreground outline-none placeholder:text-muted-foreground"
                           />
                         </div>
                         
@@ -636,7 +636,7 @@ export default function AddPropertyWizard() {
                         <button
                           type="button"
                           onClick={() => setShowLandmarkPicker(true)}
-                          className="w-16 h-11 bg-slate-50 border border-slate-100 rounded-xl relative hover:brightness-95 active:scale-95 transition-all shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center group"
+                          className="w-16 h-11 bg-muted/50 border border-border rounded-xl relative hover:brightness-95 active:scale-95 transition-all shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center group"
                           title="Pick Landmark on Map"
                         >
                           <div className="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:10px_10px]" />
@@ -651,15 +651,15 @@ export default function AddPropertyWizard() {
                     </div>
                     
                     <div className="flex flex-col">
-                      <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Google Map Location (optional)</label>
+                      <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">Google Map Location (optional)</label>
                       <div className="flex gap-3 items-center">
-                        <div className="flex-1 flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 focus-within:bg-white focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+                        <div className="flex-1 flex items-center bg-muted/50 border border-border rounded-xl px-4 py-2.5 focus-within:bg-card focus-within:border-blue-200 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
                           <input 
                             type="text" 
                             value={googleMapInput} 
                             onChange={e => handleGoogleMapInputChange(e.target.value)} 
                             placeholder="Search location on map" 
-                            className="w-full bg-transparent text-[10px] font-black text-slate-800 outline-none placeholder:text-slate-400"
+                            className="w-full bg-transparent text-[10px] font-black text-foreground outline-none placeholder:text-muted-foreground"
                           />
                         </div>
                         
@@ -667,7 +667,7 @@ export default function AddPropertyWizard() {
                         <button
                           type="button"
                           onClick={() => setShowMapPicker(true)}
-                          className="w-16 h-11 bg-slate-50 border border-slate-100 rounded-xl relative hover:brightness-95 active:scale-95 transition-all shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center group"
+                          className="w-16 h-11 bg-muted/50 border border-border rounded-xl relative hover:brightness-95 active:scale-95 transition-all shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center group"
                           title="Pick on Map"
                         >
                           <div className="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:10px_10px]" />
@@ -720,16 +720,16 @@ export default function AddPropertyWizard() {
                 />
               )}
 
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight mb-8">Contact Person Details</h2>
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
+                <h2 className="text-sm font-black text-foreground uppercase tracking-tight mb-8">Contact Person Details</h2>
                 <div className="grid grid-cols-3 gap-6">
                    <FormField label="Contact Name *" value={contactName} onChange={e => setContactName(e.target.value)} placeholder="Full Name" />
                    <FormField label="Contact Number *" value={contactNumber} onChange={e => setContactNumber(e.target.value)} placeholder="Phone Number" prefix="+91" />
                    <FormField label="Email Address *" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
                 </div>
               </div>
-               <div className="mt-8 pt-8 border-t border-slate-50 flex justify-end">
-                  <button onClick={() => setStep(2)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+               <div className="mt-8 pt-8 border-t border-border/50 flex justify-end">
+                  <button onClick={() => setStep(2)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-primary text-white text-[11px] font-medium uppercase tracking-wider shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
                      Next: Room Types & Pricing <ChevronRight className="w-4 h-4" />
                   </button>
                </div>
@@ -738,22 +738,22 @@ export default function AddPropertyWizard() {
 
           {step === 2 && (
              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
+                <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">Room Types & Pricing</h2>
+                      <h2 className="text-sm font-black text-foreground uppercase tracking-tight">Room Types & Pricing</h2>
                     </div>
                     <button onClick={addRoom} 
-                      className="px-5 py-2.5 rounded-xl border border-blue-600 text-blue-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-blue-50 transition-all">
+                      className="px-5 py-2.5 rounded-xl border border-blue-600 text-primary text-[11px] font-medium uppercase tracking-wider flex items-center gap-2 hover:bg-primary/10 transition-all">
                        <Plus className="w-3.5 h-3.5" /> Add Room Type
                     </button>
                   </div>
 
-                  <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-start gap-4 mb-8">
-                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-600 flex-shrink-0">
+                  <div className="bg-primary/10/50 border border-primary/20 rounded-xl p-4 flex items-start gap-4 mb-8">
+                     <div className="w-8 h-8 bg-card rounded-full flex items-center justify-center shadow-sm text-primary flex-shrink-0">
                         <Info className="w-4 h-4" />
                      </div>
-                     <p className="text-[10px] font-bold text-slate-600 leading-relaxed pt-1.5">
+                     <p className="text-[10px] font-bold text-foreground/80 leading-relaxed pt-1.5">
                         ⚠️ REFERENCE DATA: Standard sample room images and default pricing details have been pre-populated for your reference. You can freely delete, replace, or update them with your actual room details.
                      </p>
                   </div>
@@ -761,7 +761,7 @@ export default function AddPropertyWizard() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead>
-                        <tr className="bg-slate-50/50 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                        <tr className="bg-muted/30 text-[9px] font-black text-muted-foreground uppercase tracking-widest border-b border-border/50">
                           <th className="px-2 py-3 min-w-[130px]">Room Type</th>
                           <th className="px-2 py-3 min-w-[120px]">Description</th>
                           <th className="px-2 py-4 text-center">Total Rooms</th>
@@ -775,15 +775,15 @@ export default function AddPropertyWizard() {
                       </thead>
                       <tbody className="divide-y divide-slate-50">
                         {roomTypes.map((room, idx) => (
-                          <tr key={idx} className="group hover:bg-slate-50/50 transition-all">
+                          <tr key={idx} className="group hover:bg-muted/30 transition-all">
                             <td className="px-2 py-3 min-w-[200px]">
                                 <div className="flex items-center gap-3">
                                    <div className="relative group/main">
-                                       <label htmlFor={`upload-room-main-${idx}`} className="w-12 h-12 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex-shrink-0 shadow-sm cursor-pointer hover:border-blue-300 hover:bg-white transition-all block">
+                                       <label htmlFor={`upload-room-main-${idx}`} className="w-12 h-12 rounded-xl overflow-hidden bg-muted/50 border border-border flex-shrink-0 shadow-sm cursor-pointer hover:border-blue-300 hover:bg-card transition-all block">
                                           {(roomTypePhotos[idx] || []).length > 0 ? (
                                              <img src={roomTypePhotos[idx][0]} className="w-full h-full object-cover" />
                                           ) : (
-                                             <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 group-hover/main:text-blue-400">
+                                             <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/60 group-hover/main:text-blue-400">
                                                 <ImageIcon className="w-5 h-5" />
                                                 <span className="text-[6px] font-black uppercase mt-1">Main</span>
                                              </div>
@@ -803,39 +803,39 @@ export default function AddPropertyWizard() {
                                        )}
                                     </div>
                                    <div className="flex-1 min-w-0">
-                                      <input id={`room-type-${idx}`} value={room.type} onChange={e => updateRoom(idx, "type", e.target.value)} className="bg-transparent text-[11px] font-black text-slate-800 outline-none block w-full truncate" placeholder="e.g. Single Sharing" />
-                                      <span className="text-[8px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">Popular</span>
+                                      <input id={`room-type-${idx}`} value={room.type} onChange={e => updateRoom(idx, "type", e.target.value)} className="bg-transparent text-[11px] font-black text-foreground outline-none block w-full truncate" placeholder="e.g. Single Sharing" />
+                                      <span className="text-[8px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded mt-1 inline-block uppercase tracking-wider">Popular</span>
                                    </div>
                                 </div>
                             </td>
                             <td className="px-2 py-3">
-                              <input value={room.desc} onChange={e => updateRoom(idx, "desc", e.target.value)} className="w-full bg-transparent text-[10px] font-bold text-slate-400 outline-none min-w-[100px]" placeholder="Short description" />
+                              <input value={room.desc} onChange={e => updateRoom(idx, "desc", e.target.value)} className="w-full bg-transparent text-[10px] font-bold text-muted-foreground outline-none min-w-[100px]" placeholder="Short description" />
                             </td>
                             <td className="px-2 py-4 text-center">
-                              <input value={room.totalRooms} onChange={e => updateRoom(idx, "totalRooms", e.target.value)} className="w-10 text-center bg-slate-50 border border-slate-100 rounded-lg py-1.5 text-[11px] font-bold outline-none" />
+                              <input value={room.totalRooms} onChange={e => updateRoom(idx, "totalRooms", e.target.value)} className="w-10 text-center bg-muted/50 border border-border rounded-lg py-1.5 text-[11px] font-bold outline-none" />
                             </td>
                             <td className="px-2 py-4 text-center">
-                              <input value={room.totalBeds} onChange={e => updateRoom(idx, "totalBeds", e.target.value)} className="w-10 text-center bg-slate-50 border border-slate-100 rounded-lg py-1.5 text-[11px] font-bold outline-none" />
+                              <input value={room.totalBeds} onChange={e => updateRoom(idx, "totalBeds", e.target.value)} className="w-10 text-center bg-muted/50 border border-border rounded-lg py-1.5 text-[11px] font-bold outline-none" />
                             </td>
                             <td className="px-2 py-4 text-center">
                                <input value={room.occupancy} onChange={e => updateRoom(idx, "occupancy", e.target.value)} className="w-6 text-center bg-transparent font-black outline-none" />
                             </td>
                             <td className="px-3 py-4">
-                              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1.5">
-                                 <IndianRupee className="w-3 h-3 text-slate-400" />
+                              <div className="flex items-center gap-1.5 bg-muted/50 border border-border rounded-lg px-2 py-1.5">
+                                 <IndianRupee className="w-3 h-3 text-muted-foreground" />
                                  <input value={room.pricePerBed} onChange={e => updateRoom(idx, "pricePerBed", e.target.value)} className="w-14 bg-transparent text-[11px] font-black outline-none" />
                               </div>
                             </td>
                             <td className="px-3 py-4">
-                              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1.5">
-                                 <IndianRupee className="w-3 h-3 text-slate-400" />
+                              <div className="flex items-center gap-1.5 bg-muted/50 border border-border rounded-lg px-2 py-1.5">
+                                 <IndianRupee className="w-3 h-3 text-muted-foreground" />
                                  <input value={room.pricePerRoom} onChange={e => updateRoom(idx, "pricePerRoom", e.target.value)} className="w-14 bg-transparent text-[11px] font-black outline-none" />
                               </div>
                             </td>
                             <td className="px-3 py-4">
                                 <div className="flex flex-wrap items-center gap-2 max-w-[200px]">
                                    {(roomTypePhotos[idx] || []).slice(1, 5).map((url, imgI) => (
-                                     <div key={imgI} className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm group relative">
+                                     <div key={imgI} className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-border shadow-sm group relative">
                                        <img src={url} className="w-full h-full object-cover" />
                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                           <Trash2 onClick={() => {
@@ -847,19 +847,19 @@ export default function AddPropertyWizard() {
                                        </div>
                                      </div>
                                    ))}
-                                   <label htmlFor={`upload-room-${idx}`} className="w-10 h-10 rounded-lg bg-blue-50 border-2 border-dashed border-blue-200 text-blue-600 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-100 transition-all flex-shrink-0">
+                                   <label htmlFor={`upload-room-${idx}`} className="w-10 h-10 rounded-lg bg-primary/10 border-2 border-dashed border-border border-blue-200 text-primary flex flex-col items-center justify-center cursor-pointer hover:bg-blue-100 transition-all flex-shrink-0">
                                      <Plus className="w-4 h-4" />
                                      <span className="text-[6px] font-black uppercase mt-0.5">Upload</span>
                                      <input id={`upload-room-${idx}`} type="file" multiple className="hidden" onChange={e => handlePhotoUpload(e, "room", idx)} accept="image/*" />
                                    </label>
                                    {(roomTypePhotos[idx] || []).length > 4 && (
-                                     <span className="text-[8px] font-black text-slate-400">+{(roomTypePhotos[idx] || []).length - 4} more</span>
+                                     <span className="text-[8px] font-black text-muted-foreground">+{(roomTypePhotos[idx] || []).length - 4} more</span>
                                    )}
                                 </div>
                             </td>
                             <td className="px-3 py-4 text-right">
                                <div className="flex items-center justify-end gap-2">
-                                  <button onClick={() => document.getElementById(`room-type-${idx}`).focus()} className="p-2 rounded-lg bg-blue-50 text-blue-500 hover:text-blue-700 transition-all"><Pencil className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => document.getElementById(`room-type-${idx}`).focus()} className="p-2 rounded-lg bg-primary/10 text-primary/80 hover:text-blue-700 transition-all"><Pencil className="w-3.5 h-3.5" /></button>
                                   <button onClick={() => removeRoom(idx)} className="p-2 rounded-lg bg-red-50 text-red-400 hover:text-red-600 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                                </div>
                             </td>
@@ -870,19 +870,19 @@ export default function AddPropertyWizard() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
-                   <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-8">Additional Details</h3>
+                <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
+                   <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-8">Additional Details</h3>
                    <div className="grid grid-cols-3 gap-6">
                       <FormField label="Total Property Area (Optional)" value={totalArea} onChange={e => setTotalArea(e.target.value)} suffix="Sq.ft" />
                       <div>
-                        <label className="text-[9px] font-black text-slate-400 uppercase mb-2 block">Year Built</label>
-                        <select value={yearBuilt} onChange={e => setYearBuilt(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-xs font-black outline-none">
+                        <label className="text-[9px] font-black text-muted-foreground uppercase mb-2 block">Year Built</label>
+                        <select value={yearBuilt} onChange={e => setYearBuilt(e.target.value)} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-4 text-xs font-black outline-none">
                            <option>2020</option><option>2021</option><option>2022</option>
                         </select>
                       </div>
                       <div>
-                        <label className="text-[9px] font-black text-slate-400 uppercase mb-2 block">Property Age</label>
-                        <select value={propertyAge} onChange={e => setPropertyAge(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-xs font-black outline-none">
+                        <label className="text-[9px] font-black text-muted-foreground uppercase mb-2 block">Property Age</label>
+                        <select value={propertyAge} onChange={e => setPropertyAge(e.target.value)} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-4 text-xs font-black outline-none">
                            <option>1-2 Years</option><option>3-5 Years</option>
                         </select>
                       </div>
@@ -890,35 +890,35 @@ export default function AddPropertyWizard() {
 
                     <div className="grid grid-cols-12 gap-4 mt-8 items-end">
                        <div className="col-span-5">
-                         <label className="text-[9px] font-black text-slate-400 uppercase mb-4 block">Preferred For</label>
+                         <label className="text-[9px] font-black text-muted-foreground uppercase mb-4 block">Preferred For</label>
                          <div className="flex gap-2.5 flex-wrap">
                            {["students", "professionals", "both", "family"].map(opt => (
                              <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                <div onClick={() => setPreferredFor(prev => ({ ...prev, [opt]: !prev[opt] }))} 
-                                 className={cn("w-4 h-4 rounded border-2 transition-all flex items-center justify-center", preferredFor[opt] ? "bg-blue-600 border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-slate-200")}>
+                                 className={cn("w-4 h-4 rounded border-2 transition-all flex items-center justify-center", preferredFor[opt] ? "bg-primary border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-border")}>
                                  {preferredFor[opt] && <Check className="w-2.5 h-2.5 text-white" />}
                                </div>
-                               <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter">{opt}</span>
+                               <span className="text-[8px] font-black text-muted-foreground uppercase tracking-tighter">{opt}</span>
                              </label>
                            ))}
                          </div>
                       </div>
                       <div className="col-span-5">
-                         <label className="text-[9px] font-black text-slate-400 uppercase mb-4 block text-center">Gender Preference</label>
+                         <label className="text-[9px] font-black text-muted-foreground uppercase mb-4 block text-center">Gender Preference</label>
                          <div className="flex justify-center gap-3.5">
                            {GENDER_OPTIONS.map(g => (
                              <label key={g} onClick={() => setGenderPref(g)} className="flex items-center gap-2 cursor-pointer">
-                               <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", genderPref === g ? "border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-slate-200")}>
-                                 {genderPref === g && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                               <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", genderPref === g ? "border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-border")}>
+                                 {genderPref === g && <div className="w-2 h-2 bg-primary rounded-full" />}
                                </div>
-                               <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter">{g}</span>
+                               <span className="text-[8px] font-black text-muted-foreground uppercase tracking-tighter">{g}</span>
                              </label>
                            ))}
                          </div>
                       </div>
                       <div className="col-span-2">
-                         <label className="text-[9px] font-black text-slate-400 uppercase mb-2 block">Floor(s)</label>
-                         <input value={floors} onChange={e => setFloors(e.target.value)} list="floor-options" placeholder="e.g. G + 3" className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-3 text-[10px] font-black outline-none" />
+                         <label className="text-[9px] font-black text-muted-foreground uppercase mb-2 block">Floor(s)</label>
+                         <input value={floors} onChange={e => setFloors(e.target.value)} list="floor-options" placeholder="e.g. G + 3" className="w-full bg-muted/50 border border-border rounded-xl py-2 px-3 text-[10px] font-black outline-none" />
                           <datalist id="floor-options">
                              <option value="G + 1" /><option value="G + 2" /><option value="G + 3" /><option value="G + 4" /><option value="G + 5" />
                           </datalist>
@@ -927,45 +927,45 @@ export default function AddPropertyWizard() {
 
                    <div className="grid grid-cols-12 gap-6 mt-8">
                       <div className="col-span-4">
-                         <label className="text-[9px] font-black text-slate-400 uppercase mb-4 block text-center">Lift Available</label>
+                         <label className="text-[9px] font-black text-muted-foreground uppercase mb-4 block text-center">Lift Available</label>
                          <div className="flex justify-center gap-5">
                            {["Yes", "No"].map(v => (
                              <label key={v} onClick={() => setLiftAvailable(v)} className="flex items-center gap-2 cursor-pointer">
-                               <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", liftAvailable === v ? "border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-slate-200")}>
-                                 {liftAvailable === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                               <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", liftAvailable === v ? "border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-border")}>
+                                 {liftAvailable === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                </div>
-                               <span className={cn("text-[8px] font-black uppercase tracking-tighter transition-all", liftAvailable === v ? "text-slate-800" : "text-slate-500")}>{v}</span>
+                               <span className={cn("text-[8px] font-black uppercase tracking-tighter transition-all", liftAvailable === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                              </label>
                            ))}
                          </div>
                       </div>
                       <div className="col-span-4">
-                         <label className="text-[9px] font-black text-slate-400 uppercase mb-4 block text-center">Parking Available</label>
+                         <label className="text-[9px] font-black text-muted-foreground uppercase mb-4 block text-center">Parking Available</label>
                          <div className="flex justify-center gap-5">
                            {["Yes", "No"].map(v => (
                              <label key={v} onClick={() => setParkingAvailable(v)} className="flex items-center gap-2 cursor-pointer">
-                               <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", parkingAvailable === v ? "border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-slate-200")}>
-                                 {parkingAvailable === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                               <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", parkingAvailable === v ? "border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.1)]" : "border-border")}>
+                                 {parkingAvailable === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                </div>
-                               <span className={cn("text-[8px] font-black uppercase tracking-tighter transition-all", parkingAvailable === v ? "text-slate-800" : "text-slate-500")}>{v}</span>
+                               <span className={cn("text-[8px] font-black uppercase tracking-tighter transition-all", parkingAvailable === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                              </label>
                            ))}
                          </div>
                       </div>
                       <div className="col-span-4">
-                         <label className="text-[9px] font-black text-slate-400 uppercase mb-2 block">Notice Period</label>
-                         <select value={noticePeriod} onChange={e => setNoticePeriod(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-3 text-[10px] font-black outline-none">
+                         <label className="text-[9px] font-black text-muted-foreground uppercase mb-2 block">Notice Period</label>
+                         <select value={noticePeriod} onChange={e => setNoticePeriod(e.target.value)} className="w-full bg-muted/50 border border-border rounded-xl py-2 px-3 text-[10px] font-black outline-none">
                             <option>15 Days</option><option>30 Days</option><option>45 Days</option><option>60 Days</option>
                          </select>
                       </div>
                    </div>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-slate-50 flex justify-between">
-                   <button onClick={() => setStep(1)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all">
+                <div className="mt-8 pt-8 border-t border-border/50 flex justify-between">
+                   <button onClick={() => setStep(1)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:bg-muted/50 transition-all">
                       <ChevronLeft className="w-4 h-4" /> Back: Basic Information
                    </button>
-                   <button onClick={() => setStep(3)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                   <button onClick={() => setStep(3)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-primary text-white text-[11px] font-medium uppercase tracking-wider shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
                       Next: Amenities <ChevronRight className="w-4 h-4" />
                    </button>
                 </div>
@@ -973,24 +973,24 @@ export default function AddPropertyWizard() {
           )}
           {step === 3 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
+               <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">Amenities</h2>
-                      <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Select and add amenities available in your property.</p>
+                      <h2 className="text-sm font-black text-foreground uppercase tracking-tight">Amenities</h2>
+                      <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">Select and add amenities available in your property.</p>
                     </div>
-                    <button onClick={() => setShowCustomAmenityInput(!showCustomAmenityInput)} className="px-5 py-2.5 rounded-xl border border-blue-600 text-blue-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-blue-50 transition-all">
+                    <button onClick={() => setShowCustomAmenityInput(!showCustomAmenityInput)} className="px-5 py-2.5 rounded-xl border border-blue-600 text-primary text-[11px] font-medium uppercase tracking-wider flex items-center gap-2 hover:bg-primary/10 transition-all">
                        <Plus className="w-3.5 h-3.5" /> Add Custom Amenity
                     </button>
                   </div>
                   
                   {showCustomAmenityInput && (
-                    <div className="mb-8 p-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-end gap-4 animate-in slide-in-from-top-4">
+                    <div className="mb-8 p-6 bg-muted/50 border border-border rounded-xl flex items-end gap-4 animate-in slide-in-from-top-4">
                       <div className="flex-1">
                         <label className="text-xs font-semibold text-black mb-2 block">Custom Amenity Name</label>
-                        <input value={newCustomAmenity} onChange={e => setNewCustomAmenity(e.target.value)} placeholder="e.g. Swimming Pool" className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-sm font-semibold text-black outline-none focus:border-blue-500 transition-all shadow-sm" />
+                        <input value={newCustomAmenity} onChange={e => setNewCustomAmenity(e.target.value)} placeholder="e.g. Swimming Pool" className="w-full bg-card border border-border rounded-xl py-3 px-4 text-sm font-semibold text-black outline-none focus:border-blue-500 transition-all shadow-sm" />
                       </div>
-                      <button onClick={addCustomAmenity} className="px-6 py-3 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2">
+                      <button onClick={addCustomAmenity} className="px-6 py-3 rounded-xl bg-primary text-white text-[11px] font-medium uppercase tracking-wider shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2">
                         Add <Plus className="w-4 h-4" />
                       </button>
                     </div>
@@ -1000,23 +1000,23 @@ export default function AddPropertyWizard() {
                     {AMENITY_CATEGORIES.map(cat => (
                       <div key={cat.label}>
                          <div className="flex items-center gap-3 mb-6">
-                            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
-                               <cat.icon className="w-4 h-4 text-slate-400" />
+                            <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                               <cat.icon className="w-4 h-4 text-muted-foreground" />
                             </div>
-                            <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{cat.label}</h3>
+                            <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">{cat.label}</h3>
                          </div>
                          <div className="grid grid-cols-4 gap-4">
                             {cat.items.map(item => {
                               const active = selectedAmenities.has(item);
                               return (
                                 <button key={item} onClick={() => toggleAmenity(item)}
-                                  className={cn("p-4 rounded-2xl border-2 text-left transition-all relative flex items-center gap-3",
-                                    active ? "border-blue-600 bg-blue-50/50" : "border-slate-50 hover:border-slate-100"
+                                  className={cn("p-4 rounded-xl border-2 text-left transition-all relative flex items-center gap-3",
+                                    active ? "border-blue-600 bg-primary/10/50" : "border-border/50 hover:border-border"
                                   )}>
-                                  <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-all", active ? "bg-blue-600 border-blue-600 shadow-lg shadow-blue-100" : "border-slate-200")}>
+                                  <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-all", active ? "bg-primary border-blue-600 shadow-lg shadow-blue-100" : "border-border")}>
                                      {active && <Check className="w-2.5 h-2.5 text-white" />}
                                   </div>
-                                  <span className={cn("text-[10px] font-black uppercase tracking-tight", active ? "text-slate-800" : "text-slate-400")}>{item}</span>
+                                  <span className={cn("text-[10px] font-black uppercase tracking-tight", active ? "text-foreground" : "text-muted-foreground")}>{item}</span>
                                 </button>
                               );
                             })}
@@ -1027,23 +1027,23 @@ export default function AddPropertyWizard() {
                     {customAmenities.length > 0 && (
                       <div>
                          <div className="flex items-center gap-3 mb-6">
-                            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center">
-                               <CheckCircle2 className="w-4 h-4 text-slate-400" />
+                            <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                               <CheckCircle2 className="w-4 h-4 text-muted-foreground" />
                             </div>
-                            <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Custom Amenities</h3>
+                            <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">Custom Amenities</h3>
                          </div>
                          <div className="grid grid-cols-4 gap-4">
                             {customAmenities.map(item => {
                               const active = selectedAmenities.has(item);
                               return (
                                 <button key={item} onClick={() => toggleAmenity(item)}
-                                  className={cn("p-4 rounded-2xl border-2 text-left transition-all relative flex items-center gap-3",
-                                    active ? "border-blue-600 bg-blue-50/50" : "border-slate-50 hover:border-slate-100"
+                                  className={cn("p-4 rounded-xl border-2 text-left transition-all relative flex items-center gap-3",
+                                    active ? "border-blue-600 bg-primary/10/50" : "border-border/50 hover:border-border"
                                   )}>
-                                  <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-all", active ? "bg-blue-600 border-blue-600 shadow-lg shadow-blue-100" : "border-slate-200")}>
+                                  <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-all", active ? "bg-primary border-blue-600 shadow-lg shadow-blue-100" : "border-border")}>
                                      {active && <Check className="w-2.5 h-2.5 text-white" />}
                                   </div>
-                                  <span className={cn("text-[10px] font-black uppercase tracking-tight", active ? "text-slate-800" : "text-slate-400")}>{item}</span>
+                                  <span className={cn("text-[10px] font-black uppercase tracking-tight", active ? "text-foreground" : "text-muted-foreground")}>{item}</span>
                                 </button>
                               );
                             })}
@@ -1052,11 +1052,11 @@ export default function AddPropertyWizard() {
                     )}
                   </div>
                   
-                  <div className="mt-8 pt-8 border-t border-slate-50 flex justify-between">
-                     <button onClick={() => setStep(2)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all">
+                  <div className="mt-8 pt-8 border-t border-border/50 flex justify-between">
+                     <button onClick={() => setStep(2)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:bg-muted/50 transition-all">
                         <ChevronLeft className="w-4 h-4" /> Back: Room Types
                      </button>
-                     <button onClick={() => setStep(4)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                     <button onClick={() => setStep(4)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-primary text-white text-[11px] font-medium uppercase tracking-wider shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
                         Next: Photos & Videos <ChevronRight className="w-4 h-4" />
                      </button>
                   </div>
@@ -1066,17 +1066,17 @@ export default function AddPropertyWizard() {
 
           {step === 4 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
+               <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
                      <div className="mb-8">
-                        <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">Photos & Videos</h2>
-                        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">High quality photos and videos help you get more views and bookings.</p>
+                        <h2 className="text-sm font-black text-foreground uppercase tracking-tight">Photos & Videos</h2>
+                        <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">High quality photos and videos help you get more views and bookings.</p>
                      </div>
 
-                     <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex items-start gap-4 mb-10">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-600 flex-shrink-0">
+                     <div className="bg-primary/10/50 border border-primary/20 rounded-xl p-4 flex items-start gap-4 mb-10">
+                        <div className="w-8 h-8 bg-card rounded-full flex items-center justify-center shadow-sm text-primary flex-shrink-0">
                            <Info className="w-4 h-4" />
                         </div>
-                        <p className="text-[10px] font-bold text-slate-600 leading-relaxed pt-1.5">
+                        <p className="text-[10px] font-bold text-foreground/80 leading-relaxed pt-1.5">
                            ⚠️ REFERENCE IMAGES: High-quality sample/reference photos have been pre-populated to help you visualize a complete premium listing. You can freely delete or replace them. Supported formats: JPG, PNG, MP4. Max size: 20MB per file.
                         </p>
                      </div>
@@ -1084,29 +1084,29 @@ export default function AddPropertyWizard() {
                   <div className="space-y-10">
                         <div className="space-y-6">
                            <div className="flex justify-between items-center">
-                               <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Property Photos (Gallery Images)</h3>
+                               <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">Property Photos (Gallery Images)</h3>
                                <div className="flex gap-3">
                                  <button onClick={() => setPropertyViews([...propertyViews, { label: "New View", images: [] }])} 
-                                    className="px-4 py-2 rounded-xl border border-blue-600 text-blue-600 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:bg-blue-50 transition-all">
+                                    className="px-4 py-2 rounded-xl border border-blue-600 text-primary text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:bg-primary/10 transition-all">
                                     <Plus className="w-3 h-3" /> Add Category
                                  </button>
-                                 <button className="text-[8px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5 hover:underline">
+                                 <button className="text-[8px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:underline">
                                     <LayoutGrid className="w-3 h-3" /> Reorder
                                  </button>
                                </div>
                             </div>
-                           <p className="text-[9px] font-bold text-slate-400 -mt-4">Add attractive photos of your property organized by category.</p>
+                           <p className="text-[9px] font-bold text-muted-foreground -mt-4">Add attractive photos of your property organized by category.</p>
 
                            {propertyViews.map((view, vIdx) => (
-                             <div key={vIdx} className="mt-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                             <div key={vIdx} className="mt-4 p-4 bg-muted/30 rounded-xl border border-border">
                                <div className="flex items-center justify-between mb-3">
                                    <div className="flex items-center gap-2">
                                      <input value={view.label} onChange={(e) => {
                                         const newViews = [...propertyViews];
                                         newViews[vIdx].label = e.target.value;
                                         setPropertyViews(newViews);
-                                     }} className="bg-transparent text-[11px] font-black text-slate-800 uppercase tracking-widest outline-none border-b-2 border-transparent focus:border-blue-500 transition-all w-fit min-w-[100px]" placeholder="Category Name" />
-                                     <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">View</span>
+                                     }} className="bg-transparent text-[11px] font-black text-foreground uppercase tracking-widest outline-none border-b-2 border-transparent focus:border-blue-500 transition-all w-fit min-w-[100px]" placeholder="Category Name" />
+                                     <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">View</span>
                                    </div>
                                    <button onClick={() => setPropertyViews(propertyViews.filter((_, i) => i !== vIdx))} className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-all">
                                       <Trash2 className="w-3.5 h-3.5" />
@@ -1114,24 +1114,24 @@ export default function AddPropertyWizard() {
                                 </div>
                                <div className="grid grid-cols-5 gap-4">
                                   {view.images.map((url, i) => (
-                                    <div key={i} className="relative aspect-[4/3] rounded-2xl overflow-hidden group border border-slate-200">
+                                    <div key={i} className="relative aspect-[4/3] rounded-xl overflow-hidden group border border-border">
                                       <img src={url} className="w-full h-full object-cover" />
                                       <button onClick={() => {
                                          const newViews = [...propertyViews];
                                          newViews[vIdx].images = newViews[vIdx].images.filter((_, idx) => idx !== i);
                                          setPropertyViews(newViews);
-                                      }} className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                      }} className="absolute top-2 right-2 bg-card/90 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                                         <X className="w-3.5 h-3.5 text-red-500" />
                                       </button>
                                     </div>
                                   ))}
-                                  <label className="aspect-[4/3] bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-slate-50 hover:border-blue-200 transition-all group">
-                                     <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                        <Upload className="w-5 h-5 text-blue-600" />
+                                  <label className="aspect-[4/3] bg-card border-2 border-dashed border-border border-border rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-muted/50 hover:border-blue-200 transition-all group">
+                                     <div className="w-10 h-10 bg-muted/50 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                        <Upload className="w-5 h-5 text-primary" />
                                      </div>
                                      <div className="text-center">
-                                        <p className="text-[9px] font-black text-slate-800 uppercase">Upload {view.label}</p>
-                                        <p className="text-[7px] font-bold text-slate-400 uppercase mt-0.5">JPG, PNG up to 20MB</p>
+                                        <p className="text-[9px] font-black text-foreground uppercase">Upload {view.label}</p>
+                                        <p className="text-[7px] font-bold text-muted-foreground uppercase mt-0.5">JPG, PNG up to 20MB</p>
                                      </div>
                                      <input type="file" multiple className="hidden" onChange={(e) => handlePhotoUpload(e, "property", vIdx)} accept="image/*" />
                                   </label>
@@ -1142,51 +1142,51 @@ export default function AddPropertyWizard() {
 
                     <div>
                         <div className="space-y-6">
-                           <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Room Type Photos</h3>
-                           <p className="text-[9px] font-bold text-slate-400 -mt-4">Add photos for each room type.</p>
+                           <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">Room Type Photos</h3>
+                           <p className="text-[9px] font-bold text-muted-foreground -mt-4">Add photos for each room type.</p>
                            
-                           <div className="flex gap-2 bg-slate-50/50 p-1.5 rounded-2xl border border-slate-100 w-fit overflow-x-auto max-w-full">
+                           <div className="flex gap-2 bg-muted/30 p-1.5 rounded-xl border border-border w-fit overflow-x-auto max-w-full">
                               {roomTypes.map((rt, idx) => (
                                 <button key={idx} onClick={() => setActivePhotoRoomIdx(idx)} 
-                                  className={cn("px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activePhotoRoomIdx === idx ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "bg-transparent text-slate-400 hover:text-slate-600")}>
+                                  className={cn("px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap", activePhotoRoomIdx === idx ? "bg-primary text-white shadow-lg shadow-blue-200" : "bg-transparent text-muted-foreground hover:text-foreground/80")}>
                                    {rt.type || `Room ${idx + 1}`}
-                                   <span className={cn("block text-[7px] font-bold mt-0.5", activePhotoRoomIdx === idx ? "text-blue-100" : "text-slate-300")}>{(roomTypePhotos[idx] || []).length} Photos</span>
+                                   <span className={cn("block text-[7px] font-bold mt-0.5", activePhotoRoomIdx === idx ? "text-blue-100" : "text-muted-foreground/60")}>{(roomTypePhotos[idx] || []).length} Photos</span>
                                 </button>
                               ))}
                            </div>
 
                            <div className="grid grid-cols-5 gap-4 mt-6">
                               {(roomTypePhotos[activePhotoRoomIdx] || []).map((url, i) => (
-                                <div key={i} className="relative aspect-[4/3] rounded-2xl overflow-hidden group border border-slate-200">
+                                <div key={i} className="relative aspect-[4/3] rounded-xl overflow-hidden group border border-border">
                                   <img src={url} className="w-full h-full object-cover" />
                                   <button onClick={() => {
                                      const up = { ...roomTypePhotos };
                                      up[activePhotoRoomIdx] = up[activePhotoRoomIdx].filter((_, idx) => idx !== i);
                                      setRoomTypePhotos(up);
-                                  }} className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                  }} className="absolute top-2 right-2 bg-card/90 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                                     <X className="w-3.5 h-3.5 text-red-500" />
                                   </button>
                                 </div>
                               ))}
-                              <label className="aspect-[4/3] bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-white hover:border-blue-200 transition-all group">
-                                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                    <Upload className="w-5 h-5 text-blue-600" />
+                              <label className="aspect-[4/3] bg-muted/50 border-2 border-dashed border-border border-border rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-card hover:border-blue-200 transition-all group">
+                                 <div className="w-10 h-10 bg-card rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                    <Upload className="w-5 h-5 text-primary" />
                                  </div>
                                  <div className="text-center">
-                                    <p className="text-[9px] font-black text-slate-800 uppercase">Upload Photos</p>
-                                    <p className="text-[7px] font-bold text-slate-400 uppercase mt-0.5">JPG, PNG up to 20MB</p>
+                                    <p className="text-[9px] font-black text-foreground uppercase">Upload Photos</p>
+                                    <p className="text-[7px] font-bold text-muted-foreground uppercase mt-0.5">JPG, PNG up to 20MB</p>
                                  </div>
                                  <input type="file" multiple className="hidden" onChange={(e) => handlePhotoUpload(e, "room", activePhotoRoomIdx)} accept="image/*" />
                               </label>
                            </div>
-                           <p className="text-[8px] font-bold text-slate-400 italic mt-4">Tip: Add clear photos of beds, bathroom, windows and workspace.</p>
+                           <p className="text-[8px] font-bold text-muted-foreground italic mt-4">Tip: Add clear photos of beds, bathroom, windows and workspace.</p>
                         {/* Section 3: Property Video */}
                         <div className="space-y-6">
-                           <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Property Video <span className="normal-case font-bold text-slate-300 ml-1">(Optional)</span></h3>
-                           <p className="text-[9px] font-bold text-slate-400 -mt-4">Add video to give tenants a better understanding of your property.</p>
+                           <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">Property Video <span className="normal-case font-bold text-muted-foreground/60 ml-1">(Optional)</span></h3>
+                           <p className="text-[9px] font-bold text-muted-foreground -mt-4">Add video to give tenants a better understanding of your property.</p>
                            
                            <div className="grid grid-cols-4 gap-6">
-                              <label className="aspect-[4/3] bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-white hover:border-blue-200 transition-all group relative overflow-hidden">
+                              <label className="aspect-[4/3] bg-muted/50 border-2 border-dashed border-border border-border rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-card hover:border-blue-200 transition-all group relative overflow-hidden">
                                  {videoUrl ? (
                                    <>
                                      <video src={videoUrl} className="w-full h-full object-cover" />
@@ -1196,12 +1196,12 @@ export default function AddPropertyWizard() {
                                    </>
                                  ) : (
                                    <>
-                                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                        <Play className="w-5 h-5 text-blue-600 ml-0.5" />
+                                     <div className="w-10 h-10 bg-card rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                        <Play className="w-5 h-5 text-primary ml-0.5" />
                                      </div>
                                      <div className="text-center">
-                                        <p className="text-[9px] font-black text-slate-800 uppercase">Upload Video</p>
-                                        <p className="text-[7px] font-bold text-slate-400 uppercase mt-0.5">MP4 up to 50MB</p>
+                                        <p className="text-[9px] font-black text-foreground uppercase">Upload Video</p>
+                                        <p className="text-[7px] font-bold text-muted-foreground uppercase mt-0.5">MP4 up to 50MB</p>
                                      </div>
                                    </>
                                  )}
@@ -1211,11 +1211,11 @@ export default function AddPropertyWizard() {
                         </div>
                      </div>
 
-                     <div className="mt-16 pt-8 border-t border-slate-50 flex justify-between">
-                        <button onClick={() => setStep(3)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all">
+                     <div className="mt-16 pt-8 border-t border-border/50 flex justify-between">
+                        <button onClick={() => setStep(3)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:bg-muted/50 transition-all">
                            <ChevronLeft className="w-4 h-4" /> Back: Amenities
                         </button>
-                        <button onClick={() => setStep(5)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                        <button onClick={() => setStep(5)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-primary text-white text-[11px] font-medium uppercase tracking-wider shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
                            Next: Policies & Pricing <ChevronRight className="w-4 h-4" />
                         </button>
                      </div>
@@ -1227,10 +1227,10 @@ export default function AddPropertyWizard() {
 
           {step === 5 && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
+               <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
                   <div className="mb-8">
-                    <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">Policies & Pricing</h2>
-                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Set your property rules, policies, pricing and other important information.</p>
+                    <h2 className="text-sm font-black text-foreground uppercase tracking-tight">Policies & Pricing</h2>
+                    <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">Set your property rules, policies, pricing and other important information.</p>
                   </div>
                   
                   <div className="space-y-12">
@@ -1243,16 +1243,16 @@ export default function AddPropertyWizard() {
                            {/* Smoking Allowed */}
                            <div className="space-y-3">
                               <div className="flex items-center gap-1.5">
-                                 <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight">Smoking Allowed</span>
-                                 <Info className="w-3 h-3 text-slate-300" />
+                                 <span className="text-[10px] font-black text-foreground uppercase tracking-tight">Smoking Allowed</span>
+                                 <Info className="w-3 h-3 text-muted-foreground/60" />
                               </div>
                               <div className="flex gap-8">
                                  {["Yes", "No"].map(v => (
                                    <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, smokingAllowed: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.smokingAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                         {houseRules.smokingAllowed === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.smokingAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                         {houseRules.smokingAllowed === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                       </div>
-                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.smokingAllowed === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.smokingAllowed === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                    </label>
                                  ))}
                               </div>
@@ -1260,14 +1260,14 @@ export default function AddPropertyWizard() {
 
                            {/* Pets Allowed */}
                            <div className="space-y-3">
-                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Pets Allowed</span>
+                              <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Pets Allowed</span>
                               <div className="flex gap-8">
                                  {["Yes", "No"].map(v => (
                                    <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, petsAllowed: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.petsAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                         {houseRules.petsAllowed === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.petsAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                         {houseRules.petsAllowed === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                       </div>
-                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.petsAllowed === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.petsAllowed === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                    </label>
                                  ))}
                               </div>
@@ -1276,23 +1276,23 @@ export default function AddPropertyWizard() {
                            {/* Visitors Allowed */}
                            <div className="space-y-4">
                               <div className="space-y-3">
-                                 <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Visitors Allowed</span>
+                                 <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Visitors Allowed</span>
                                  <div className="flex gap-8">
                                     {["Yes", "No"].map(v => (
                                       <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, visitorsAllowed: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                         <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.visitorsAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                            {houseRules.visitorsAllowed === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                         <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.visitorsAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                            {houseRules.visitorsAllowed === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                          </div>
-                                         <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.visitorsAllowed === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                         <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.visitorsAllowed === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                       </label>
                                     ))}
                                  </div>
                               </div>
                               {houseRules.visitorsAllowed === "Yes" && (
                                 <div className="animate-in slide-in-from-top-2 duration-300 max-w-[180px]">
-                                   <label className="text-[8px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Visitor Timing (Optional)</label>
+                                   <label className="text-[8px] font-black text-muted-foreground uppercase mb-1.5 block tracking-widest">Visitor Timing (Optional)</label>
                                    <select value={houseRules.visitorTiming} onChange={e => setHouseRules(prev => ({ ...prev, visitorTiming: e.target.value }))}
-                                     className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-3 text-[10px] font-black text-slate-700 outline-none hover:bg-white focus:border-blue-200 transition-all">
+                                     className="w-full bg-muted/50 border border-border rounded-xl py-2 px-3 text-[10px] font-black text-foreground outline-none hover:bg-card focus:border-blue-200 transition-all">
                                       <option>8:00 AM - 8:00 PM</option>
                                       <option>9:00 AM - 9:00 PM</option>
                                    </select>
@@ -1308,14 +1308,14 @@ export default function AddPropertyWizard() {
                         <div className="flex-1 space-y-10">
                            {/* Alcohol Allowed */}
                            <div className="space-y-3">
-                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Alcohol Allowed</span>
+                              <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Alcohol Allowed</span>
                               <div className="flex gap-8">
                                  {["Yes", "No"].map(v => (
                                    <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, alcoholAllowed: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.alcoholAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                         {houseRules.alcoholAllowed === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.alcoholAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                         {houseRules.alcoholAllowed === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                       </div>
-                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.alcoholAllowed === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.alcoholAllowed === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                    </label>
                                  ))}
                               </div>
@@ -1323,14 +1323,14 @@ export default function AddPropertyWizard() {
 
                            {/* Cooking Allowed */}
                            <div className="space-y-3">
-                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Cooking Allowed</span>
+                              <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Cooking Allowed</span>
                               <div className="flex gap-8">
                                  {["Yes", "No"].map(v => (
                                    <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, cookingAllowed: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.cookingAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                         {houseRules.cookingAllowed === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.cookingAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                         {houseRules.cookingAllowed === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                       </div>
-                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.cookingAllowed === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.cookingAllowed === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                    </label>
                                  ))}
                               </div>
@@ -1338,14 +1338,14 @@ export default function AddPropertyWizard() {
 
                            {/* Party Allowed */}
                            <div className="space-y-3">
-                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Party/Events Allowed</span>
+                              <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Party/Events Allowed</span>
                               <div className="flex gap-8">
                                  {["Yes", "No"].map(v => (
                                    <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, partyAllowed: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.partyAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                         {houseRules.partyAllowed === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.partyAllowed === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                         {houseRules.partyAllowed === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                       </div>
-                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.partyAllowed === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.partyAllowed === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                    </label>
                                  ))}
                               </div>
@@ -1359,14 +1359,14 @@ export default function AddPropertyWizard() {
                         <div className="flex-1 space-y-10">
                            {/* Outside Food */}
                            <div className="space-y-3">
-                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Outside Food Allowed</span>
+                              <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Outside Food Allowed</span>
                               <div className="flex gap-8">
                                  {["Yes", "No"].map(v => (
                                    <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, outsideFood: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.outsideFood === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                         {houseRules.outsideFood === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.outsideFood === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                         {houseRules.outsideFood === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                       </div>
-                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.outsideFood === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.outsideFood === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                    </label>
                                  ))}
                               </div>
@@ -1375,23 +1375,23 @@ export default function AddPropertyWizard() {
                            {/* Quiet Hours */}
                            <div className="space-y-4">
                               <div className="space-y-3">
-                                 <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Quiet Hours</span>
+                                 <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Quiet Hours</span>
                                  <div className="flex gap-8">
                                     {["Yes", "No"].map(v => (
                                       <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, quietHours: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                         <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.quietHours === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                            {houseRules.quietHours === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                         <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.quietHours === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                            {houseRules.quietHours === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                          </div>
-                                         <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.quietHours === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                         <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.quietHours === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                       </label>
                                     ))}
                                  </div>
                               </div>
                               {houseRules.quietHours === "Yes" && (
                                 <div className="animate-in slide-in-from-top-2 duration-300 max-w-[200px]">
-                                   <label className="text-[8px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Quiet Hours Timing</label>
+                                   <label className="text-[8px] font-black text-muted-foreground uppercase mb-1.5 block tracking-widest">Quiet Hours Timing</label>
                                    <select value={houseRules.quietHoursTiming} onChange={e => setHouseRules(prev => ({ ...prev, quietHoursTiming: e.target.value }))}
-                                     className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-3 text-[10px] font-black text-slate-700 outline-none hover:bg-white focus:border-blue-200 transition-all">
+                                     className="w-full bg-muted/50 border border-border rounded-xl py-2 px-3 text-[10px] font-black text-foreground outline-none hover:bg-card focus:border-blue-200 transition-all">
                                       <option>10:00 PM - 7:00 AM</option>
                                       <option>11:00 PM - 6:00 AM</option>
                                    </select>
@@ -1401,14 +1401,14 @@ export default function AddPropertyWizard() {
 
                            {/* Early Check-in */}
                            <div className="space-y-3">
-                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-tight block">Early Check-in Allowed</span>
+                              <span className="text-[10px] font-black text-foreground uppercase tracking-tight block">Early Check-in Allowed</span>
                               <div className="flex gap-8">
                                  {["Yes", "No"].map(v => (
                                    <label key={v} onClick={() => setHouseRules(prev => ({ ...prev, earlyCheckIn: v }))} className="flex items-center gap-2.5 cursor-pointer group">
-                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.earlyCheckIn === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-slate-200 group-hover:border-slate-300")}>
-                                         {houseRules.earlyCheckIn === v && <div className="w-2 h-2 bg-blue-600 rounded-full animate-in zoom-in-50 duration-300" />}
+                                      <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", houseRules.earlyCheckIn === v ? "border-blue-600 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-border group-hover:border-slate-300")}>
+                                         {houseRules.earlyCheckIn === v && <div className="w-2 h-2 bg-primary rounded-full animate-in zoom-in-50 duration-300" />}
                                       </div>
-                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.earlyCheckIn === v ? "text-slate-800" : "text-slate-400")}>{v}</span>
+                                      <span className={cn("text-[10px] font-black uppercase tracking-tight transition-all", houseRules.earlyCheckIn === v ? "text-foreground" : "text-muted-foreground")}>{v}</span>
                                    </label>
                                  ))}
                               </div>
@@ -1418,16 +1418,16 @@ export default function AddPropertyWizard() {
                     </div>
 
                     {/* Pricing & Charges Section */}
-                    <div className="pt-12 border-t border-slate-50 relative">
-                       <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-8">Pricing & Charges</h3>
+                    <div className="pt-12 border-t border-border/50 relative">
+                       <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-8">Pricing & Charges</h3>
                        
                        <div className="grid grid-cols-12 gap-10">
                           {/* Left: Inputs */}
                           <div className="col-span-8 space-y-10">
                               <div className="grid grid-cols-3 gap-x-6 gap-y-8">
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Rent Type</label>
-                                    <select value={pricing.rentType} onChange={e => setPricing({...pricing, rentType: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-[10px] font-black outline-none hover:bg-white focus:border-blue-200 transition-all">
+                                    <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">Rent Type</label>
+                                    <select value={pricing.rentType} onChange={e => setPricing({...pricing, rentType: e.target.value})} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-4 text-[10px] font-black outline-none hover:bg-card focus:border-blue-200 transition-all">
                                        <option>Per Bed</option><option>Per Room</option>
                                     </select>
                                  </div>
@@ -1441,47 +1441,47 @@ export default function AddPropertyWizard() {
                                     <FormField label="Advance Rent" value={pricing.advanceRent} onChange={e => setPricing({...pricing, advanceRent: e.target.value})} prefix="₹" placeholder="5000" />
                                  </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Notice Period</label>
-                                    <select value={pricing.noticePeriod} onChange={e => setPricing({...pricing, noticePeriod: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-[10px] font-black outline-none hover:bg-white focus:border-blue-200 transition-all">
+                                    <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">Notice Period</label>
+                                    <select value={pricing.noticePeriod} onChange={e => setPricing({...pricing, noticePeriod: e.target.value})} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-4 text-[10px] font-black outline-none hover:bg-card focus:border-blue-200 transition-all">
                                        <option>15 Days</option><option>30 Days</option><option>45 Days</option><option>60 Days</option>
                                     </select>
                                  </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Lock-in Period</label>
-                                    <select value={pricing.lockInPeriod} onChange={e => setPricing({...pricing, lockInPeriod: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-[10px] font-black outline-none hover:bg-white focus:border-blue-200 transition-all">
+                                    <label className="text-[10px] font-black text-foreground uppercase mb-3 block tracking-tight">Lock-in Period</label>
+                                    <select value={pricing.lockInPeriod} onChange={e => setPricing({...pricing, lockInPeriod: e.target.value})} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-4 text-[10px] font-black outline-none hover:bg-card focus:border-blue-200 transition-all">
                                        <option>None</option><option>1 Month</option><option>3 Months</option><option>6 Months</option><option>1 Year</option>
                                     </select>
                                  </div>
                              </div>
 
                              <div>
-                                <label className="text-[10px] font-black text-slate-800 uppercase mb-4 block tracking-tight">Included in Rent</label>
+                                <label className="text-[10px] font-black text-foreground uppercase mb-4 block tracking-tight">Included in Rent</label>
                                 <div className="grid grid-cols-4 gap-x-4 gap-y-3">
                                    {Object.keys(includedInRent).map(key => (
-                                     <label key={key} className="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 hover:bg-white transition-all">
+                                     <label key={key} className="flex items-center gap-2 cursor-pointer bg-muted/50 px-4 py-2 rounded-xl border border-border hover:bg-card transition-all">
                                         <div onClick={() => setIncludedInRent(prev => ({ ...prev, [key]: !prev[key] }))} 
-                                          className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-all", includedInRent[key] ? "bg-blue-600 border-blue-600 shadow-lg shadow-blue-100" : "border-slate-200")}>
+                                          className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-all", includedInRent[key] ? "bg-primary border-blue-600 shadow-lg shadow-blue-100" : "border-border")}>
                                            {includedInRent[key] && <Check className="w-2.5 h-2.5 text-white" />}
                                         </div>
-                                        <span className="text-[9px] font-black uppercase tracking-tight text-slate-800">{key}</span>
+                                        <span className="text-[9px] font-black uppercase tracking-tight text-foreground">{key}</span>
                                      </label>
                                    ))}
                                 </div>
                              </div>
 
                              <div className="space-y-4">
-                                <label className="text-[10px] font-black text-slate-800 uppercase block tracking-tight">Additional Charges (If any)</label>
+                                <label className="text-[10px] font-black text-foreground uppercase block tracking-tight">Additional Charges (If any)</label>
                                 
                                 {additionalCharges.length > 0 && (
                                   <div className="grid grid-cols-12 gap-4">
                                      <div className="col-span-4">
-                                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest pl-1">Charge Name</span>
+                                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest pl-1">Charge Name</span>
                                      </div>
                                      <div className="col-span-3">
-                                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest pl-1">Amount</span>
+                                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest pl-1">Amount</span>
                                      </div>
                                      <div className="col-span-4">
-                                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest pl-1">Per</span>
+                                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest pl-1">Per</span>
                                      </div>
                                   </div>
                                 )}
@@ -1490,29 +1490,29 @@ export default function AddPropertyWizard() {
                                      <div className="col-span-4">
                                         <input value={charge.name} onChange={e => {
                                           const up = [...additionalCharges]; up[idx].name = e.target.value; setAdditionalCharges(up);
-                                        }} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-[10px] font-black outline-none" placeholder="Charge Name" />
+                                        }} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-4 text-[10px] font-black outline-none" placeholder="Charge Name" />
                                      </div>
                                      <div className="col-span-3 relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">₹</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground">₹</span>
                                         <input value={charge.amount} onChange={e => {
                                           const up = [...additionalCharges]; up[idx].amount = e.target.value; setAdditionalCharges(up);
-                                        }} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-8 pr-4 text-[10px] font-black outline-none" placeholder="Amount" />
+                                        }} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 pl-8 pr-4 text-[10px] font-black outline-none" placeholder="Amount" />
                                      </div>
                                      <div className="col-span-4">
                                            <select value={charge.per} onChange={e => {
                                              const up = [...additionalCharges]; up[idx].per = e.target.value; setAdditionalCharges(up);
-                                           }} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-[10px] font-black outline-none">
+                                           }} className="w-full bg-muted/50 border border-border rounded-xl py-2.5 px-3 text-[10px] font-black outline-none">
                                               <option>Month</option><option>Day</option><option>One-time</option>
                                            </select>
                                      </div>
                                      <div className="col-span-1 pb-1 text-right">
-                                        <button onClick={() => setAdditionalCharges(prev => prev.filter((_, i) => i !== idx))} className="p-2.5 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all">
+                                        <button onClick={() => setAdditionalCharges(prev => prev.filter((_, i) => i !== idx))} className="p-2.5 rounded-xl text-muted-foreground/60 hover:text-rose-500 hover:bg-destructive/10 transition-all">
                                            <Trash2 className="w-4 h-4" />
                                         </button>
                                      </div>
                                   </div>
                                 ))}
-                                <button onClick={() => setAdditionalCharges([...additionalCharges, { name: "", amount: "", per: "Month" }])} className="text-[9px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all">
+                                <button onClick={() => setAdditionalCharges([...additionalCharges, { name: "", amount: "", per: "Month" }])} className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-all">
                                    <Plus className="w-3.5 h-3.5" /> Add Another Charge
                                 </button>
                              </div>
@@ -1520,25 +1520,25 @@ export default function AddPropertyWizard() {
 
                           {/* Right: Preview Card */}
                           <div className="col-span-4">
-                             <div className="bg-slate-50/80 rounded-2xl p-6 border border-slate-50">
-                                <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Pricing Preview <span className="normal-case font-bold text-slate-300 ml-1">(Per Month)</span></h4>
+                             <div className="bg-muted/50/80 rounded-xl p-6 border border-border/50">
+                                <h4 className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-6">Pricing Preview <span className="normal-case font-bold text-muted-foreground/60 ml-1">(Per Month)</span></h4>
                                 <div className="space-y-5">
                                    {roomTypes.length > 0 ? roomTypes.map((r, i) => (
                                      <div key={i} className="flex justify-between items-start">
                                         <div>
-                                           <p className="text-[10px] font-black text-slate-800 tracking-tight">{r.type || "Untitled Room"}</p>
-                                           <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{r.totalRooms || 0} Rooms • {r.totalBeds || 0} Beds</p>
+                                           <p className="text-[10px] font-black text-foreground tracking-tight">{r.type || "Untitled Room"}</p>
+                                           <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1 tracking-widest">{r.totalRooms || 0} Rooms • {r.totalBeds || 0} Beds</p>
                                         </div>
-                                        <p className="text-[10px] font-black text-slate-800 tracking-tighter">₹{r.pricePerBed || 0}<span className="text-[7px] text-slate-400 ml-0.5">/bed</span></p>
+                                        <p className="text-[10px] font-black text-foreground tracking-tighter">₹{r.pricePerBed || 0}<span className="text-[7px] text-muted-foreground ml-0.5">/bed</span></p>
                                      </div>
                                    )) : (
                                      <div className="py-4 text-center">
-                                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Add room types to see pricing</p>
+                                        <p className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest">Add room types to see pricing</p>
                                      </div>
                                    )}
                                 </div>
-                                <div className="mt-8 pt-6 border-t border-slate-100">
-                                   <p className="text-[8px] font-bold text-slate-400 uppercase leading-relaxed">
+                                <div className="mt-8 pt-6 border-t border-border">
+                                   <p className="text-[8px] font-bold text-muted-foreground uppercase leading-relaxed">
                                       Price may vary based on selected additional charges.
                                    </p>
                                 </div>
@@ -1548,21 +1548,21 @@ export default function AddPropertyWizard() {
                     </div>
 
                     {/* Cancellation & Description */}
-                    <div className="pt-12 border-t border-slate-50 grid grid-cols-12 gap-10">
+                    <div className="pt-12 border-t border-border/50 grid grid-cols-12 gap-10">
                        <div className="col-span-4">
-                          <label className="text-[10px] font-black text-slate-800 uppercase mb-4 block tracking-tight">Cancellation Policy</label>
+                          <label className="text-[10px] font-black text-foreground uppercase mb-4 block tracking-tight">Cancellation Policy</label>
                           <div className="space-y-4">
-                             <select value={cancellationPolicy} onChange={e => setCancellationPolicy(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-[10px] font-black outline-none">
+                             <select value={cancellationPolicy} onChange={e => setCancellationPolicy(e.target.value)} className="w-full bg-muted/50 border border-border rounded-xl py-3 px-4 text-[10px] font-black outline-none">
                                 <option>Moderate</option><option>Strict</option><option>Flexible</option>
                              </select>
-                             <button className="text-[8px] font-black text-blue-600 uppercase tracking-widest hover:underline">View Policy Details</button>
+                             <button className="text-[8px] font-black text-primary uppercase tracking-widest hover:underline">View Policy Details</button>
                           </div>
                        </div>
                        <div className="col-span-8">
-                          <label className="text-[10px] font-black text-slate-800 uppercase mb-4 block tracking-tight">Property Description for Tenants <span className="normal-case font-bold text-slate-300 ml-1">(Optional)</span></label>
+                          <label className="text-[10px] font-black text-foreground uppercase mb-4 block tracking-tight">Property Description for Tenants <span className="normal-case font-bold text-muted-foreground/60 ml-1">(Optional)</span></label>
                           <div className="relative">
-                             <textarea rows={4} value={tenantDescription} onChange={e => setTenantDescription(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 text-[10px] font-bold text-slate-600 outline-none focus:bg-white focus:border-blue-200 transition-all resize-none" placeholder="e.g. A comfortable and secure stay with all essential amenities..." />
-                             <div className="absolute bottom-4 right-5 text-[8px] font-black text-slate-300 uppercase tracking-widest">
+                             <textarea rows={4} value={tenantDescription} onChange={e => setTenantDescription(e.target.value)} className="w-full bg-muted/50 border border-border rounded-xl py-4 px-5 text-[10px] font-bold text-foreground/80 outline-none focus:bg-card focus:border-blue-200 transition-all resize-none" placeholder="e.g. A comfortable and secure stay with all essential amenities..." />
+                             <div className="absolute bottom-4 right-5 text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest">
                                 {tenantDescription.length}/500 characters
                              </div>
                           </div>
@@ -1573,10 +1573,10 @@ export default function AddPropertyWizard() {
 
                {/* Step Footer Buttons */}
                <div className="flex items-center justify-between pt-4">
-                  <button onClick={() => setStep(4)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all">
+                  <button onClick={() => setStep(4)} className="flex items-center gap-2 px-6 py-3 rounded-xl border border-border text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:bg-muted/50 transition-all">
                      <ChevronLeft className="w-4 h-4" /> Back: Photos & Videos
                   </button>
-                  <button onClick={() => setStep(6)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                  <button onClick={() => setStep(6)} className="flex items-center gap-2 px-10 py-3 rounded-xl bg-primary text-white text-[11px] font-medium uppercase tracking-wider shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
                      Next: Review & Submit <ChevronRight className="w-4 h-4" />
                   </button>
                </div>
@@ -1588,15 +1588,15 @@ export default function AddPropertyWizard() {
                <div className="grid grid-cols-12 gap-8">
                   {/* Left: Summary Details */}
                   <div className="col-span-8 space-y-8">
-                     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
-                        <div className="flex items-center justify-between mb-8 pb-8 border-b border-slate-50">
+                     <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
+                        <div className="flex items-center justify-between mb-8 pb-8 border-b border-border/50">
                           <div>
-                            <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">{editId ? "Edit Property Summary" : "Review & Submit"}</h2>
-                            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Review all the details before submitting your property for listing.</p>
+                            <h2 className="text-sm font-black text-foreground uppercase tracking-tight">{editId ? "Edit Property Summary" : "Review & Submit"}</h2>
+                            <p className="text-[10px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">Review all the details before submitting your property for listing.</p>
                           </div>
-                          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl border border-emerald-100">
+                          <div className="flex items-center gap-2 bg-success/10 text-success px-4 py-2 rounded-xl border border-success/20">
                              <CheckCircle2 className="w-4 h-4" />
-                             <span className="text-[10px] font-black uppercase tracking-widest">Ready to Publish</span>
+                             <span className="text-[11px] font-medium uppercase tracking-wider">Ready to Publish</span>
                           </div>
                         </div>
 
@@ -1604,58 +1604,58 @@ export default function AddPropertyWizard() {
                            <div className="grid grid-cols-2 gap-12">
                               <section>
                                  <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">1. Basic Details</h3>
-                                    <button onClick={() => setStep(1)} className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline">Edit</button>
+                                    <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">1. Basic Details</h3>
+                                    <button onClick={() => setStep(1)} className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline">Edit</button>
                                  </div>
-                                 <div className="space-y-4 bg-slate-50/50 rounded-2xl p-5 border border-slate-50">
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Property Name</span><span className="text-[10px] font-black text-slate-800 uppercase">{propertyName || "N/A"}</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Type</span><span className="text-[10px] font-black text-slate-800 uppercase">{propertyType}</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Location</span><span className="text-[10px] font-black text-slate-800 uppercase text-right max-w-[200px]">{city}, {state}</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Category</span><span className="text-[10px] font-black text-slate-800 uppercase">{propertyCategory}</span></div>
+                                 <div className="space-y-4 bg-muted/30 rounded-xl p-5 border border-border/50">
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Property Name</span><span className="text-[10px] font-black text-foreground uppercase">{propertyName || "N/A"}</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Type</span><span className="text-[10px] font-black text-foreground uppercase">{propertyType}</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Location</span><span className="text-[10px] font-black text-foreground uppercase text-right max-w-[200px]">{city}, {state}</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Category</span><span className="text-[10px] font-black text-foreground uppercase">{propertyCategory}</span></div>
                                  </div>
                               </section>
 
                               <section>
                                  <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">2. Property Details</h3>
-                                    <button onClick={() => setStep(2)} className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline">Edit</button>
+                                    <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">2. Property Details</h3>
+                                    <button onClick={() => setStep(2)} className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline">Edit</button>
                                  </div>
-                                 <div className="space-y-4 bg-slate-50/50 rounded-2xl p-5 border border-slate-50">
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Total Area</span><span className="text-[10px] font-black text-slate-800 uppercase">{totalArea} Sq.ft</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Gender Preference</span><span className="text-[10px] font-black text-slate-800 uppercase">{genderPref}</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Room Types</span><span className="text-[10px] font-black text-slate-800 uppercase">{roomTypes.length} types</span></div>
-                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-slate-400 uppercase">Total Floors</span><span className="text-[10px] font-black text-slate-800 uppercase">{floors}</span></div>
+                                 <div className="space-y-4 bg-muted/30 rounded-xl p-5 border border-border/50">
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Total Area</span><span className="text-[10px] font-black text-foreground uppercase">{totalArea} Sq.ft</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Gender Preference</span><span className="text-[10px] font-black text-foreground uppercase">{genderPref}</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Room Types</span><span className="text-[10px] font-black text-foreground uppercase">{roomTypes.length} types</span></div>
+                                    <div className="flex justify-between items-center"><span className="text-[9px] font-bold text-muted-foreground uppercase">Total Floors</span><span className="text-[10px] font-black text-foreground uppercase">{floors}</span></div>
                                  </div>
                               </section>
                            </div>
 
                            <section>
                               <div className="flex items-center justify-between mb-4">
-                                 <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">3. Amenities</h3>
-                                 <button onClick={() => setStep(3)} className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline">Edit</button>
+                                 <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">3. Amenities</h3>
+                                 <button onClick={() => setStep(3)} className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline">Edit</button>
                               </div>
-                              <div className="flex flex-wrap gap-2.5 bg-slate-50/50 rounded-2xl p-6 border border-slate-50">
+                              <div className="flex flex-wrap gap-2.5 bg-muted/30 rounded-xl p-6 border border-border/50">
                                  {Array.from(selectedAmenities).length > 0 ? Array.from(selectedAmenities).map(a => (
-                                   <span key={a} className="bg-white border border-slate-100 px-3.5 py-1.5 rounded-xl text-[9px] font-black text-slate-600 uppercase tracking-tight shadow-sm">{a}</span>
+                                   <span key={a} className="bg-card border border-border px-3.5 py-1.5 rounded-xl text-[9px] font-black text-foreground/80 uppercase tracking-tight shadow-sm">{a}</span>
                                  )) : (
-                                   <p className="text-[10px] font-bold text-slate-400 uppercase italic">No amenities selected</p>
+                                   <p className="text-[10px] font-bold text-muted-foreground uppercase italic">No amenities selected</p>
                                  )}
                               </div>
                            </section>
 
                            <section>
                               <div className="flex items-center justify-between mb-4">
-                                 <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">4. Photos & Videos</h3>
-                                 <button onClick={() => setStep(4)} className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline">Edit</button>
+                                 <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">4. Photos & Videos</h3>
+                                 <button onClick={() => setStep(4)} className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline">Edit</button>
                               </div>
-                              <div className="grid grid-cols-6 gap-3 bg-slate-50/50 rounded-2xl p-5 border border-slate-50">
+                              <div className="grid grid-cols-6 gap-3 bg-muted/30 rounded-xl p-5 border border-border/50">
                                   {propertyPhotos.length > 0 ? propertyPhotos.slice(0, 12).map((url, i) => (
-                                    <div key={i} className="aspect-square rounded-xl bg-white border border-slate-100 overflow-hidden shadow-sm">
+                                    <div key={i} className="aspect-square rounded-xl bg-card border border-border overflow-hidden shadow-sm">
                                        <img src={url} className="w-full h-full object-cover" />
                                     </div>
                                   )) : (
-                                    <div className="col-span-6 py-8 text-center bg-white rounded-xl border border-dashed border-slate-200">
-                                       <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No photos uploaded yet</p>
+                                    <div className="col-span-6 py-8 text-center bg-card rounded-xl border border-dashed border-border border-border">
+                                       <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">No photos uploaded yet</p>
                                     </div>
                                   )}
                                </div>
@@ -1663,24 +1663,24 @@ export default function AddPropertyWizard() {
 
                            <section>
                               <div className="flex items-center justify-between mb-4">
-                                 <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">5. Policies & Pricing</h3>
-                                 <button onClick={() => setStep(5)} className="text-[9px] font-black text-blue-600 uppercase tracking-widest hover:underline">Edit</button>
+                                 <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">5. Policies & Pricing</h3>
+                                 <button onClick={() => setStep(5)} className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline">Edit</button>
                               </div>
-                              <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-50 space-y-6">
+                              <div className="bg-muted/30 rounded-xl p-6 border border-border/50 space-y-6">
                                  <div className="grid grid-cols-2 gap-10">
                                     <div className="space-y-3">
-                                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">House Rules</p>
+                                       <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">House Rules</p>
                                        <div className="flex flex-wrap gap-x-6 gap-y-2">
-                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-600" /><span className="text-[9px] font-black text-slate-700 uppercase">Smoking: {houseRules.smokingAllowed}</span></div>
-                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-600" /><span className="text-[9px] font-black text-slate-700 uppercase">Pets: {houseRules.petsAllowed}</span></div>
-                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-600" /><span className="text-[9px] font-black text-slate-700 uppercase">Visitors: {houseRules.visitorsAllowed}</span></div>
+                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /><span className="text-[9px] font-black text-foreground uppercase">Smoking: {houseRules.smokingAllowed}</span></div>
+                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /><span className="text-[9px] font-black text-foreground uppercase">Pets: {houseRules.petsAllowed}</span></div>
+                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary" /><span className="text-[9px] font-black text-foreground uppercase">Visitors: {houseRules.visitorsAllowed}</span></div>
                                        </div>
                                     </div>
                                     <div className="space-y-3">
-                                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Policies</p>
+                                       <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Policies</p>
                                        <div className="flex flex-wrap gap-x-6 gap-y-2">
-                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /><span className="text-[9px] font-black text-slate-700 uppercase">Cancellation: {cancellationPolicy}</span></div>
-                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /><span className="text-[9px] font-black text-slate-700 uppercase">Lock-in: {pricing.lockInPeriod} Months</span></div>
+                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /><span className="text-[9px] font-black text-foreground uppercase">Cancellation: {cancellationPolicy}</span></div>
+                                          <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /><span className="text-[9px] font-black text-foreground uppercase">Lock-in: {pricing.lockInPeriod} Months</span></div>
                                        </div>
                                     </div>
                                  </div>
@@ -1692,29 +1692,29 @@ export default function AddPropertyWizard() {
 
                   {/* Right: Publish Actions */}
                   <div className="col-span-4 space-y-6">
-                     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sticky top-24">
-                        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-50">
-                           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                              <Building2 className="w-5 h-5 text-blue-600" />
+                     <div className="bg-card rounded-xl border border-border shadow-sm p-6 sticky top-24">
+                        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border/50">
+                           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                              <Building2 className="w-5 h-5 text-primary" />
                            </div>
                            <div>
-                              <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-tight">Listing Overview</h3>
-                              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Property ID: {editId ? editId.slice(-8).toUpperCase() : "RMH-2024-NEW"}</p>
+                              <h3 className="text-[11px] font-black text-foreground uppercase tracking-tight">Listing Overview</h3>
+                              <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Property ID: {editId ? editId.slice(-8).toUpperCase() : "RMH-2024-NEW"}</p>
                            </div>
                         </div>
 
                         <div className="space-y-5">
                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] font-bold text-slate-400 uppercase">Total Rooms</span>
-                              <span className="text-[10px] font-black text-slate-800 uppercase">{roomTypes.reduce((acc, r) => acc + (parseInt(r.totalRooms) || 0), 0)} Rooms</span>
+                              <span className="text-[9px] font-bold text-muted-foreground uppercase">Total Rooms</span>
+                              <span className="text-[10px] font-black text-foreground uppercase">{roomTypes.reduce((acc, r) => acc + (parseInt(r.totalRooms) || 0), 0)} Rooms</span>
                            </div>
                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] font-bold text-slate-400 uppercase">Total Beds</span>
-                              <span className="text-[10px] font-black text-slate-800 uppercase">{roomTypes.reduce((acc, r) => acc + (parseInt(r.totalBeds) || 0), 0)} Beds</span>
+                              <span className="text-[9px] font-bold text-muted-foreground uppercase">Total Beds</span>
+                              <span className="text-[10px] font-black text-foreground uppercase">{roomTypes.reduce((acc, r) => acc + (parseInt(r.totalBeds) || 0), 0)} Beds</span>
                            </div>
                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] font-bold text-slate-400 uppercase">Price Starts From</span>
-                              <span className="text-[11px] font-black text-blue-600 uppercase">
+                              <span className="text-[9px] font-bold text-muted-foreground uppercase">Price Starts From</span>
+                              <span className="text-[11px] font-black text-primary uppercase">
                                  ₹{(() => {
                                    const prices = roomTypes.map(r => parseInt(r.pricePerBed)).filter(p => p > 0);
                                    return prices.length > 0 ? Math.min(...prices).toLocaleString("en-IN") : "0";
@@ -1724,14 +1724,14 @@ export default function AddPropertyWizard() {
                         </div>
 
                         <div className="mt-10 space-y-3">
-                           <button onClick={handleSubmit} disabled={submitting} className="w-full bg-blue-600 text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center justify-center gap-3">
+                           <button onClick={handleSubmit} disabled={submitting} className="w-full bg-primary text-white py-4 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-soft shadow-blue-100 hover:bg-blue-700 transition-all flex items-center justify-center gap-3">
                               {submitting ? (editId ? "Updating..." : "Publishing...") : (editId ? "Update Property" : "Publish Listing")} <ChevronRight className="w-4 h-4" />
                            </button>
-                           <p className="text-[8px] font-bold text-slate-400 text-center uppercase tracking-tight">By {editId ? "updating" : "publishing"}, you agree to our terms & conditions.</p>
+                           <p className="text-[8px] font-bold text-muted-foreground text-center uppercase tracking-tight">By {editId ? "updating" : "publishing"}, you agree to our terms & conditions.</p>
                         </div>
                      </div>
 
-                     <div className="bg-amber-50/50 rounded-2xl border border-amber-100 p-6">
+                     <div className="bg-amber-50/50 rounded-xl border border-amber-100 p-6">
                         <div className="flex items-center gap-2 mb-4">
                            <ShieldCheck className="w-4 h-4 text-amber-600" />
                            <h4 className="text-[10px] font-black text-amber-800 uppercase tracking-widest">Quality Check</h4>
@@ -1760,46 +1760,46 @@ export default function AddPropertyWizard() {
         {step !== 6 && (
         <div className="col-span-3 space-y-6 sticky top-24 self-start">
            {step === 1 && (
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                 <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight mb-6">Property Photos *</h2>
-                 <p className="text-xs text-slate-500 mb-4">Upload high-quality photos of your property.</p>
+              <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+                 <h2 className="text-sm font-black text-foreground uppercase tracking-tight mb-6">Property Photos *</h2>
+                 <p className="text-xs text-muted-foreground mb-4">Upload high-quality photos of your property.</p>
                  
-                 <label className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-all mb-4">
+                 <label className="border-2 border-dashed border-border border-border rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-all mb-4">
                     <input type="file" multiple className="hidden" onChange={(e) => handlePhotoUpload(e, "property")} accept="image/*" />
-                    <Upload className="w-8 h-8 text-slate-400 mb-3" />
-                    <span className="text-xs font-semibold text-blue-600">Click to upload or drag and drop</span>
-                    <span className="text-[10px] text-slate-400 mt-1">JPG, PNG (Max. 10MB each)</span>
+                    <Upload className="w-8 h-8 text-muted-foreground mb-3" />
+                    <span className="text-xs font-semibold text-primary">Click to upload or drag and drop</span>
+                    <span className="text-[10px] text-muted-foreground mt-1">JPG, PNG (Max. 10MB each)</span>
                  </label>
                  
                  {propertyPhotos.length > 0 && (
                    <div className="grid grid-cols-2 gap-3 mt-4">
                      {propertyPhotos.map((url, i) => (
-                       <div key={i} className="relative aspect-video rounded-lg overflow-hidden group border border-slate-200">
+                       <div key={i} className="relative aspect-video rounded-lg overflow-hidden group border border-border">
                          <img src={url} alt={`Property ${i+1}`} className="w-full h-full object-cover" />
-                         <button onClick={(e) => { e.preventDefault(); removePropertyPhoto(i); }} className="absolute top-1 right-1 bg-white/90 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button onClick={(e) => { e.preventDefault(); removePropertyPhoto(i); }} className="absolute top-1 right-1 bg-card/90 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                            <X className="w-3 h-3 text-red-500" />
                          </button>
                        </div>
                      ))}
                    </div>
                  )}
-                 <div className="mt-4 pt-4 border-t border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center flex items-center justify-center gap-1.5 hover:text-slate-600 transition-colors">
+                 <div className="mt-4 pt-4 border-t border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center flex items-center justify-center gap-1.5 hover:text-foreground/80 transition-colors">
                     <label className="cursor-pointer flex items-center gap-1.5">
                        <input type="file" multiple className="hidden" onChange={(e) => handlePhotoUpload(e, "property")} accept="image/*" />
                        <Plus className="w-3.5 h-3.5" /> Upload More Photos
                     </label>
                  </div>
-                 <p className="text-[9px] text-slate-400 text-center mt-2 font-semibold">You can upload up to 20 photos</p>
+                 <p className="text-[9px] text-muted-foreground text-center mt-2 font-semibold">You can upload up to 20 photos</p>
               </div>
            )}
            
            {/* Tips for better listing */}
-           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+           <div className="bg-card rounded-xl border border-border shadow-sm p-5">
               <div className="flex items-center gap-3 mb-6">
-                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <Zap className="w-3.5 h-3.5 text-blue-600" />
+                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Zap className="w-3.5 h-3.5 text-primary" />
                  </div>
-                 <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Tips for better listing</h3>
+                 <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">Tips for better listing</h3>
               </div>
               <ul className="space-y-4">
                  {[
@@ -1813,34 +1813,34 @@ export default function AddPropertyWizard() {
                       <div className="mt-0.5 flex-shrink-0">
                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                       </div>
-                      <p className="text-[9px] font-black text-slate-500 leading-relaxed uppercase tracking-tight">{tip}</p>
+                      <p className="text-[9px] font-black text-muted-foreground leading-relaxed uppercase tracking-tight">{tip}</p>
                    </li>
                  ))}
               </ul>
 
               {step === 1 && (
-                 <div className="mt-8 pt-8 border-t border-slate-100">
-                    <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-6">Listing Preview</h3>
-                    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                      <div className="h-40 bg-slate-100 relative">
+                 <div className="mt-8 pt-8 border-t border-border">
+                    <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-6">Listing Preview</h3>
+                    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                      <div className="h-40 bg-muted relative">
                         {propertyPhotos.length > 0 ? (
                           <img src={propertyPhotos[0]} className="w-full h-full object-cover" alt="Preview" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-300">
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/60">
                              <ImageIcon className="w-8 h-8 opacity-50" />
                           </div>
                         )}
-                        <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur rounded text-[9px] font-black uppercase text-blue-600 shadow-sm">
+                        <div className="absolute top-3 left-3 px-2 py-1 bg-card/90 backdrop-blur rounded text-[9px] font-black uppercase text-primary shadow-sm">
                           {PROPERTY_TYPES.find(p => p.value === propertyType)?.label || propertyType || "Property Type"}
                         </div>
                       </div>
                       <div className="p-4">
-                        <h4 className="text-sm font-black text-slate-800 truncate">{propertyName || "Property Name"}</h4>
-                        <div className="flex items-center gap-1.5 text-slate-500 mt-1.5">
+                        <h4 className="text-sm font-black text-foreground truncate">{propertyName || "Property Name"}</h4>
+                        <div className="flex items-center gap-1.5 text-muted-foreground mt-1.5">
                            <MapPin className="w-3 h-3" />
                            <span className="text-[10px] font-bold truncate">{locality || city ? `${locality}${locality && city ? ", " : ""}${city}` : "Location"}</span>
                         </div>
-                        <div className="flex gap-2 mt-4 pt-4 border-t border-slate-100 text-[9px] font-bold text-slate-500">
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-border text-[9px] font-bold text-muted-foreground">
                            {/* Room details count removed here as per request */}
                         </div>
                       </div>
@@ -1851,41 +1851,41 @@ export default function AddPropertyWizard() {
               {step !== 1 && (
                  <>
               {/* Room Summary Integration */}
-              <div className="mt-8 pt-8 border-t border-slate-100">
-                 <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-6">Room Summary</h3>
+              <div className="mt-8 pt-8 border-t border-border">
+                 <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-6">Room Summary</h3>
                  <div className="space-y-5">
                     {roomTypes.length > 0 ? (
                       <>
                        {roomTypes.map((r, i) => (
                          <div key={i} className="flex justify-between items-start animate-in slide-in-from-right-4 duration-300">
                             <div>
-                               <p className="text-[10px] font-black text-slate-800 tracking-tight">{r.type || "Untitled Room"}</p>
-                               <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{r.totalRooms || 0} Rooms • {r.totalBeds || 0} Beds</p>
+                               <p className="text-[10px] font-black text-foreground tracking-tight">{r.type || "Untitled Room"}</p>
+                               <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1 tracking-widest">{r.totalRooms || 0} Rooms • {r.totalBeds || 0} Beds</p>
                             </div>
                             <div className="text-right">
-                               <p className="text-[10px] font-black text-slate-800 tracking-tighter">₹{r.pricePerBed || 0}/bed</p>
-                               <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-widest">₹{r.pricePerRoom || 0}/room</p>
+                               <p className="text-[10px] font-black text-foreground tracking-tighter">₹{r.pricePerBed || 0}/bed</p>
+                               <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1 tracking-widest">₹{r.pricePerRoom || 0}/room</p>
                             </div>
                          </div>
                        ))}
-                       <div className="pt-5 border-t border-slate-100 flex justify-between items-center">
-                          <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Total</p>
-                          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                       <div className="pt-5 border-t border-border flex justify-between items-center">
+                          <p className="text-[10px] font-black text-foreground uppercase tracking-widest">Total</p>
+                          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                              {roomTypes.reduce((acc, r) => acc + (parseInt(r.totalRooms) || 0), 0)} Rooms • {roomTypes.reduce((acc, r) => acc + (parseInt(r.totalBeds) || 0), 0)} Beds
                           </p>
                        </div>
                       </>
                     ) : (
-                      <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-100">
-                         <div className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1">Live Summary</div>
-                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">0 Rooms • 0 Beds</div>
+                      <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/30 rounded-xl border border-dashed border-border border-border">
+                         <div className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-1">Live Summary</div>
+                         <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">0 Rooms • 0 Beds</div>
                       </div>
                     )}
                  </div>
                </div>
 
               {/* Pricing Note Section */}
-              <div className="mt-8 bg-amber-50/50 border border-amber-100 rounded-2xl p-6 relative overflow-hidden">
+              <div className="mt-8 bg-amber-50/50 border border-amber-100 rounded-xl p-6 relative overflow-hidden">
                  <div className="absolute -top-2 -right-2 p-4 opacity-5">
                     <Building2 className="w-16 h-16 text-amber-600" />
                  </div>

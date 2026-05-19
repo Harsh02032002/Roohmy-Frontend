@@ -7,8 +7,22 @@ import {
   BedDouble,
   IndianRupee,
   ArrowUpRight,
-  BarChart2
+  BarChart2,
+  Wallet,
+  AlertTriangle,
+  Send,
+  Plus,
+  Sparkles,
+  TrendingUp,
+  MessageSquareWarning,
+  CalendarClock
 } from "lucide-react";
+import { StatCard } from "../../components/propertyowner/StatCard";
+import { Pill } from "../../components/propertyowner/Pill";
+import {
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
+  PieChart, Pie, Cell
+} from "recharts";
 import {
   clearOwnerRuntimeSession,
   fetchOwnerTenants,
@@ -26,7 +40,7 @@ export default function Admin() {
       { name: "viewport", content: "width=device-width, initial-scale=1.0" }
     ],
     links: [
-      { href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap", rel: "stylesheet" },
+      { href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap", rel: "stylesheet" },
       { rel: "stylesheet", href: "/propertyowner/assets/css/admin.css" }
     ],
     scripts: [{ src: "https://cdn.tailwindcss.com" }, { src: "https://unpkg.com/lucide@latest" }],
@@ -134,66 +148,125 @@ export default function Admin() {
       }}
       contentClassName="max-w-7xl mx-auto"
     >
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-7">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Welcome back, {owner?.name || "Owner"}!</h1>
-          <p className="text-sm text-slate-500 mt-1">Here's what's happening with your properties today.</p>
+          <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary mb-1.5 flex items-center gap-1.5">
+            <Sparkles className="size-3.5" /> Good morning, {owner?.name || "Owner"}
+          </div>
+          <h1 className="font-serif text-[34px] md:text-[40px] leading-[1.05]">
+            Here's what's happening today.
+          </h1>
+          <p className="mt-1.5 text-[14px] text-muted-foreground">
+            {loading ? "..." : tenantsCount} beds occupied across {loading ? "..." : roomsCount} rooms.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40">
+            <Send className="size-3.5" /> Send rent reminders
+          </button>
+          <button className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90">
+            <Plus className="size-3.5" /> Add tenant
+          </button>
         </div>
       </div>
 
       {errorMsg ? <div className="text-sm text-red-600 mb-4">{errorMsg}</div> : null}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Tenants Card - Orange Gradient (react-app style) */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
-          <div className="relative z-10">
-            <p className="text-orange-100 text-sm font-medium">Tenants</p>
-            <h3 className="text-3xl font-bold mt-2">{loading ? "0" : tenantsCount}</h3>
-          </div>
-          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
-            <Users className="w-12 h-12" />
-          </div>
-        </div>
-
-        {/* Rooms Card - Purple Gradient (react-app style) */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
-          <div className="relative z-10">
-            <p className="text-purple-100 text-sm font-medium">Rooms</p>
-            <h3 className="text-3xl font-bold mt-2">{loading ? "0" : roomsCount}</h3>
-          </div>
-          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
-            <BedDouble className="w-12 h-12" />
-          </div>
-        </div>
-
-        {/* Rent Card - Green Gradient (react-app style) */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
-          <div className="relative z-10">
-            <p className="text-green-100 text-sm font-medium">Rent Collected</p>
-            <h3 className="text-3xl font-bold mt-2">{`Rs ${loading ? "0" : rentTotal}`}</h3>
-          </div>
-          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
-            <IndianRupee className="w-12 h-12" />
-          </div>
-        </div>
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
+        <StatCard
+          label="Today's collection"
+          value={`Rs ${loading ? "0" : rentTotal}`}
+          icon={Wallet}
+          tone="primary"
+          trend={{ value: "+18% vs yesterday", up: true }}
+        />
+        <StatCard
+          label="Pending dues"
+          value="Rs 0"
+          icon={AlertTriangle}
+          tone="warning"
+          hint="0 tenants overdue"
+        />
+        <StatCard
+          label="Occupancy"
+          value={`${loading ? 0 : tenantsCount}`}
+          icon={BedDouble}
+          tone="success"
+          hint="Rooms Active"
+        />
+        <StatCard
+          label="Active tenants"
+          value={String(loading ? 0 : tenantsCount)}
+          icon={Users}
+          tone="info"
+          trend={{ value: "+2 this week", up: true }}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-lg font-bold text-slate-900">Occupancy Overview</h3>
-            <select className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-500 outline-none cursor-pointer">
-              <option>This Month</option>
-              <option>Last Month</option>
-            </select>
-          </div>
-          <div className="h-72 w-full flex flex-col items-center justify-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-4">
-              <BarChart2 className="w-8 h-8 text-blue-600" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5">
+        {/* Collection chart */}
+        <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-soft">
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <h3 className="font-medium text-[15px] text-foreground">Collection — last 7 days</h3>
+              <p className="text-[12.5px] text-muted-foreground mt-0.5">
+                Rs {loading ? "0" : rentTotal} collected this week
+              </p>
             </div>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
-              Performance Data Loading...
-            </p>
+            <Pill tone="success"><TrendingUp className="size-3" /> +12.4%</Pill>
+          </div>
+          <div className="h-[230px] mt-3 -ml-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={[{day: "Mon", amount: 15000}, {day: "Tue", amount: 25000}, {day: "Wed", amount: 10000}, {day: "Thu", amount: 45000}, {day: "Fri", amount: 30000}, {day: "Sat", amount: 50000}, {day: "Sun", amount: 15000}]} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(var(--muted-foreground))" }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "oklch(var(--muted-foreground))" }} tickFormatter={(v) => `₹${v / 1000}k`} />
+                <Tooltip
+                  contentStyle={{ borderRadius: 12, border: "1px solid oklch(var(--border))", background: "oklch(var(--card))", boxShadow: "var(--shadow-pop)", fontSize: 12 }}
+                  formatter={(v) => [`Rs ${v}`, "Collected"]}
+                />
+                <Area type="monotone" dataKey="amount" stroke="oklch(var(--primary))" strokeWidth={2.2} fill="url(#g1)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Occupancy donut */}
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+          <h3 className="font-medium text-[15px] text-foreground">Occupancy</h3>
+          <p className="text-[12.5px] text-muted-foreground mt-0.5">Across all properties</p>
+          <div className="relative h-[200px] mt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={[{name: "Occupied", value: tenantsCount || 10}, {name: "Vacant", value: Math.max(roomsCount - tenantsCount, 0) || 5}]} dataKey="value" innerRadius={60} outerRadius={82} paddingAngle={3} stroke="none">
+                  <Cell fill="oklch(var(--primary))" />
+                  <Cell fill="oklch(var(--muted))" />
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 grid place-items-center pointer-events-none">
+              <div className="text-center">
+                <div className="font-serif text-[34px] leading-none text-foreground">{roomsCount ? Math.round(((tenantsCount||0) / roomsCount) * 100) : 0}%</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{tenantsCount}/{roomsCount} beds</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-around text-center mt-1">
+            <div>
+              <div className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground"><span className="size-2 w-2 h-2 rounded-full bg-primary" /> Occupied</div>
+              <div className="font-medium text-[14px] mt-0.5 text-foreground">{tenantsCount || 0}</div>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground"><span className="size-2 w-2 h-2 rounded-full bg-muted-foreground/30" /> Vacant</div>
+              <div className="font-medium text-[14px] mt-0.5 text-foreground">{Math.max(roomsCount - tenantsCount, 0)}</div>
+            </div>
           </div>
         </div>
       </div>

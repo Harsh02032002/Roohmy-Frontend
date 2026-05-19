@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, 
   BedDouble, 
   ClipboardList, 
@@ -19,7 +19,7 @@ import { LayoutDashboard,
   Menu, 
   Bell, 
   Settings2,
-  Search, Lock, ChevronRight, Crown, Zap, Users, BookOpen, FileText, Smartphone, Wallet, PieChart, Shield, Target, Navigation, Megaphone, Coffee, Receipt, Sparkles, LinkIcon } from "lucide-react";
+  Search, Lock, ChevronRight, Crown, Zap, Users, BookOpen, FileText, Smartphone, Wallet, PieChart, Shield, Target, Navigation, Megaphone, Coffee, Receipt, Sparkles, LinkIcon, UserPlus, AlertCircle, Calendar, HelpCircle, Building2 } from "lucide-react";
 import { SILVER_NAV, GOLD_NAV } from './navConfig';
 
 const DEFAULT_DESKTOP_ITEMS = [
@@ -101,17 +101,18 @@ export default function PropertyOwnerLayout({
   onLogout
 }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [subscriptionTier, setSubscriptionTier] = useState(() => localStorage.getItem('propertyowner_subscription_tier') || 'silver');
+  const [subscriptionTier, setSubscriptionTier] = useState('gold');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({});
 
   useEffect(() => {
-    localStorage.setItem('propertyowner_subscription_tier', subscriptionTier);
-  }, [subscriptionTier]);
+    localStorage.setItem('propertyowner_subscription_tier', 'gold');
+  }, []);
 
-  const CURRENT_NAV = subscriptionTier === 'gold' ? GOLD_NAV : SILVER_NAV;
+  const CURRENT_NAV = GOLD_NAV;
 
   const handleParentClick = (e, item) => {
     if (subscriptionTier === 'silver' && item.goldOnly) {
@@ -407,7 +408,7 @@ export default function PropertyOwnerLayout({
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden font-inter text-slate-800">
+    <div className="flex h-screen w-full bg-background overflow-hidden font-sans text-foreground">
       {/* Sidebar - EXACT Superadmin Style */}
       <aside className={joinClassNames(
         "w-72 h-screen bg-[#0F172A] text-slate-300 flex flex-col z-50 shrink-0 transition-transform duration-300",
@@ -453,7 +454,7 @@ export default function PropertyOwnerLayout({
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Global Header - EXACT Superadmin Style */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 z-30 shrink-0">
+        <header className="h-16 bg-card/90 backdrop-blur-md border-b border-border flex items-center justify-between px-8 z-30 shrink-0">
           <div className="flex items-center gap-4">
             <button
               className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
@@ -467,6 +468,44 @@ export default function PropertyOwnerLayout({
 
           <div className="flex items-center gap-6">
             {/* Search Box */}
+            {/* Quick Actions Dropdown */}
+            <div className="relative group">
+              <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/20 text-sm font-bold">
+                <Plus size={16} />
+                <span className="hidden sm:inline">Add Quick</span>
+                <ChevronDown size={14} className="opacity-70" />
+              </button>
+              <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all -translate-y-2 group-hover:translate-y-0 z-50 overflow-hidden">
+                <div className="p-2 space-y-1">
+                  <button onClick={() => navigate("/propertyowner/tenantrec")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <UserPlus size={16} className="text-blue-600" /> Add Tenant
+                  </button>
+                  <button onClick={() => navigate("/propertyowner/payment")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <Wallet size={16} className="text-emerald-600" /> Collect Rent
+                  </button>
+                  <button onClick={() => navigate("/propertyowner/complaints")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <AlertCircle size={16} className="text-rose-600" /> Add Complaint
+                  </button>
+                  <button onClick={() => navigate("/propertyowner/expense-tracking")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <Receipt size={16} className="text-amber-600" /> Add Expense
+                  </button>
+                  <button onClick={() => navigate("/propertyowner/add-property")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <Building2 size={16} className="text-indigo-600" /> Add Property
+                  </button>
+                  <button onClick={() => navigate("/propertyowner/booking")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <Calendar size={16} className="text-violet-600" /> Book Bed
+                  </button>
+                  <button onClick={() => navigate("/propertyowner/ownerchat")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <Bell size={16} className="text-orange-600" /> Send Reminder
+                  </button>
+                  <button onClick={() => navigate("/propertyowner/receipts")} className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">
+                    <Receipt size={16} className="text-slate-600" /> Generate Receipt
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Box */}
             <div className="hidden lg:flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 w-72 group focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/5 focus-within:border-blue-500 transition-all">
               <Search size={16} className="text-slate-400 group-focus-within:text-blue-600" />
               <input 
@@ -475,6 +514,23 @@ export default function PropertyOwnerLayout({
                 className="bg-transparent border-none outline-none text-xs font-bold ml-3 w-full text-slate-700 placeholder:text-slate-400"
               />
             </div>
+
+            {/* Messages */}
+            <button onClick={() => navigate("/propertyowner/ownerchat")} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group hidden sm:block">
+              <MessageSquare size={20} className="group-hover:scale-110 transition-transform" />
+            </button>
+
+            {/* Property Switcher */}
+            <button className="hidden lg:flex items-center gap-2 p-2.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-slate-100">
+              <Building2 size={18} className="text-blue-600" />
+              <span className="text-sm font-bold">All Properties</span>
+              <ChevronDown size={14} className="opacity-50" />
+            </button>
+
+            {/* Help Center */}
+            <button onClick={() => navigate("/propertyowner/complaints")} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group hidden sm:block">
+              <HelpCircle size={20} className="group-hover:scale-110 transition-transform" />
+            </button>
 
             <div className="relative">
               <button 
@@ -514,7 +570,7 @@ export default function PropertyOwnerLayout({
             </div>
 
             {/* Profile Identity */}
-            <div className="flex items-center gap-4 pl-6 border-l border-slate-100 group cursor-pointer" onClick={() => setProfileOpen(!profileOpen)}>
+            <div className="flex items-center gap-4 pl-6 border-l border-slate-100 group cursor-pointer relative" onClick={() => setProfileOpen(!profileOpen)}>
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-black text-slate-900 leading-none group-hover:text-blue-600 transition-colors">{displayName}</p>
                 <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest opacity-60">ID: {owner?.loginId || "..."}</p>
@@ -522,10 +578,16 @@ export default function PropertyOwnerLayout({
               <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
                 {ownerInitial}
               </div>
+              <div className={cn("absolute top-full right-0 mt-4 w-48 bg-white rounded-xl shadow-xl border border-slate-100 transition-all z-50 overflow-hidden", profileOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2")}>
+                <div className="p-2 space-y-1">
+                  <button onClick={() => navigate("/propertyowner/ownerprofile")} className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-lg text-sm text-slate-600 font-medium transition-colors">Profile Settings</button>
+                  <button onClick={handleLogout} className="w-full text-left px-3 py-2 hover:bg-rose-50 text-rose-600 rounded-lg text-sm font-medium transition-colors">Log Out</button>
+                </div>
+              </div>
             </div>
           </div>
         </header>
-        <main className={cn("flex-1 overflow-y-auto custom-scrollbar p-8", mainClassName)}>
+        <main className={cn("flex-1 overflow-y-auto custom-scrollbar bg-background p-8", mainClassName)}>
           <div className={contentClassName}>{children}</div>
         </main>
 
@@ -536,73 +598,6 @@ export default function PropertyOwnerLayout({
             onClick={() => setMobileOpen(false)}
           />
         )}
-
-      {/* Plan Switcher (Dev Mode) */}
-      <div className="fixed bottom-6 right-6 z-50 flex bg-white rounded-full p-1 shadow-2xl border border-slate-100">
-        <button
-          onClick={() => setSubscriptionTier('silver')}
-          className={cn(
-            "px-4 py-2 rounded-full text-xs font-bold transition-all",
-            subscriptionTier === 'silver' ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:text-slate-900"
-          )}
-        >
-          Silver Tier
-        </button>
-        <button
-          onClick={() => setSubscriptionTier('gold')}
-          className={cn(
-            "px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1",
-            subscriptionTier === 'gold' ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-md shadow-orange-500/30" : "text-slate-500 hover:text-orange-500"
-          )}
-        >
-          <Crown size={12} /> Gold Tier
-        </button>
-      </div>
-
-      {showUpgradeModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 transition-opacity">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative overflow-hidden border border-slate-100 transform transition-transform">
-            <button 
-              onClick={() => setShowUpgradeModal(false)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-2 rounded-full transition-colors z-10"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 -z-0" />
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl -z-0" />
-            
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/30 mb-6 mt-4 mx-auto">
-                <Crown size={32} className="text-white" />
-              </div>
-
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-black text-slate-900 mb-2">Upgrade to Gold Plan</h3>
-                <p className="text-sm font-medium text-slate-500">Unlock this feature and get access to premium tools, AI recommendations, and priority support.</p>
-              </div>
-
-              <div className="space-y-3 mb-8">
-                {['Advanced AI Recommendor', 'Instant Payment Receipts', 'Priority Support 24/7'].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                      <Check size={14} className="text-emerald-600" />
-                    </div>
-                    <span className="text-sm font-bold text-slate-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button 
-                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white rounded-xl font-bold text-sm shadow-lg shadow-yellow-500/30 transition-all flex items-center justify-center gap-2 group"
-              >
-                <Zap size={18} className="group-hover:scale-110 transition-transform" />
-                Upgrade Now - ₹59/month
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       </div>
     </div>
   );
