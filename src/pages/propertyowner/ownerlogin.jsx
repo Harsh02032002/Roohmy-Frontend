@@ -193,8 +193,8 @@ export default function Ownerlogin() {
   };
 
   return (
-    <div className="html-page">
-      <div className="light-card w-full max-w-md p-8 text-center relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 text-center relative overflow-hidden border border-slate-200">
         <div className="text-3xl font-bold text-blue-600 mb-2">Roomhy</div>
 
         {step === "login" && (
