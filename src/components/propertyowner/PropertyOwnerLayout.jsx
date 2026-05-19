@@ -143,7 +143,16 @@ export default function PropertyOwnerLayout({
     setMobileOpen(false);
     setNotificationOpen(false);
     setProfileOpen(false);
-  }, [pathname]);
+    
+    // Auto-expand the active section's menu so it doesn't collapse
+    const activeParent = CURRENT_NAV.find(item => 
+      item.href === pathname || 
+      (item.submenus && item.submenus.some(sub => sub.href === pathname))
+    );
+    if (activeParent) {
+      setExpandedMenus(prev => ({ ...prev, [activeParent.label]: true }));
+    }
+  }, [pathname, CURRENT_NAV]);
 
   const displayName = useMemo(() => owner?.name || owner?.ownerName || "Owner", [owner]);
   const ownerInitial = useMemo(() => String(displayName).charAt(0).toUpperCase() || "O", [displayName]);
