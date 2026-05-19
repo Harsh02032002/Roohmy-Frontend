@@ -151,7 +151,7 @@ export default function Admin() {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-7">
         <div>
           <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-primary mb-1.5 flex items-center gap-1.5">
-            <Sparkles className="size-3.5" /> Good morning, {owner?.name || "Owner"}
+            <Sparkles className="size-3.5" /> Hi, {owner?.name || "Owner"}
           </div>
           <h1 className="font-serif text-[34px] md:text-[40px] leading-[1.05]">
             Here's what's happening today.
