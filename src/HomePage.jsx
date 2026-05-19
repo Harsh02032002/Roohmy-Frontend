@@ -83,6 +83,16 @@ const staticOfferings = [
       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=600&auto=format&fit=crop'
     ]
   },
+  {
+    title: 'List Property',
+    category: 'List',
+    description: 'Are you an owner? List your property on Roomhy for free!',
+    link: '/website/list',
+    images: [
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1582408921715-18e7806365c1?q=80&w=600&auto=format&fit=crop'
+    ]
+  }
 ];
 
 const featuredProperties = [
@@ -268,6 +278,7 @@ export default function HomePage() {
         // Sort by timestamp descending
         validItems.sort((a, b) => b.timestamp - a.timestamp);
         
+        // Save strictly the non-expired items (hides the section completely if empty)
         setRecentlyViewed(validItems);
         
         // Update storage with cleaned items
@@ -1187,30 +1198,6 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* List Your Property CTA */}
-        <section className="py-8 md:py-12 bg-gradient-to-r from-teal-600 to-teal-800 relative overflow-hidden mt-6 mb-4 rounded-none md:rounded-3xl mx-0 md:mx-12 shadow-2xl">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-64 h-64 bg-teal-400 rounded-full opacity-20 blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/4 w-48 h-48 bg-cyan-400 rounded-full opacity-20 blur-2xl"></div>
-          
-          <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-            <h2 className="text-2xl md:text-4xl font-bold text-white mb-3 drop-shadow-sm">
-              Own a Property?
-            </h2>
-            <p className="text-teal-50 text-sm md:text-lg mb-6 max-w-2xl mx-auto opacity-90 leading-relaxed">
-              List your PG, Hostel, or Flat on Roomhy. Connect with thousands of verified students looking for their perfect stay.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                to="/website/list"
-                className="bg-white text-teal-700 hover:bg-teal-50 hover:text-teal-800 hover:scale-105 active:scale-95 transition-all font-bold px-8 py-3.5 rounded-xl shadow-xl flex items-center justify-center gap-2 w-full sm:w-auto"
-              >
-                <Building2 className="w-5 h-5" />
-                List Your Property Free
-              </Link>
-            </div>
-          </div>
-        </section>
 
         {/* Why Choose Roomhy - Combined Section */}
         <WhyRoomhy />

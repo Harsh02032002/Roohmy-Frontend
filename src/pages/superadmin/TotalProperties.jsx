@@ -103,7 +103,7 @@ export default function TotalProperties() {
       if (data.success && data.properties) {
         setProperties(data.properties.map(p => ({
           id:         p._id,
-          propId:     p.visitId || p.locationCode || `PROP-${p._id?.slice(-4).toUpperCase()}`,
+          propId:     p.propertyId || p.visitId || (p.locationCode && p.locationCode !== 'GEN' ? p.locationCode : null) || `PROP-${p._id?.slice(-4).toUpperCase()}`,
           title:      p.title || p.propertyInfo?.name || "Unnamed",
           image:      p.featuredImage || p.images?.[0] || "",
           type:       p.propertyType || p.propertyInfo?.propertyType || "pg",

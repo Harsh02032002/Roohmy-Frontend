@@ -144,49 +144,37 @@ export default function Admin() {
       {errorMsg ? <div className="text-sm text-red-600 mb-4">{errorMsg}</div> : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Tenants Card - Emerald */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:translate-y-[-4px] hover:shadow-md group">
-           <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center transition-transform group-hover:scale-110">
-              <Users size={24} />
-           </div>
-           <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">Total Tenants</p>
-              <h4 className="text-2xl font-black text-slate-900 tracking-tight leading-none">{loading ? "..." : tenantsCount}</h4>
-              <div className="flex items-center gap-1.5 mt-2">
-                 <ArrowUpRight size={12} className="text-emerald-500" />
-                 <span className="text-[10px] font-bold text-slate-400 truncate">+ 12.5% from last week</span>
-              </div>
-           </div>
+        {/* Tenants Card - Orange Gradient (react-app style) */}
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
+          <div className="relative z-10">
+            <p className="text-orange-100 text-sm font-medium">Tenants</p>
+            <h3 className="text-3xl font-bold mt-2">{loading ? "0" : tenantsCount}</h3>
+          </div>
+          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
+            <Users className="w-12 h-12" />
+          </div>
         </div>
 
-        {/* Rooms Card - Purple */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:translate-y-[-4px] hover:shadow-md group">
-           <div className="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center transition-transform group-hover:scale-110">
-              <BedDouble size={24} />
-           </div>
-           <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">Total Rooms</p>
-              <h4 className="text-2xl font-black text-slate-900 tracking-tight leading-none">{loading ? "..." : roomsCount}</h4>
-              <div className="flex items-center gap-1.5 mt-2">
-                 <ArrowUpRight size={12} className="text-emerald-500" />
-                 <span className="text-[10px] font-bold text-slate-400 truncate">+ 8.3% from last week</span>
-              </div>
-           </div>
+        {/* Rooms Card - Purple Gradient (react-app style) */}
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
+          <div className="relative z-10">
+            <p className="text-purple-100 text-sm font-medium">Rooms</p>
+            <h3 className="text-3xl font-bold mt-2">{loading ? "0" : roomsCount}</h3>
+          </div>
+          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
+            <BedDouble className="w-12 h-12" />
+          </div>
         </div>
 
-        {/* Rent Card - Blue */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5 transition-all hover:translate-y-[-4px] hover:shadow-md group">
-           <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center transition-transform group-hover:scale-110">
-              <IndianRupee size={24} />
-           </div>
-           <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-2">Rent Collected</p>
-              <h4 className="text-2xl font-black text-slate-900 tracking-tight leading-none">₹{loading ? "0" : rentTotal.toLocaleString()}</h4>
-              <div className="flex items-center gap-1.5 mt-2">
-                 <ArrowUpRight size={12} className="text-emerald-500" />
-                 <span className="text-[10px] font-bold text-slate-400 truncate">+ 18.6% from last week</span>
-              </div>
-           </div>
+        {/* Rent Card - Green Gradient (react-app style) */}
+        <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
+          <div className="relative z-10">
+            <p className="text-green-100 text-sm font-medium">Rent Collected</p>
+            <h3 className="text-3xl font-bold mt-2">{`Rs ${loading ? "0" : rentTotal}`}</h3>
+          </div>
+          <div className="absolute right-4 top-4 opacity-20 group-hover:scale-110 transition-transform duration-300">
+            <IndianRupee className="w-12 h-12" />
+          </div>
         </div>
       </div>
 

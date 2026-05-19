@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { getApiBase, fetchCities, fetchAreas } from "../../utils/api";
 import { toast } from "react-hot-toast";
+import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { PageHeader } from "../../components/superadmin/PageHeader";
 import LocationMapPicker from "../../components/website/LocationMapPicker";
 
@@ -452,7 +453,8 @@ export default function AddPropertyWizard() {
         pricing: { ...pricing, includedInRent, additionalCharges, cancellationPolicy },
         tenantDescription,
         videoUrl,
-        status: "active",
+        status: "pending_approval",
+        ownerLoginId: localStorage.getItem("propertyOwnerId") || "",
       };
 
       const res = await fetch(editId ? `${apiUrl}/api/properties/${editId}` : `${apiUrl}/api/properties/add`, {
@@ -474,6 +476,7 @@ export default function AddPropertyWizard() {
 
   if (submitted) {
     return (
+      <PropertyOwnerLayout>
       <div className="min-h-full bg-white flex items-center justify-center p-8">
         <div className="bg-white rounded-3xl p-12 border border-slate-100 shadow-2xl max-w-lg w-full text-center">
           <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-emerald-100">
@@ -481,13 +484,15 @@ export default function AddPropertyWizard() {
           </div>
           <h2 className="text-2xl font-bold text-slate-800 mb-3 uppercase tracking-tight">Property Added Successfully!</h2>
           <p className="text-xs font-bold text-slate-400 mb-8 uppercase">Your listing is now live and visible to potential tenants.</p>
-          <button onClick={() => navigate("/superadmin/total-properties")} className="w-full bg-blue-600 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100">Go to Properties</button>
+          <button onClick={() => navigate("/propertyowner/properties")} className="w-full bg-blue-600 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100">Go to Properties</button>
         </div>
       </div>
+      </PropertyOwnerLayout>
     );
   }
 
   return (
+    <PropertyOwnerLayout>
     <div className="min-h-full bg-white">
       {/* Top Header Actions */}
       <div className="px-8 pt-8">
@@ -1908,5 +1913,6 @@ export default function AddPropertyWizard() {
         )}
       </div>
     </div>
+    </PropertyOwnerLayout>
   );  
 }

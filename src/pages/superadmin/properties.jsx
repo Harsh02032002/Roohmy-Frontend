@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getApiBase } from "../../utils/api";
+import LocationMapPicker from "../../components/website/LocationMapPicker";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -301,8 +302,39 @@ function AddPropertyView({ onBack, apiUrl, editId }) {
   const [formData, setFormData] = useState({
     title: "", address: "", city: "", locality: "", ownerName: "", ownerPhone: "", ownerLoginId: "", 
     propertyType: "pg", gender: "any", monthlyRent: "", discount: "", description: "",
-    status: "inactive", isLiveOnWebsite: false
+    status: "inactive", isLiveOnWebsite: false, landmark: "", latitude: null, longitude: null
   });
+  
+  const [googleMapInput, setGoogleMapInput] = useState("");
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [showLandmarkPicker, setShowLandmarkPicker] = useState(false);
+
+  const parseLatLngFromUrl = (url) => {
+    if (!url) return null;
+    const atRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const atMatch = url.match(atRegex);
+    if (atMatch) return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+    const qRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const qMatch = url.match(qRegex);
+    if (qMatch) return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+    const generalRegex = /(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/;
+    const genMatch = url.match(generalRegex);
+    if (genMatch) return { lat: parseFloat(genMatch[1]), lng: parseFloat(genMatch[2]) };
+    return null;
+  };
+
+  const handleGoogleMapInputChange = (val) => {
+    setGoogleMapInput(val);
+    const parsed = parseLatLngFromUrl(val);
+    if (parsed) {
+      setFormData(prev => ({
+        ...prev,
+        latitude: parsed.lat,
+        longitude: parsed.lng
+      }));
+      toast.success(`Coordinates found: ${parsed.lat}, ${parsed.lng}`);
+    }
+  };
   
   // Amenities fetched from DB
   const [dbAmenities, setDbAmenities] = useState([]);
@@ -475,8 +507,14 @@ function AddPropertyView({ onBack, apiUrl, editId }) {
               discount: p.discount || 0,
               description: p.description || p.propertyInfo?.description || "",
               status: p.status || "inactive",
-              isLiveOnWebsite: p.isLiveOnWebsite || false
+              isLiveOnWebsite: p.isLiveOnWebsite || false,
+              landmark: p.landmark || "",
+              latitude: p.latitude || null,
+              longitude: p.longitude || null
             });
+            if (p.latitude && p.longitude) {
+              setGoogleMapInput(`https://www.google.com/maps/@${p.latitude},${p.longitude},17z`);
+            }
             if (p.images && p.images.length > 0) setGlobalImages(p.images);
             if (p.propertyViews && p.propertyViews.length > 0) setPropertyViews(p.propertyViews);
             
@@ -559,6 +597,9 @@ function AddPropertyView({ onBack, apiUrl, editId }) {
       address: formData.address,
       city: formData.city,
       locality: formData.locality,
+      landmark: formData.landmark || "",
+      latitude: formData.latitude ? Number(formData.latitude) : null,
+      longitude: formData.longitude ? Number(formData.longitude) : null,
       owner: formData.owner,
       ownerName: formData.ownerName,
       ownerLoginId: formData.ownerLoginId,
@@ -584,7 +625,9 @@ function AddPropertyView({ onBack, apiUrl, editId }) {
         rent: parseInt(formData.monthlyRent) || 0,
         description: formData.description,
         genderSuitability: formData.gender,
-        propertyType: formData.propertyType
+        propertyType: formData.propertyType,
+        latitude: formData.latitude ? Number(formData.latitude) : null,
+        longitude: formData.longitude ? Number(formData.longitude) : null
       }
     };
 
@@ -687,6 +730,106 @@ function AddPropertyView({ onBack, apiUrl, editId }) {
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Full Address</label>
                     <textarea value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none" placeholder="Enter complete address" rows={2} />
                   </div>
+
+                  {/* Landmark and Google Map Location */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-50">
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Nearby Landmarks (optional)</label>
+                      <div className="flex gap-3 items-center">
+                        <div className="flex-1 flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                          <input 
+                            value={formData.landmark || ""} 
+                            onChange={e => setFormData({...formData, landmark: e.target.value})} 
+                            className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" 
+                            placeholder="e.g. Near Christ University, Koramangala 4th Block" 
+                          />
+                        </div>
+                        
+                        {/* Map Picker Trigger for Landmark */}
+                        <button
+                          type="button"
+                          onClick={() => setShowLandmarkPicker(true)}
+                          className="w-16 h-11 bg-slate-50 border border-slate-100 rounded-xl relative hover:brightness-95 active:scale-95 transition-all shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center group"
+                          title="Pick Landmark on Map"
+                        >
+                          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:10px_10px]" />
+                          <div className="absolute top-2 left-3 w-6 h-4 bg-emerald-100 rounded-full blur-sm" />
+                          <div className="absolute bottom-1 right-2 w-8 h-5 bg-sky-100 rounded-full blur-sm" />
+                          <div className="relative z-10 flex flex-col items-center">
+                            <MapPin className="w-5 h-5 text-teal-600 fill-teal-600 drop-shadow-md group-hover:-translate-y-0.5 transition-transform duration-300" />
+                            <div className="w-1.5 h-0.5 bg-black/20 rounded-full blur-[1px]" />
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Google Map Location (optional)</label>
+                      <div className="flex gap-3 items-center">
+                        <div className="flex-1 flex items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                          <input 
+                            type="text" 
+                            value={googleMapInput} 
+                            onChange={e => handleGoogleMapInputChange(e.target.value)} 
+                            placeholder="Search location on map" 
+                            className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
+                          />
+                        </div>
+                        
+                        {/* Map Thumbnail Button */}
+                        <button
+                          type="button"
+                          onClick={() => setShowMapPicker(true)}
+                          className="w-16 h-11 bg-slate-50 border border-slate-100 rounded-xl relative hover:brightness-95 active:scale-95 transition-all shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center group"
+                          title="Pick on Map"
+                        >
+                          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:10px_10px]" />
+                          <div className="absolute top-2 left-3 w-6 h-4 bg-emerald-100 rounded-full blur-sm" />
+                          <div className="absolute bottom-1 right-2 w-8 h-5 bg-sky-100 rounded-full blur-sm" />
+                          <div className="relative z-10 flex flex-col items-center">
+                            <MapPin className="w-5 h-5 text-red-500 fill-red-500 drop-shadow-md group-hover:-translate-y-0.5 transition-transform duration-300" />
+                            <div className="w-1.5 h-0.5 bg-black/20 rounded-full blur-[1px]" />
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {showMapPicker && (
+                    <LocationMapPicker 
+                      onLocationSelect={({ latitude: lat, longitude: lng, location }) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          latitude: lat,
+                          longitude: lng,
+                          landmark: location && !prev.landmark ? location : prev.landmark
+                        }));
+                        setGoogleMapInput(location || `https://www.google.com/maps/@${lat},${lng},17z`);
+                        setShowMapPicker(false);
+                        toast.success("Location confirmed from map!");
+                      }}
+                      onClose={() => setShowMapPicker(false)}
+                    />
+                  )}
+
+                  {showLandmarkPicker && (
+                    <LocationMapPicker 
+                      onLocationSelect={({ latitude: lat, longitude: lng, location }) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          landmark: location || `Lat: ${lat}, Lng: ${lng}`,
+                          latitude: prev.latitude || lat,
+                          longitude: prev.longitude || lng
+                        }));
+                        if (!formData.latitude || !formData.longitude) {
+                          setGoogleMapInput(location || `https://www.google.com/maps/@${lat},${lng},17z`);
+                        }
+                        setShowLandmarkPicker(false);
+                        toast.success("Landmark set from map!");
+                      }}
+                      onClose={() => setShowLandmarkPicker(false)}
+                    />
+                  )}
                   <div className="pt-4 border-t border-slate-50">
                     <div>
                       <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Select Property Owner *</label>

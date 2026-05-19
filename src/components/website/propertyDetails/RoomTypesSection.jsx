@@ -1,10 +1,19 @@
-import React from 'react';
-import { Check, Info, Users, Bed, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Info, Users, Bed, ChevronRight, Image as ImageIcon, Star } from 'lucide-react';
+import RoomImageModal from './RoomImageModal';
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 export default function RoomTypesSection({ roomTypes = [] }) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
   if (!roomTypes || roomTypes.length === 0) return null;
+
+  const handleImageClick = (room) => {
+    setSelectedRoom(room);
+    setModalOpen(true);
+  };
 
   return (
     <div className="py-8 bg-white" style={{ borderBottom: '1px solid #f0f0f0' }}>
@@ -86,7 +95,10 @@ export default function RoomTypesSection({ roomTypes = [] }) {
               {/* Right Side: Image & Desktop CTA */}
               <div className="w-full md:w-[320px] bg-[#f8f9fa] p-4 md:p-6 flex flex-col justify-between border-t md:border-t-0 md:border-l border-[#eee]">
                 {/* Image Placeholder/Thumbnail */}
-                <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-5 group bg-white shadow-sm border border-[#e0e0e0]">
+                <div 
+                  className="relative aspect-[4/3] rounded-lg overflow-hidden mb-5 group bg-white shadow-sm border border-[#e0e0e0] cursor-pointer"
+                  onClick={() => handleImageClick(room)}
+                >
                   {room.images && room.images.length > 0 ? (
                     <img src={room.images[0]} alt={room.type} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
@@ -95,6 +107,11 @@ export default function RoomTypesSection({ roomTypes = [] }) {
                       <span className="text-[10px] uppercase font-black mt-2">No Image</span>
                     </div>
                   )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="bg-white/90 p-2 rounded-full shadow-lg">
+                      <ImageIcon size={20} className="text-[#EE4266]" />
+                    </div>
+                  </div>
                   {room.images && room.images.length > 1 && (
                     <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-md text-[9px] font-black flex items-center gap-1.5 shadow-lg">
                        <ImageIcon size={10} /> {room.images.length} PHOTOS
@@ -124,25 +141,16 @@ export default function RoomTypesSection({ roomTypes = [] }) {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
 
-// Subcomponent for Star icon if not imported
-function Star({ size, className }) {
-  return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
+      {/* Room Image Modal */}
+      {selectedRoom && (
+        <RoomImageModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          roomType={selectedRoom.type}
+          images={selectedRoom.images}
+        />
+      )}
+    </div>
   );
 }

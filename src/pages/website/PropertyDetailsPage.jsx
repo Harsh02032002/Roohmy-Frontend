@@ -647,13 +647,11 @@ export default function PropertyDetailsPage() {
               : (foundProperty.propertyInfo?.roomTypes && foundProperty.propertyInfo.roomTypes.length > 0)
                 ? foundProperty.propertyInfo.roomTypes
                 : foundProperty.roomVariants || [],
-            facilities: foundProperty.facilities || {},
+            facilities: foundProperty.facilities || foundProperty.propertyInfo?.facilities || [],
             
             // Property details
             propertyType: foundProperty.propertyType || foundProperty.propertyInfo?.propertyType || "pg",
-            description: foundProperty.description || foundProperty.propertyInfo?.description || "",
             monthlyRent: foundProperty.monthlyRent || foundProperty.rent || foundProperty.price || 0,
-            price: foundProperty.monthlyRent || foundProperty.rent || foundProperty.price || 0,
             pricing: foundProperty.pricing || {},
             securityDeposit: foundProperty.pricing?.securityDeposit || foundProperty.propertyInfo?.securityDeposit || 0,
             advanceRent: foundProperty.pricing?.advanceRent || foundProperty.propertyInfo?.advanceRent || 0,
@@ -664,11 +662,9 @@ export default function PropertyDetailsPage() {
               return fromRoomTypes || foundProperty.totalRooms || foundProperty.propertyDetails?.floors || 0;
             })(),
             bedsPerRoom: foundProperty.bedsPerRoom || 1,
-            gender: foundProperty.gender || foundProperty.propertyInfo?.genderSuitability || "Co-ed",
             
             // New sections
             propertyDetails: foundProperty.propertyDetails || {},
-            pricing: foundProperty.pricing || {},
             policies: foundProperty.policies || {},
             tenantDescription: foundProperty.tenantDescription || "",
             

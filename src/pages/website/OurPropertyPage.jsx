@@ -94,7 +94,11 @@ export default function OurPropertyPage() {
             images: images, 
             verified: p.isVerified || p.verified || p.status === 'approved' || true,
             owner: p.owner_name || p.ownerName || p.generatedCredentials?.ownerName || 'Verified Owner',
-            beds: p.propertyInfo?.totalSeats || p.beds || 1,
+            beds: (() => {
+              const fromRoomTypes = (p.roomTypes || p.propertyInfo?.roomTypes || [])
+                .reduce((acc, rt) => acc + parseInt(rt.totalRooms || rt.total_rooms || 0), 0);
+              return fromRoomTypes || p.propertyInfo?.totalSeats || p.totalRooms || p.beds || 1;
+            })(),
             phone: p.owner_phone || p.contactPhone || p.ownerPhone || 'N/A',
             amenities: p.amenities || p.propertyInfo?.amenities || [],
             nearbyColleges: p.nearbyColleges || [],
@@ -106,6 +110,7 @@ export default function OurPropertyPage() {
             description: p.description || p.propertyInfo?.description || "",
             securityDeposit: p.pricing?.securityDeposit || p.propertyInfo?.securityDeposit || 0,
             advanceRent: p.pricing?.advanceRent || p.propertyInfo?.advanceRent || 0,
+            isPremium: p.isPremium || p.is_premium || p.propertyInfo?.isPremium || false,
           };
         });
 
@@ -824,7 +829,7 @@ function PropertyCard({ property, onBidNow }) {
               trackPropertyClick(property.id);
             }}
           >
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <div className="flex justify-between items-start">
                  <h3 className="text-xl font-extrabold text-gray-900 leading-tight line-clamp-1 group-hover:text-[#EE2A24] transition-colors">{property.name}</h3>
                  <div className="bg-[#1AB64F] text-white px-2 py-0.5 rounded flex items-center gap-1 text-[11px] font-bold shadow-sm">
@@ -837,19 +842,19 @@ function PropertyCard({ property, onBidNow }) {
               </p>
               
               {property.description && (
-                <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
+                <p className="text-[11px] text-gray-500 line-clamp-1 leading-relaxed">
                   {property.description}
                 </p>
               )}
               
-              <div className="flex items-center gap-3 py-1">
+              <div className="flex items-center gap-2 py-0.5">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-700 bg-slate-100 px-2 py-0.5 rounded">
                   <Bed className="w-3.5 h-3.5 text-blue-600" />
                   {property.beds} Bedrooms
                 </div>
               </div>
               
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-gray-600 font-medium py-1">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-600 font-medium py-0.5">
                 {(property.amenities || []).slice(0, 4).map((amenity, idx) => {
                     const amenityName = typeof amenity === 'string' ? amenity : (amenity.name || '');
                     const amenityIcon = typeof amenity === 'string' ? 'check' : (amenity.icon || 'check');
@@ -906,16 +911,18 @@ function PropertyCard({ property, onBidNow }) {
                   })}
               </div>
 
-              <div className="flex items-center gap-2 pt-1.5">
+              <div className="flex items-center gap-2 pt-1 mt-auto">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#EE2A24] bg-[#EE2A24]/5 px-2 py-1 rounded border border-[#EE2A24]/10">
-                  {property.gender}
+                  {property.gender || 'Any'}
                 </span>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-700 bg-gray-100 px-2 py-1 rounded border border-gray-200">
-                  {property.type}
+                  {property.type || 'PG'}
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100">
-                  Premium
-                </span>
+                {(property.isPremium || property.rating >= 4.5) && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                    Premium
+                  </span>
+                )}
               </div>
             </div>
             

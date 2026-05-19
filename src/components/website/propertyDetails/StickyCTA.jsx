@@ -1,4 +1,4 @@
-import { Phone, Mail, Navigation, Shield, Zap, BadgePercent } from "lucide-react";
+import { Phone, Mail, Navigation, Shield, Zap, BadgePercent, Users } from "lucide-react";
 
 export default function StickyCTA({ property, onBookNow }) {
   if (!property) return null;
@@ -41,122 +41,141 @@ export default function StickyCTA({ property, onBookNow }) {
       </div>
 
       {/* ==================== DESKTOP STICKY SIDEBAR — OYO Style ==================== */}
-      <div className="hidden md:block sticky top-24">
-        {/* Main Price Card */}
-        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid #e8e8e8', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+      <div className="hidden md:block">
+        <div className="bg-white rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-[#e8e8e8]">
           
-          {/* Top Offer Banner — OYO style red/orange */}
+          {/* 1. Top Offer Banner — OYO style premium */}
           {discount > 0 && (
-            <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: '#d63a5b' }}>
-              <div className="flex items-center gap-2">
-                <Zap size={14} className="text-yellow-300" />
-                <span className="text-white text-xs font-bold uppercase tracking-wide">
-                  Save up to {discount}% — Direct Booking
-                </span>
-              </div>
+            <div className="px-5 py-3.5 flex items-center justify-center gap-2" style={{ background: '#EE4266' }}>
+              <Zap size={16} className="text-yellow-300 fill-yellow-300" />
+              <span className="text-white text-xs font-black uppercase tracking-[0.05em]">
+                Save up to {discount}% — Direct Booking
+              </span>
             </div>
           )}
 
-          {/* Price Section */}
-          <div className="px-5 py-4" style={{ borderBottom: '1px solid #e8e8e8' }}>
+          {/* 2. Price Section */}
+          <div className="px-7 py-8 border-b border-gray-100">
             <div className="flex items-baseline gap-2">
-              <span className="text-[28px] font-extrabold text-[#222]">₹{price}</span>
+              <span className="text-[36px] font-black text-[#222]">₹{price}</span>
               {discount > 0 && (
-                <span className="text-base text-[#6d787d] line-through">₹{originalPrice}</span>
-              )}
-              {discount > 0 && (
-                <span className="text-sm font-bold text-[#1ab64f]">{discount}% off</span>
+                <span className="text-lg text-[#6d787d] line-through decoration-gray-400">₹{originalPrice}</span>
               )}
             </div>
-            <p className="text-xs text-[#6d787d] mt-0.5">per month</p>
+            <div className="flex items-center gap-2 mt-1">
+              {discount > 0 && (
+                <span className="text-sm font-bold text-[#1ab64f] bg-[#1ab64f]/10 px-2 py-0.5 rounded">
+                  {discount}% OFF
+                </span>
+              )}
+              <span className="text-sm text-[#6d787d] font-medium">per month</span>
+            </div>
           </div>
 
-          {/* Pricing Breakdown */}
-          <div className="px-5 py-4 space-y-2.5" style={{ borderBottom: '1px solid #e8e8e8' }}>
+          {/* 3. Pricing Breakdown */}
+          <div className="px-7 py-6 space-y-4 border-b border-gray-100 bg-gray-50/50">
             <div className="flex justify-between text-sm">
-              <span className="text-[#6d787d]">Base Rent</span>
-              <span className="text-[#222] font-medium">₹{originalPrice}</span>
+              <span className="text-[#6d787d] font-medium">Base Rent</span>
+              <span className="text-[#222] font-bold">₹{originalPrice}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-[#1ab64f] flex items-center gap-1">
-                  <BadgePercent size={13} />
+                <span className="text-[#1ab64f] font-bold flex items-center gap-1.5">
+                  <BadgePercent size={15} />
                   Direct Discount
                 </span>
-                <span className="text-[#1ab64f] font-medium">-₹{originalPrice - price}</span>
+                <span className="text-[#1ab64f] font-bold">-₹{originalPrice - price}</span>
               </div>
             )}
-            <div className="pt-2.5 mt-1 flex justify-between" style={{ borderTop: '1px dashed #e0e0e0' }}>
-              <span className="text-[#222] font-bold text-sm">Total Amount</span>
-              <span className="text-[#222] font-extrabold text-lg">₹{price}</span>
+            <div className="pt-4 mt-2 flex justify-between border-t border-dashed border-gray-300">
+              <span className="text-[#222] font-extrabold text-base">Total Amount</span>
+              <span className="text-[#222] font-black text-2xl">₹{price}</span>
             </div>
           </div>
 
-          {/* CTA Button — OYO green style but using brand color */}
-          <div className="px-5 py-4 space-y-3">
+          {/* 4. Booking Action */}
+          <div className="px-7 py-8 space-y-4">
             <button
               onClick={onBookNow || (() => { if (property.ownerPhone) window.location.href = `tel:${property.ownerPhone}`; })}
-              className="w-full py-3.5 text-white font-bold rounded-lg text-sm transition-colors"
-              style={{ background: '#EE4266' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#d63a5b'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#EE4266'; }}
+              className="w-full py-4.5 bg-[#EE4266] text-white font-black rounded-md text-base shadow-[0_4px_15px_rgba(238,66,102,0.3)] hover:bg-[#d63a5b] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               Book Now
             </button>
 
-            {/* Urgency text — OYO style */}
-            <div className="flex items-center justify-center gap-1.5 py-1">
-              <Zap size={13} className="text-[#EE4266]" />
-              <span className="text-xs text-[#EE4266] font-semibold">
-                {Math.floor(Math.random() * 10) + 5} people viewed this in last 24 hours
-              </span>
+            {/* Urgency indicators */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-2 text-[#EE4266] bg-[#EE4266]/5 px-3 py-2 rounded-lg">
+                <Zap size={14} className="fill-[#EE4266]" />
+                <span className="text-[11px] font-bold uppercase tracking-wide">
+                  {Math.floor(Math.random() * 10) + 5} people viewed this in last 24 hours
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                <Shield size={14} className="fill-green-600" />
+                <span className="text-[11px] font-bold uppercase tracking-wide">
+                  Free cancellation available
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Owner Info Card — Clean OYO style */}
-        <div className="rounded-lg mt-4 p-5" style={{ border: '1px solid #e8e8e8' }}>
-          <h3 className="text-sm font-bold text-[#222] mb-3">Owner Information</h3>
-          <div className="space-y-3">
-            <div>
-              <p className="text-[10px] text-[#6d787d] uppercase tracking-wider">Name</p>
-              <p className="text-sm text-[#222] font-semibold">{property.owner}</p>
+          {/* 5. Why Roomhy? — Increases height and trust */}
+          <div className="px-7 py-6 border-t border-gray-100 bg-[#fcfcfc]">
+            <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">Why choose this stay?</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <Shield size={16} className="text-[#EE4266]" />
+                <span className="text-xs font-bold text-gray-800">Verified Property</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Zap size={16} className="text-[#EE4266]" />
+                <span className="text-xs font-bold text-gray-800">Instant Booking</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <BadgePercent size={16} className="text-[#EE4266]" />
+                <span className="text-xs font-bold text-gray-800">Best Price</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Phone size={16} className="text-[#EE4266]" />
+                <span className="text-xs font-bold text-gray-800">24/7 Support</span>
+              </div>
             </div>
-            {property.ownerPhone && (
-              <a
-                href={`tel:${property.ownerPhone}`}
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-semibold text-sm transition-colors"
-                style={{ border: '1px solid #e0e0e0', color: '#222' }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#EE4266'; e.currentTarget.style.color = '#EE4266'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0e0e0'; e.currentTarget.style.color = '#222'; }}
-              >
-                <Phone size={14} /> Call Owner
-              </a>
-            )}
-            {property.ownerEmail && (
-              <a
-                href={`mailto:${property.ownerEmail}`}
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg font-semibold text-sm transition-colors"
-                style={{ border: '1px solid #e0e0e0', color: '#222' }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#EE4266'; e.currentTarget.style.color = '#EE4266'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e0e0e0'; e.currentTarget.style.color = '#222'; }}
-              >
-                <Mail size={14} /> Send Email
-              </a>
-            )}
           </div>
-        </div>
 
-        {/* Map Card */}
-        {property.latitude && property.longitude && (
-          <div className="rounded-lg mt-4 overflow-hidden" style={{ border: '1px solid #e8e8e8' }}>
-            <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid #e8e8e8' }}>
-              <h3 className="text-sm font-bold text-[#222] flex items-center gap-2">
-                <Navigation size={14} className="text-[#EE4266]" />
-                Property Location
-              </h3>
+          {/* 6. Owner Quick Info */}
+          <div className="px-7 py-6 border-t border-gray-100">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                <Users size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase font-black tracking-wider">Owner</p>
+                <p className="text-sm text-gray-900 font-bold">{property.owner}</p>
+              </div>
             </div>
-            <div className="h-[200px]">
+            <div className="flex gap-2">
+              {property.ownerPhone && (
+                <a
+                  href={`tel:${property.ownerPhone}`}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-gray-700 font-bold text-xs hover:border-[#EE4266] hover:text-[#EE4266] transition-all"
+                >
+                  <Phone size={14} /> Call
+                </a>
+              )}
+              {property.ownerEmail && (
+                <a
+                  href={`mailto:${property.ownerEmail}`}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-200 text-gray-700 font-bold text-xs hover:border-[#EE4266] hover:text-[#EE4266] transition-all"
+                >
+                  <Mail size={14} /> Email
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* 7. Location Shortcut */}
+          {property.latitude && property.longitude && (
+            <div className="h-32 relative group">
               <iframe
                 src={`https://www.google.com/maps?q=${property.latitude},${property.longitude}&z=14&output=embed`}
                 width="100%"
@@ -164,12 +183,24 @@ export default function StickyCTA({ property, onBookNow }) {
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
                 title="Property Location"
+                className="grayscale-[0.5] group-hover:grayscale-0 transition-all"
               />
+              <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent pointer-events-none transition-all" />
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-max">
+                <a 
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-[10px] font-bold shadow-lg flex items-center gap-1.5 hover:bg-white transition-all"
+                >
+                  <Navigation size={12} className="text-[#EE4266]" />
+                  Open in Maps
+                </a>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   );

@@ -132,6 +132,7 @@ const routeEntries = [
   
   // Property Owner Routes
   ["/propertyowner/admin", "./pages/propertyowner/admin.jsx"],
+  ["/propertyowner/add-property", "./pages/propertyowner/AddPropertyWizard.jsx"],
   ["/propertyowner/booking-form", "./pages/propertyowner/booking-form.jsx"],
   ["/propertyowner/booking", "./pages/propertyowner/booking.jsx"],
   ["/propertyowner/booking_request", "./pages/propertyowner/booking_request.jsx"],

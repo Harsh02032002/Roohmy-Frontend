@@ -476,8 +476,17 @@ export const fetchProperties = async () => {
           latitude: p.latitude || p.propertyInfo?.latitude || p.propertyInfo?.location?.coordinates?.[1] || null,
           longitude: p.longitude || p.propertyInfo?.longitude || p.propertyInfo?.location?.coordinates?.[0] || null,
           
+          // Beds/Rooms calculation
+          beds: (() => {
+            const fromRoomTypes = (p.roomTypes || p.propertyInfo?.roomTypes || [])
+              .reduce((acc, rt) => acc + parseInt(rt.totalRooms || rt.total_rooms || 0), 0);
+            return fromRoomTypes || p.propertyInfo?.totalSeats || p.totalRooms || p.beds || 1;
+          })(),
+
           // Owner info
-          owner_id: p.owner_id || p.ownerLoginId || p.generatedCredentials?.loginId || p.ownerLoginId
+          owner_id: p.owner_id || p.ownerLoginId || p.generatedCredentials?.loginId || p.ownerLoginId,
+          isPremium: p.isPremium || p.is_premium || p.propertyInfo?.isPremium || false,
+          gender: p.gender || p.genderSuitability || p.propertyInfo?.genderSuitability || 'Co-ed'
         };
       });
     
