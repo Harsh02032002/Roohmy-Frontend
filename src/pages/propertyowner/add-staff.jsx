@@ -1,49 +1,158 @@
-import React from "react";
+import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { 
+  UserPlus, ShieldCheck, Mail, Phone, 
+  Briefcase, IndianRupee, FileText, CheckCircle2
+} from "lucide-react";
 
 export default function AddStaffPage() {
   const owner = getOwnerRuntimeSession();
-  if (!owner?.loginId && typeof window !== "undefined") { window.location.href = "/propertyowner/ownerlogin"; return null; }
+  if (!owner?.loginId && typeof window !== "undefined") { 
+    window.location.href = "/propertyowner/ownerlogin"; 
+    return null; 
+  }
+
+  const [formData, setFormData] = useState({
+    name: "",
+    role: "Warden",
+    phone: "",
+    salary: "",
+    shift: "Day Shift (09:00 AM - 06:00 PM)",
+    aadhaar: ""
+  });
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSuccess(true);
+    setTimeout(() => {
+      setSuccess(false);
+      setFormData({
+        name: "",
+        role: "Warden",
+        phone: "",
+        salary: "",
+        shift: "Day Shift (09:00 AM - 06:00 PM)",
+        aadhaar: ""
+      });
+    }, 2000);
+  };
 
   return (
     <PropertyOwnerLayout 
       owner={owner} 
-      title="Add Staff" 
+      title="Add New Staff" 
       onLogout={() => { clearOwnerRuntimeSession(); window.location.href = "/propertyowner/ownerlogin"; }}
     >
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Add Staff</h1>
-          <p className="mt-1.5 text-[13.5px] text-muted-foreground">Manage add staff and access real-time records.</p>
+          <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Add New Staff</h1>
+          <p className="mt-1.5 text-[13.5px] text-muted-foreground">Register a new team member, assign job roles, shift timings, and monthly salary.</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-soft">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">✓</div>
-          <div>
-            <h3 className="font-serif text-[18px] text-foreground">Interactive Module Ready</h3>
-            <p className="text-[12.5px] text-muted-foreground">This feature is live and initialized with live session config.</p>
+      <div className="max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-soft space-y-6">
+        <h3 className="font-serif text-[20px] text-foreground border-b border-border/60 pb-3">Staff Profile Information</h3>
+        
+        {success && (
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 text-xs font-bold flex items-center gap-2 animate-bounce">
+            <CheckCircle2 size={16} /> Staff member registered successfully!
           </div>
-        </div>
+        )}
 
-        <div className="border-t border-border pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-xl bg-muted/40 p-4 border border-border">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Current Status</span>
-              <p className="text-[15px] font-medium text-foreground mt-1">Operational</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Full Name</label>
+              <input 
+                type="text" 
+                value={formData.name} 
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g. Ramesh Kumar"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
+                required
+              />
             </div>
-            <div className="rounded-xl bg-muted/40 p-4 border border-border">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Connected Property</span>
-              <p className="text-[15px] font-medium text-foreground mt-1 truncate">{owner?.propertyName || "Main Property"}</p>
-            </div>
-            <div className="rounded-xl bg-muted/40 p-4 border border-border">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Total Records</span>
-              <p className="text-[15px] font-medium text-foreground mt-1">12 Active Items</p>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Job Designation / Role</label>
+              <select 
+                value={formData.role} 
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all cursor-pointer"
+              >
+                <option value="Warden">Property Warden</option>
+                <option value="Electrician">Electrician</option>
+                <option value="Plumber">Plumber</option>
+                <option value="Security Guard">Security Guard</option>
+                <option value="Housekeeping">Housekeeping Supervisor</option>
+              </select>
             </div>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Phone Number</label>
+              <input 
+                type="tel" 
+                value={formData.phone} 
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="e.g. +91 99887 76655"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Monthly Salary (₹)</label>
+              <input 
+                type="number" 
+                value={formData.salary} 
+                onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                placeholder="e.g. 15000"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Duty Shift Schedule</label>
+              <select 
+                value={formData.shift} 
+                onChange={(e) => setFormData({ ...formData, shift: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all cursor-pointer"
+              >
+                <option value="Day Shift (09:00 AM - 06:00 PM)">Day Shift (09:00 AM - 06:00 PM)</option>
+                <option value="Night Shift (08:00 PM - 08:00 AM)">Night Shift (08:00 PM - 08:00 AM)</option>
+                <option value="Flexible Shift">Flexible Hours</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Aadhaar Card Number</label>
+              <input 
+                type="text" 
+                value={formData.aadhaar} 
+                onChange={(e) => setFormData({ ...formData, aadhaar: e.target.value })}
+                placeholder="12-digit Aadhaar"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4 border-t border-border/60">
+            <button 
+              type="submit" 
+              className="px-6 h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10"
+            >
+              Add Staff Member <UserPlus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </form>
       </div>
     </PropertyOwnerLayout>
   );

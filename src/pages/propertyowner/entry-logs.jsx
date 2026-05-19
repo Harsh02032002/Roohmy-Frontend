@@ -1,48 +1,110 @@
-import React from "react";
+import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { 
+  LogIn, Search, Download, Filter, 
+  FileText, Calendar
+} from "lucide-react";
 
 export default function EntryLogsPage() {
   const owner = getOwnerRuntimeSession();
-  if (!owner?.loginId && typeof window !== "undefined") { window.location.href = "/propertyowner/ownerlogin"; return null; }
+  if (!owner?.loginId && typeof window !== "undefined") { 
+    window.location.href = "/propertyowner/ownerlogin"; 
+    return null; 
+  }
+
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("all");
+
+  const logs = [
+    { id: "ENT-8451", name: "Amit Sharma", type: "Resident", gate: "Main Gate", time: "Today, 08:30 PM" },
+    { id: "ENT-8452", name: "Kunal Shah", type: "Visitor", gate: "Main Gate", time: "Today, 06:15 PM" },
+    { id: "ENT-8453", name: "Suresh Kumar", type: "Staff", gate: "Back Service Entrance", time: "Today, 08:58 AM" }
+  ];
+
+  const filteredLogs = logs.filter(l => {
+    const matchesSearch = l.name.toLowerCase().includes(search.toLowerCase()) || l.id.includes(search);
+    const matchesType = filterType === "all" || l.type.toLowerCase() === filterType;
+    return matchesSearch && matchesType;
+  });
 
   return (
     <PropertyOwnerLayout 
       owner={owner} 
-      title="Entry Logs" 
+      title="Gate Entry Logs" 
       onLogout={() => { clearOwnerRuntimeSession(); window.location.href = "/propertyowner/ownerlogin"; }}
     >
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Entry Logs</h1>
-          <p className="mt-1.5 text-[13.5px] text-muted-foreground">Manage entry logs and access real-time records.</p>
+          <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Gate Entry Logs</h1>
+          <p className="mt-1.5 text-[13.5px] text-muted-foreground">Monitor real-time gate logins, biometrics scans, and RFID arrivals logs.</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-soft">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">✓</div>
-          <div>
-            <h3 className="font-serif text-[18px] text-foreground">Interactive Module Ready</h3>
-            <p className="text-[12.5px] text-muted-foreground">This feature is live and initialized with live session config.</p>
-          </div>
+      {/* Toolbar / Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search entries by name or RFID reference ID..."
+            className="w-full h-10 pl-9 pr-3 rounded-xl bg-card border border-border text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+          />
         </div>
+        <div className="flex gap-2">
+          {(["all", "resident", "visitor", "staff"]).map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilterType(type)}
+              className={`h-10 px-4 rounded-xl text-xs font-bold capitalize transition-colors border ${
+                filterType === type 
+                  ? "bg-slate-900 text-white border-slate-900" 
+                  : "bg-card text-muted-foreground border-border hover:bg-muted"
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        <div className="border-t border-border pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-xl bg-muted/40 p-4 border border-border">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Current Status</span>
-              <p className="text-[15px] font-medium text-foreground mt-1">Operational</p>
-            </div>
-            <div className="rounded-xl bg-muted/40 p-4 border border-border">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Connected Property</span>
-              <p className="text-[15px] font-medium text-foreground mt-1 truncate">{owner?.propertyName || "Main Property"}</p>
-            </div>
-            <div className="rounded-xl bg-muted/40 p-4 border border-border">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Total Records</span>
-              <p className="text-[15px] font-medium text-foreground mt-1">12 Active Items</p>
-            </div>
-          </div>
+      {/* Entry Table */}
+      <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
+        <div className="overflow-x-auto">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="text-left text-[11.5px] uppercase tracking-wider text-muted-foreground bg-muted/50">
+                <th className="px-6 py-3.5 font-semibold">Log ID</th>
+                <th className="px-6 py-3.5 font-semibold">User Name</th>
+                <th className="px-6 py-3.5 font-semibold">User Type</th>
+                <th className="px-6 py-3.5 font-semibold">Access Point / Gate</th>
+                <th className="px-6 py-3.5 font-semibold">Check-In Timestamp</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filteredLogs.map((l) => (
+                <tr key={l.id} className="hover:bg-muted/40 transition-colors">
+                  <td className="px-6 py-4 font-mono font-bold text-foreground">{l.id}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <span className="size-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <LogIn size={11} />
+                      </span>
+                      <span className="font-semibold text-foreground">{l.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                      {l.type}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-muted-foreground">{l.gate}</td>
+                  <td className="px-6 py-4 font-bold text-slate-800">{l.time}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </PropertyOwnerLayout>
