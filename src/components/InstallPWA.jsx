@@ -13,10 +13,6 @@ export default function InstallPWA() {
       console.log('PWA Prompt event captured and showing banner!');
     };
 
-    if (window.deferredPrompt) {
-      handler(window.deferredPrompt);
-    }
-
     window.addEventListener('beforeinstallprompt', handler);
 
     return () => {
