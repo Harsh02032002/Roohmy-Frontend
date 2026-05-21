@@ -7,17 +7,18 @@ export default function InstallPWA() {
 
   useEffect(() => {
     const handler = (e) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
       
-      // Don't show if they already dismissed it this session
       const hasDismissed = sessionStorage.getItem('pwa_prompt_dismissed');
       if (!hasDismissed) {
         setShowPrompt(true);
       }
     };
+
+    if (window.deferredPrompt) {
+      handler(window.deferredPrompt);
+    }
 
     window.addEventListener('beforeinstallprompt', handler);
 
