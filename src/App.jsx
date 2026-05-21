@@ -7,6 +7,7 @@ import routes from "./routes";
 import { getOwnerSession } from "./utils/ownerSession";
 import SharedShell from "./components/SharedShell";
 import { Toaster } from "react-hot-toast";
+import InstallPWA from "./components/InstallPWA";
 
 const PageLoader = () => (
   <div className="min-h-[40vh] flex items-center justify-center px-4 py-12 text-sm text-slate-500">
@@ -155,6 +156,7 @@ export default function App() {
         <ThemeProvider>
           <Router>
             <Toaster position="top-right" reverseOrder={false} />
+            <InstallPWA />
             <ManagerRouteGuard />
             <RouteChromeCleanup />
             <Suspense fallback={<PageLoader />}>
