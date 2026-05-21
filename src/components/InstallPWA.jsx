@@ -15,13 +15,23 @@ export default function InstallPWA() {
 
     window.addEventListener('beforeinstallprompt', handler);
 
+    // FORCE SHOW for the user to see it even if browser blocks the event
+    const timer = setTimeout(() => {
+      setShowPrompt(true);
+    }, 1500);
+
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handler);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      alert("Browser ne automatic install block kar diya hai (ya toh app pehle se installed hai). Kripya browser menu (3 dots) mein jayein aur 'Install App' ya 'Add to Home screen' par click karein!");
+      setShowPrompt(false);
+      return;
+    }
     
     // Show the install prompt
     deferredPrompt.prompt();
