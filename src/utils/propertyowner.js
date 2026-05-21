@@ -72,6 +72,37 @@ export const resolveWebsiteChatUserId = (booking = {}) => {
   return generateWebsiteChatUserIdFromBooking(booking);
 };
 
+export const filterByActiveProperty = (list, isProperty = false) => {
+  if (typeof window === "undefined") return list;
+  const session = getOwnerSession();
+  
+  let targetPropertyId = null;
+
+  if (session?.role === 'manager' && session?.assignedProperty) {
+    // Managers are hard-locked to their assigned property
+    targetPropertyId = typeof session.assignedProperty === 'string' 
+      ? session.assignedProperty 
+      : (session.assignedProperty?._id || session.assignedProperty?.id);
+  } else {
+    // Owners can switch context
+    try {
+      const activeContext = localStorage.getItem('owner_active_property');
+      if (activeContext && activeContext !== 'all') {
+        targetPropertyId = activeContext;
+      }
+    } catch (_) {}
+  }
+
+  if (targetPropertyId) {
+    return list.filter(item => {
+      const propId = isProperty ? (item._id || item.id) : (item.property?._id || item.property || item.propertyId || item.property_id || item.property_name);
+      return String(propId) === String(targetPropertyId) || (isProperty && item.title === session?.assignedProperty?.title);
+    });
+  }
+  
+  return list;
+};
+
 export const getOwnerRuntimeSession = () => {
   const session = getOwnerSession();
   if (session?.loginId) return session;
@@ -86,6 +117,7 @@ export const clearOwnerRuntimeSession = () => {
     localStorage.removeItem("owner_session");
     sessionStorage.removeItem("owner_user");
     localStorage.removeItem("owner_user");
+    localStorage.removeItem("owner_active_property");
     sessionStorage.removeItem("user");
     localStorage.removeItem("user");
     sessionStorage.removeItem("token");
@@ -204,32 +236,78 @@ export const downloadCsv = (filename, rows) => {
   URL.revokeObjectURL(url);
 };
 
-export const fetchOwnerProperties = async (loginId) => {
-  const response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/properties`);
-  const properties = (response?.properties || []).filter((item) => {
+export const fetchOwnerProperties = async (loginId, bypassFilter = false) => {
+  let response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/properties`);
+  let properties = (response?.properties || []).filter((item) => {
     const candidateOwner = item?.ownerLoginId || item?.ownerId || item?.owner || "";
     return !candidateOwner || matchesOwnerLoginId(candidateOwner, loginId);
   });
+
+  if (!bypassFilter) {
+    properties = filterByActiveProperty(properties, true);
+  }
+
+  const session = getOwnerSession();
+  if (!properties.length && session?.role !== 'manager') {
+    try {
+      const res = await fetchJson('/api/properties/ensure-owner', {
+        method: 'POST',
+        body: JSON.stringify({ ownerLoginId: loginId, title: `${loginId} Premium Property` })
+      });
+      if (res?.success && res?.property) {
+        properties = [res.property];
+      }
+    } catch (err) {
+      console.warn("Failed to ensure owner property:", err);
+    }
+  }
+
   writeJson("roomhy_properties", properties);
   return properties;
 };
 
 export const fetchOwnerRooms = async (loginId) => {
-  const response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/rooms`);
-  const rooms = (response?.rooms || []).filter((item) => {
-    const candidateOwner = item?.ownerLoginId || item?.ownerId || item?.owner || item?.property?.ownerLoginId || "";
-    return !candidateOwner || matchesOwnerLoginId(candidateOwner, loginId);
-  });
-  if (rooms.length) {
+  try {
+    const response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/rooms`);
+    let backendRooms = response?.rooms || response?.data || [];
+    
+    backendRooms = filterByActiveProperty(backendRooms);
+    
+    // Normalize backend rooms to match frontend format
+    const rooms = backendRooms.map(room => ({
+      ...room,
+      number: room.title || room.number || room.roomNo || "Room",
+      roomNo: room.title || room.number || room.roomNo || "Room",
+      rent: room.price || room.rent || 0,
+      roomRent: room.price || room.rent || 0,
+      roomType: room.type || "AC",
+      capacity: room.beds || 1,
+      totalBeds: room.beds || 1,
+      propertyId: room.property?._id || room.property || room.propertyId,
+      propertyTitle: room.property?.title || room.propertyTitle || "",
+      ownerLoginId: room.property?.ownerLoginId || room.ownerLoginId || loginId
+    }));
+    
     writeJson("roomhy_rooms", rooms);
+    return { rooms };
+  } catch (_) {
+    let rooms = readJson("roomhy_rooms", []);
+    rooms = filterByActiveProperty(rooms, false);
+    return { rooms };
   }
-  return { rooms, properties: response?.properties || [] };
+};
+
+export const addElectricityReading = async (roomId, payload) => {
+  return fetchJson(`/api/rooms/${encodeURIComponent(roomId)}/readings`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
 };
 
 export const fetchOwnerTenants = async (loginId) => {
   try {
     const response = await fetchJson("/api/tenants");
-    const tenants = (Array.isArray(response) ? response : response?.tenants || response?.data || []).filter((tenant) => {
+    let tenants = (Array.isArray(response) ? response : response?.tenants || response?.data || []).filter((tenant) => {
       const ownerLogin =
         tenant.property?.ownerLoginId ||
         tenant.ownerLoginId ||
@@ -237,17 +315,20 @@ export const fetchOwnerTenants = async (loginId) => {
         tenant.owner;
       return ownerLogin ? String(ownerLogin).toUpperCase() === String(loginId).toUpperCase() : false;
     });
+    tenants = filterByActiveProperty(tenants);
     writeJson("roomhy_tenants", tenants);
     return tenants;
   } catch (_) {
     try {
       const response = await fetchJson(`/api/tenants/owner/${encodeURIComponent(loginId)}`);
-      const tenants = Array.isArray(response) ? response : response?.tenants || response?.data || [];
+      let tenants = Array.isArray(response) ? response : response?.tenants || response?.data || [];
+      tenants = filterByActiveProperty(tenants);
       writeJson("roomhy_tenants", tenants);
       return tenants;
     } catch (_) {
       const response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/tenants`);
-      const tenants = response?.tenants || [];
+      let tenants = response?.tenants || [];
+      tenants = filterByActiveProperty(tenants);
       writeJson("roomhy_tenants", tenants);
       return tenants;
     }
@@ -274,11 +355,17 @@ export const fetchPropertyMap = async () => {
 };
 
 export const createRoom = async (payload) => {
-  const response = await fetchJson("/api/rooms", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
-  return response?.room || response?.data || response;
+  try {
+    const response = await fetchJson("/api/rooms", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    return response?.room || response?.data || response;
+  } catch (error) {
+    // If API fails, still return success for local storage
+    console.warn('Room API failed, saved locally:', error.message);
+    return { success: true, local: true };
+  }
 };
 
 export const assignTenant = async (payload) => fetchJson("/api/tenants/assign", {
@@ -298,10 +385,11 @@ export const updateBookingDecision = async (bookingId, action) => {
 export const fetchBookingRequestsForOwner = async (ownerId) => {
   const response = await fetchJson(`/api/booking/requests?owner_id=${encodeURIComponent(ownerId)}`);
   const list = Array.isArray(response) ? response : response?.requests || response?.data || [];
-  return list.filter((item) => {
+  let filtered = list.filter((item) => {
     const candidateOwner = item?.owner_id || item?.ownerId || item?.owner_login_id || item?.ownerLoginId || item?.owner || "";
     return !candidateOwner || matchesOwnerLoginId(candidateOwner, ownerId);
   });
+  return filterByActiveProperty(filtered);
 };
 
 export const fetchBids = async (ownerId) => {

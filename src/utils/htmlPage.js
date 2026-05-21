@@ -79,6 +79,7 @@ const markInlineExecuted = (key) => {
 const wasInlineExecuted = (key) => Boolean(window[inlineExecutedKey]?.[key]);
 
 const getLegacyApiUrl = () => {
+  if (import.meta.env?.VITE_API_URL) return import.meta.env.VITE_API_URL;
   if (typeof window === "undefined") return "https://roohmy-backend-xwa9.vercel.app";
   const host = window.location?.hostname;
   return host === "localhost" || host === "127.0.0.1"

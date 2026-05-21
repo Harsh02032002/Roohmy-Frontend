@@ -2,6 +2,7 @@
 // This replaces the vanilla JS API calls with proper React-compatible fetch calls
 
 const getApiUrl = () => {
+  if (import.meta.env?.VITE_API_URL) return import.meta.env.VITE_API_URL;
   if (typeof window !== 'undefined') {
     return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:5001'

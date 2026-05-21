@@ -15,7 +15,7 @@ const emptyForm = {
 
 export const useTenantProfile = () => {
   const apiBase = useMemo(
-    () => (isLocalHost() ? "http://localhost:5001" : "https://roohmy-backend-xwa9.vercel.app"),
+    () => (import.meta.env?.VITE_API_URL || (isLocalHost() ? "http://localhost:5001" : "https://roohmy-backend-xwa9.vercel.app")),
     []
   );
   const [form, setForm] = useState(emptyForm);

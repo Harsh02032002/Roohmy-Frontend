@@ -194,7 +194,11 @@ export default function Index() {
         const role = data.user.role;
         if (role === "superadmin" || role === "admin") {
           navigate(resolvePanelPath("superadmin", "superadmin"));
-        } else if (role === "areamanager" || role === "manager" || role === "employee") {
+        } else if (role === "manager") {
+          localStorage.setItem("managerToken", data.token);
+          localStorage.setItem("managerData", JSON.stringify(data.user));
+          navigate(resolvePanelPath("manager", "dashboard"));
+        } else if (role === "areamanager" || role === "employee") {
           navigate(resolvePanelPath("employee", "areaadmin"));
         } else if (role === "owner") {
           navigate(resolvePanelPath("propertyowner", "admin"));

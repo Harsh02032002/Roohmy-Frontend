@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 
 const getApiUrl = () =>
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  import.meta.env?.VITE_API_URL ||
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001"
-    : "https://roohmy-backend-xwa9.vercel.app";
+    : "https://roohmy-backend-xwa9.vercel.app");
 
 // Sidebar is injected dynamically for employee pages via useHtmlPage.
 

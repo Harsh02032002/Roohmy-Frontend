@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchJson } from "../../utils/api";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { requireOwnerSession } from "../../utils/ownerSession";
+import { fetchOwnerProperties } from "../../utils/propertyowner";
 import {
   Plus, MapPin, BedDouble, IndianRupee, ArrowRight, Search
 } from "lucide-react";
@@ -36,8 +37,8 @@ export default function Properties() {
     setOwner(session);
     const load = async () => {
       try {
-        const data = await fetchJson(`/api/owners/${session.loginId}/properties`);
-        setProperties(data?.properties || []);
+        const props = await fetchOwnerProperties(session.loginId);
+        setProperties(props);
       } catch (err) {
         setErrorMsg(err?.body || err?.message || "Failed to load properties.");
       } finally {

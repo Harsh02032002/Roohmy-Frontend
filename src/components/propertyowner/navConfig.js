@@ -5,7 +5,7 @@ import {
   Eye, Wallet, CheckCircle, BellRing, Receipt, Link, Repeat, Calculator,
   FileBadge, TrendingUp, BarChart3, AlertTriangle, PieChart, CreditCard,
   AlertCircle, Megaphone, MessageSquare, Star, FolderOpen,
-  Calendar, IndianRupee, Headset, Briefcase, ClipboardList, Target, ShieldCheck
+  Calendar, IndianRupee, Headset, Briefcase, ClipboardList, Target, ShieldCheck, Zap
 } from 'lucide-react';
 
 // ============================================
@@ -16,15 +16,7 @@ export const PROPERTY_OWNER_NAV = [
   {
     label: "Dashboard",
     icon: LayoutDashboard,
-    href: "/propertyowner/admin",
-    submenus: [
-      { label: "Overview", href: "/propertyowner/admin", goldOnly: false },
-      { label: "Occupancy Overview", href: "/propertyowner/occupancy-overview", goldOnly: false },
-      { label: "Revenue Overview", href: "/propertyowner/revenue-overview", goldOnly: false },
-      { label: "Quick Actions", href: "/propertyowner/quick-actions", goldOnly: false },
-      { label: "Notifications", href: "/propertyowner/notifications", goldOnly: false },
-      { label: "Activity Timeline", href: "/propertyowner/activity-timeline", goldOnly: false },
-    ]
+    href: "/propertyowner/admin"
   },
   {
     label: "Properties",
@@ -87,6 +79,7 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Payment History", href: "/propertyowner/payment-received", goldOnly: false },
       { label: "Online Payments", href: "/propertyowner/payment-dashboard", goldOnly: false },
       { label: "Receipts", href: "/propertyowner/receipts", goldOnly: false },
+      { label: "Electricity Readings", href: "/propertyowner/electricity-readings", goldOnly: false },
       { label: "Security Deposits", href: "/propertyowner/security-deposits", goldOnly: false },
       { label: "Refunds", href: "/propertyowner/refunds", goldOnly: false },
       { label: "Discounts & Offers", href: "/propertyowner/discounts-offers", goldOnly: false },
@@ -128,6 +121,7 @@ export const PROPERTY_OWNER_NAV = [
     icon: Briefcase,
     href: "/propertyowner/all-staff",
     submenus: [
+      { label: "Property Managers", href: "/propertyowner/property-managers", goldOnly: false },
       { label: "All Staff", href: "/propertyowner/all-staff", goldOnly: false },
       { label: "Add Staff", href: "/propertyowner/add-staff", goldOnly: false },
       { label: "Roles & Permissions", href: "/propertyowner/roles-permissions", goldOnly: false },
@@ -151,25 +145,13 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Gate Management", href: "/propertyowner/gate-management", goldOnly: false },
     ]
   },
-  {
-    label: "Food & Kitchen",
-    icon: Target,
-    href: "/propertyowner/daily-menu",
-    submenus: [
-      { label: "Daily Menu", href: "/propertyowner/daily-menu", goldOnly: false },
-      { label: "Weekly Menu", href: "/propertyowner/weekly-menu", goldOnly: false },
-      { label: "Meal Attendance", href: "/propertyowner/meal-attendance", goldOnly: false },
-      { label: "Kitchen Inventory", href: "/propertyowner/kitchen-inventory", goldOnly: false },
-      { label: "Grocery Expenses", href: "/propertyowner/grocery-expenses", goldOnly: false },
-      { label: "Vendor List", href: "/propertyowner/vendor-list", goldOnly: false },
-      { label: "Food Feedback", href: "/propertyowner/food-feedback", goldOnly: false },
-    ]
-  },
+
   {
     label: "Communication",
     icon: MessageCircle,
     href: "/propertyowner/ownerchat",
     submenus: [
+      { label: "Chat", href: "/propertyowner/ownerchat", goldOnly: false },
       { label: "WhatsApp Broadcast", href: "/propertyowner/whatsapp", goldOnly: false },
       { label: "SMS Campaigns", href: "/propertyowner/sms-campaigns", goldOnly: false },
       { label: "Email Notices", href: "/propertyowner/email-notices", goldOnly: false },

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { X, Plus, Building2, ChevronDown } from "lucide-react";
+import { X, Plus, Building2, ChevronDown, UploadCloud, Wind, Table as TableIcon, Tv, Bath, LayoutTemplate, Refrigerator, DoorClosed, Armchair, Utensils, Microwave, Flame, Shirt, Video, Fan, Check } from "lucide-react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { fetchJson } from "../../utils/api";
 import {
@@ -49,7 +49,8 @@ export default function Rooms() {
   const [errorMsg, setErrorMsg] = useState("");
   const [roomModalOpen, setRoomModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
-  const [roomForm, setRoomForm] = useState({ roomNo: "", roomType: "AC", roomRent: "", roomGender: "", roomBeds: 2 });
+  const defaultRoomForm = { roomNo: "", unitType: "", floor: "", sharingType: "", roomRent: "", remarks: "", isAvailable: true, facilities: [], roomTypeFeatures: [], media: [], roomType: "AC", roomGender: "", roomBeds: 2, electricityUnitCost: 0, meterReadings: [] };
+  const [roomForm, setRoomForm] = useState(defaultRoomForm);
   const [assignMode, setAssignMode] = useState("new");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedBedIndex, setSelectedBedIndex] = useState(null);
@@ -107,9 +108,15 @@ export default function Rooms() {
   const handleCreateRoom = async (e) => {
     e.preventDefault();
     if (!owner?.loginId) return;
+    
+    const propId = currentProperty?._id || "";
+    if (!propId) {
+      setErrorMsg("Please wait for properties to load or add a property first.");
+      return;
+    }
+    
     try {
       setErrorMsg("");
-      const propId = currentProperty?._id || "";
       const bedCount = Number(roomForm.roomBeds || 1);
       const local = normalizeRoom({
         id: `R-${Date.now()}`, ownerLoginId: owner.loginId, propertyId: propId,
@@ -121,9 +128,28 @@ export default function Rooms() {
       const updated = [...readJson("roomhy_rooms", []), local];
       writeJson("roomhy_rooms", updated);
       setRooms(mergeRooms(owner.loginId, []));
-      try { await createRoom({ propertyId: propId, title: roomForm.roomNo, type: roomForm.roomType, rent: Number(roomForm.roomRent || 0), beds: bedCount, gender: roomForm.roomGender, ownerLoginId: owner.loginId }); } catch {}
+      try { 
+        await createRoom({ 
+          propertyId: propId, 
+          title: roomForm.roomNo, 
+          type: roomForm.roomType, 
+          rent: Number(roomForm.roomRent || 0), 
+          beds: bedCount, 
+          gender: roomForm.roomGender, 
+          ownerLoginId: owner.loginId,
+          unitType: roomForm.unitType,
+          floor: roomForm.floor,
+          sharingType: roomForm.sharingType,
+          remarks: roomForm.remarks,
+          isAvailable: roomForm.isAvailable,
+          facilities: roomForm.facilities,
+          roomTypeFeatures: roomForm.roomTypeFeatures,
+          media: roomForm.media,
+          electricityUnitCost: Number(roomForm.electricityUnitCost || 0)
+        }); 
+      } catch {}
       setRoomModalOpen(false);
-      setRoomForm({ roomNo: "", roomType: "AC", roomRent: "", roomGender: "", roomBeds: 2 });
+      setRoomForm(defaultRoomForm);
       await load(owner);
     } catch (e) { setErrorMsg(e?.message || "Failed."); }
   };
@@ -166,6 +192,63 @@ export default function Rooms() {
     <PropertyOwnerLayout owner={owner} title="Rooms & Beds" onLogout={() => { clearOwnerRuntimeSession(); window.location.href = "/propertyowner/ownerlogin"; }} contentClassName="max-w-7xl mx-auto">
 
       {/* Header */}
+      {/* Stats Panel */}
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 mb-6">
+        <div className="bg-card p-4 rounded-xl shadow-sm">
+          <p className="text-sm text-muted-foreground">Total Rooms</p>
+          <p className="text-xl font-semibold text-foreground">{rooms.length}</p>
+        </div>
+        <div className="bg-card p-4 rounded-xl shadow-sm">
+          <p className="text-sm text-muted-foreground">Total Beds</p>
+          <p className="text-xl font-semibold text-foreground">{rooms.reduce((s,r)=> s+ (r.beds?.length||0),0)}</p>
+        </div>
+        <div className="bg-card p-4 rounded-xl shadow-sm">
+          <p className="text-sm text-muted-foreground">Vacant Beds</p>
+          <p className="text-xl font-semibold text-foreground">{rooms.reduce((s,r)=>s+ r.beds.filter(b=>b.status==='available').length,0)}</p>
+        </div>
+        <div className="bg-card p-4 rounded-xl shadow-sm">
+          <p className="text-sm text-muted-foreground">Occupied Beds</p>
+          <p className="text-xl font-semibold text-foreground">{rooms.reduce((s,r)=>s+ r.beds.filter(b=>b.status==='occupied').length,0)}</p>
+        </div>
+        <div className="bg-card p-4 rounded-xl shadow-sm">
+          <p className="text-sm text-muted-foreground">Vacant Rooms</p>
+          <p className="text-xl font-semibold text-foreground">{rooms.filter(r=> r.beds.filter(b=>b.status==='available').length>0).length}</p>
+        </div>
+        <div className="bg-card p-4 rounded-xl shadow-sm">
+          <p className="text-sm text-muted-foreground">Occupied Rooms</p>
+          <p className="text-xl font-semibold text-foreground">{rooms.filter(r=> r.beds.filter(b=>b.status==='occupied').length>0).length}</p>
+        </div>
+      </div>
+      {/* Filter Row */}
+      <div className="flex flex-wrap items-center gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-muted-foreground">Show:</span>
+          <select className="bg-card border border-border rounded-lg px-3 py-1 text-sm">
+            <option value="all">All Rooms</option>
+            <option value="vacant">Vacant</option>
+            <option value="occupied">Occupied</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-muted-foreground">Floor:</span>
+          <select className="bg-card border border-border rounded-lg px-3 py-1 text-sm">
+            <option value="all">All Floors</option>
+            {/* Dynamically generate floor options */}
+            {Array.from(new Set(rooms.map(r=>r.floor).filter(Boolean))).map(f=>(
+              <option key={f} value={f}>{f}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-muted-foreground">Sharing:</span>
+          <select className="bg-card border border-border rounded-lg px-3 py-1 text-sm">
+            <option value="all">All</option>
+            <option value="Single Sharing">Single</option>
+            <option value="Double Sharing">Double</option>
+            <option value="Triple Sharing">Triple</option>
+          </select>
+        </div>
+      </div>
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
         <div>
           <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Rooms &amp; Beds</h1>
@@ -256,49 +339,201 @@ export default function Rooms() {
       </div>
 
       {/* Add Room Modal */}
-      <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm transition-all", roomModalOpen?"opacity-100 pointer-events-auto":"opacity-0 pointer-events-none")}>
-        <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-          <div className="p-6 border-b border-border flex justify-between items-center">
-            <div><h2 className="text-[18px] font-semibold text-foreground">Add New Room</h2><p className="text-[12px] text-muted-foreground mt-0.5">Configure room details</p></div>
-            <button onClick={() => setRoomModalOpen(false)} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"><X size={20}/></button>
+      <div className={cn("fixed inset-0 z-[100] flex items-center justify-center bg-black/70 transition-all", roomModalOpen?"opacity-100 pointer-events-auto":"opacity-0 pointer-events-none")}>
+        <div className={cn("bg-white dark:bg-card w-full max-w-md rounded-2xl shadow-2xl flex flex-col transition-transform duration-300", roomModalOpen?"scale-100":"scale-95")}>
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-border">
+            <button type="button" onClick={() => setRoomModalOpen(false)} className="p-1 -ml-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"><X size={18}/></button>
+            <h2 className="text-[18px] font-semibold text-foreground flex-1">Room Details</h2>
           </div>
-          <form onSubmit={handleCreateRoom} className="p-6 space-y-4">
-            <div className="bg-muted/50 p-3 rounded-lg border border-border">
-              <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Property</label>
-              <div className="flex items-center gap-2 text-[13.5px] font-medium text-foreground"><Building2 className="size-4 text-primary"/><span className="truncate">{currentPropertyDisplay}</span></div>
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Room Number</label>
-              <input required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="e.g. 101, A-Wing" value={roomForm.roomNo} onChange={e=>setRoomForm(p=>({...p,roomNo:e.target.value}))}/>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="flex-1 overflow-y-auto p-6 max-h-[calc(100vh-180px)]">
+            <form id="addRoomForm" onSubmit={handleCreateRoom} className="space-y-6">
+              
               <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Type</label>
-                <select className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" value={roomForm.roomType} onChange={e=>setRoomForm(p=>({...p,roomType:e.target.value}))}>
-                  <option value="AC">AC Room</option><option value="Non-AC">Non-AC</option>
-                </select>
+                <label className="block text-[13px] text-muted-foreground mb-1.5">Room Name <span className="text-destructive">*</span></label>
+                <input required className="w-full bg-card border border-border rounded-lg px-3 py-2 text-[14px] text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60 transition-colors" placeholder="Ex. Room 001" value={roomForm.roomNo} onChange={e=>setRoomForm(p=>({...p,roomNo:e.target.value}))}/>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] text-muted-foreground mb-1.5">Unit Type</label>
+                  <select className="w-full bg-card border border-border rounded-lg px-3 py-2 text-[14px] text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none transition-colors" value={roomForm.unitType} onChange={e=>setRoomForm(p=>({...p,unitType:e.target.value}))}>
+                    <option value="">Select Unit Type</option>
+                    <option value="Room">Room</option>
+                    <option value="Bed">Bed</option>
+                    <option value="PG">PG</option>
+                    <option value="1RK">1RK</option>
+                    <option value="2RK">2RK</option>
+                    <option value="1BHK">1BHK</option>
+                    <option value="2BHK">2BHK</option>
+                    <option value="3BHK">3BHK</option>
+                    <option value="4BHK">4BHK</option>
+                    <option value="5BHK">5BHK</option>
+                    <option value="Studio Apartment">Studio Apartment</option>
+                    <option value="Apartment">Apartment</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] text-muted-foreground mb-1.5">Select Floor</label>
+                  <select className="w-full bg-card border border-border rounded-lg px-3 py-2 text-[14px] text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none transition-colors" value={roomForm.floor} onChange={e=>setRoomForm(p=>({...p,floor:e.target.value}))}>
+                    <option value="">Select Floor</option>
+                    <option value="Basement">Basement</option>
+                    <option value="Ground Floor">Ground Floor</option>
+                    {Array.from({length: 100}, (_, i) => i + 1).map(floor => (
+                      <option key={floor} value={`${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor`}>
+                        {floor}{floor === 1 ? 'st' : floor === 2 ? 'nd' : floor === 3 ? 'rd' : 'th'} Floor
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] text-muted-foreground mb-1.5">Sharing Type</label>
+                  <select className="w-full bg-card border border-border rounded-lg px-3 py-2 text-[14px] text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none transition-colors" value={roomForm.sharingType} onChange={e=>setRoomForm(p=>({...p,sharingType:e.target.value}))}>
+                    <option value="">Select Unit Sharing Type</option>
+                    <option value="Single Sharing">Single Sharing</option>
+                    <option value="Double Sharing">Double Sharing</option>
+                    <option value="Triple Sharing">Triple Sharing</option>
+                    <option value="Four Sharing">Four Sharing</option>
+                    <option value="Private Room (No Sharing)">Private Room (No Sharing)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] text-muted-foreground mb-1.5">Amount Per Bed</label>
+                  <input type="number" className="w-full bg-card border border-border rounded-lg px-3 py-2 text-[14px] text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="0" value={roomForm.roomRent} onChange={e=>setRoomForm(p=>({...p,roomRent:e.target.value}))}/>
+                </div>
+              </div>
+
               <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Rent/Month</label>
-                <input type="number" required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="0" value={roomForm.roomRent} onChange={e=>setRoomForm(p=>({...p,roomRent:e.target.value}))}/>
+                <label className="block text-[13px] text-muted-foreground mb-1.5">Room Remarks</label>
+                <textarea className="w-full bg-card border border-border rounded-lg px-3 py-2 text-[14px] text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/60 transition-colors min-h-[80px]" placeholder="Remarks" value={roomForm.remarks} onChange={e=>setRoomForm(p=>({...p,remarks:e.target.value}))}></textarea>
               </div>
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Gender</label>
-              <select required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" value={roomForm.roomGender} onChange={e=>setRoomForm(p=>({...p,roomGender:e.target.value}))}>
-                <option value="">Select</option><option value="Boys">Boys</option><option value="Girls">Girls</option><option value="Co-ed">Co-ed</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Beds</label>
-              <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg p-1">
-                <button type="button" onClick={() => setRoomForm(p=>({...p,roomBeds:Math.max(1,p.roomBeds-1)}))} className="size-8 rounded-md bg-card border border-border text-foreground font-bold hover:bg-muted">-</button>
-                <span className="flex-1 text-center text-[13.5px] font-medium text-foreground">{roomForm.roomBeds}</span>
-                <button type="button" onClick={() => setRoomForm(p=>({...p,roomBeds:Math.min(10,p.roomBeds+1)}))} className="size-8 rounded-md bg-card border border-border text-foreground font-bold hover:bg-muted">+</button>
+
+              <div>
+                <label className="block text-[13px] text-muted-foreground mb-2">Is this room available to rent <span className="text-destructive">*</span></label>
+                <div className="flex items-center gap-6">
+                  <label className="flex items-center gap-2 text-[14px] text-foreground cursor-pointer">
+                    <input type="radio" name="isAvailable" checked={roomForm.isAvailable} onChange={() => setRoomForm(p=>({...p,isAvailable:true}))} className="w-4 h-4 text-primary focus:ring-primary accent-primary" /> Yes
+                  </label>
+                  <label className="flex items-center gap-2 text-[14px] text-foreground cursor-pointer">
+                    <input type="radio" name="isAvailable" checked={!roomForm.isAvailable} onChange={() => setRoomForm(p=>({...p,isAvailable:false}))} className="w-4 h-4 text-primary focus:ring-primary accent-primary" /> No
+                  </label>
+                </div>
               </div>
-            </div>
-            <button type="submit" className="w-full h-10 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90">Create Room</button>
-          </form>
+
+              <div>
+                <h3 className="text-[14px] font-semibold text-primary mb-4">Room Facilities</h3>
+                <div className="mb-3">
+                  <label className="text-[13px] text-muted-foreground">Facilities</label>
+                </div>
+                <div className="grid grid-cols-4 gap-y-6 gap-x-2">
+                  {[
+                    {name: "AC", icon: Wind}, {name: "Table", icon: TableIcon}, {name: "TV", icon: Tv}, {name: "Washroom", icon: Bath},
+                    {name: "Balcony", icon: LayoutTemplate}, {name: "Fridge", icon: Refrigerator}, {name: "Almirah", icon: DoorClosed}, {name: "Chair", icon: Armchair},
+                    {name: "Food", icon: Utensils}, {name: "Microwave", icon: Microwave}, {name: "Geyser", icon: Flame}, {name: "Laundry", icon: Shirt},
+                    {name: "CCTV", icon: Video}, {name: "Toilet", icon: Bath}, {name: "Cooler", icon: Fan}
+                  ].map(fac => {
+                    const isSelected = roomForm.facilities.includes(fac.name);
+                    return (
+                      <label key={fac.name} className="flex flex-col items-center gap-1.5 cursor-pointer group">
+                        <div className="relative">
+                          <input type="checkbox" className="peer sr-only" checked={isSelected} onChange={(e) => {
+                            setRoomForm(p => ({
+                              ...p, 
+                              facilities: e.target.checked ? [...p.facilities, fac.name] : p.facilities.filter(f => f !== fac.name)
+                            }));
+                          }} />
+                          <div className={cn("w-5 h-5 rounded border border-border flex items-center justify-center transition-colors absolute -left-6 top-1/2 -translate-y-1/2", isSelected ? "bg-primary border-primary text-primary-foreground" : "bg-card group-hover:border-primary/50")}>
+                            {isSelected && <Check size={14} strokeWidth={3} />}
+                          </div>
+                          <div className="flex flex-col items-center gap-1 pl-1">
+                            <fac.icon size={22} className={cn("transition-colors", isSelected ? "text-primary" : "text-muted-foreground")} />
+                            <span className={cn("text-[12px] font-medium transition-colors text-center leading-tight", isSelected ? "text-foreground" : "text-muted-foreground")}>{fac.name}</span>
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <div className="mb-4">
+                  <label className="text-[13px] text-muted-foreground">Room Type</label>
+                </div>
+                <div className="grid grid-cols-3 gap-y-4 gap-x-4">
+                  {["Corner Room", "Large Room", "Ventilation", "Furnished", "Unfurnished", "Semi-Furnished", "Female", "Male", "Non Attached", "Attached", "Hall", "Short Term", "Long Term"].map(rt => {
+                    const isSelected = roomForm.roomTypeFeatures.includes(rt);
+                    return (
+                      <label key={rt} className="flex items-start gap-2 cursor-pointer group">
+                        <div className="relative flex items-center mt-0.5">
+                          <input type="checkbox" className="peer sr-only" checked={isSelected} onChange={(e) => {
+                            setRoomForm(p => ({
+                              ...p, 
+                              roomTypeFeatures: e.target.checked ? [...p.roomTypeFeatures, rt] : p.roomTypeFeatures.filter(f => f !== rt)
+                            }));
+                          }} />
+                          <div className={cn("w-4 h-4 rounded border border-border flex items-center justify-center transition-colors", isSelected ? "bg-primary border-primary text-primary-foreground" : "bg-card group-hover:border-primary/50")}>
+                            {isSelected && <Check size={12} strokeWidth={3} />}
+                          </div>
+                        </div>
+                        <span className={cn("text-[13px] leading-tight transition-colors", isSelected ? "text-foreground" : "text-muted-foreground")}>{rt}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-4 pb-4 border-t border-border">
+                <h3 className="text-[14px] font-semibold text-primary mb-4">Electricity Meter</h3>
+                <div>
+                  <label className="block text-[13px] text-muted-foreground mb-1.5">Unit Cost (₹/Unit)</label>
+                  <input type="number" step="0.01" className="w-full bg-card border border-border rounded-lg px-3 py-2 text-[14px] text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="e.g., 8.50" value={roomForm.electricityUnitCost} onChange={e=>setRoomForm(p=>({...p,electricityUnitCost:Number(e.target.value)}))}/>
+                  <p className="text-[11px] text-muted-foreground mt-1">Set the cost per unit. Staff will add readings later.</p>
+                </div>
+              </div>
+
+              <div className="pt-2 pb-6">
+                <h3 className="text-[14px] font-semibold text-primary mb-3">Room Media (Photos/Videos)</h3>
+                <div className="mb-3">
+                  {roomForm.media.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      {roomForm.media.map((file, idx) => (
+                        <div key={idx} className="relative group">
+                          <img src={file.preview} alt={`media-${idx}`} className="w-full h-20 object-cover rounded-lg border border-border" />
+                          <button type="button" onClick={() => setRoomForm(p => ({...p, media: p.media.filter((_, i) => i !== idx)}))} className="absolute top-1 right-1 p-1 bg-destructive text-background rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <label className="w-32 h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-all text-primary">
+                  <input type="file" multiple accept="image/*,video/*" onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    files.forEach(file => {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        setRoomForm(p => ({...p, media: [...p.media, {file, preview: event.target.result}]}));
+                      };
+                      reader.readAsDataURL(file);
+                    });
+                  }} className="sr-only" />
+                  <UploadCloud size={28} />
+                  <span className="text-[11px] font-medium text-center px-2">Upload photos/videos</span>
+                </label>
+              </div>
+
+            </form>
+          </div>
+          
+          <div className="p-4 border-t border-border bg-card">
+            <button type="submit" form="addRoomForm" className="w-full h-11 rounded-lg bg-primary text-primary-foreground text-[14px] font-medium hover:opacity-90 transition-opacity shadow-sm">
+              Add Room
+            </button>
+          </div>
         </div>
       </div>
 

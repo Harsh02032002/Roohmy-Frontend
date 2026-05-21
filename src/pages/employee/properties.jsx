@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 
-const API_BASES = ["https://roohmy-backend-xwa9.vercel.app", "http://localhost:5001"];
+const API_BASES = import.meta.env?.VITE_API_URL
+  ? [import.meta.env.VITE_API_URL, ""]
+  : ["https://roohmy-backend-xwa9.vercel.app", "http://localhost:5001"];
 
 const getApiUrl = () =>
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  import.meta.env?.VITE_API_URL ||
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001"
-    : "https://roohmy-backend-xwa9.vercel.app";
+    : "https://roohmy-backend-xwa9.vercel.app");
 
 const getStoredToken = () =>
   localStorage.getItem("token") ||

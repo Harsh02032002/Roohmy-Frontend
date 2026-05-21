@@ -203,16 +203,16 @@ export default function Ownerlogin() {
         {step === "login" && (
           <div className="fade-in">
             <h1 className="text-2xl font-semibold text-gray-800 mb-2">Portal Login</h1>
-            <p className="text-gray-500 mb-6">Enter your Owner ID generated from Enquiry.</p>
+            <p className="text-gray-500 mb-6">Enter your Owner ID or Phone Number.</p>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 text-left mb-2">Login ID</label>
+              <label className="block text-sm font-medium text-gray-700 text-left mb-2">Login ID or Phone Number</label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="user" className="w-5 h-5"></i></span>
                 <input
                   type="text"
                   className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 transition-colors"
-                  placeholder="e.g. ROOMHY001"
+                  placeholder="ROOMHY001 or 9876543210"
                   value={loginId}
                   onChange={(event) => setLoginId(event.target.value)}
                 />

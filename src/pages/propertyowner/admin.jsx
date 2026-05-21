@@ -27,7 +27,8 @@ import {
   clearOwnerRuntimeSession,
   fetchOwnerTenants,
   formatDate,
-  getOwnerRuntimeSession
+  getOwnerRuntimeSession,
+  filterByActiveProperty
 } from "../../utils/propertyowner";
 
 export default function Admin() {
@@ -82,10 +83,23 @@ export default function Admin() {
         fetchJson(`/api/notifications?toLoginId=${encodeURIComponent(loginId)}`)
       ]);
       setOwner((prev) => ({ ...prev, ...(ownerRes || {}) }));
-      setRoomsCount((roomsRes?.rooms || []).length);
-      setTenantsCount((Array.isArray(tenantsRes) ? tenantsRes : tenantsRes?.tenants || []).length);
-      setRentTotal(rentRes?.totalRent || 0);
-      setEnquiries(Array.isArray(enquiryRes) ? enquiryRes : enquiryRes?.enquiries || []);
+      
+      const filteredRooms = filterByActiveProperty(roomsRes?.rooms || [], false);
+      const allEnquiries = filterByActiveProperty(Array.isArray(enquiryRes) ? enquiryRes : enquiryRes?.enquiries || [], false);
+      const filteredTenants = Array.isArray(tenantsRes) ? tenantsRes : tenantsRes?.tenants || []; // already filtered by fetchOwnerTenants
+      
+      setRoomsCount(filteredRooms.length);
+      setTenantsCount(filteredTenants.length);
+      
+      const computedRent = allEnquiries
+          .filter(e => String(e.status).toLowerCase() === 'accepted' || String(e.status).toLowerCase() === 'approved' || String(e.status).toLowerCase() === 'active')
+          .reduce((sum, e) => sum + (Number(e.paidAmount) || Number(e.agreedRent) || 0), 0);
+      
+      // If manager, use computed rent from their assigned properties. Otherwise use backend total
+      const session = getOwnerRuntimeSession();
+      setRentTotal(session?.role === 'manager' ? computedRent : (rentRes?.totalRent || 0));
+      
+      setEnquiries(allEnquiries);
       setNotifications(Array.isArray(notificationRes) ? notificationRes : []);
     } catch (err) {
       setErrorMsg(err?.body || err?.message || "Failed to load dashboard data.");
@@ -173,35 +187,51 @@ export default function Admin() {
       {errorMsg ? <div className="text-sm text-red-600 mb-4">{errorMsg}</div> : null}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-        <StatCard
-          label="Today's collection"
-          value={`Rs ${loading ? "0" : rentTotal}`}
-          icon={Wallet}
-          tone="primary"
-          trend={{ value: "+18% vs yesterday", up: true }}
-        />
-        <StatCard
-          label="Pending dues"
-          value="Rs 0"
-          icon={AlertTriangle}
-          tone="warning"
-          hint="0 tenants overdue"
-        />
-        <StatCard
-          label="Occupancy"
-          value={`${loading ? 0 : tenantsCount}`}
-          icon={BedDouble}
-          tone="success"
-          hint="Rooms Active"
-        />
-        <StatCard
-          label="Active tenants"
-          value={String(loading ? 0 : tenantsCount)}
-          icon={Users}
-          tone="info"
-          trend={{ value: "+2 this week", up: true }}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mb-8">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Monthly Rent Expected</p>
+              <h3 className="text-[32px] font-bold text-foreground mt-2">₹{loading ? "0" : (rentTotal * 30).toLocaleString('en-IN')}</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+              <IndianRupee className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+          <p className="text-[13px] text-muted-foreground">Expected from {tenantsCount} tenants</p>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Rent Collected</p>
+              <h3 className="text-[32px] font-bold text-emerald-600 mt-2">₹{loading ? "0" : rentTotal.toLocaleString('en-IN')}</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <Wallet className="w-6 h-6 text-emerald-600" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-emerald-600 text-[12px] font-semibold">
+              <TrendingUp className="w-3.5 h-3.5" />
+              {rentTotal > 0 ? Math.round((rentTotal / (rentTotal * 30)) * 100) : 0}%
+            </div>
+            <span className="text-[13px] text-muted-foreground">collected this month</span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Pending Dues</p>
+              <h3 className="text-[32px] font-bold text-rose-600 mt-2">₹{loading ? "0" : ((rentTotal * 30) - rentTotal).toLocaleString('en-IN')}</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-rose-600" />
+            </div>
+          </div>
+          <p className="text-[13px] text-muted-foreground">{tenantsCount > 0 ? tenantsCount : 0} tenants pending payment</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5">
@@ -270,6 +300,7 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
     </PropertyOwnerLayout>
   );
 }

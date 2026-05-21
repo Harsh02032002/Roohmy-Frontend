@@ -46,7 +46,14 @@ const resolveHostHome = () => {
 
   if (host === "admin.roomhy.com" || host === "www.admin.roomhy.com") {
     if (role === "superadmin" || role === "admin") return "/superadmin/superadmin";
-    if (role === "areamanager" || role === "manager" || role === "employee") return "/employee/areaadmin";
+    if (role === "manager") {
+      const hasManagerSession =
+        !!sessionStorage.getItem("managerToken") ||
+        !!localStorage.getItem("managerToken") ||
+        !!localStorage.getItem("managerData");
+      return hasManagerSession ? "/propertyowner/admin" : "/manager/login";
+    }
+    if (role === "areamanager" || role === "employee") return "/employee/areaadmin";
     return "/superadmin/index";
   }
   if (host === "app.roomhy.com" || host === "www.app.roomhy.com") {
@@ -64,6 +71,32 @@ const HtmlRedirectOrHome = () => {
     return <Navigate to={clean || "/"} replace />;
   }
   return <Navigate to={resolveHostHome()} replace />;
+};
+
+const ManagerRouteGuard = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const hasManagerSession =
+      !!sessionStorage.getItem("manager_user") ||
+      !!localStorage.getItem("managerData") ||
+      !!sessionStorage.getItem("managerToken") ||
+      !!localStorage.getItem("managerToken");
+
+    if (!hasManagerSession) return;
+
+    const currentPath = location.pathname || "";
+    const blockedPrefixes = ["/superadmin/", "/staff"];
+    const isBlockedRoute = blockedPrefixes.some((prefix) => currentPath.startsWith(prefix));
+
+    if (isBlockedRoute) {
+      window.location.replace("/manager/dashboard");
+    }
+  }, [location.pathname]);
+
+  return null;
 };
 
 const RouteChromeCleanup = () => {
@@ -122,6 +155,7 @@ export default function App() {
         <ThemeProvider>
           <Router>
             <Toaster position="top-right" reverseOrder={false} />
+            <ManagerRouteGuard />
             <RouteChromeCleanup />
             <Suspense fallback={<PageLoader />}>
               <Routes>

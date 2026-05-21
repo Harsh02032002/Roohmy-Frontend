@@ -21,6 +21,7 @@ import { LayoutDashboard,
   Settings2,
   Search, Lock, ChevronRight, Crown, Zap, Users, BookOpen, FileText, Smartphone, Wallet, PieChart, Shield, Target, Navigation, Megaphone, Coffee, Receipt, Sparkles, LinkIcon, UserPlus, AlertCircle, Calendar, HelpCircle, Building2 } from "lucide-react";
 import { SILVER_NAV, GOLD_NAV } from './navConfig';
+import { fetchOwnerProperties } from "../../utils/propertyowner";
 
 const DEFAULT_DESKTOP_ITEMS = [
   { href: "/propertyowner/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -107,10 +108,32 @@ export default function PropertyOwnerLayout({
   const [subscriptionTier, setSubscriptionTier] = useState('gold');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({});
+  const [properties, setProperties] = useState([]);
+  const [activePropertyId, setActivePropertyId] = useState('all');
+  const [switcherOpen, setSwitcherOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('propertyowner_subscription_tier', 'gold');
+    const storedActive = localStorage.getItem('owner_active_property');
+    if (storedActive) {
+      setActivePropertyId(storedActive);
+    }
   }, []);
+
+  useEffect(() => {
+    if (owner?.loginId) {
+      fetchOwnerProperties(owner.loginId, true).then(props => {
+        setProperties(props || []);
+      }).catch(err => console.error("Failed to fetch properties for switcher", err));
+    }
+  }, [owner?.loginId]);
+
+  const handlePropertySwitch = (propId) => {
+    localStorage.setItem('owner_active_property', propId);
+    setActivePropertyId(propId);
+    setSwitcherOpen(false);
+    window.location.reload();
+  };
 
   const CURRENT_NAV = GOLD_NAV;
 
@@ -122,7 +145,7 @@ export default function PropertyOwnerLayout({
     }
     if (item.submenus) {
       e.preventDefault();
-      setExpandedMenus(prev => ({ ...prev, [item.label]: !prev[item.label] }));
+      setExpandedMenus(prev => ({ [item.label]: !prev[item.label] }));
     } else {
       if (window.innerWidth < 1024) setMobileOpen(false);
     }
@@ -156,7 +179,9 @@ export default function PropertyOwnerLayout({
 
   const displayName = useMemo(() => owner?.name || owner?.ownerName || "Owner", [owner]);
   const ownerInitial = useMemo(() => String(displayName).charAt(0).toUpperCase() || "O", [displayName]);
-  const accountLabel = useMemo(() => (owner?.loginId ? `Account: ${owner.loginId}` : "Property Owner"), [owner]);
+  const displayLoginId = useMemo(() => owner?.managerLoginId || owner?.loginId, [owner]);
+  const accountRole = useMemo(() => owner?.role === 'manager' ? 'Property Manager' : 'Property Owner', [owner]);
+  const accountLabel = useMemo(() => (displayLoginId ? `Account: ${displayLoginId}` : accountRole), [displayLoginId, accountRole]);
 
   const handleLogout = () => {
     if (typeof onLogout === "function") {
@@ -168,6 +193,8 @@ export default function PropertyOwnerLayout({
       localStorage.removeItem("owner_session");
       sessionStorage.removeItem("owner_user");
       localStorage.removeItem("owner_user");
+      sessionStorage.removeItem("manager_user");
+      localStorage.removeItem("managerData");
       sessionStorage.removeItem("user");
       localStorage.removeItem("user");
       sessionStorage.removeItem("token");
@@ -177,6 +204,7 @@ export default function PropertyOwnerLayout({
     }
     window.location.href = "/propertyowner/ownerlogin";
   };
+
 
   const renderDynamicNavItem = (item) => {
     const isParentActive = isActivePath(pathname, item.href) || 
@@ -423,16 +451,98 @@ export default function PropertyOwnerLayout({
         "w-72 h-screen bg-[#0F172A] text-slate-300 flex flex-col z-50 shrink-0 transition-transform duration-300",
         mobileOpen ? "fixed left-0 top-0 translate-x-0" : "fixed left-0 top-0 -translate-x-full lg:relative lg:translate-x-0"
       )}>
-        {/* Profile Header in Sidebar */}
-        <div className="p-6 flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg border-2 border-white/10 shadow-lg shadow-blue-600/20">
-            {ownerInitial}
+        {/* Profile Header in Sidebar (Property Switcher) */}
+        {owner?.role !== 'manager' ? (
+          <div className="relative p-4 shrink-0 border-b border-slate-800/50">
+            <button 
+              onClick={() => setSwitcherOpen(!switcherOpen)}
+              className={cn(
+                "w-full flex items-center justify-between p-3 rounded-2xl transition-all border",
+                activePropertyId !== 'all' 
+                  ? "border-blue-500/30 bg-blue-500/10" 
+                  : "border-slate-700/50 hover:bg-slate-800/50"
+              )}
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 shadow-lg shrink-0 transition-colors",
+                  activePropertyId !== 'all' ? "bg-blue-600 border-blue-400 shadow-blue-600/20" : "bg-slate-700 border-slate-600 shadow-slate-900/20"
+                )}>
+                  {activePropertyId !== 'all' ? <Building2 size={18} /> : ownerInitial}
+                </div>
+                <div className="flex flex-col min-w-0 text-left">
+                  <p className="text-sm font-bold text-white leading-none truncate">
+                    {activePropertyId === 'all' 
+                      ? displayName 
+                      : (properties.find(p => String(p._id || p.id) === activePropertyId)?.title || displayName)}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-widest truncate">
+                    {activePropertyId === 'all' ? "All Properties" : "Active Property"}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown size={16} className={cn("text-slate-500 shrink-0 transition-transform", switcherOpen && "rotate-180")} />
+            </button>
+
+            {/* Switcher Dropdown */}
+            <div className={cn(
+              "absolute left-4 right-4 top-full mt-2 bg-[#1E293B] rounded-2xl shadow-2xl border border-slate-700 py-2 z-50 overflow-hidden transition-all transform origin-top",
+              switcherOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none"
+            )}>
+              <div className="px-4 py-2 border-b border-slate-700/50 mb-1">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Switch Context</h3>
+              </div>
+              <div className="max-h-60 overflow-y-auto custom-scrollbar p-2">
+                <button
+                  onClick={() => handlePropertySwitch('all')}
+                  className={cn(
+                    "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors text-left",
+                    activePropertyId === 'all' ? "bg-blue-500/20 text-blue-400" : "text-slate-300 hover:bg-slate-800"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <LayoutDashboard size={16} className={activePropertyId === 'all' ? "text-blue-400" : "text-slate-500"} />
+                    <span>All Properties (Overview)</span>
+                  </div>
+                  {activePropertyId === 'all' && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+                </button>
+                
+                <div className="my-2 border-t border-slate-700/50"></div>
+                
+                {properties.map(p => {
+                  const pId = String(p._id || p.id);
+                  const isActive = activePropertyId === pId;
+                  return (
+                    <button
+                      key={pId}
+                      onClick={() => handlePropertySwitch(pId)}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors text-left mb-1 last:mb-0",
+                        isActive ? "bg-blue-500/20 text-blue-400" : "text-slate-300 hover:bg-slate-800"
+                      )}
+                    >
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="truncate">{p.title || p.name || "Property"}</span>
+                        <span className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{p.city || p.area || "No Location"}</span>
+                      </div>
+                      {isActive && <div className="w-2 h-2 shrink-0 rounded-full bg-blue-500" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-white leading-none truncate">{displayName}</p>
-            <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest truncate opacity-60">Property Owner</p>
+        ) : (
+          <div className="p-6 flex items-center gap-3 shrink-0">
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg border-2 border-white/10 shadow-lg shadow-blue-600/20">
+              {ownerInitial}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-white leading-none truncate">{displayName}</p>
+              <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest truncate opacity-60">Property Manager</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-4 space-y-0.5 custom-scrollbar pb-6">
@@ -529,12 +639,7 @@ export default function PropertyOwnerLayout({
               <MessageSquare size={20} className="group-hover:scale-110 transition-transform" />
             </button>
 
-            {/* Property Switcher */}
-            <button className="hidden lg:flex items-center gap-2 p-2.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all border border-slate-100">
-              <Building2 size={18} className="text-blue-600" />
-              <span className="text-sm font-bold">All Properties</span>
-              <ChevronDown size={14} className="opacity-50" />
-            </button>
+
 
             {/* Help Center */}
             <button onClick={() => navigate("/propertyowner/complaints")} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group hidden sm:block">

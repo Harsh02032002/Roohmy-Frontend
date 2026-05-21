@@ -10,7 +10,7 @@ import {
 import { getApiBase, fetchJson } from "../../utils/api";
 import { toast } from "react-hot-toast";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchOwnerProperties } from "../../utils/propertyowner";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
@@ -217,9 +217,8 @@ export default function TenantRec() {
     // Load properties for dropdown specifically belonging to the logged-in owner
     const loadProperties = async () => {
       try {
-        const data = await fetchJson(`/api/owners/${owner.loginId}/properties`);
-        const propList = Array.isArray(data) ? data : Array.isArray(data?.properties) ? data.properties : [];
-        setProperties(propList);
+        const props = await fetchOwnerProperties(owner.loginId);
+        setProperties(props);
       } catch (err) {
         console.error("Failed to load properties:", err);
       }

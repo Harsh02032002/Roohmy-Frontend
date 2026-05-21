@@ -149,6 +149,7 @@ const routeEntries = [
   ["/propertyowner/properties", "./pages/propertyowner/properties.jsx"],
   ["/propertyowner/review", "./pages/propertyowner/review.jsx"],
   ["/propertyowner/rooms", "./pages/propertyowner/rooms.jsx"],
+  ["/propertyowner/electricity-readings", "./pages/propertyowner/electricity-readings.jsx"],
   ["/propertyowner/schedulevisit", "./pages/propertyowner/schedulevisit.jsx"],
   ["/propertyowner/settings", "./pages/propertyowner/settings.jsx"],
   ["/propertyowner/tenantrec", "./pages/propertyowner/tenantrec.jsx"],
@@ -323,6 +324,11 @@ const routeEntries = [
   ["/propertyowner/whatsapp", "./pages/propertyowner/whatsapp.jsx"],
   ["/propertyowner/listing", "./pages/propertyowner/listing.jsx"],
   ["/propertyowner/occupancy-report", "./pages/propertyowner/occupancy-report.jsx"],
+  ["/propertyowner/property-managers", "./pages/propertyowner/property-managers.jsx"],
+  
+  // Property Manager Routes
+  ["/manager/login", "./pages/manager/login.jsx"],
+  ["/manager/dashboard", "./pages/manager/dashboard.jsx"],
 ];
 
 const buildRouteElement = (modulePath) => {

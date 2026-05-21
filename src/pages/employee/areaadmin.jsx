@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
 
 const getApiUrl = () =>
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  import.meta.env?.VITE_API_URL ||
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001"
-    : "https://roohmy-backend-xwa9.vercel.app";
+    : "https://roohmy-backend-xwa9.vercel.app");
 
 const WINDOW_NAME_SESSION_PREFIX = "__ROOMHY_STAFF_SESSION__:";
 
@@ -122,6 +123,29 @@ const sidebarConfig = {
 };
 
 const mandatoryPermissions = ["dashboard"];
+
+const mapManagerPermissionsToModules = (permissions = {}) => {
+  const allowed = new Set(["dashboard", "properties"]);
+
+  if (permissions?.canViewTenants || permissions?.canAddTenants) {
+    allowed.add("tenants");
+  }
+  if (permissions?.canCollectRent) {
+    allowed.add("rent_collections");
+  }
+  if (permissions?.canViewReports) {
+    allowed.add("visits");
+    allowed.add("reviews");
+  }
+  if (permissions?.canManageComplaints) {
+    allowed.add("complaint_history");
+  }
+  if (permissions?.canManageRooms) {
+    allowed.add("properties");
+  }
+
+  return Array.from(allowed);
+};
 
 const parseCountPayload = (payload) => {
   if (Array.isArray(payload)) return payload.length;
@@ -248,11 +272,16 @@ export default function SuperadminAreaadmin() {
     complaints: 0,
     visits: 0
   });
+  const assignedPropertyLabel =
+    user?.assignedProperty?.title ||
+    user?.assignedProperty?.name ||
+    user?.assignedProperty?.property_name ||
+    "Assigned Property";
 
   useEffect(() => {
     const stored = getStaffUser();
     if (stored && stored.role) stored.role = String(stored.role).toLowerCase();
-    if (!stored || (stored.role !== "areamanager" && stored.role !== "employee")) {
+    if (!stored || !["areamanager", "employee", "manager"].includes(stored.role)) {
       localStorage.removeItem("user");
       localStorage.removeItem("manager_user");
       sessionStorage.removeItem("owner_session");
@@ -280,12 +309,31 @@ export default function SuperadminAreaadmin() {
     const display = resolveUserDisplayName(stored, getEmployeeRecord(stored?.loginId));
     setUser(stored);
     setDisplayName(display);
-    setRoleLabel(stored.role === "areamanager" ? "AREA ADMIN" : "TEAM MEMBER");
-    setHeaderRole(stored.role === "employee" ? (stored.team || "Employee") : "Area Manager");
-    setShowSalary(stored.role !== "employee");
+    setRoleLabel(
+      stored.role === "areamanager"
+        ? "AREA ADMIN"
+        : stored.role === "manager"
+          ? "PROPERTY MANAGER"
+          : "TEAM MEMBER"
+    );
+    setHeaderRole(
+      stored.role === "employee"
+        ? (stored.team || "Employee")
+        : stored.role === "manager"
+          ? "Assigned Property Manager"
+          : "Area Manager"
+    );
+    setShowSalary(stored.role === "areamanager");
 
+    const assignedPropertyLabel =
+      stored?.assignedProperty?.title ||
+      stored?.assignedProperty?.name ||
+      stored?.assignedProperty?.property_name ||
+      "";
     const assignedArea = stored.area || stored.areaName;
-    if (assignedArea && assignedArea !== "Unassigned" && assignedArea !== "Select Area") {
+    if (stored.role === "manager" && assignedPropertyLabel) {
+      setHeaderBadge(assignedPropertyLabel);
+    } else if (assignedArea && assignedArea !== "Unassigned" && assignedArea !== "Select Area") {
       setHeaderBadge(stored.city ? `${assignedArea}, ${stored.city}` : assignedArea);
     } else {
       setHeaderBadge(stored.team || "Head Office");
@@ -294,6 +342,8 @@ export default function SuperadminAreaadmin() {
     let allowed = [];
     if (stored.role === "areamanager") {
       allowed = Object.keys(sidebarConfig);
+    } else if (stored.role === "manager") {
+      allowed = mapManagerPermissionsToModules(stored.permissions);
     } else {
       const assigned = normalizePermissions(stored.permissions);
       allowed = [...new Set([...assigned, ...mandatoryPermissions])];
@@ -307,6 +357,15 @@ export default function SuperadminAreaadmin() {
 
   useEffect(() => {
     if (!user) return;
+    if (user.role === "manager") {
+      setAreaStats({
+        totalProperties: 1,
+        pendingApprovals: "-",
+        activeOwners: assignedPropertyLabel
+      });
+      return;
+    }
+
     const apiUrl = getApiUrl();
     const areaCode = user?.areaCode || user?.area || "";
     if (!areaCode) return;
@@ -331,12 +390,13 @@ export default function SuperadminAreaadmin() {
       .finally(() => clearTimeout(timeout));
 
     return () => clearTimeout(timeout);
-  }, [user]);
+  }, [assignedPropertyLabel, user]);
 
   useEffect(() => {
     if (!user) return;
     const apiUrl = getApiUrl();
     const isEmployee = user?.role === "employee";
+    const isManager = user?.role === "manager";
     const visitQuery =
       isEmployee && (user?.loginId || user?.name)
         ? `?staffId=${encodeURIComponent(user?.loginId || "")}&staffName=${encodeURIComponent(user?.name || "")}`
@@ -347,7 +407,7 @@ export default function SuperadminAreaadmin() {
         const res = await fetch(`${apiUrl}${path}`);
         if (!res.ok) return 0;
         const data = await res.json().catch(() => ({}));
-        if (isEmployee && path.startsWith("/api/visits")) {
+        if ((isEmployee || isManager) && path.startsWith("/api/visits")) {
           const list = Array.isArray(data)
             ? data
             : Array.isArray(data?.visits)
@@ -369,7 +429,7 @@ export default function SuperadminAreaadmin() {
 
     const loadCounts = async () => {
       const [properties, tenants, complaints, visits] = await Promise.all([
-        allowedModules.includes("properties") ? fetchCount("/api/properties") : 0,
+        allowedModules.includes("properties") ? (isManager ? 1 : fetchCount("/api/properties")) : 0,
         allowedModules.includes("tenants") ? fetchCount("/api/tenants") : 0,
         allowedModules.includes("complaint_history") ? fetchCount("/api/complaints") : 0,
         allowedModules.includes("visits") ? fetchCount(`/api/visits${visitQuery}`) : 0
@@ -469,7 +529,46 @@ export default function SuperadminAreaadmin() {
   }, [displayName, user]);
 
   return (
-    <main class="flex-1 min-h-full bg-[#f1f5f9] p-6 md:p-10">
+    <div className="min-h-screen bg-[#f1f5f9] flex">
+      <aside className="w-[290px] bg-[#0f172a] text-white min-h-screen hidden lg:flex lg:flex-col">
+        <div className="px-8 py-8 border-b border-white/10">
+          <h2 className="text-[22px] font-extrabold leading-none">
+            {user?.role === "manager" ? "Manager" : "Employee"}
+          </h2>
+          <p className="text-xs text-slate-400 mt-3 uppercase tracking-[0.22em]">
+            {user?.role === "manager" ? "Assigned Property Access" : roleLabel}
+          </p>
+        </div>
+
+        <div className="py-4 overflow-y-auto">
+          <a href="/employee/areaadmin" className="sidebar-link active">
+            <i data-lucide="layout-dashboard" className="w-5 h-5 mr-3"></i> Dashboard
+          </a>
+          {renderSection("Management", navManagement)}
+          {renderSection("Finance", navFinance)}
+          {renderSection("System", navSystem)}
+        </div>
+
+        <div className="mt-auto px-6 py-6 border-t border-white/10">
+          <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+            <p className="text-xs font-semibold text-slate-300 uppercase tracking-[0.2em]">
+              {user?.role === "manager" ? "Assigned Property" : "Access Scope"}
+            </p>
+            <p className="text-sm font-bold text-white mt-3 break-words">
+              {user?.role === "manager" ? assignedPropertyLabel : headerBadge}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={logout}
+            className="w-full mt-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      <main className="flex-1 min-h-full p-6 md:p-10">
       <div class="w-full">
         <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
@@ -477,7 +576,7 @@ export default function SuperadminAreaadmin() {
               Welcome, <span id="welcomeName">{displayName}</span>!
             </h1>
             <p class="text-lg text-slate-500 mt-2">
-              Accessing <span id="welcomeArea" class="font-semibold text-purple-600">Dashboard</span>.
+              Accessing <span id="welcomeArea" class="font-semibold text-purple-600">{user?.role === "manager" ? assignedPropertyLabel : "Dashboard"}</span>.
             </p>
           </div>
 
@@ -495,8 +594,8 @@ export default function SuperadminAreaadmin() {
               </h3>
             </div>
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center min-w-[160px]">
-              <p class="text-sm font-medium text-slate-500 mb-1">Active Owners</p>
-              <h3 id="activeOwnersCountArea" class="text-3xl font-bold text-slate-900">
+              <p class="text-sm font-medium text-slate-500 mb-1">{user?.role === "manager" ? "Assigned Property" : "Active Owners"}</p>
+              <h3 id="activeOwnersCountArea" class={`font-bold text-slate-900 ${user?.role === "manager" ? "text-base leading-snug" : "text-3xl"}`}>
                 {areaStats.activeOwners}
               </h3>
             </div>
@@ -558,7 +657,8 @@ export default function SuperadminAreaadmin() {
           </div>
         </div>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }
 
