@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Download, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
+    // Only show on property owner routes
+    if (!location.pathname.startsWith('/propertyowner')) {
+      return;
+    }
+
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -24,11 +31,11 @@ export default function InstallPWA() {
       clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handler);
     };
-  }, []);
+  }, [location.pathname]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      alert("Browser ne automatic install block kar diya hai (ya toh app pehle se installed hai). Kripya browser menu (3 dots) mein jayein aur 'Install App' ya 'Add to Home screen' par click karein!");
+      alert("Already installed");
       setShowPrompt(false);
       return;
     }
