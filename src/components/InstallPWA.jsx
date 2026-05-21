@@ -9,11 +9,8 @@ export default function InstallPWA() {
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      
-      const hasDismissed = sessionStorage.getItem('pwa_prompt_dismissed');
-      if (!hasDismissed) {
-        setShowPrompt(true);
-      }
+      setShowPrompt(true);
+      console.log('PWA Prompt event captured and showing banner!');
     };
 
     if (window.deferredPrompt) {
