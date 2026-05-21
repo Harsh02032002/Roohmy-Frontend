@@ -22,6 +22,7 @@ export default defineConfig({
         theme_color: '#2563eb',
         background_color: '#0f172a',
         display: 'standalone',
+        id: '/propertyowner/app',
         start_url: '/propertyowner/admin',
         icons: [
           {
