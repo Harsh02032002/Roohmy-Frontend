@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   Tag, Search, Plus, Trash2, Edit3, 
-  CheckCircle2, AlertCircle, Percent
+  CheckCircle2, AlertCircle, Percent, Loader2
 } from "lucide-react";
 
 export default function CouponsOffersPage() {
@@ -14,36 +15,71 @@ export default function CouponsOffersPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [coupons, setCoupons] = useState([
-    { id: 1, code: "WELCOME1000", discount: "Flat ₹1000 Off", usage: "12 Times used", validity: "Valid till 30 June 2026", status: "Active" },
-    { id: 2, code: " monsoon5", discount: "5% Off rent", usage: "3 Times used", validity: "Valid till 15 July 2026", status: "Active" }
-  ]);
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [codeVal, setCodeVal] = useState("");
   const [discountVal, setDiscountVal] = useState("");
   const [validityVal, setValidityVal] = useState("");
+  const [isBusy, setIsBusy] = useState(false);
 
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!codeVal || !discountVal) return;
-    const newCoupon = {
-      id: coupons.length + 1,
-      code: codeVal.toUpperCase().replace(/\s+/g, ""),
-      discount: discountVal,
-      usage: "0 Times used",
-      validity: validityVal || "Unlimited validity",
-      status: "Active"
-    };
-    setCoupons([newCoupon, ...coupons]);
-    setCodeVal("");
-    setDiscountVal("");
-    setValidityVal("");
-    setShowAddModal(false);
+  React.useEffect(() => {
+    fetchCoupons();
+  }, [owner.loginId]);
+
+  const fetchCoupons = async () => {
+    try {
+      setLoading(true);
+      const res = await apiFetch(`/api/coupons/owner/${owner.loginId}`);
+      if (res && res.success) {
+        setCoupons(res.coupons);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeactivate = (id) => {
-    setCoupons(prev => prev.map(c => c.id === id ? { ...c, status: "Deactivated" } : c));
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!codeVal || !discountVal) return;
+    setIsBusy(true);
+    try {
+      const res = await apiFetch("/api/coupons", {
+        method: "POST",
+        body: JSON.stringify({
+          ownerLoginId: owner.loginId,
+          code: codeVal.toUpperCase().replace(/\s+/g, ""),
+          discount: discountVal,
+          validity: validityVal
+        })
+      });
+      if (res && res.success) {
+        setCoupons([res.coupon, ...coupons]);
+        setCodeVal("");
+        setDiscountVal("");
+        setValidityVal("");
+        setShowAddModal(false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleDeactivate = async (id) => {
+    if (!confirm("Deactivate this coupon?")) return;
+    try {
+      const res = await apiFetch(`/api/coupons/${id}/deactivate`, { method: "PUT" });
+      if (res && res.success) {
+        setCoupons(prev => prev.map(c => c._id === id ? { ...c, status: "Deactivated" } : c));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const filtered = coupons.filter(c => 
@@ -86,49 +122,60 @@ export default function CouponsOffersPage() {
       </div>
 
       {/* Grid of Coupons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((c) => (
-          <div key={c.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                  <Tag size={20} />
+      {loading ? (
+        <div className="text-center py-12 text-slate-500 flex flex-col items-center">
+          <Loader2 className="animate-spin mb-4" size={32} />
+          <p>Loading coupons...</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-12 text-slate-500">
+          No coupons found. Click "Create Coupon code" to create one.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((c) => (
+            <div key={c._id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                    <Tag size={20} />
+                  </div>
+                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
+                    c.status === "Active" 
+                      ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}>
+                    {c.status}
+                  </span>
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
-                  c.status === "Active" 
-                    ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                    : "bg-slate-100 text-slate-500 border-slate-200"
-                }`}>
-                  {c.status}
-                </span>
+
+                <div>
+                  <span className="text-xs font-mono font-bold text-slate-400 block mb-1">Coupon Promo Code</span>
+                  <h3 className="font-serif text-[24px] font-black text-slate-900 uppercase tracking-tight">{c.code}</h3>
+                  <p className="text-[13px] text-slate-700 mt-2 font-bold">{c.discount}</p>
+                  <p className="text-[11.5px] text-muted-foreground mt-0.5">{c.usage}</p>
+                </div>
+
+                <div className="border-t border-border/60 pt-4 flex justify-between items-center text-xs text-muted-foreground">
+                  <span>Validity Limits:</span>
+                  <span className="font-bold text-slate-800">{c.validity}</span>
+                </div>
               </div>
 
-              <div>
-                <span className="text-xs font-mono font-bold text-slate-400 block mb-1">Coupon Promo Code</span>
-                <h3 className="font-serif text-[24px] font-black text-slate-900 uppercase tracking-tight">{c.code}</h3>
-                <p className="text-[13px] text-slate-700 mt-2 font-bold">{c.discount}</p>
-                <p className="text-[11.5px] text-muted-foreground mt-0.5">{c.usage}</p>
-              </div>
-
-              <div className="border-t border-border/60 pt-4 flex justify-between items-center text-xs text-muted-foreground">
-                <span>Validity Limits:</span>
-                <span className="font-bold text-slate-800">{c.validity}</span>
-              </div>
+              {c.status === "Active" && (
+                <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
+                  <button 
+                    onClick={() => handleDeactivate(c._id)}
+                    className="flex-1 h-10 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Deactivate Coupon
+                  </button>
+                </div>
+              )}
             </div>
-
-            {c.status === "Active" && (
-              <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
-                <button 
-                  onClick={() => handleDeactivate(c.id)}
-                  className="flex-1 h-10 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  Deactivate Coupon
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Add Modal */}
       {showAddModal && (
@@ -181,9 +228,10 @@ export default function CouponsOffersPage() {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
+                  disabled={isBusy}
+                  className="flex-1 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold disabled:opacity-50"
                 >
-                  Create
+                  {isBusy ? "Creating..." : "Create"}
                 </button>
               </div>
             </form>

@@ -3,12 +3,44 @@ import StaffLayout from "../../components/StaffLayout";
 import { CheckCircle2, Circle, Clock, ClipboardList, Plus, MoreVertical } from "lucide-react";
 
 export default function StaffTasks() {
-  const tasks = [
-    { title: "Morning bathroom cleaning check", time: "08:00 AM", status: "Completed", category: "Cleaning" },
-    { title: "Collect rent for Room 102", time: "10:00 AM", status: "Pending", category: "Accounts" },
-    { title: "Fix leaking tap in Room 305", time: "11:30 AM", status: "In Progress", category: "Maintenance" },
-    { title: "Evening security round", time: "09:00 PM", status: "Pending", category: "Security" },
-  ];
+  const [tasks, setTasks] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        setLoading(true);
+        // We will just use the first employee to simulate a logged-in staff for now.
+        const empRes = await fetch('/api/employees');
+        const empData = await empRes.json();
+        
+        if (empData && empData.data && empData.data.length > 0) {
+           const staffMember = empData.data[0]; // Simulated logged-in staff
+           const maintRes = await fetch(`/api/maintenance/owner/${staffMember.parentLoginId}`);
+           const maintData = await maintRes.json();
+           
+           if (maintData && maintData.tasks) {
+               const assigned = maintData.tasks.filter(t => 
+                  t.assignedStaffId && 
+                  (t.assignedStaffId === staffMember._id || t.assignedStaffId._id === staffMember._id)
+               );
+               setTasks(assigned.map(t => ({
+                   id: t._id,
+                   title: t.title,
+                   time: t.scheduledDate || "N/A",
+                   status: t.status,
+                   category: t.frequency || "Maintenance"
+               })));
+           }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTasks();
+  }, []);
 
   return (
     <StaffLayout title="Daily Tasks">
@@ -25,7 +57,11 @@ export default function StaffTasks() {
 
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden p-6">
         <div className="space-y-4">
-          {tasks.map((task, i) => (
+          {loading ? (
+             <div className="text-center py-6 text-sm text-slate-500">Loading your tasks...</div>
+          ) : tasks.length === 0 ? (
+             <div className="text-center py-6 text-sm text-slate-500">No tasks assigned to you right now.</div>
+          ) : tasks.map((task, i) => (
             <div key={i} className="flex items-center justify-between p-4 bg-slate-50/50 hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-xl hover:shadow-slate-100 rounded-2xl transition-all group">
               <div className="flex items-center gap-4">
                 <button className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${

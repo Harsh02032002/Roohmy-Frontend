@@ -14,12 +14,50 @@ export default function LeaveRequestsPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [requests, setRequests] = useState([
-    { id: 1, name: "Rajesh Gupta", room: "102", from: "24 May 2026", to: "28 May 2026", reason: "Going home for sister's wedding", status: "Pending" }
-  ]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleUpdateStatus = (id, newStatus) => {
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+  React.useEffect(() => {
+    fetchRequests();
+  }, [owner.loginId]);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/leaves/owner/${owner.loginId}`);
+      const data = await res.json();
+      if (data.success && data.requests) {
+        setRequests(data.requests.map(r => ({
+           id: r._id,
+           name: r.tenantName,
+           room: r.roomNo,
+           from: new Date(r.fromDate).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}),
+           to: new Date(r.toDate).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}),
+           reason: r.reason,
+           status: r.status
+        })));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      const res = await fetch(`/api/leaves/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRequests(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const filteredRequests = requests.filter(r => 
@@ -54,8 +92,13 @@ export default function LeaveRequestsPage() {
       </div>
 
       {/* Grid of Leave requests */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredRequests.map((r) => (
+      {loading ? (
+        <div className="py-12 text-center text-slate-500">Loading leave requests...</div>
+      ) : filteredRequests.length === 0 ? (
+        <div className="py-12 text-center text-slate-500">No leave requests found.</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredRequests.map((r) => (
           <div key={r.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex justify-between items-start">
@@ -111,7 +154,8 @@ export default function LeaveRequestsPage() {
             )}
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </PropertyOwnerLayout>
   );
 }

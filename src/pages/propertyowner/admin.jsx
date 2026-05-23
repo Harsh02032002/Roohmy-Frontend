@@ -204,33 +204,29 @@ export default function Admin() {
         <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Rent Collected</p>
-              <h3 className="text-[32px] font-bold text-emerald-600 mt-2">₹{loading ? "0" : rentTotal.toLocaleString('en-IN')}</h3>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Total Tenants</p>
+              <h3 className="text-[32px] font-bold text-emerald-600 mt-2">{loading ? "0" : tenantsCount}</h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <Wallet className="w-6 h-6 text-emerald-600" />
+              <Users className="w-6 h-6 text-emerald-600" />
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-emerald-600 text-[12px] font-semibold">
-              <TrendingUp className="w-3.5 h-3.5" />
-              {rentTotal > 0 ? Math.round((rentTotal / (rentTotal * 30)) * 100) : 0}%
-            </div>
-            <span className="text-[13px] text-muted-foreground">collected this month</span>
+            <span className="text-[13px] text-muted-foreground">Active residing tenants</span>
           </div>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Pending Dues</p>
-              <h3 className="text-[32px] font-bold text-rose-600 mt-2">₹{loading ? "0" : ((rentTotal * 30) - rentTotal).toLocaleString('en-IN')}</h3>
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Total Leads</p>
+              <h3 className="text-[32px] font-bold text-rose-600 mt-2">{loading ? "0" : enquiries.length}</h3>
             </div>
             <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6 text-rose-600" />
+              <TrendingUp className="w-6 h-6 text-rose-600" />
             </div>
           </div>
-          <p className="text-[13px] text-muted-foreground">{tenantsCount > 0 ? tenantsCount : 0} tenants pending payment</p>
+          <p className="text-[13px] text-muted-foreground">Enquiries & Booking requests</p>
         </div>
       </div>
 

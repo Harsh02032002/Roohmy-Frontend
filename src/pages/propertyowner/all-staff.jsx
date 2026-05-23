@@ -14,14 +14,60 @@ export default function AllStaffPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [staff, setStaff] = useState([
-    { id: 1, name: "Suresh Kumar", role: "Electrician", phone: "+91 98765 11002", shift: "09:00 AM - 06:00 PM", status: "Active" },
-    { id: 2, name: "Ramesh Dev", role: "Plumber", phone: "+91 91234 55432", shift: "09:00 AM - 06:00 PM", status: "Active" },
-    { id: 3, name: "Deepak Rawat", role: "Warden / Security", phone: "+91 99988 88776", shift: "08:00 PM - 08:00 AM", status: "Active" }
-  ]);
+  const [staff, setStaff] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleTerminate = (id) => {
-    setStaff(prev => prev.map(s => s.id === id ? { ...s, status: "Terminated" } : s));
+  React.useEffect(() => {
+    fetchStaff();
+  }, []);
+
+  const fetchStaff = async () => {
+    try {
+      // Fetch employees where parentLoginId is owner.loginId (assuming our API returns all or we just filter client-side for now, wait, employeeRoutes returns all by default. We should pass filter, but it's not supported via query yet. We'll filter client side for safety.)
+      const res = await fetch('/api/employees');
+      const data = await res.json();
+      let myStaff = (data.data || []).filter(e => e.parentLoginId === owner.loginId);
+
+      // Fetch their shifts to show duty hours
+      const shiftsRes = await fetch(`/api/hr/shifts/${owner.loginId}`);
+      const shiftsData = await shiftsRes.json();
+      const shiftsMap = {};
+      if (shiftsData.success) {
+        shiftsData.data.forEach(sh => {
+          if (sh.employeeId && sh.employeeId._id) {
+             shiftsMap[sh.employeeId._id] = `${sh.startTime} - ${sh.endTime}`;
+          } else if (sh.employeeId) {
+             shiftsMap[sh.employeeId] = `${sh.startTime} - ${sh.endTime}`;
+          }
+        });
+      }
+
+      myStaff = myStaff.map(s => ({
+        id: s._id,
+        loginId: s.loginId,
+        name: s.name,
+        role: s.role,
+        phone: s.phone || 'N/A',
+        shift: shiftsMap[s._id] || 'Standard Hours',
+        status: s.isActive ? 'Active' : 'Terminated'
+      }));
+
+      setStaff(myStaff);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTerminate = async (loginId) => {
+    if (!window.confirm("Are you sure you want to terminate this staff member?")) return;
+    try {
+      await fetch(`/api/employees/${loginId}/deactivate`, { method: 'POST' });
+      setStaff(prev => prev.map(s => s.loginId === loginId ? { ...s, status: "Terminated" } : s));
+    } catch (err) {
+      console.error("Failed to terminate", err);
+    }
   };
 
   const filteredStaff = staff.filter(s => 
@@ -56,50 +102,56 @@ export default function AllStaffPage() {
       </div>
 
       {/* Grid of Staff */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStaff.map((s) => (
-          <div key={s.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                  <Users size={20} />
+      {loading ? (
+        <div className="py-12 text-center text-slate-500">Loading staff...</div>
+      ) : filteredStaff.length === 0 ? (
+        <div className="py-12 text-center text-slate-500">No staff members found.</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredStaff.map((s) => (
+            <div key={s.id} className={`rounded-2xl border ${s.status === 'Active' ? 'border-border bg-card' : 'border-rose-100 bg-rose-50/30'} p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between`}>
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className={`size-10 rounded-xl flex items-center justify-center ${s.status === 'Active' ? 'bg-blue-500/10 text-blue-600' : 'bg-slate-500/10 text-slate-500'}`}>
+                    <Users size={20} />
+                  </div>
+                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${
+                    s.status === "Active" 
+                      ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                      : "bg-rose-50 text-rose-600 border border-rose-100"
+                  }`}>
+                    {s.status}
+                  </span>
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${
-                  s.status === "Active" 
-                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                    : "bg-rose-50 text-rose-600 border border-rose-100"
-                }`}>
-                  {s.status}
-                </span>
+
+                <div>
+                  <h3 className={`font-serif text-[21px] font-bold ${s.status === 'Active' ? 'text-foreground' : 'text-slate-600 line-through'}`}>{s.name}</h3>
+                  <p className="text-[12.5px] text-muted-foreground mt-0.5">{s.role}</p>
+                  <p className="text-[11.5px] text-muted-foreground mt-1 flex items-center gap-1"><Phone size={11} /> {s.phone}</p>
+                </div>
+
+                <div className="border-t border-border/60 pt-4 space-y-2 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Duty Shift Hours:</span>
+                    <span className="font-medium text-foreground">{s.shift}</span>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-serif text-[21px] font-bold text-foreground">{s.name}</h3>
-                <p className="text-[12.5px] text-muted-foreground mt-0.5">{s.role}</p>
-                <p className="text-[11.5px] text-muted-foreground mt-1 flex items-center gap-1"><Phone size={11} /> {s.phone}</p>
-              </div>
-
-              <div className="border-t border-border/60 pt-4 space-y-2 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Duty Shift Hours:</span>
-                  <span className="font-medium text-foreground">{s.shift}</span>
+              {s.status === "Active" && (
+                <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
+                  <button 
+                    onClick={() => handleTerminate(s.loginId)}
+                    className="flex-1 h-10 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Terminate Staff
+                  </button>
                 </div>
-              </div>
+              )}
             </div>
-
-            {s.status === "Active" && (
-              <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
-                <button 
-                  onClick={() => handleTerminate(s.id)}
-                  className="flex-1 h-10 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  Terminate Staff
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </PropertyOwnerLayout>
   );
 }

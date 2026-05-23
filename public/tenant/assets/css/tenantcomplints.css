@@ -53,3 +53,19 @@ body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
 
         /* Modal */
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
+
+        /* Force sidebar and header display on tenant pages */
+        header.bg-white {
+            display: flex !important;
+        }
+
+        @media (min-width: 768px) {
+            aside.w-64 {
+                display: flex !important;
+            }
+        }
+        @media (max-width: 767px) {
+            aside.w-64 {
+                display: none !important;
+            }
+        }

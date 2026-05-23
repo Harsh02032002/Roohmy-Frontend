@@ -208,7 +208,8 @@ export const resolveSectionFromPath = (path = "") => {
   if (path.startsWith("/superadmin/")) return "superadmin";
   if (path.startsWith("/employee/")) return "employee";
   if (path.startsWith("/propertyowner/")) return "propertyowner";
-  if (path.startsWith("/tenant/")) return "tenant";
+  // Tenant pages render standalone without the shared shell.
+  if (path.startsWith("/tenant/")) return null;
   
   return null;
 };

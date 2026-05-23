@@ -14,12 +14,58 @@ export default function ServiceHistoryPage() {
   }
 
   const [search, setSearch] = useState("");
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const logs = [
-    { id: "SRV-4821", desc: "Main line water valve pipe repair", vendor: "Gupta Plumbers", amount: 4500, date: "15 May 2026", status: "Paid" },
-    { id: "SRV-4790", desc: "Kitchen chimney duct deep clean", vendor: "Sparkle Cleaners", amount: 2500, date: "12 May 2026", status: "Paid" },
-    { id: "SRV-4711", desc: "Corridor backup generator diesel top-up", vendor: "HP Fuel Station", amount: 6000, date: "08 May 2026", status: "Paid" }
-  ];
+  React.useEffect(() => {
+    fetchHistory();
+  }, [owner.loginId]);
+
+  const fetchHistory = async () => {
+    try {
+      setLoading(true);
+      const [maintRes, compRes] = await Promise.all([
+        fetch(`/api/maintenance/owner/${owner.loginId}`),
+        fetch(`/api/complaints/owner/${owner.loginId}`)
+      ]);
+      const maintData = await maintRes.json();
+      const compData = await compRes.json();
+      
+      const history = [];
+
+      (maintData.tasks || []).forEach(t => {
+        if (t.status === "Completed") {
+          history.push({
+            id: `MNT-${t._id.substring(t._id.length-4).toUpperCase()}`,
+            desc: t.title,
+            vendor: t.assignedStaffName || t.staff || "Internal Staff",
+            date: new Date(t.updatedAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}),
+            amount: 0,
+            type: "Maintenance"
+          });
+        }
+      });
+
+      (compData.complaints || []).forEach(c => {
+        if (c.status === "Resolved") {
+          history.push({
+            id: `CMP-${c._id.substring(c._id.length-4).toUpperCase()}`,
+            desc: c.category + " - " + c.description,
+            vendor: c.assignedStaffName || "Internal Staff",
+            date: new Date(c.updatedAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}),
+            amount: 0,
+            type: "Complaint Resolution"
+          });
+        }
+      });
+
+      setLogs(history);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredLogs = logs.filter(l => 
     l.desc.toLowerCase().includes(search.toLowerCase()) ||
@@ -67,20 +113,29 @@ export default function ServiceHistoryPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredLogs.map((l) => (
-                <tr key={l.id} className="hover:bg-muted/40 transition-colors">
-                  <td className="px-6 py-4 font-mono font-bold text-foreground">{l.id}</td>
-                  <td className="px-6 py-4 font-semibold text-foreground">{l.desc}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{l.vendor}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{l.date}</td>
-                  <td className="px-6 py-4 font-bold text-emerald-600">₹{l.amount.toLocaleString("en-IN")}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
-                      <Download size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <tr><td colSpan="6" className="px-6 py-8 text-center text-slate-500">Loading service history...</td></tr>
+              ) : filteredLogs.length === 0 ? (
+                <tr><td colSpan="6" className="px-6 py-8 text-center text-slate-500">No completed services found.</td></tr>
+              ) : (
+                filteredLogs.map((l) => (
+                  <tr key={l.id} className="hover:bg-muted/40 transition-colors">
+                    <td className="px-6 py-4 font-mono font-bold text-foreground">{l.id}</td>
+                    <td className="px-6 py-4 font-semibold text-foreground">
+                      {l.desc}
+                      <span className="block text-[10px] text-muted-foreground font-normal mt-0.5 uppercase tracking-wider">{l.type}</span>
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground">{l.vendor}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{l.date}</td>
+                    <td className="px-6 py-4 font-bold text-emerald-600">{l.amount > 0 ? `₹${l.amount.toLocaleString("en-IN")}` : "N/A"}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
+                        <Download size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

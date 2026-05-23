@@ -14,24 +14,68 @@ export default function NotificationsPage() {
   }
 
   const [activeTab, setActiveTab] = useState("all");
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: "payment", title: "Rent payment received", msg: "Vijay Kumar (Room 101) paid ₹8,500 via UPI online. Receipt generated automatically.", time: "10 mins ago", read: false },
-    { id: 2, type: "kyc", title: "Police verification pending", msg: "Rohan Mehra (Room 202) checked-in, but local police verification form is not uploaded.", time: "2 hours ago", read: false },
-    { id: 3, type: "complaint", title: "New Geyser Complaint logged", msg: "Amit Sharma (Room 101) reported geyser not heating on the 1st floor.", time: "4 hours ago", read: true },
-    { id: 4, type: "payment", title: "Late fine penalty charged", msg: "Ajay Devgn (Room 204) outstanding dues exceeded grace period. ₹500 fine applied.", time: "1 day ago", read: true },
-    { id: 5, type: "system", title: "Weekly menu updated", msg: "Cook updated weekly menu for breakfast & dinner. Tenants notified.", time: "2 days ago", read: true }
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...content = n, read: true })));
+  React.useEffect(() => {
+    if (!owner?.loginId) return;
+    const fetchNotifs = async () => {
+      try {
+        const { fetchJson } = await import("../../utils/api");
+        const res = await fetchJson(`/api/notifications?toLoginId=${encodeURIComponent(owner.loginId)}`);
+        if (Array.isArray(res)) {
+          const formatted = res.map(n => {
+            const meta = typeof n.meta === 'string' ? JSON.parse(n.meta) : (n.meta || {});
+            return {
+              id: n._id,
+              type: n.type || "system",
+              title: meta.title || n.title || "Notification",
+              msg: meta.message || n.message || "",
+              time: new Date(n.createdAt).toLocaleString(),
+              read: n.read
+            };
+          });
+          setNotifications(formatted);
+        }
+      } catch (e) {
+        console.error("Failed to load notifications", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifs();
+  }, [owner?.loginId]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      const { fetchJson } = await import("../../utils/api");
+      await fetchJson('/api/notifications/mark-all-read', {
+        method: 'PUT',
+        body: JSON.stringify({ toLoginId: owner.loginId })
+      });
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const handleMarkSingleRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const handleMarkSingleRead = async (id) => {
+    try {
+      const { fetchJson } = await import("../../utils/api");
+      await fetchJson(`/api/notifications/${id}/read`, { method: 'PUT' });
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const handleDeleteNotification = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const handleDeleteNotification = async (id) => {
+    try {
+      // Add delete logic here if the API exists, for now just remove from state
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const filtered = notifications.filter(n => {

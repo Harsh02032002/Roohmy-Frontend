@@ -135,6 +135,40 @@ export default function PropertyOwnerLayout({
     window.location.reload();
   };
 
+  const [globalNotifications, setGlobalNotifications] = useState([]);
+  
+  useEffect(() => {
+    if (owner?.loginId) {
+      const fetchNotifs = async () => {
+        try {
+          const { fetchJson } = await import("../../utils/api");
+          const res = await fetchJson(`/api/notifications?toLoginId=${encodeURIComponent(owner.loginId)}`);
+          if (Array.isArray(res)) {
+            const formatted = res.map(n => {
+              const meta = typeof n.meta === 'string' ? JSON.parse(n.meta) : (n.meta || {});
+              return {
+                ...n,
+                title: meta.title || n.title || "Notification",
+                message: meta.message || n.message || "",
+                type: n.type || "system",
+                meta: meta
+              };
+            });
+            setGlobalNotifications(formatted);
+          }
+        } catch (e) {
+          console.error("Failed to fetch global notifications", e);
+        }
+      };
+      fetchNotifs();
+    }
+  }, [owner?.loginId]);
+
+  const displayNotifications = globalNotifications.length > 0 ? globalNotifications : notifications;
+  const displayNotificationCount = globalNotifications.length > 0 
+    ? globalNotifications.filter(n => !n.read).length 
+    : notificationCount;
+
   const CURRENT_NAV = GOLD_NAV;
 
   const handleParentClick = (e, item) => {
@@ -652,7 +686,7 @@ export default function PropertyOwnerLayout({
                 onClick={() => setNotificationOpen(!notificationOpen)}
               >
                 <Bell size={20} className="group-hover:rotate-12 transition-transform" />
-                {notificationCount > 0 && (
+                {displayNotificationCount > 0 && (
                   <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm" />
                 )}
               </button>
@@ -666,13 +700,13 @@ export default function PropertyOwnerLayout({
                   <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Notifications</h3>
                 </div>
                 <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                  {notifications.length === 0 ? (
+                  {displayNotifications.length === 0 ? (
                     <div className="px-5 py-10 text-center">
                       <Bell className="w-8 h-8 text-slate-100 mx-auto mb-2" />
                       <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">No messages yet</p>
                     </div>
                   ) : (
-                    notifications.map((n, i) => (
+                    displayNotifications.map((n, i) => (
                       <div key={i} className="px-5 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 cursor-pointer">
                         <p className="text-[11px] font-bold text-slate-900 leading-tight mb-1">{n.title}</p>
                         <p className="text-[10px] text-slate-500 line-clamp-2">{n.message}</p>

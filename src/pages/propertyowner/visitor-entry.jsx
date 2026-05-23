@@ -14,9 +14,8 @@ export default function VisitorEntryPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [visitors, setVisitors] = useState([
-    { id: 1, name: "Kunal Shah", phone: "+91 98223 11223", host: "Amit Sharma", room: "101", purpose: "Friend / Social Visit", entryTime: "Today, 06:15 PM" }
-  ]);
+  const [visitors, setVisitors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [vName, setVName] = useState("");
@@ -25,28 +24,79 @@ export default function VisitorEntryPage() {
   const [vRoom, setVRoom] = useState("");
   const [vPurpose, setVPurpose] = useState("Social");
 
-  const handleAddVisitor = (e) => {
-    e.preventDefault();
-    if (!vName || !vPhone || !vHost || !vRoom) return;
-    const newVisitor = {
-      id: visitors.length + 1,
-      name: vName,
-      phone: vPhone,
-      host: vHost,
-      room: vRoom,
-      purpose: vPurpose,
-      entryTime: `Today, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-    };
-    setVisitors([newVisitor, ...visitors]);
-    setVName("");
-    setVPhone("");
-    setVHost("");
-    setVRoom("");
-    setShowAddModal(false);
+  React.useEffect(() => {
+    fetchVisitors();
+  }, [owner.loginId]);
+
+  const fetchVisitors = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/visitors/owner/${owner.loginId}?status=Inside`);
+      const data = await res.json();
+      if (data.success && data.visitors) {
+        setVisitors(data.visitors.map(v => ({
+           id: v._id,
+           name: v.name,
+           phone: v.phone,
+           host: v.hostName,
+           room: v.hostRoom,
+           purpose: v.purpose,
+           entryTime: `Today, ${new Date(v.entryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        })));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCheckout = (id) => {
-    setVisitors(prev => prev.filter(v => v.id !== id));
+  const handleAddVisitor = async (e) => {
+    e.preventDefault();
+    if (!vName || !vPhone || !vHost || !vRoom) return;
+    
+    try {
+      const res = await fetch('/api/visitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ownerLoginId: owner.loginId,
+          name: vName,
+          phone: vPhone,
+          hostName: vHost,
+          hostRoom: vRoom,
+          purpose: vPurpose,
+          status: 'Inside'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchVisitors(); // Refresh list
+        setVName("");
+        setVPhone("");
+        setVHost("");
+        setVRoom("");
+        setShowAddModal(false);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCheckout = async (id) => {
+    try {
+      const res = await fetch(`/api/visitors/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Exited' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVisitors(prev => prev.filter(v => v.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const filteredVisitors = visitors.filter(v => 
@@ -89,8 +139,13 @@ export default function VisitorEntryPage() {
       </div>
 
       {/* Visitor Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVisitors.map((v) => (
+      {loading ? (
+        <div className="py-12 text-center text-slate-500">Loading active visitors...</div>
+      ) : filteredVisitors.length === 0 ? (
+        <div className="py-12 text-center text-slate-500">No visitors currently inside.</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredVisitors.map((v) => (
           <div key={v.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex justify-between items-start">
@@ -127,7 +182,8 @@ export default function VisitorEntryPage() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Check-In Visitor Modal */}
       {showAddModal && (

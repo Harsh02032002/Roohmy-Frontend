@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { ownerApi, apiFetch } from "../../services/api";
 import { 
   UserCheck, Search, FileText, CheckCircle2, XCircle, 
   Clock, ShieldCheck, Eye, Download, AlertTriangle
@@ -14,31 +15,75 @@ export default function KycVerificationPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [kycList, setKycList] = useState([
-    { id: 1, name: "Amit Sharma", room: "101", docType: "Aadhaar Card", docNo: "XXXX-XXXX-8451", status: "Verified", updated: "15 May 2026" },
-    { id: 2, name: "Vijay Kumar", room: "101", docType: "Aadhaar Card", docNo: "XXXX-XXXX-9122", status: "Verified", updated: "12 May 2026" },
-    { id: 3, name: "Rajesh Gupta", room: "102", docType: "PAN Card", docNo: "XXXXX9102K", status: "Pending Verification", updated: "Today, 10:30 AM" },
-    { id: 4, name: "Sanjay Dutt", room: "103", docType: "Aadhaar Card", docNo: "XXXX-XXXX-5521", status: "Action Required", updated: "18 May 2026" }
-  ]);
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleApprove = (id) => {
-    setKycList(prev => prev.map(k => k.id === id ? { ...k, status: "Verified" } : k));
+  const fetchKycData = async () => {
+    try {
+      setLoading(true);
+      const data = await ownerApi.getOwnerTenants(owner.loginId);
+      if (data?.tenants) {
+        // Sort so that 'submitted' (pending verification) is at the top
+        const sorted = [...data.tenants].sort((a, b) => {
+          if (a.kycStatus === "submitted" && b.kycStatus !== "submitted") return -1;
+          if (a.kycStatus !== "submitted" && b.kycStatus === "submitted") return 1;
+          return 0;
+        });
+        setTenants(sorted);
+      }
+    } catch (err) {
+      console.error("Error fetching KYC tenants:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReject = (id) => {
-    setKycList(prev => prev.map(k => k.id === id ? { ...k, status: "Action Required" } : k));
+  useEffect(() => {
+    fetchKycData();
+  }, [owner.loginId]);
+
+  const handleApprove = async (tenantId) => {
+    try {
+      await apiFetch("/api/tenants/kyc/approve", {
+        method: "POST",
+        body: JSON.stringify({ tenantId })
+      });
+      fetchKycData();
+    } catch (err) {
+      alert("Error approving KYC: " + err.message);
+    }
   };
 
-  const filteredKyc = kycList.filter(k => 
-    k.name.toLowerCase().includes(search.toLowerCase()) ||
-    k.room.includes(search)
+  const handleReject = async (tenantId) => {
+    try {
+      await apiFetch("/api/tenants/kyc/reject", {
+        method: "POST",
+        body: JSON.stringify({ tenantId })
+      });
+      fetchKycData();
+    } catch (err) {
+      alert("Error rejecting KYC: " + err.message);
+    }
+  };
+
+  const filteredKyc = tenants.filter(k => 
+    (k.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    (k.roomNo || k.room?.number || "").includes(search)
   );
+
+  const getStatusLabel = (status) => {
+    if (status === "verified") return "Verified";
+    if (status === "submitted") return "Pending Verification";
+    if (status === "rejected") return "Action Required";
+    return "Pending Upload";
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Verified": return "bg-emerald-50 text-emerald-600 border-emerald-100";
-      case "Pending Verification": return "bg-amber-50 text-amber-600 border-amber-100";
-      default: return "bg-rose-50 text-rose-600 border-rose-100";
+      case "verified": return "bg-emerald-50 text-emerald-600 border-emerald-100";
+      case "submitted": return "bg-amber-50 text-amber-600 border-amber-100";
+      case "rejected": return "bg-rose-50 text-rose-600 border-rose-100";
+      default: return "bg-slate-50 text-slate-600 border-slate-100";
     }
   };
 
@@ -84,43 +129,80 @@ export default function KycVerificationPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredKyc.map((k) => (
-                <tr key={k.id} className="hover:bg-muted/40 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-foreground">{k.name}</td>
-                  <td className="px-6 py-4 font-bold text-foreground">Room {k.room}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{k.docType}</td>
-                  <td className="px-6 py-4 font-mono text-muted-foreground">{k.docNo}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{k.updated}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusColor(k.status)}`}>
-                      {k.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors" title="View Document File">
-                      <Eye size={14} />
-                    </button>
-                    {k.status === "Pending Verification" && (
-                      <>
-                        <button 
-                          onClick={() => handleApprove(k.id)}
-                          className="size-8 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 inline-flex items-center justify-center transition-colors"
-                          title="Approve KYC"
-                        >
-                          <CheckCircle2 size={14} />
-                        </button>
-                        <button 
-                          onClick={() => handleReject(k.id)}
-                          className="size-8 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 inline-flex items-center justify-center transition-colors"
-                          title="Reject / Request Re-upload"
-                        >
-                          <XCircle size={14} />
-                        </button>
-                      </>
-                    )}
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">Loading KYC validation list...</td>
                 </tr>
-              ))}
+              ) : filteredKyc.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">No KYC entries found.</td>
+                </tr>
+              ) : (
+                filteredKyc.map((k) => {
+                  const docType = k.kyc?.idProof || "Aadhaar Card";
+                  const docNo = k.kyc?.aadhaarNumber || k.kyc?.aadhar || "-";
+                  const updated = k.kyc?.uploadedAt 
+                    ? new Date(k.kyc.uploadedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) 
+                    : "-";
+                  
+                  const handleViewDocs = () => {
+                    const files = [
+                      k.kyc?.aadharFile,
+                      k.kyc?.aadhaarFront,
+                      k.kyc?.aadhaarBack,
+                      k.kyc?.idProofFile,
+                      k.kyc?.addressProofFile
+                    ].filter(Boolean);
+                    if (files.length > 0) {
+                      files.forEach(f => window.open(f, "_blank"));
+                    } else {
+                      alert("No files uploaded for this tenant's KYC.");
+                    }
+                  };
+
+                  return (
+                    <tr key={k._id} className="hover:bg-muted/40 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-foreground">{k.name}</td>
+                      <td className="px-6 py-4 font-bold text-foreground">Room {k.roomNo || k.room?.number || "N/A"}</td>
+                      <td className="px-6 py-4 text-muted-foreground">{docType}</td>
+                      <td className="px-6 py-4 font-mono text-muted-foreground">{docNo}</td>
+                      <td className="px-6 py-4 text-muted-foreground">{updated}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusColor(k.kycStatus)}`}>
+                          {getStatusLabel(k.kycStatus)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-2">
+                        <button 
+                          onClick={handleViewDocs}
+                          className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors" 
+                          title="View Document File"
+                        >
+                          <Eye size={14} />
+                        </button>
+                        {k.kycStatus === "submitted" && (
+                          <>
+                            <button 
+                              onClick={() => handleApprove(k._id)}
+                              className="size-8 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 inline-flex items-center justify-center transition-colors"
+                              title="Approve KYC"
+                            >
+                              <CheckCircle2 size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleReject(k._id)}
+                              className="size-8 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 inline-flex items-center justify-center transition-colors"
+                              title="Reject / Request Re-upload"
+                            >
+                              <XCircle size={14} />
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

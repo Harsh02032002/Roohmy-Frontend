@@ -144,6 +144,7 @@ const routeEntries = [
   ["/propertyowner/ownerchat", "./pages/propertyowner/ownerchat.jsx"],
   ["/propertyowner/ownerlogin", "./pages/propertyowner/ownerlogin.jsx"],
   ["/propertyowner/ownerprofile", "./pages/propertyowner/ownerprofile.jsx"],
+  ["/propertyowner/reports", "./pages/propertyowner/reports.jsx"],
   ["/propertyowner/payment-received", "./pages/propertyowner/payment-received.jsx"],
   ["/propertyowner/payment", "./pages/propertyowner/payment.jsx"],
   ["/propertyowner/properties", "./pages/propertyowner/properties.jsx"],

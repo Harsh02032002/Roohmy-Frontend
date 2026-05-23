@@ -14,14 +14,77 @@ export default function StaffSalariesPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [salaries, setSalaries] = useState([
-    { id: 1, name: "Suresh Kumar", role: "Electrician", base: 18000, deductions: 500, net: 17500, status: "Paid" },
-    { id: 2, name: "Ramesh Dev", role: "Plumber", base: 15000, deductions: 0, net: 15000, status: "Unpaid" },
-    { id: 3, name: "Deepak Rawat", role: "Security Guard", base: 14000, deductions: 200, net: 13800, status: "Unpaid" }
-  ]);
+  const [salaries, setSalaries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handlePaySalary = (id) => {
-    setSalaries(prev => prev.map(s => s.id === id ? { ...s, status: "Paid" } : s));
+  React.useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+      
+      const empRes = await fetch('/api/employees');
+      const empData = await empRes.json();
+      const myStaff = (empData.data || []).filter(e => e.parentLoginId === owner.loginId);
+
+      const salRes = await fetch(`/api/hr/salaries/${owner.loginId}`);
+      const salData = await salRes.json();
+      
+      const currentMonthRecords = (salData.data || []).filter(s => s.month === month);
+      const salMap = {};
+      currentMonthRecords.forEach(s => {
+        if (s.employeeId && s.employeeId._id) {
+          salMap[s.employeeId._id] = s;
+        } else {
+          salMap[s.employeeId] = s;
+        }
+      });
+
+      const merged = myStaff.map(s => {
+        const record = salMap[s._id] || {};
+        return {
+          id: s._id,
+          name: s.name,
+          role: s.role,
+          base: record.baseSalary || 0,
+          deductions: record.deductions || 0,
+          bonus: record.bonus || 0,
+          net: record.netPay || 0,
+          status: record.status || "Unpaid",
+          month
+        };
+      });
+
+      setSalaries(merged);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaySalary = async (id, base, deductions, bonus) => {
+    try {
+      const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+      await fetch('/api/hr/salaries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeId: id,
+          ownerLoginId: owner.loginId,
+          month,
+          baseSalary: base,
+          deductions: deductions,
+          bonus: bonus,
+          status: 'Paid'
+        })
+      });
+      setSalaries(prev => prev.map(s => s.id === id ? { ...s, status: "Paid" } : s));
+    } catch (err) {
+      console.error("Failed to pay salary", err);
+    }
   };
 
   const filteredSalaries = salaries.filter(s => 
@@ -90,38 +153,44 @@ export default function StaffSalariesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredSalaries.map((s) => (
-                <tr key={s.id} className="hover:bg-muted/40 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-foreground">{s.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{s.role}</td>
-                  <td className="px-6 py-4 text-muted-foreground">₹{s.base.toLocaleString("en-IN")}</td>
-                  <td className="px-6 py-4 text-rose-600 font-bold">₹{s.deductions.toLocaleString("en-IN")}</td>
-                  <td className="px-6 py-4 font-bold text-slate-800">₹{s.net.toLocaleString("en-IN")}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
-                      s.status === "Paid" 
-                        ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                        : "bg-rose-50 text-rose-600 border-rose-100 animate-pulse"
-                    }`}>
-                      {s.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    {s.status === "Unpaid" ? (
-                      <button 
-                        onClick={() => handlePaySalary(s.id)}
-                        className="h-8 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
-                      >
-                        Release Salary
-                      </button>
-                    ) : (
-                      <button className="h-8 px-3 border border-border text-muted-foreground hover:text-foreground text-xs font-bold rounded-lg inline-flex items-center gap-1">
-                        <Download size={12} /> Payslip
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <tr><td colSpan="7" className="px-6 py-8 text-center text-slate-500">Loading payroll...</td></tr>
+              ) : filteredSalaries.length === 0 ? (
+                <tr><td colSpan="7" className="px-6 py-8 text-center text-slate-500">No active staff payroll records found.</td></tr>
+              ) : (
+                filteredSalaries.map((s) => (
+                  <tr key={s.id} className="hover:bg-muted/40 transition-colors">
+                    <td className="px-6 py-4 font-semibold text-foreground">{s.name}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{s.role}</td>
+                    <td className="px-6 py-4 text-muted-foreground">₹{s.base.toLocaleString("en-IN")}</td>
+                    <td className="px-6 py-4 text-rose-600 font-bold">₹{s.deductions.toLocaleString("en-IN")}</td>
+                    <td className="px-6 py-4 font-bold text-slate-800">₹{s.net.toLocaleString("en-IN")}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                        s.status === "Paid" 
+                          ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                          : "bg-rose-50 text-rose-600 border-rose-100 animate-pulse"
+                      }`}>
+                        {s.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right space-x-2">
+                      {s.status === "Unpaid" || s.status === "Pending" ? (
+                        <button 
+                          onClick={() => handlePaySalary(s.id, s.base, s.deductions, s.bonus)}
+                          className="h-8 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
+                        >
+                          Release Salary
+                        </button>
+                      ) : (
+                        <button className="h-8 px-3 border border-border text-muted-foreground hover:text-foreground text-xs font-bold rounded-lg inline-flex items-center gap-1">
+                          <Download size={12} /> Payslip
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

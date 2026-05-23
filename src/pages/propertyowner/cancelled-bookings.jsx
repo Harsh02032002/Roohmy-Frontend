@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   Ban, Search, FileText, Download, User, Info, Calendar
 } from "lucide-react";
@@ -13,15 +14,41 @@ export default function CancelledBookingsPage() {
   }
 
   const [search, setSearch] = useState("");
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const cancelledBookingsData = [
-    { id: 1, name: "Ishan Kishan", room: "103", type: "Triple Sharing", tokenPaid: 1500, cancelDate: "18 May 2026", reason: "Found flat closer to office", refund: "Retained (No Refund)" },
-    { id: 2, name: "Hardik Pandya", room: "104", type: "Double Sharing", tokenPaid: 2000, cancelDate: "15 May 2026", reason: "Personal emergency", refund: "Refunded 100%" }
-  ];
+  React.useEffect(() => {
+    let active = true;
+    const fetchBookings = async () => {
+      try {
+        setLoading(true);
+        const response = await apiFetch(`/api/booking?owner_id=${owner.loginId}`);
+        if (active && response?.data) {
+          const cancelledList = response.data.filter(b => 
+            b.status === "rejected" || 
+            b.status === "cancelled" || 
+            b.booking_status === "rejected" || 
+            b.booking_status === "cancelled"
+          );
+          setBookings(cancelledList);
+        }
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    fetchBookings();
+    return () => { active = false; };
+  }, [owner.loginId]);
 
-  const filteredBookings = cancelledBookingsData.filter(b => 
-    b.name.toLowerCase().includes(search.toLowerCase()) ||
-    b.room.includes(search)
+  const handleViewSettlement = (b) => {
+    alert(`Settlement Details for ${b.name}:\n\nToken Paid: ₹${(b.payment_amount || b.rent_amount || b.total_amount || 0).toLocaleString("en-IN")}\nStatus: ${b.status || b.booking_status}\nRefund: Retained (No refund for owner rejection or client cancellation unless authorized)`);
+  };
+
+  const filteredBookings = bookings.filter(b => 
+    (b.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    (b.property_name || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -44,60 +71,75 @@ export default function CancelledBookingsPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search cancelled bookings by name or room..."
+            placeholder="Search cancelled bookings by name or property..."
             className="w-full h-10 pl-9 pr-3 rounded-xl bg-card border border-border text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
-      {/* Grid of Cancelled Bookings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredBookings.map((item) => (
-          <div key={item.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="size-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center">
-                  <Ban size={20} />
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading cancelled bookings...</p>
+        </div>
+      ) : filteredBookings.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-soft">
+          <Ban size={40} className="mx-auto text-muted-foreground mb-4" />
+          <h3 className="font-serif text-[20px] font-bold text-foreground">No Cancelled Bookings</h3>
+          <p className="text-[13px] text-muted-foreground mt-1">There are no cancelled or rejected bookings on record.</p>
+        </div>
+      ) : (
+        /* Grid of Cancelled Bookings */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredBookings.map((item) => (
+            <div key={item._id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="size-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center">
+                    <Ban size={20} />
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100">
+                    Retained (No Refund)
+                  </span>
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-                  item.refund.includes("Refunded") 
-                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                    : "bg-rose-50 text-rose-600 border border-rose-100"
-                }`}>
-                  {item.refund}
-                </span>
+
+                <div>
+                  <h3 className="font-serif text-[21px] font-bold text-foreground">{item.name}</h3>
+                  <p className="text-[12.5px] text-muted-foreground mt-1">Property: <strong className="text-foreground">{item.property_name}</strong></p>
+                  <p className="text-[12.5px] text-muted-foreground mt-1">Cancelled On: <strong className="text-foreground">{item.updated_at ? new Date(item.updated_at).toLocaleDateString("en-IN") : "Today"}</strong></p>
+                  {item.message && (
+                    <p className="text-[12.5px] text-muted-foreground mt-2 italic bg-muted/40 p-3 rounded-xl border border-border/40">
+                      " {item.message} "
+                    </p>
+                  )}
+                </div>
+
+                <div className="border-t border-border/60 pt-4 grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-muted-foreground font-medium block">Token Amount Paid</span>
+                    <strong className="text-[14px] text-foreground">₹{(item.payment_amount || item.rent_amount || item.total_amount || 0).toLocaleString("en-IN")}</strong>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground font-medium block font-bold text-rose-600">Refund Settlement</span>
+                    <strong className="text-[14px] text-rose-600">
+                      ₹0
+                    </strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-serif text-[21px] font-bold text-foreground">{item.name}</h3>
-                <p className="text-[12.5px] text-muted-foreground mt-1">Room {item.room} • Cancelled: <strong className="text-foreground">{item.cancelDate}</strong></p>
-                <p className="text-[12.5px] text-muted-foreground mt-2 italic bg-muted/40 p-3 rounded-xl border border-border/40">
-                  " {item.reason} "
-                </p>
-              </div>
-
-              <div className="border-t border-border/60 pt-4 grid grid-cols-2 gap-4 text-xs">
-                <div>
-                  <span className="text-muted-foreground font-medium block">Token Amount Paid</span>
-                  <strong className="text-[14px] text-foreground">₹{item.tokenPaid.toLocaleString("en-IN")}</strong>
-                </div>
-                <div>
-                  <span className="text-muted-foreground font-medium block font-bold text-rose-600">Refund Settlement</span>
-                  <strong className="text-[14px] text-rose-600">
-                    {item.refund.includes("Refunded") ? `₹${item.tokenPaid}` : "₹0"}
-                  </strong>
-                </div>
+              <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
+                <button 
+                  onClick={() => handleViewSettlement(item)}
+                  className="flex-1 h-11 border border-border rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground inline-flex items-center justify-center"
+                >
+                  <FileText size={14} className="mr-1.5" /> View Settlement details
+                </button>
               </div>
             </div>
-
-            <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
-              <button className="flex-1 h-11 border border-border rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground inline-flex items-center justify-center">
-                <FileText size={14} className="mr-1.5" /> View Settlement details
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </PropertyOwnerLayout>
   );
 }

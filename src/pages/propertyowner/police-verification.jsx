@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { ownerApi, apiFetch } from "../../services/api";
 import { 
   ShieldCheck, Search, Download, Upload, FileText, 
-  CheckCircle2, AlertTriangle, Clock, Eye
+  CheckCircle2, AlertTriangle, Clock, Eye, XCircle
 } from "lucide-react";
 
 export default function PoliceVerificationPage() {
@@ -14,23 +15,75 @@ export default function PoliceVerificationPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [list, setList] = useState([
-    { id: 1, name: "Amit Sharma", room: "101", formStatus: "Submitted to Station", date: "16 May 2026", receipt: "Uploaded" },
-    { id: 2, name: "Vijay Kumar", room: "101", formStatus: "Submitted to Station", date: "15 May 2026", receipt: "Uploaded" },
-    { id: 3, name: "Rajesh Gupta", room: "102", formStatus: "Pending Form Submission", date: "—", receipt: "Not Uploaded" },
-    { id: 4, name: "Sanjay Dutt", room: "103", formStatus: "Receipt Pending Verification", date: "18 May 2026", receipt: "Awaiting Review" }
-  ]);
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredList = list.filter(item => 
-    item.name.toLowerCase().includes(search.toLowerCase()) ||
-    item.room.includes(search)
+  const fetchPoliceData = async () => {
+    try {
+      setLoading(true);
+      const data = await ownerApi.getOwnerTenants(owner.loginId);
+      if (data?.tenants) {
+        // Sort so that 'submitted' (pending verification) is at the top
+        const sorted = [...data.tenants].sort((a, b) => {
+          if (a.policeVerification?.status === "submitted" && b.policeVerification?.status !== "submitted") return -1;
+          if (a.policeVerification?.status !== "submitted" && b.policeVerification?.status === "submitted") return 1;
+          return 0;
+        });
+        setTenants(sorted);
+      }
+    } catch (err) {
+      console.error("Error fetching police verification tenants:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPoliceData();
+  }, [owner.loginId]);
+
+  const handleApprove = async (tenantId) => {
+    try {
+      await apiFetch("/api/tenants/police/approve", {
+        method: "POST",
+        body: JSON.stringify({ tenantId })
+      });
+      fetchPoliceData();
+    } catch (err) {
+      alert("Error approving police verification: " + err.message);
+    }
+  };
+
+  const handleReject = async (tenantId) => {
+    try {
+      await apiFetch("/api/tenants/police/reject", {
+        method: "POST",
+        body: JSON.stringify({ tenantId })
+      });
+      fetchPoliceData();
+    } catch (err) {
+      alert("Error rejecting police verification: " + err.message);
+    }
+  };
+
+  const filteredList = tenants.filter(item => 
+    (item.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    (item.roomNo || item.room?.number || "").includes(search)
   );
+
+  const getStatusLabel = (status) => {
+    if (status === "verified") return "Submitted to Station (Verified)";
+    if (status === "submitted") return "Receipt Pending Verification";
+    if (status === "rejected") return "Action Required / Rejected";
+    return "Pending Receipt Upload";
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Submitted to Station": return "bg-emerald-50 text-emerald-600 border-emerald-100";
-      case "Receipt Pending Verification": return "bg-amber-50 text-amber-600 border-amber-100";
-      default: return "bg-rose-50 text-rose-600 border-rose-100";
+      case "verified": return "bg-emerald-50 text-emerald-600 border-emerald-100";
+      case "submitted": return "bg-amber-50 text-amber-600 border-amber-100";
+      case "rejected": return "bg-rose-50 text-rose-600 border-rose-100";
+      default: return "bg-slate-50 text-slate-600 border-slate-100";
     }
   };
 
@@ -98,29 +151,71 @@ export default function PoliceVerificationPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredList.map((item) => (
-                <tr key={item.id} className="hover:bg-muted/40 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-foreground">{item.name}</td>
-                  <td className="px-6 py-4 font-bold text-foreground">Room {item.room}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusColor(item.formStatus)}`}>
-                      {item.formStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.date}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.receipt}</td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    <button className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
-                      <Eye size={14} />
-                    </button>
-                    {item.receipt === "Not Uploaded" && (
-                      <button className="size-8 rounded-lg border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 inline-flex items-center justify-center transition-colors" title="Upload Receipt PDF">
-                        <Upload size={14} />
-                      </button>
-                    )}
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">Loading police verification list...</td>
                 </tr>
-              ))}
+              ) : filteredList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">No verification logs found.</td>
+                </tr>
+              ) : (
+                filteredList.map((item) => {
+                  const receiptUploaded = item.policeVerification?.receiptFile ? "Uploaded" : "Not Uploaded";
+                  const dateVal = item.policeVerification?.submittedAt
+                    ? new Date(item.policeVerification.submittedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+                    : "—";
+
+                  const handleViewReceipt = () => {
+                    if (item.policeVerification?.receiptFile) {
+                      window.open(item.policeVerification.receiptFile, "_blank");
+                    } else {
+                      alert("No receipt file uploaded for this tenant.");
+                    }
+                  };
+
+                  return (
+                    <tr key={item._id} className="hover:bg-muted/40 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-foreground">{item.name}</td>
+                      <td className="px-6 py-4 font-bold text-foreground">Room {item.roomNo || item.room?.number || "N/A"}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusColor(item.policeVerification?.status)}`}>
+                          {getStatusLabel(item.policeVerification?.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-muted-foreground">{dateVal}</td>
+                      <td className="px-6 py-4 text-muted-foreground">{receiptUploaded}</td>
+                      <td className="px-6 py-4 text-right space-x-2">
+                        <button 
+                          onClick={handleViewReceipt}
+                          className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors"
+                          title="View Receipt Document"
+                        >
+                          <Eye size={14} />
+                        </button>
+                        {item.policeVerification?.status === "submitted" && (
+                          <>
+                            <button 
+                              onClick={() => handleApprove(item._id)}
+                              className="size-8 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 inline-flex items-center justify-center transition-colors"
+                              title="Approve Submission"
+                            >
+                              <CheckCircle2 size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleReject(item._id)}
+                              className="size-8 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 inline-flex items-center justify-center transition-colors"
+                              title="Reject Receipt"
+                            >
+                              <XCircle size={14} />
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

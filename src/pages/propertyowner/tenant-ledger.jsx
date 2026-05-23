@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { ownerApi, apiFetch } from "../../services/api";
 import { 
   FileText, Search, Printer, Mail, IndianRupee, 
   ArrowUpRight, ArrowDownRight, ClipboardList, Plus
@@ -13,44 +14,90 @@ export default function TenantLedgerPage() {
     return null; 
   }
 
-  const [selectedTenant, setSelectedTenant] = useState("Amit Sharma");
-  const [ledgerEntries, setLedgerEntries] = useState([
-    { id: 1, date: "01 May 2026", details: "Monthly Rent Charged (Room 101)", debit: 8500, credit: 0, balance: 8500 },
-    { id: 2, date: "05 May 2026", details: "Electricity Bills Charged (25 units)", debit: 300, credit: 0, balance: 8800 },
-    { id: 3, date: "08 May 2026", details: "UPI Payment Received - Txn 8451", debit: 0, credit: 8800, balance: 0 },
-    { id: 4, date: "15 May 2026", details: "Late Fine charged (3 days)", debit: 150, credit: 0, balance: 150 }
-  ]);
+  const [tenants, setTenants] = useState([]);
+  const [selectedTenantLoginId, setSelectedTenantLoginId] = useState("");
+  const [ledgerEntries, setLedgerEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
 
   const [showAddEntryModal, setShowAddEntryModal] = useState(false);
   const [entryDetails, setEntryDetails] = useState("");
   const [entryAmount, setEntryAmount] = useState(0);
   const [entryType, setEntryType] = useState("debit");
 
-  const handleAddEntry = (e) => {
-    e.preventDefault();
-    if (!entryDetails || entryAmount <= 0) return;
-    
-    const lastBalance = ledgerEntries.length > 0 ? ledgerEntries[ledgerEntries.length - 1].balance : 0;
-    const isDebit = entryType === "debit";
-    const newBal = isDebit ? lastBalance + entryAmount : lastBalance - entryAmount;
-
-    const newEntry = {
-      id: ledgerEntries.length + 1,
-      date: "Today",
-      details: entryDetails,
-      debit: isDebit ? entryAmount : 0,
-      credit: !isDebit ? entryAmount : 0,
-      balance: newBal
+  // Fetch tenants
+  useEffect(() => {
+    let active = true;
+    const fetchTenants = async () => {
+      try {
+        setLoading(true);
+        const data = await ownerApi.getOwnerTenants(owner.loginId);
+        if (active && data?.tenants) {
+          setTenants(data.tenants);
+          if (data.tenants.length > 0) {
+            setSelectedTenantLoginId(data.tenants[0].loginId);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching tenants for ledger:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
     };
+    fetchTenants();
+    return () => { active = false; };
+  }, [owner.loginId]);
 
-    setLedgerEntries([...ledgerEntries, newEntry]);
-    setEntryDetails("");
-    setEntryAmount(0);
-    setShowAddEntryModal(false);
+  // Fetch ledger entries when selected tenant changes
+  const fetchLedger = async (tLoginId) => {
+    if (!tLoginId) return;
+    try {
+      setLedgerLoading(true);
+      const res = await apiFetch(`/api/tenants/ledger/${encodeURIComponent(tLoginId)}`);
+      if (res?.success) {
+        setLedgerEntries(res.ledger || []);
+      }
+    } catch (err) {
+      console.error("Error fetching ledger:", err);
+    } finally {
+      setLedgerLoading(false);
+    }
   };
 
-  const totalDebits = ledgerEntries.reduce((acc, e) => acc + e.debit, 0);
-  const totalCredits = ledgerEntries.reduce((acc, e) => acc + e.credit, 0);
+  useEffect(() => {
+    if (selectedTenantLoginId) {
+      fetchLedger(selectedTenantLoginId);
+    }
+  }, [selectedTenantLoginId]);
+
+  const handleAddEntry = async (e) => {
+    e.preventDefault();
+    if (!entryDetails || entryAmount <= 0 || !selectedTenantLoginId) return;
+    
+    try {
+      const isDebit = entryType === "debit";
+      await apiFetch("/api/tenants/ledger", {
+        method: "POST",
+        body: JSON.stringify({
+          tenantLoginId: selectedTenantLoginId,
+          details: entryDetails,
+          debit: isDebit ? entryAmount : 0,
+          credit: !isDebit ? entryAmount : 0
+        })
+      });
+      setEntryDetails("");
+      setEntryAmount(0);
+      setShowAddEntryModal(false);
+      // Reload ledger
+      fetchLedger(selectedTenantLoginId);
+    } catch (err) {
+      console.error("Error adding ledger entry:", err);
+      alert(err.message || "Failed to post entry");
+    }
+  };
+
+  const totalDebits = ledgerEntries.reduce((acc, e) => acc + (e.debit || 0), 0);
+  const totalCredits = ledgerEntries.reduce((acc, e) => acc + (e.credit || 0), 0);
   const runningBalance = ledgerEntries.length > 0 ? ledgerEntries[ledgerEntries.length - 1].balance : 0;
 
   return (
@@ -68,6 +115,7 @@ export default function TenantLedgerPage() {
           <button 
             onClick={() => setShowAddEntryModal(true)}
             className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity"
+            disabled={!selectedTenantLoginId}
           >
             <Plus className="size-4" /> Add Entry
           </button>
@@ -79,13 +127,21 @@ export default function TenantLedgerPage() {
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-muted-foreground">Select Resident:</span>
           <select 
-            value={selectedTenant}
-            onChange={(e) => setSelectedTenant(e.target.value)}
+            value={selectedTenantLoginId}
+            onChange={(e) => setSelectedTenantLoginId(e.target.value)}
             className="h-10 px-3 border border-border bg-card rounded-xl text-xs font-semibold focus:outline-none"
           >
-            <option value="Amit Sharma">Amit Sharma (Room 101)</option>
-            <option value="Vijay Kumar">Vijay Kumar (Room 101)</option>
-            <option value="Rajesh Gupta">Rajesh Gupta (Room 102)</option>
+            {loading ? (
+              <option>Loading tenants...</option>
+            ) : tenants.length === 0 ? (
+              <option>No tenants found</option>
+            ) : (
+              tenants.map(t => (
+                <option key={t.loginId} value={t.loginId}>
+                  {t.name} ({t.roomNo || t.room?.number ? `Room ${t.roomNo || t.room?.number}` : "No Room"}) - {t.loginId}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
@@ -129,21 +185,35 @@ export default function TenantLedgerPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {ledgerEntries.map((e) => (
-                <tr key={e.id} className="hover:bg-muted/40 transition-colors">
-                  <td className="px-6 py-4 text-muted-foreground">{e.date}</td>
-                  <td className="px-6 py-4 font-medium text-foreground">{e.details}</td>
-                  <td className="px-6 py-4 font-bold text-rose-600">
-                    {e.debit > 0 ? `₹${e.debit.toLocaleString("en-IN")}` : "—"}
-                  </td>
-                  <td className="px-6 py-4 font-bold text-emerald-600">
-                    {e.credit > 0 ? `₹${e.credit.toLocaleString("en-IN")}` : "—"}
-                  </td>
-                  <td className="px-6 py-4 font-bold text-foreground text-right">
-                    ₹{e.balance.toLocaleString("en-IN")}
+              {ledgerLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    Loading ledger data...
                   </td>
                 </tr>
-              ))}
+              ) : ledgerEntries.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    No ledger entries recorded for this tenant.
+                  </td>
+                </tr>
+              ) : (
+                ledgerEntries.map((e) => (
+                  <tr key={e.id || e._id} className="hover:bg-muted/40 transition-colors">
+                    <td className="px-6 py-4 text-muted-foreground">{e.date}</td>
+                    <td className="px-6 py-4 font-medium text-foreground">{e.details}</td>
+                    <td className="px-6 py-4 font-bold text-rose-600">
+                      {e.debit > 0 ? `₹${e.debit.toLocaleString("en-IN")}` : "—"}
+                    </td>
+                    <td className="px-6 py-4 font-bold text-emerald-600">
+                      {e.credit > 0 ? `₹${e.credit.toLocaleString("en-IN")}` : "—"}
+                    </td>
+                    <td className="px-6 py-4 font-bold text-foreground text-right">
+                      ₹{e.balance.toLocaleString("en-IN")}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

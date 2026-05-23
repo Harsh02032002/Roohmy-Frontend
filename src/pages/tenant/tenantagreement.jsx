@@ -32,7 +32,7 @@ export default function Tenantagreement() {
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("tenant_user") || localStorage.getItem("user") || "null");
     if (!stored?.loginId) {
-      window.location.href = "/tenant//tenant/tenantlogin";
+      window.location.href = "/tenant/tenantlogin";
       return;
     }
     (async () => {
@@ -60,7 +60,7 @@ export default function Tenantagreement() {
     }
     setErrorMsg("");
     try {
-      await fetchJson("/api/checkin/tenant/agreement", {
+      const resp = await fetchJson("/api/checkin/tenant/agreement", {
         method: "POST",
         body: JSON.stringify({
           loginId: tenant?.loginId,
@@ -68,7 +68,11 @@ export default function Tenantagreement() {
           accepted: true
         })
       });
-      window.location.href = "/tenant//tenant/tenantdashboard";
+      if (resp?.signUrl) {
+        window.location.href = resp.signUrl;
+        return;
+      }
+      setErrorMsg("Zoho Sign URL was not returned.");
     } catch (err) {
       setErrorMsg(err?.body || err?.message || "Failed to submit agreement.");
     }
@@ -150,5 +154,4 @@ export default function Tenantagreement() {
     </div>
   );
 }
-
 

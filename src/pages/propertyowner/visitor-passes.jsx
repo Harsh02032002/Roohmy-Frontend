@@ -14,13 +14,50 @@ export default function VisitorPassesPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [passes, setPasses] = useState([
-    { id: 1, code: "PASS-9081", visitor: "Suresh Gupta (Father)", tenant: "Amit Sharma", room: "101", validity: "22 May - 24 May 2026", status: "Approved" },
-    { id: 2, code: "PASS-8842", visitor: "Vijay Rawat (Friend)", tenant: "Vijay Kumar", room: "101", validity: "20 May 2026 (04 PM - 09 PM)", status: "Approved" }
-  ]);
+  const [passes, setPasses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleRevoke = (id) => {
-    setPasses(prev => prev.map(p => p.id === id ? { ...p, status: "Revoked" } : p));
+  React.useEffect(() => {
+    fetchPasses();
+  }, [owner.loginId]);
+
+  const fetchPasses = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/visitors/owner/${owner.loginId}?status=Pre-approved`);
+      const data = await res.json();
+      if (data.success && data.visitors) {
+        setPasses(data.visitors.map(v => ({
+           id: v._id,
+           code: `PASS-${v._id.substring(v._id.length-4).toUpperCase()}`,
+           visitor: `${v.name} (${v.purpose})`,
+           tenant: v.hostName,
+           room: v.hostRoom,
+           validity: "Until " + new Date(v.createdAt).toLocaleDateString(),
+           status: v.status === "Pre-approved" ? "Approved" : v.status
+        })));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRevoke = async (id) => {
+    try {
+      const res = await fetch(`/api/visitors/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Cancelled' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPasses(prev => prev.map(p => p.id === id ? { ...p, status: "Revoked" } : p));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const filteredPasses = passes.filter(p => 
@@ -55,8 +92,13 @@ export default function VisitorPassesPage() {
       </div>
 
       {/* Grid of Passes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPasses.map((p) => (
+      {loading ? (
+        <div className="py-12 text-center text-slate-500">Loading pre-authorized passes...</div>
+      ) : filteredPasses.length === 0 ? (
+        <div className="py-12 text-center text-slate-500">No active visitor passes found.</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPasses.map((p) => (
           <div key={p.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex justify-between items-start">
@@ -96,7 +138,8 @@ export default function VisitorPassesPage() {
             )}
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </PropertyOwnerLayout>
   );
 }

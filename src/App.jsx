@@ -143,9 +143,8 @@ export default function App() {
   const shellRoutes = routes.filter(r => {
     const isSuperadmin = r.path.startsWith("/superadmin/") && r.path !== "/superadmin/index";
     const isEmployee = r.path.startsWith("/employee/") && r.path !== "/employee/index";
-    const isTenant = r.path.startsWith("/tenant/") && r.path !== "/tenant/tenantlogin";
-    // Owners handle their own sidebar/layout inside their components (PropertyOwnerLayout)
-    return isSuperadmin || isEmployee || isTenant;
+    // Owners and Tenants handle their own sidebar/layout inside their components
+    return isSuperadmin || isEmployee;
   });
 
   const standaloneRoutes = routes.filter(r => !shellRoutes.find(sr => sr.path === r.path));

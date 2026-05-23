@@ -25,13 +25,8 @@ export const PROPERTY_OWNER_NAV = [
     submenus: [
       { label: "All Properties", href: "/propertyowner/properties", goldOnly: false },
       { label: "Add Property", href: "/propertyowner/add-property", goldOnly: false },
-      { label: "Floors", href: "/propertyowner/floors", goldOnly: false },
       { label: "Rooms", href: "/propertyowner/rooms", goldOnly: false },
-      { label: "Beds", href: "/propertyowner/beds", goldOnly: false },
-      { label: "Vacant Beds", href: "/propertyowner/vacant-beds", goldOnly: false },
-      { label: "Property Gallery", href: "/propertyowner/room-photos", goldOnly: false },
       { label: "Amenities", href: "/propertyowner/amenities", goldOnly: false },
-      { label: "Property Settings", href: "/propertyowner/property-settings", goldOnly: false },
     ]
   },
   {
@@ -48,7 +43,6 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Tenant Documents", href: "/propertyowner/tenant-docs", goldOnly: false },
       { label: "KYC Verification", href: "/propertyowner/kyc-verification", goldOnly: false },
       { label: "Police Verification", href: "/propertyowner/police-verification", goldOnly: false },
-      { label: "Tenant Ledger", href: "/propertyowner/tenant-ledger", goldOnly: false },
       { label: "Tenant Feedback", href: "/propertyowner/review", goldOnly: false },
     ]
   },
@@ -97,7 +91,6 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Profit & Loss", href: "/propertyowner/profit-loss", goldOnly: false },
       { label: "Cash Flow", href: "/propertyowner/cash-flow", goldOnly: false },
       { label: "GST & Tax", href: "/propertyowner/hra-gst", goldOnly: false },
-      { label: "Reports", href: "/propertyowner/reports", goldOnly: false },
       { label: "Download Statements", href: "/propertyowner/download-statements", goldOnly: false },
     ]
   },
@@ -152,12 +145,7 @@ export const PROPERTY_OWNER_NAV = [
     href: "/propertyowner/ownerchat",
     submenus: [
       { label: "Chat", href: "/propertyowner/ownerchat", goldOnly: false },
-      { label: "WhatsApp Broadcast", href: "/propertyowner/whatsapp", goldOnly: false },
-      { label: "SMS Campaigns", href: "/propertyowner/sms-campaigns", goldOnly: false },
-      { label: "Email Notices", href: "/propertyowner/email-notices", goldOnly: false },
-      { label: "Announcements", href: "/propertyowner/announcements", goldOnly: false },
-      { label: "Emergency Alerts", href: "/propertyowner/emergency-alerts", goldOnly: false },
-      { label: "Templates", href: "/propertyowner/communication-templates", goldOnly: false },
+      { label: "Broadcast Message", href: "/propertyowner/announcements", goldOnly: false },
     ]
   },
   {
@@ -166,27 +154,14 @@ export const PROPERTY_OWNER_NAV = [
     href: "/propertyowner/vacancy-promotion",
     submenus: [
       { label: "Vacancy Promotion", href: "/propertyowner/vacancy-promotion", goldOnly: false },
-      { label: "Social Media Leads", href: "/propertyowner/social-media-leads", goldOnly: false },
-      { label: "Referral Program", href: "/propertyowner/referral-program", goldOnly: false },
-      { label: "Property Website", href: "/propertyowner/property-website", goldOnly: false },
       { label: "Banners & Posters", href: "/propertyowner/banners-posters", goldOnly: false },
       { label: "Coupons & Offers", href: "/propertyowner/coupons-offers", goldOnly: false },
     ]
   },
   {
-    label: "Analytics & Reports",
+    label: "Reports",
     icon: BarChart3,
-    href: "/propertyowner/collection-report",
-    submenus: [
-      { label: "Occupancy Reports", href: "/propertyowner/occupancy-report", goldOnly: false },
-      { label: "Revenue Reports", href: "/propertyowner/revenue-analytics", goldOnly: false },
-      { label: "Expense Reports", href: "/propertyowner/expense-reports", goldOnly: false },
-      { label: "Tenant Analytics", href: "/propertyowner/tenant-analytics", goldOnly: false },
-      { label: "Collection Reports", href: "/propertyowner/collection-report", goldOnly: false },
-      { label: "Complaint Analytics", href: "/propertyowner/complaint-analytics", goldOnly: false },
-      { label: "Staff Reports", href: "/propertyowner/staff-reports", goldOnly: false },
-      { label: "Export Reports", href: "/propertyowner/export-reports", goldOnly: false },
-    ]
+    href: "/propertyowner/reports",
   },
   {
     label: "Documents",
@@ -199,18 +174,6 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Property Documents", href: "/propertyowner/property-documents", goldOnly: false },
       { label: "Uploaded Files", href: "/propertyowner/uploaded-files", goldOnly: false },
       { label: "Digital Signatures", href: "/propertyowner/digital-signatures", goldOnly: false },
-    ]
-  },
-  {
-    label: "Subscription & Billing",
-    icon: ShieldCheck,
-    href: "/propertyowner/current-plan",
-    submenus: [
-      { label: "Current Plan", href: "/propertyowner/current-plan", goldOnly: false },
-      { label: "Upgrade Plan", href: "/propertyowner/upgrade-plan", goldOnly: false },
-      { label: "Billing History", href: "/propertyowner/billing-history", goldOnly: false },
-      { label: "Invoices", href: "/propertyowner/invoices", goldOnly: false },
-      { label: "Payment Methods", href: "/propertyowner/payment-methods", goldOnly: false },
     ]
   },
   {

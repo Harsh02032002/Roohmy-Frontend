@@ -14,18 +14,83 @@ export default function TenantAttendancePage() {
   }
 
   const [search, setSearch] = useState("");
-  const [tenants, setTenants] = useState([
-    { id: 1, name: "Amit Sharma", room: "101", status: "Inside", lastScan: "Today, 08:30 PM" },
-    { id: 2, name: "Vijay Kumar", room: "101", status: "Outside", lastScan: "Today, 04:00 PM" },
-    { id: 3, name: "Rajesh Gupta", room: "102", status: "On Leave", lastScan: "18 May 2026, 09:00 AM" }
-  ]);
+  const [tenants, setTenants] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleStatusToggle = (id, nextStatus) => {
-    setTenants(prev => prev.map(t => t.id === id ? { 
-      ...t, 
-      status: nextStatus,
-      lastScan: `Just now, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-    } : t));
+  React.useEffect(() => {
+    syncAndFetchAttendance();
+  }, [owner.loginId]);
+
+  const syncAndFetchAttendance = async () => {
+    try {
+      setLoading(true);
+      
+      // 1. Fetch active tenants
+      const tenantsRes = await fetch(`/api/tenants/propertyowner/${owner.loginId}`);
+      const tenantsData = await tenantsRes.json();
+      
+      if (tenantsData.success && tenantsData.data) {
+          const activeTenants = tenantsData.data.map(t => ({
+             id: t._id,
+             name: t.name,
+             room: t.roomNo || "N/A"
+          }));
+
+          // 2. Sync attendance
+          await fetch('/api/tenant-attendance/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ownerLoginId: owner.loginId, tenants: activeTenants })
+          });
+      }
+
+      // 3. Fetch attendance records
+      const attRes = await fetch(`/api/tenant-attendance/owner/${owner.loginId}`);
+      const attData = await attRes.json();
+      
+      if (attData.success && attData.attendance) {
+          setTenants(attData.attendance.map(a => ({
+             id: a.tenantId, // Use tenantId for the toggle mapping
+             name: a.tenantName,
+             room: a.roomNo,
+             status: a.status,
+             lastScan: a.lastScanTime ? new Date(a.lastScanTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : "N/A"
+          })));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusToggle = async (id, nextStatus) => {
+    try {
+      const tenant = tenants.find(t => t.id === id);
+      if (!tenant) return;
+
+      const res = await fetch('/api/tenant-attendance/update', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+            ownerLoginId: owner.loginId,
+            tenantId: id,
+            tenantName: tenant.name,
+            roomNo: tenant.room,
+            status: nextStatus
+         })
+      });
+      const data = await res.json();
+      if (data.success) {
+         setTenants(prev => prev.map(t => t.id === id ? { 
+           ...t, 
+           status: nextStatus,
+           lastScan: new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })
+         } : t));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const filteredTenants = tenants.filter(t => 
@@ -73,7 +138,11 @@ export default function TenantAttendancePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredTenants.map((t) => (
+              {loading ? (
+                <tr><td colSpan="5" className="px-6 py-8 text-center text-slate-500">Loading attendance data...</td></tr>
+              ) : filteredTenants.length === 0 ? (
+                <tr><td colSpan="5" className="px-6 py-8 text-center text-slate-500">No tenants found.</td></tr>
+              ) : filteredTenants.map((t) => (
                 <tr key={t.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-6 py-4 font-semibold text-foreground">{t.name}</td>
                   <td className="px-6 py-4 font-bold text-foreground">Room {t.room}</td>

@@ -184,7 +184,9 @@ export default function Payment() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{t.propertyName || t.property || "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {t.propertyName || (t.property && typeof t.property === "object" ? t.property.title || t.property.name : t.property) || "—"}
+                    </td>
                     <td className="px-4 py-3 text-foreground">May 2025</td>
                     <td className="px-4 py-3 font-medium text-foreground">{fmt(t.agreedRent || t.rent || 0)}</td>
                     <td className="px-4 py-3 text-muted-foreground">5 May</td>

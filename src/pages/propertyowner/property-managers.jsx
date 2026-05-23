@@ -21,15 +21,23 @@ export default function PropertyManagers() {
     email: "",
     phone: "",
     assignedProperty: "",
-    permissions: {
-      canViewTenants: true,
-      canAddTenants: true,
-      canCollectRent: true,
-      canViewReports: true,
-      canManageComplaints: true,
-      canManageRooms: false
-    }
+    permissions: []
   });
+
+  const availableModules = [
+    { id: "dashboard", label: "Dashboard" },
+    { id: "properties", label: "Properties" },
+    { id: "tenants", label: "Tenants" },
+    { id: "leads", label: "Leads & Bookings" },
+    { id: "rent", label: "Rent & Payments" },
+    { id: "accounting", label: "Accounting" },
+    { id: "complaints", label: "Complaints & Maintenance" },
+    { id: "staff", label: "Staff Management" },
+    { id: "gate", label: "Attendance & Entry" },
+    { id: "communication", label: "Communication" },
+    { id: "marketing", label: "Marketing" },
+    { id: "reports", label: "Reports" }
+  ];
 
   useEffect(() => {
     const s = getOwnerRuntimeSession();
@@ -83,14 +91,7 @@ export default function PropertyManagers() {
         email: "",
         phone: "",
         assignedProperty: "",
-        permissions: {
-          canViewTenants: true,
-          canAddTenants: true,
-          canCollectRent: true,
-          canViewReports: true,
-          canManageComplaints: true,
-          canManageRooms: false
-        }
+        permissions: []
       });
       await loadData(owner.loginId);
     } catch (e) {
@@ -316,6 +317,35 @@ export default function PropertyManagers() {
                 ))}
               </select>
             </div>
+            
+            {/* Sidebar Modules Checkboxes */}
+            <div>
+              <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Sidebar Access (Modules)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {availableModules.map((mod) => {
+                  const isChecked = managerForm.permissions.includes(mod.id);
+                  return (
+                    <label key={mod.id} className="flex items-center gap-2 p-2 rounded border border-border bg-muted/10 cursor-pointer hover:bg-muted/30">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-border text-primary focus:ring-primary/20"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const newPerms = e.target.checked 
+                            ? [...managerForm.permissions, mod.id]
+                            : managerForm.permissions.filter(p => p !== mod.id);
+                          setManagerForm(p => ({ ...p, permissions: newPerms }));
+                        }}
+                      />
+                      <span className="text-[12px] font-medium text-foreground">{mod.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
             {errorMsg && <p className="text-[12px] text-destructive">{errorMsg}</p>}
             <button
               type="submit"

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   MessageSquare, Search, Phone, ExternalLink, 
-  UserCheck, AlertCircle, Clock, Zap
+  UserCheck, AlertCircle, Clock, Zap, Loader2
 } from "lucide-react";
 
 export default function WhatsappLeadsPage() {
@@ -14,20 +15,46 @@ export default function WhatsappLeadsPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [leads, setLeads] = useState([
-    { id: 1, name: "Varun Dhawan", phone: "+91 95432 11002", lastMessage: "Is single occupancy AC room available in Silver heights?", status: "Bot Replied (Pricing Sent)", date: "Just now" },
-    { id: 2, name: "Alia Bhatt", phone: "+91 99988 77766", lastMessage: "Can I schedule a visit for tomorrow at 2 PM?", status: "Needs Human Response", date: "15 minutes ago" },
-    { id: 3, name: "Siddharth Malhotra", phone: "+91 98765 44321", lastMessage: "Yes, please confirm double sharing.", status: "Bot Replied (Welcome Template)", date: "1 hour ago" }
-  ]);
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAction = (id) => {
-    // Action trigger
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: "Handled" } : l));
+  const fetchLeads = async () => {
+    try {
+      setLoading(true);
+      const data = await apiFetch(`/api/owners/${owner.loginId}/enquiries`);
+      if (data) {
+        // filter for source WhatsApp
+        setLeads(data.filter(e => e.source?.toLowerCase() === "whatsapp"));
+      }
+    } catch (err) {
+      console.error("Error fetching WhatsApp leads:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, [owner.loginId]);
+
+  const handleAction = async (id) => {
+    try {
+      await apiFetch(`/api/owners/enquiries/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "completed" })
+      });
+      // Update local state status to completed
+      setLeads(prev => prev.map(l => l._id === id ? { ...l, status: "completed" } : l));
+    } catch (err) {
+      console.error("Error marking lead handled:", err);
+      alert(`Action failed: ${err.message}`);
+    }
   };
 
   const filteredLeads = leads.filter(l => 
-    l.name.toLowerCase().includes(search.toLowerCase()) ||
-    l.lastMessage.toLowerCase().includes(search.toLowerCase())
+    (l.studentName || "").toLowerCase().includes(search.toLowerCase()) ||
+    (l.notes || "").toLowerCase().includes(search.toLowerCase()) ||
+    (l.studentPhone || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -56,54 +83,86 @@ export default function WhatsappLeadsPage() {
         </div>
       </div>
 
-      {/* Grid of WhatsApp Leads */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredLeads.map((item) => (
-          <div key={item.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                  <MessageSquare size={20} />
+      {loading ? (
+        <div className="text-center py-12">
+          <Loader2 className="size-8 animate-spin mx-auto text-primary" />
+          <p className="mt-2 text-sm text-muted-foreground">Loading chat leads...</p>
+        </div>
+      ) : filteredLeads.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-soft">
+          <MessageSquare size={40} className="mx-auto text-muted-foreground mb-4" />
+          <h3 className="font-serif text-[20px] font-bold text-foreground">No WhatsApp Leads</h3>
+          <p className="text-[13px] text-muted-foreground mt-1">There are no leads generated via WhatsApp yet.</p>
+        </div>
+      ) : (
+        /* Grid of WhatsApp Leads */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredLeads.map((item) => {
+            const isHandled = ["completed", "handled", "accepted"].includes(item.status?.toLowerCase());
+            const phoneDigits = (item.studentPhone || "").replace(/[^0-9]/g, "");
+            
+            return (
+              <div key={item._id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                      <MessageSquare size={20} />
+                    </div>
+                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${
+                      !isHandled 
+                        ? "bg-rose-50 text-rose-600 border border-rose-100 animate-pulse" 
+                        : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                    }`}>
+                      {isHandled ? "Handled" : "Needs Response"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-serif text-[21px] font-bold text-foreground">{item.studentName || "Prospect"}</h3>
+                    <p className="text-[12px] font-mono text-muted-foreground mt-0.5">
+                      {item.studentPhone || "—"} • {item.ts ? new Date(item.ts).toLocaleDateString("en-IN") : "Recent"}
+                    </p>
+                    {item.propertyName && (
+                      <p className="text-[11.5px] font-semibold text-slate-400 mt-1">
+                        Property: {item.propertyName}
+                      </p>
+                    )}
+                    {item.notes ? (
+                      <p className="text-[12.5px] text-muted-foreground mt-3 italic bg-emerald-50/20 dark:bg-emerald-950/10 p-3 rounded-xl border border-emerald-100/30">
+                        " {item.notes} "
+                      </p>
+                    ) : (
+                      <p className="text-[12px] text-slate-400 mt-3 italic">No conversation summary available.</p>
+                    )}
+                  </div>
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-                  item.status === "Needs Human Response" 
-                    ? "bg-rose-50 text-rose-600 border border-rose-100 animate-pulse" 
-                    : "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                }`}>
-                  {item.status}
-                </span>
-              </div>
 
-              <div>
-                <h3 className="font-serif text-[21px] font-bold text-foreground">{item.name}</h3>
-                <p className="text-[12px] font-mono text-muted-foreground mt-0.5">{item.phone} • {item.date}</p>
-                <p className="text-[12.5px] text-muted-foreground mt-3 italic bg-emerald-50/20 p-3 rounded-xl border border-emerald-100/30">
-                  " {item.lastMessage} "
-                </p>
+                <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
+                  {phoneDigits && (
+                    <a 
+                      href={`https://wa.me/${phoneDigits}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex-1 h-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5"
+                    >
+                      Open WhatsApp <ExternalLink size={13} />
+                    </a>
+                  )}
+                  {!isHandled && (
+                    <button 
+                      onClick={() => handleAction(item._id)}
+                      className="px-4 h-10 border border-border rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground transition"
+                    >
+                      Mark Handled
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-
-            <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
-              <a 
-                href={`https://wa.me/${item.phone.replace(/[^0-9]/g, "")}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="flex-1 h-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5"
-              >
-                Open WhatsApp <ExternalLink size={13} />
-              </a>
-              {item.status === "Needs Human Response" && (
-                <button 
-                  onClick={() => handleAction(item.id)}
-                  className="px-4 h-10 border border-border rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground"
-                >
-                  Mark Handled
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </PropertyOwnerLayout>
   );
 }
+

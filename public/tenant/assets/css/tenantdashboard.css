@@ -3,6 +3,40 @@ body {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); 
             min-height: 100vh; 
         }
+
+        /* Sidebar Styles */
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            text-decoration: none;
+        }
+        .sidebar-item:hover {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
+        .sidebar-item.active {
+            background-color: #1e293b;
+            color: #ffffff;
+            border-left-color: #9333ea;
+        }
+        .sidebar-item i { margin-right: 12px; width: 18px; height: 18px; }
+        .sidebar-section-title {
+            padding: 16px 24px 8px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            font-weight: 700;
+        }
         
         .top-navbar {
             background: white;
@@ -137,4 +171,20 @@ body {
             padding: 0 !important;
             min-height: auto !important;
             background: transparent !important;
+        }
+
+        /* Force sidebar and header display on tenant pages */
+        header.bg-white {
+            display: flex !important;
+        }
+
+        @media (min-width: 768px) {
+            aside.w-64 {
+                display: flex !important;
+            }
+        }
+        @media (max-width: 767px) {
+            aside.w-64 {
+                display: none !important;
+            }
         }

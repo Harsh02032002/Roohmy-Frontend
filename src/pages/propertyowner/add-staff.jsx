@@ -3,7 +3,7 @@ import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLay
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
 import { 
   UserPlus, ShieldCheck, Mail, Phone, 
-  Briefcase, IndianRupee, FileText, CheckCircle2
+  Briefcase, IndianRupee, FileText, CheckCircle2, AlertCircle
 } from "lucide-react";
 
 export default function AddStaffPage() {
@@ -22,21 +22,78 @@ export default function AddStaffPage() {
     aadhaar: ""
   });
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      setFormData({
-        name: "",
-        role: "Warden",
-        phone: "",
-        salary: "",
-        shift: "Day Shift (09:00 AM - 06:00 PM)",
-        aadhaar: ""
+    setLoading(true);
+    setError("");
+    try {
+      // 1. Generate loginId
+      const loginId = `${formData.name.replace(/\s+/g, '').toLowerCase()}_${Date.now().toString().slice(-4)}`;
+      
+      // 2. Create Employee
+      const empRes = await fetch('/api/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          loginId: loginId,
+          phone: formData.phone,
+          role: formData.role,
+          parentLoginId: owner.loginId
+        })
       });
-    }, 2000);
+      const empData = await empRes.json();
+      if (!empRes.ok) throw new Error(empData.error || 'Failed to create staff');
+      
+      const employeeId = empData.data._id;
+
+      // 3. Setup Salary
+      await fetch('/api/hr/salaries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeId,
+          ownerLoginId: owner.loginId,
+          month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
+          baseSalary: Number(formData.salary) || 0,
+          status: 'Pending'
+        })
+      });
+
+      // 4. Setup Shift
+      let startTime = "09:00 AM";
+      let endTime = "06:00 PM";
+      if (formData.shift.includes("Night")) {
+        startTime = "08:00 PM";
+        endTime = "08:00 AM";
+      }
+      await fetch('/api/hr/shifts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeId,
+          ownerLoginId: owner.loginId,
+          shiftName: formData.shift.split(" ")[0] + " Shift",
+          startTime,
+          endTime,
+          days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        })
+      });
+
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        setFormData({ name: "", role: "Warden", phone: "", salary: "", shift: "Day Shift (09:00 AM - 06:00 PM)", aadhaar: "" });
+      }, 3000);
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,6 +115,11 @@ export default function AddStaffPage() {
         {success && (
           <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 text-xs font-bold flex items-center gap-2 animate-bounce">
             <CheckCircle2 size={16} /> Staff member registered successfully!
+          </div>
+        )}
+        {error && (
+          <div className="rounded-xl border border-rose-100 bg-rose-50 p-4 text-rose-700 text-xs font-bold flex items-center gap-2">
+            <AlertCircle size={16} /> {error}
           </div>
         )}
 
@@ -147,9 +209,10 @@ export default function AddStaffPage() {
           <div className="flex justify-end pt-4 border-t border-border/60">
             <button 
               type="submit" 
-              className="px-6 h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10"
+              disabled={loading}
+              className="px-6 h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10 disabled:opacity-50"
             >
-              Add Staff Member <UserPlus className="w-3.5 h-3.5" />
+              {loading ? "Registering..." : "Add Staff Member"} <UserPlus className="w-3.5 h-3.5" />
             </button>
           </div>
         </form>

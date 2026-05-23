@@ -17,13 +17,91 @@ import {
   ArrowRight
 } from "lucide-react";
 
-export default function StaffDashboard() {
-  const stats = [
-    { label: "New Check-ins", value: "08", desc: "Since 8:00 AM", icon: UserCheck, color: "text-blue-600", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-    { label: "Pending KYC", value: "12", desc: "Awaiting approval", icon: ClipboardList, color: "text-indigo-600", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
-    { label: "Active Issues", value: "05", desc: "Urgent attention", icon: AlertCircle, color: "text-rose-600", bg: "bg-rose-500/10", border: "border-rose-500/20" },
-    { label: "Rent Due", value: "₹45k", desc: "Collected: ₹1.2L", icon: CreditCard, color: "text-emerald-600", bg: "bg-emerald-500/10", border: "border-emerald-500/20" }
-  ];
+  const [stats, setStats] = React.useState([
+    { label: "New Check-ins", value: "0", desc: "Since 8:00 AM", icon: UserCheck, color: "text-blue-600", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+    { label: "Pending KYC", value: "0", desc: "Awaiting approval", icon: ClipboardList, color: "text-indigo-600", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
+    { label: "Active Issues", value: "0", desc: "Urgent attention", icon: AlertCircle, color: "text-rose-600", bg: "bg-rose-500/10", border: "border-rose-500/20" },
+    { label: "Rent Due", value: "₹0", desc: "Collected: ₹0", icon: CreditCard, color: "text-emerald-600", bg: "bg-emerald-500/10", border: "border-emerald-500/20" }
+  ]);
+  const [feed, setFeed] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [activeCount, setActiveCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const empRes = await fetch('/api/employees');
+        const empData = await empRes.json();
+        
+        if (empData && empData.data && empData.data.length > 0) {
+           const staffMember = empData.data[0];
+           
+           const [compRes, maintRes] = await Promise.all([
+             fetch(`/api/complaints/owner/${staffMember.parentLoginId}`),
+             fetch(`/api/maintenance/owner/${staffMember.parentLoginId}`)
+           ]);
+           
+           const compData = await compRes.json();
+           const maintData = await maintRes.json();
+           
+           let pendingCount = 0;
+           const newFeed = [];
+
+           if (compData && compData.complaints) {
+               const assigned = compData.complaints.filter(c => 
+                  c.assignedStaffId && 
+                  (c.assignedStaffId === staffMember._id || c.assignedStaffId._id === staffMember._id)
+               );
+               assigned.forEach(c => {
+                  if (c.status !== "Resolved") pendingCount++;
+                  newFeed.push({
+                     type: "Complaint",
+                     name: c.tenantName || "Unknown",
+                     room: c.roomNo || "N/A",
+                     time: new Date(c.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                     initials: (c.tenantName || "U").substring(0,2).toUpperCase(),
+                     color: c.priority === "High" ? "bg-rose-600" : "bg-orange-500",
+                     status: c.status
+                  });
+               });
+           }
+
+           if (maintData && maintData.tasks) {
+               const assigned = maintData.tasks.filter(t => 
+                  t.assignedStaffId && 
+                  (t.assignedStaffId === staffMember._id || t.assignedStaffId._id === staffMember._id)
+               );
+               assigned.forEach(t => {
+                  if (t.status !== "Completed") pendingCount++;
+                  newFeed.push({
+                     type: "Maintenance",
+                     name: t.title,
+                     room: "Property",
+                     time: t.scheduledDate || "N/A",
+                     initials: "MT",
+                     color: "bg-blue-600",
+                     status: t.status
+                  });
+               });
+           }
+
+           setActiveCount(pendingCount);
+           setFeed(newFeed.slice(0, 5)); // show top 5
+
+           setStats(prev => {
+              const next = [...prev];
+              next[2].value = pendingCount.toString();
+              return next;
+           });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <StaffLayout 
@@ -44,7 +122,7 @@ export default function StaffDashboard() {
                  Everything's looking <span className="text-blue-600">excellent</span> today.
               </h1>
               <p className="text-slate-500 text-base font-medium mb-8 leading-relaxed max-w-lg">
-                 You have 3 high-priority maintenance requests and 2 check-ins scheduled for the next hour.
+                 You have {activeCount} high-priority tasks and complaints assigned to you right now. Stay productive!
               </p>
               <div className="flex flex-wrap gap-4">
                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-black text-xs transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-200 flex items-center gap-2 group">
@@ -91,33 +169,22 @@ export default function StaffDashboard() {
             </div>
 
             <div className="space-y-4">
-              <FeedItem 
-                 type="Check-in" 
-                 name="Rahul Sharma" 
-                 room="102-A" 
-                 time="Just Now" 
-                 initials="RS" 
-                 color="bg-blue-600"
-                 status="Processing"
-              />
-              <FeedItem 
-                 type="Payment" 
-                 name="Priya Patel" 
-                 room="205-B" 
-                 time="15 min ago" 
-                 initials="PP" 
-                 color="bg-emerald-600"
-                 status="Verified"
-              />
-              <FeedItem 
-                 type="Complaint" 
-                 name="Amit Verma" 
-                 room="108-C" 
-                 time="1 hour ago" 
-                 initials="AV" 
-                 color="bg-rose-600"
-                 status="Urgent"
-              />
+              {loading ? (
+                 <div className="py-6 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">Loading...</div>
+              ) : feed.length === 0 ? (
+                 <div className="py-6 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">No assigned tasks right now</div>
+              ) : feed.map((item, idx) => (
+                 <FeedItem 
+                   key={idx}
+                   type={item.type}
+                   name={item.name}
+                   room={item.room}
+                   time={item.time}
+                   initials={item.initials}
+                   color={item.color}
+                   status={item.status}
+                 />
+              ))}
             </div>
             
             <button className="w-full mt-6 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-400 font-black text-[8px] uppercase tracking-widest transition-all border border-slate-100 italic">

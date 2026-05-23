@@ -14,18 +14,86 @@ export default function StaffAttendancePage() {
   }
 
   const [search, setSearch] = useState("");
-  const [attendance, setAttendance] = useState([
-    { id: 1, name: "Suresh Kumar", role: "Electrician", status: "Present", inTime: "08:58 AM", outTime: "--" },
-    { id: 2, name: "Ramesh Dev", role: "Plumber", status: "Present", inTime: "09:05 AM", outTime: "--" },
-    { id: 3, name: "Deepak Rawat", role: "Security Guard", status: "Absent", inTime: "--", outTime: "--" }
-  ]);
+  const [attendance, setAttendance] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleToggleStatus = (id, newStatus) => {
-    setAttendance(prev => prev.map(a => a.id === id ? { 
-      ...a, 
-      status: newStatus,
-      inTime: newStatus === "Present" ? "09:00 AM" : "--"
-    } : a));
+  React.useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      // Fetch employees
+      const empRes = await fetch('/api/employees');
+      const empData = await empRes.json();
+      const myStaff = (empData.data || []).filter(e => e.parentLoginId === owner.loginId);
+
+      // Fetch today's attendance
+      const attRes = await fetch(`/api/hr/attendance/${owner.loginId}`);
+      const attData = await attRes.json();
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const todaysRecords = (attData.data || []).filter(a => {
+        const d = new Date(a.date);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime() === today.getTime();
+      });
+
+      const attMap = {};
+      todaysRecords.forEach(a => {
+        if (a.employeeId && a.employeeId._id) {
+          attMap[a.employeeId._id] = a;
+        } else {
+          attMap[a.employeeId] = a;
+        }
+      });
+
+      const merged = myStaff.map(s => {
+        const record = attMap[s._id] || {};
+        return {
+          id: s._id,
+          name: s.name,
+          role: s.role,
+          status: record.status || "Absent",
+          inTime: record.checkIn || "--",
+          outTime: record.checkOut || "--"
+        };
+      });
+
+      setAttendance(merged);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (id, newStatus) => {
+    try {
+      const inTime = newStatus === "Present" ? new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "--";
+      await fetch('/api/hr/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employeeId: id,
+          ownerLoginId: owner.loginId,
+          date: new Date().toISOString(),
+          status: newStatus,
+          checkIn: inTime,
+          checkOut: "--"
+        })
+      });
+
+      setAttendance(prev => prev.map(a => a.id === id ? { 
+        ...a, 
+        status: newStatus,
+        inTime: newStatus === "Present" && a.inTime === "--" ? inTime : a.inTime
+      } : a));
+    } catch (err) {
+      console.error("Failed to update attendance", err);
+    }
   };
 
   const filteredAttendance = attendance.filter(a => 
@@ -74,40 +142,46 @@ export default function StaffAttendancePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredAttendance.map((a) => (
-                <tr key={a.id} className="hover:bg-muted/40 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-foreground">{a.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{a.role}</td>
-                  <td className="px-6 py-4 font-mono text-muted-foreground">{a.inTime}</td>
-                  <td className="px-6 py-4 font-mono text-muted-foreground">{a.outTime}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
-                      a.status === "Present" 
-                        ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                        : "bg-rose-50 text-rose-600 border-rose-100"
-                    }`}>
-                      {a.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-2">
-                    {a.status !== "Present" ? (
-                      <button 
-                        onClick={() => handleToggleStatus(a.id, "Present")}
-                        className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
-                      >
-                        Mark Present
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => handleToggleStatus(a.id, "Absent")}
-                        className="h-8 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold"
-                      >
-                        Mark Absent
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                <tr><td colSpan="6" className="px-6 py-8 text-center text-slate-500">Loading attendance...</td></tr>
+              ) : filteredAttendance.length === 0 ? (
+                <tr><td colSpan="6" className="px-6 py-8 text-center text-slate-500">No staff found.</td></tr>
+              ) : (
+                filteredAttendance.map((a) => (
+                  <tr key={a.id} className="hover:bg-muted/40 transition-colors">
+                    <td className="px-6 py-4 font-semibold text-foreground">{a.name}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{a.role}</td>
+                    <td className="px-6 py-4 font-mono text-muted-foreground">{a.inTime}</td>
+                    <td className="px-6 py-4 font-mono text-muted-foreground">{a.outTime}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                        a.status === "Present" 
+                          ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                          : "bg-rose-50 text-rose-600 border-rose-100"
+                      }`}>
+                        {a.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right space-x-2">
+                      {a.status !== "Present" ? (
+                        <button 
+                          onClick={() => handleToggleStatus(a.id, "Present")}
+                          className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                        >
+                          Mark Present
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleToggleStatus(a.id, "Absent")}
+                          className="h-8 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold"
+                        >
+                          Mark Absent
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   Megaphone, Search, ToggleLeft, ToggleRight, 
-  CheckCircle2, AlertCircle, Share2
+  CheckCircle2, AlertCircle, Share2, Loader2
 } from "lucide-react";
 
 export default function VacancyPromotionPage() {
@@ -14,18 +15,42 @@ export default function VacancyPromotionPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [promotions, setPromotions] = useState([
-    { id: 1, room: "101", bedType: "Single Sharing", price: 12000, active: true },
-    { id: 2, room: "105", bedType: "Double Sharing", price: 8500, active: false }
-  ]);
+  const [promotions, setPromotions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleToggle = (id) => {
-    setPromotions(prev => prev.map(p => p.id === id ? { ...p, active: !p.active } : p));
+  React.useEffect(() => {
+    fetchRooms();
+  }, [owner.loginId]);
+
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const res = await apiFetch(`/api/rooms/owner/${owner.loginId}`);
+      if (res && res.success) {
+        setPromotions(res.rooms);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggle = async (id) => {
+    // Optimistic toggle
+    setPromotions(prev => prev.map(p => p._id === id ? { ...p, isPromoted: !p.isPromoted } : p));
+    try {
+      await apiFetch(`/api/rooms/${id}/toggle-promoted`, { method: "PUT" });
+    } catch (err) {
+      console.error("Failed to toggle", err);
+      // Revert on failure
+      setPromotions(prev => prev.map(p => p._id === id ? { ...p, isPromoted: !p.isPromoted } : p));
+    }
   };
 
   const filtered = promotions.filter(p => 
-    p.room.includes(search) || 
-    p.bedType.toLowerCase().includes(search.toLowerCase())
+    p.title.toLowerCase().includes(search.toLowerCase()) || 
+    (p.property?.title && p.property.title.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -55,43 +80,54 @@ export default function VacancyPromotionPage() {
       </div>
 
       {/* Grid of rooms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((p) => (
-          <div key={p.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                  <Megaphone size={20} />
+      {loading ? (
+        <div className="text-center py-12 text-slate-500 flex flex-col items-center">
+          <Loader2 className="animate-spin mb-4" size={32} />
+          <p>Loading rooms...</p>
+        </div>
+      ) : promotions.length === 0 ? (
+        <div className="text-center py-12 text-slate-500">
+          No rooms found. Please add properties and rooms first.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((p) => (
+            <div key={p._id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                    <Megaphone size={20} />
+                  </div>
+                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
+                    p.isPromoted 
+                      ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}>
+                    {p.isPromoted ? "Promoted Live" : "Inactive"}
+                  </span>
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
-                  p.active 
-                    ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                    : "bg-slate-100 text-slate-500 border-slate-200"
-                }`}>
-                  {p.active ? "Promoted Live" : "Inactive"}
-                </span>
+
+                <div>
+                  <h3 className="font-serif text-[21px] font-bold text-foreground">Room {p.title}</h3>
+                  <p className="text-[12.5px] text-muted-foreground mt-0.5">{p.property?.title}</p>
+                  <h4 className="text-[20px] font-bold text-slate-800 mt-2">₹{p.price.toLocaleString("en-IN")}<span className="text-xs font-normal text-muted-foreground">/month</span></h4>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-serif text-[21px] font-bold text-foreground">Room {p.room}</h3>
-                <p className="text-[12.5px] text-muted-foreground mt-0.5">{p.bedType}</p>
-                <h4 className="text-[20px] font-bold text-slate-800 mt-2">₹{p.price.toLocaleString("en-IN")}<span className="text-xs font-normal text-muted-foreground">/month</span></h4>
+              <div className="border-t border-border/60 mt-6 pt-4 flex justify-between items-center text-xs">
+                <span className="text-muted-foreground font-semibold">Enable Portal Listing:</span>
+                <button onClick={() => handleToggle(p._id)}>
+                  {p.isPromoted ? (
+                    <ToggleRight size={38} className="text-emerald-600 animate-pulse" />
+                  ) : (
+                    <ToggleLeft size={38} className="text-slate-300" />
+                  )}
+                </button>
               </div>
             </div>
-
-            <div className="border-t border-border/60 mt-6 pt-4 flex justify-between items-center text-xs">
-              <span className="text-muted-foreground font-semibold">Enable Portal Listing:</span>
-              <button onClick={() => handleToggle(p.id)}>
-                {p.active ? (
-                  <ToggleRight size={38} className="text-emerald-600 animate-pulse" />
-                ) : (
-                  <ToggleLeft size={38} className="text-slate-300" />
-                )}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </PropertyOwnerLayout>
   );
 }

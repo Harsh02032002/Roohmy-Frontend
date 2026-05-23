@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   Bell, Search, Plus, Trash2, Edit3, 
-  CheckCircle2, AlertCircle, Pin
+  CheckCircle2, AlertCircle, Pin, Loader2
 } from "lucide-react";
 
 export default function AnnouncementsPage() {
@@ -14,34 +15,70 @@ export default function AnnouncementsPage() {
   }
 
   const [search, setSearch] = useState("");
-  const [announcements, setAnnouncements] = useState([
-    { id: 1, title: "Curfew Timing Extension on Weekends", content: "Main gates will remain open until 11:30 PM on Friday and Saturday nights.", date: "18 May 2026", priority: "Normal" },
-    { id: 2, title: "Elevator Annual Servicing Shutdown", content: "The main lift will be shut down for routine elevator testing between 10:00 AM and 04:00 PM tomorrow.", date: "19 May 2026", priority: "Important" }
-  ]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [titleInput, setTitleInput] = useState("");
   const [contentInput, setContentInput] = useState("");
   const [priorityInput, setPriorityInput] = useState("Normal");
+  const [isBusy, setIsBusy] = useState(false);
 
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!titleInput || !contentInput) return;
-    const newAnn = {
-      id: announcements.length + 1,
-      title: titleInput,
-      content: contentInput,
-      date: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }),
-      priority: priorityInput
-    };
-    setAnnouncements([newAnn, ...announcements]);
-    setTitleInput("");
-    setContentInput("");
-    setShowAddModal(false);
+  React.useEffect(() => {
+    fetchAnnouncements();
+  }, [owner.loginId]);
+
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const res = await apiFetch(`/api/announcements/owner/${owner.loginId}`);
+      if (res && res.success) {
+        setAnnouncements(res.announcements);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (id) => {
-    setAnnouncements(prev => prev.filter(a => a.id !== id));
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!titleInput || !contentInput) return;
+    setIsBusy(true);
+    try {
+      const res = await apiFetch("/api/announcements", {
+        method: "POST",
+        body: JSON.stringify({
+          ownerLoginId: owner.loginId,
+          title: titleInput,
+          content: contentInput,
+          priority: priorityInput
+        })
+      });
+      if (res && res.success) {
+        setAnnouncements([res.announcement, ...announcements]);
+        setTitleInput("");
+        setContentInput("");
+        setShowAddModal(false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this announcement?")) return;
+    try {
+      const res = await apiFetch(`/api/announcements/${id}`, { method: "DELETE" });
+      if (res && res.success) {
+        setAnnouncements(prev => prev.filter(a => a._id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const filteredAnnouncements = announcements.filter(a => 
@@ -84,47 +121,58 @@ export default function AnnouncementsPage() {
       </div>
 
       {/* Grid of Announcements */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAnnouncements.map((a) => (
-          <div key={a.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-                  <Bell size={20} />
+      {loading ? (
+        <div className="text-center py-12 text-slate-500 flex flex-col items-center">
+          <Loader2 className="animate-spin mb-4" size={32} />
+          <p>Loading announcements...</p>
+        </div>
+      ) : filteredAnnouncements.length === 0 ? (
+        <div className="text-center py-12 text-slate-500">
+          No announcements found. Click "Create Announcement" to post one.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAnnouncements.map((a) => (
+            <div key={a._id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                    <Bell size={20} />
+                  </div>
+                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
+                    a.priority === "Important" 
+                      ? "bg-rose-50 text-rose-600 border-rose-100" 
+                      : "bg-slate-100 text-slate-500 border-slate-200"
+                  }`}>
+                    {a.priority}
+                  </span>
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
-                  a.priority === "Important" 
-                    ? "bg-rose-50 text-rose-600 border-rose-100" 
-                    : "bg-slate-100 text-slate-500 border-slate-200"
-                }`}>
-                  {a.priority}
-                </span>
+
+                <div>
+                  <h3 className="font-serif text-[21px] font-bold text-foreground leading-tight">{a.title}</h3>
+                  <p className="text-[13px] text-slate-700 mt-3 font-medium bg-muted/40 p-3 rounded-xl border border-border/40">
+                    {a.content}
+                  </p>
+                </div>
+
+                <div className="border-t border-border/60 pt-4 flex justify-between items-center text-xs text-muted-foreground">
+                  <span>Published:</span>
+                  <span className="font-bold text-slate-800">{a.date}</span>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-serif text-[21px] font-bold text-foreground leading-tight">{a.title}</h3>
-                <p className="text-[13px] text-slate-700 mt-3 font-medium bg-muted/40 p-3 rounded-xl border border-border/40">
-                  {a.content}
-                </p>
-              </div>
-
-              <div className="border-t border-border/60 pt-4 flex justify-between items-center text-xs text-muted-foreground">
-                <span>Published:</span>
-                <span className="font-bold text-slate-800">{a.date}</span>
+              <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
+                <button 
+                  onClick={() => handleDelete(a._id)}
+                  className="flex-1 h-10 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  Delete
+                </button>
               </div>
             </div>
-
-            <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
-              <button 
-                onClick={() => handleDelete(a.id)}
-                className="flex-1 h-10 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition-all"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Add Modal */}
       {showAddModal && (
@@ -178,9 +226,10 @@ export default function AnnouncementsPage() {
                 </button>
                 <button 
                   type="submit"
+                  disabled={isBusy}
                   className="flex-1 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
                 >
-                  Create
+                  {isBusy ? "Creating..." : "Create"}
                 </button>
               </div>
             </form>

@@ -15,12 +15,35 @@ export default function EntryLogsPage() {
 
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const logs = [
-    { id: "ENT-8451", name: "Amit Sharma", type: "Resident", gate: "Main Gate", time: "Today, 08:30 PM" },
-    { id: "ENT-8452", name: "Kunal Shah", type: "Visitor", gate: "Main Gate", time: "Today, 06:15 PM" },
-    { id: "ENT-8453", name: "Suresh Kumar", type: "Staff", gate: "Back Service Entrance", time: "Today, 08:58 AM" }
-  ];
+  React.useEffect(() => {
+    fetchLogs();
+  }, [owner.loginId]);
+
+  const fetchLogs = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/visitors/owner/${owner.loginId}`);
+      const data = await res.json();
+      if (data.success && data.visitors) {
+        // Filter those who have entered
+        const entered = data.visitors.filter(v => v.entryTime);
+        setLogs(entered.map(v => ({
+           id: `ENT-${v._id.substring(v._id.length-4).toUpperCase()}`,
+           name: v.name,
+           type: "Visitor",
+           gate: "Main Gate",
+           time: new Date(v.entryTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+        })));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredLogs = logs.filter(l => {
     const matchesSearch = l.name.toLowerCase().includes(search.toLowerCase()) || l.id.includes(search);
@@ -83,7 +106,11 @@ export default function EntryLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredLogs.map((l) => (
+              {loading ? (
+                <tr><td colSpan="5" className="px-6 py-8 text-center text-slate-500">Loading entry logs...</td></tr>
+              ) : filteredLogs.length === 0 ? (
+                <tr><td colSpan="5" className="px-6 py-8 text-center text-slate-500">No entry logs found.</td></tr>
+              ) : filteredLogs.map((l) => (
                 <tr key={l.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-6 py-4 font-mono font-bold text-foreground">{l.id}</td>
                   <td className="px-6 py-4">
