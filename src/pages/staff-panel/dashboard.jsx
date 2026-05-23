@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from "lucide-react";
 
+export default function Dashboard() {
   const [stats, setStats] = React.useState([
     { label: "New Check-ins", value: "0", desc: "Since 8:00 AM", icon: UserCheck, color: "text-blue-600", bg: "bg-blue-500/10", border: "border-blue-500/20" },
     { label: "Pending KYC", value: "0", desc: "Awaiting approval", icon: ClipboardList, color: "text-indigo-600", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
