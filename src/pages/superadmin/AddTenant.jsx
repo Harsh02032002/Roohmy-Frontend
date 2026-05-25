@@ -195,7 +195,8 @@ export default function AddTenant() {
     noticePeriod: "30",
     rentDueDate: "5th of every month",
     paymentFrequency: "Monthly",
-    lateFee: ""
+    lateFee: "",
+    electricityUnitCost: ""
   });
 
   // Section 4: Additional Details
@@ -323,6 +324,7 @@ export default function AddTenant() {
         bedNo: roomAssignment.bed,
         moveInDate: tenancyDetails.moveInDate,
         agreedRent: tenancyDetails.rentAmount,
+        electricityUnitCost: tenancyDetails.electricityUnitCost,
         securityDepositTotal: tenancyDetails.depositAmount,
         securityDepositPaid: 0,
         dob: basicDetails.dob,
@@ -675,6 +677,13 @@ export default function AddTenant() {
                 value={tenancyDetails.lateFee}
                 onChange={e => setTenancyDetails({...tenancyDetails, lateFee: e.target.value})}
                 placeholder="Enter late fee (optional)"
+                type="number"
+              />
+              <FormField 
+                label="Electricity Unit Cost (₹)" 
+                value={tenancyDetails.electricityUnitCost}
+                onChange={e => setTenancyDetails({...tenancyDetails, electricityUnitCost: e.target.value})}
+                placeholder="e.g. 8"
                 type="number"
               />
             </div>

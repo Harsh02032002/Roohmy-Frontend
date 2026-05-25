@@ -31,6 +31,7 @@ export default function Index() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
+  const [requireReset, setRequireReset] = useState(false);
 
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("email");
@@ -186,6 +187,18 @@ export default function Index() {
         method: "POST",
         body: JSON.stringify({ identifier: loginId, password })
       });
+      if (data?.requireReset) {
+        setRequireReset(true);
+        setForgotOpen(true);
+        setForgotStep("password");
+        setForgotEmail(data.email || ""); // fallback if missing
+        // For staff reset we can reuse forgot token, but here we can't easily without OTP verification.
+        // Wait, the manager login reset uses /api/auth/reset-initial-password which takes oldPassword!
+        // We need to implement reset-initial-password in Employee UI.
+        setForgotToken("initial_reset"); // flag for initial reset
+        setForgotError("Please set a new password to continue.");
+        return;
+      }
       if (data?.token && data?.user) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
@@ -294,11 +307,20 @@ export default function Index() {
     setForgotError("");
     setForgotLoading(true);
     try {
-      await fetchJson("/api/auth/forgot-password/reset-password", {
-        method: "POST",
-        body: JSON.stringify({ email: forgotEmail, token: forgotToken, newPassword })
-      });
-      closeForgotModal();
+      if (forgotToken === "initial_reset") {
+        await fetchJson("/api/auth/reset-initial-password", {
+          method: "POST",
+          body: JSON.stringify({ loginId, oldPassword: password, newPassword })
+        });
+        closeForgotModal();
+        handleLogin(); // auto login
+      } else {
+        await fetchJson("/api/auth/forgot-password/reset-password", {
+          method: "POST",
+          body: JSON.stringify({ email: forgotEmail, token: forgotToken, newPassword })
+        });
+        closeForgotModal();
+      }
     } catch (err) {
       setForgotError(err?.body || err?.message || "Failed to reset password.");
     } finally {

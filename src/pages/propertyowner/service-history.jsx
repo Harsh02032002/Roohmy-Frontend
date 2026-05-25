@@ -5,6 +5,7 @@ import {
   FileText, Search, Download, CheckCircle2, 
   ArrowUpRight, IndianRupee, Tag
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function ServiceHistoryPage() {
   const owner = getOwnerRuntimeSession();
@@ -24,12 +25,10 @@ export default function ServiceHistoryPage() {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const [maintRes, compRes] = await Promise.all([
-        fetch(`/api/maintenance/owner/${owner.loginId}`),
-        fetch(`/api/complaints/owner/${owner.loginId}`)
+      const [maintData, compData] = await Promise.all([
+        apiFetch(`/api/maintenance/owner/${owner.loginId}`),
+        apiFetch(`/api/complaints/owner/${owner.loginId}`)
       ]);
-      const maintData = await maintRes.json();
-      const compData = await compRes.json();
       
       const history = [];
 

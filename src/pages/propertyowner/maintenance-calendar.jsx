@@ -5,6 +5,7 @@ import {
   Calendar, Clock, CheckCircle2, ChevronRight, 
   MapPin, User, ChevronLeft
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function MaintenanceCalendarPage() {
   const owner = getOwnerRuntimeSession();
@@ -23,8 +24,7 @@ export default function MaintenanceCalendarPage() {
   React.useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await fetch(`/api/maintenance/owner/${owner.loginId}`);
-        const data = await res.json();
+        const data = await apiFetch(`/api/maintenance/owner/${owner.loginId}`);
         if (data && data.tasks) {
           const upcoming = data.tasks
             .filter(t => t.status !== "Completed")

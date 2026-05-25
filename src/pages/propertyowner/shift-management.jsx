@@ -5,6 +5,7 @@ import {
   Clock, Search, Plus, Trash2, Edit3, 
   CheckCircle2, AlertCircle, ChevronRight
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function ShiftManagementPage() {
   const owner = getOwnerRuntimeSession();
@@ -22,8 +23,7 @@ export default function ShiftManagementPage() {
 
   const fetchShifts = async () => {
     try {
-      const res = await fetch(`/api/hr/shifts/${owner.loginId}`);
-      const data = await res.json();
+      const data = await apiFetch(`/api/hr/shifts/${owner.loginId}`);
       
       const shiftGroups = {};
       

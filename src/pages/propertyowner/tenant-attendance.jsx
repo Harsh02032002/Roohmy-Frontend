@@ -5,6 +5,7 @@ import {
   Users, Search, ShieldCheck, MapPin, 
   Clock, CheckCircle2, PlayCircle, LogIn, LogOut
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function TenantAttendancePage() {
   const owner = getOwnerRuntimeSession();
@@ -26,8 +27,7 @@ export default function TenantAttendancePage() {
       setLoading(true);
       
       // 1. Fetch active tenants
-      const tenantsRes = await fetch(`/api/tenants/propertyowner/${owner.loginId}`);
-      const tenantsData = await tenantsRes.json();
+      const tenantsData = await apiFetch(`/api/tenants/propertyowner/${owner.loginId}`);
       
       if (tenantsData.success && tenantsData.data) {
           const activeTenants = tenantsData.data.map(t => ({
@@ -37,7 +37,7 @@ export default function TenantAttendancePage() {
           }));
 
           // 2. Sync attendance
-          await fetch('/api/tenant-attendance/sync', {
+          await apiFetch('/api/tenant-attendance/sync', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ ownerLoginId: owner.loginId, tenants: activeTenants })
@@ -45,8 +45,7 @@ export default function TenantAttendancePage() {
       }
 
       // 3. Fetch attendance records
-      const attRes = await fetch(`/api/tenant-attendance/owner/${owner.loginId}`);
-      const attData = await attRes.json();
+      const attData = await apiFetch(`/api/tenant-attendance/owner/${owner.loginId}`);
       
       if (attData.success && attData.attendance) {
           setTenants(attData.attendance.map(a => ({
@@ -69,7 +68,7 @@ export default function TenantAttendancePage() {
       const tenant = tenants.find(t => t.id === id);
       if (!tenant) return;
 
-      const res = await fetch('/api/tenant-attendance/update', {
+      const data = await apiFetch('/api/tenant-attendance/update', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({
@@ -80,7 +79,6 @@ export default function TenantAttendancePage() {
             status: nextStatus
          })
       });
-      const data = await res.json();
       if (data.success) {
          setTenants(prev => prev.map(t => t.id === id ? { 
            ...t, 

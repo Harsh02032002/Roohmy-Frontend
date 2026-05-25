@@ -5,6 +5,7 @@ import {
   CalendarCheck, Search, Check, X, 
   Clock, AlertCircle, Sparkles
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function StaffAttendancePage() {
   const owner = getOwnerRuntimeSession();
@@ -24,13 +25,11 @@ export default function StaffAttendancePage() {
   const fetchData = async () => {
     try {
       // Fetch employees
-      const empRes = await fetch('/api/employees');
-      const empData = await empRes.json();
+      const empData = await apiFetch('/api/employees');
       const myStaff = (empData.data || []).filter(e => e.parentLoginId === owner.loginId);
 
       // Fetch today's attendance
-      const attRes = await fetch(`/api/hr/attendance/${owner.loginId}`);
-      const attData = await attRes.json();
+      const attData = await apiFetch(`/api/hr/attendance/${owner.loginId}`);
       
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -73,7 +72,7 @@ export default function StaffAttendancePage() {
   const handleToggleStatus = async (id, newStatus) => {
     try {
       const inTime = newStatus === "Present" ? new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "--";
-      await fetch('/api/hr/attendance', {
+      await apiFetch('/api/hr/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -5,6 +5,7 @@ import {
   Users, Search, Plus, Trash2, Edit3, 
   CheckCircle2, AlertCircle, Phone, Sparkles
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function AssignedStaffPage() {
   const owner = getOwnerRuntimeSession();
@@ -24,16 +25,12 @@ export default function AssignedStaffPage() {
   const fetchStaffWorkload = async () => {
     try {
       setLoading(true);
-      const [empRes, compRes, maintRes, attRes] = await Promise.all([
-        fetch('/api/employees'),
-        fetch(`/api/complaints/owner/${owner.loginId}`),
-        fetch(`/api/maintenance/owner/${owner.loginId}`),
-        fetch(`/api/hr/attendance/${owner.loginId}`)
+      const [empData, compData, maintData, attData] = await Promise.all([
+        apiFetch('/api/employees'),
+        apiFetch(`/api/complaints/owner/${owner.loginId}`),
+        apiFetch(`/api/maintenance/owner/${owner.loginId}`),
+        apiFetch(`/api/hr/attendance/${owner.loginId}`)
       ]);
-      const empData = await empRes.json();
-      const compData = await compRes.json();
-      const maintData = await maintRes.json();
-      const attData = await attRes.json();
 
       const myStaff = (empData.data || []).filter(e => e.parentLoginId === owner.loginId);
       

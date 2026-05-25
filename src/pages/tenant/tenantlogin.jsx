@@ -69,6 +69,10 @@ export default function Tenantlogin() {
         method: "POST",
         body: JSON.stringify({ identifier: loginId, password })
       });
+      if (data.requireReset) {
+        setStep("setPassword");
+        return;
+      }
       storeAuth(data);
       window.location.href = resolvePanelPath("tenant", "tenantdashboard");
     } catch (err) {

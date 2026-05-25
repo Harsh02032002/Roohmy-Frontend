@@ -368,6 +368,15 @@ export const createRoom = async (payload) => {
   }
 };
 
+export const updateRoom = async (roomId, payload) => fetchJson(`/api/rooms/${encodeURIComponent(roomId)}`, {
+  method: "PUT",
+  body: JSON.stringify(payload)
+});
+
+export const deleteRoom = async (roomId) => fetchJson(`/api/rooms/${encodeURIComponent(roomId)}`, {
+  method: "DELETE"
+});
+
 export const assignTenant = async (payload) => fetchJson("/api/tenants/assign", {
   method: "POST",
   body: JSON.stringify(payload)

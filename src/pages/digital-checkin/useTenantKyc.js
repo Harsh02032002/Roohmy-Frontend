@@ -67,16 +67,19 @@ export const useTenantKyc = () => {
     }
   }, [aadhaarLinkedPhone, aadhaarNumber, apiBases, loginId, saveKycState]);
 
-  const handleComplete = useCallback(async () => {
+  const handleComplete = useCallback(async (aadhaarFront = "", aadhaarBack = "") => {
     try {
       const aadhaarRaw = aadhaarNumber.trim().replace(/\D/g, "");
       if (!/^\d{12}$/.test(aadhaarRaw)) return alert("Aadhaar must be 12 digits");
       if (!otp.trim()) return alert("OTP is required");
+      if (!aadhaarFront || !aadhaarBack) return alert("Please upload both front and back photos of Aadhaar card");
 
       const payload = {
         loginId: loginId.trim(),
         aadhaarNumber: aadhaarRaw,
-        otp: otp.trim()
+        otp: otp.trim(),
+        aadhaarFront,
+        aadhaarBack
       };
       saveKycState({ otpSent: true });
       await postExpectSuccess("/api/checkin/tenant/kyc/verify-otp", payload, apiBases);
@@ -92,11 +95,15 @@ export const useTenantKyc = () => {
           tenants[idx].kyc.digilockerVerifiedAt = new Date().toISOString();
           tenants[idx].kyc.aadhaarNumber = payload.aadhaarNumber || tenants[idx].kyc.aadhaarNumber || "";
           tenants[idx].kyc.aadhar = payload.aadhaarNumber || tenants[idx].kyc.aadhar || "";
+          tenants[idx].kyc.aadhaarFront = aadhaarFront;
+          tenants[idx].kyc.aadhaarBack = aadhaarBack;
           tenants[idx].digitalCheckin = tenants[idx].digitalCheckin || {};
           tenants[idx].digitalCheckin.kyc = {
             ...(tenants[idx].digitalCheckin.kyc || {}),
             digilockerVerified: true,
-            digilockerVerifiedAt: new Date().toISOString()
+            digilockerVerifiedAt: new Date().toISOString(),
+            aadhaarFront,
+            aadhaarBack
           };
           localStorage.setItem("roomhy_tenants", JSON.stringify(tenants));
         }

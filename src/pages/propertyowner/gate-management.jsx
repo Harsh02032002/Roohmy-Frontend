@@ -5,6 +5,7 @@ import {
   DoorOpen, ShieldCheck, ToggleLeft, ToggleRight, 
   Clock, AlertTriangle, AlertCircle, Plus, Trash2
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function GateManagementPage() {
   const owner = getOwnerRuntimeSession();
@@ -24,14 +25,11 @@ export default function GateManagementPage() {
   React.useEffect(() => {
     const fetchStatsAndGates = async () => {
        try {
-          const [vRes, tRes, gRes] = await Promise.all([
-             fetch(`/api/visitors/owner/${owner.loginId}?status=Inside`),
-             fetch(`/api/tenant-attendance/owner/${owner.loginId}`),
-             fetch(`/api/gates/owner/${owner.loginId}`)
+          const [vData, tData, gData] = await Promise.all([
+             apiFetch(`/api/visitors/owner/${owner.loginId}?status=Inside`),
+             apiFetch(`/api/tenant-attendance/owner/${owner.loginId}`),
+             apiFetch(`/api/gates/owner/${owner.loginId}`)
           ]);
-          const vData = await vRes.json();
-          const tData = await tRes.json();
-          const gData = await gRes.json();
           
           setStats({
              visitorsInside: vData.visitors ? vData.visitors.length : 0,
@@ -56,8 +54,7 @@ export default function GateManagementPage() {
         status: g.status === "Unlocked" ? "Locked" : "Unlocked" 
       } : g));
 
-      const res = await fetch(`/api/gates/${id}/toggle`, { method: "PUT" });
-      const data = await res.json();
+      const data = await apiFetch(`/api/gates/${id}/toggle`, { method: "PUT" });
       if (!data.success) {
          // Revert on failure
          setGates(prev => prev.map(g => g._id === id ? { 
@@ -75,7 +72,7 @@ export default function GateManagementPage() {
     if (!newGateName || !newGateType) return;
     setIsBusy(true);
     try {
-      const res = await fetch("/api/gates", {
+      const data = await apiFetch("/api/gates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,7 +82,6 @@ export default function GateManagementPage() {
           status: "Unlocked"
         })
       });
-      const data = await res.json();
       if (data.success) {
         setGates(prev => [...prev, data.gate]);
         setNewGateName("");
@@ -102,8 +98,7 @@ export default function GateManagementPage() {
   const handleDeleteGate = async (id) => {
     if (!confirm("Are you sure you want to delete this gate?")) return;
     try {
-      const res = await fetch(`/api/gates/${id}`, { method: "DELETE" });
-      const data = await res.json();
+      const data = await apiFetch(`/api/gates/${id}`, { method: "DELETE" });
       if (data.success) {
         setGates(prev => prev.filter(g => g._id !== id));
       }

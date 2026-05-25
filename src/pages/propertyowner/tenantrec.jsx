@@ -214,11 +214,32 @@ export default function TenantRec() {
   const [newTenant, setNewTenant] = useState(null);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pId = urlParams.get('propertyId');
+    const room = urlParams.get('room');
+    if (pId) {
+      setRoomAssignment(prev => ({
+        ...prev,
+        propertyId: pId,
+        ...(room ? { roomUnit: room } : {})
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
     // Load properties for dropdown specifically belonging to the logged-in owner
     const loadProperties = async () => {
       try {
         const props = await fetchOwnerProperties(owner.loginId);
         setProperties(props);
+        
+        // Auto-select if there's only 1 property and none is selected via URL
+        if (props && props.length === 1 && !roomAssignment.propertyId) {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (!urlParams.get('propertyId')) {
+            setRoomAssignment(prev => ({ ...prev, propertyId: props[0]._id }));
+          }
+        }
       } catch (err) {
         console.error("Failed to load properties:", err);
       }
@@ -259,6 +280,24 @@ export default function TenantRec() {
           }
         }
         setRooms(roomList);
+        
+        // Auto-fill logic if a room is already selected via URL
+        if (roomAssignment.roomUnit) {
+          const selectedRoom = roomList.find(r => r.title === roomAssignment.roomUnit);
+          if (selectedRoom) {
+            setRoomAssignment(prev => ({
+              ...prev,
+              roomType: selectedRoom.type || prev.roomType,
+              floor: selectedRoom.floor || prev.floor
+            }));
+            if (selectedRoom.price) {
+              setTenancyDetails(prev => ({
+                ...prev,
+                rentAmount: selectedRoom.price.toString()
+              }));
+            }
+          }
+        }
       } catch (err) {
         console.error("Failed to load rooms:", err);
         setRooms([]);
@@ -551,7 +590,24 @@ export default function TenantRec() {
                 label="Room / Unit" 
                 required
                 value={roomAssignment.roomUnit}
-                onChange={e => setRoomAssignment({...roomAssignment, roomUnit: e.target.value})}
+                onChange={e => {
+                  const selectedTitle = e.target.value;
+                  const selectedRoom = rooms.find(r => r.title === selectedTitle);
+                  
+                  setRoomAssignment(prev => ({
+                    ...prev,
+                    roomUnit: selectedTitle,
+                    roomType: selectedRoom?.type || prev.roomType,
+                    floor: selectedRoom?.floor || prev.floor
+                  }));
+
+                  if (selectedRoom?.price) {
+                    setTenancyDetails(prev => ({
+                      ...prev,
+                      rentAmount: selectedRoom.price.toString()
+                    }));
+                  }
+                }}
                 options={
                   roomAssignment.propertyId && rooms.length === 0 
                     ? [{ label: "No rooms available", value: "" }] 

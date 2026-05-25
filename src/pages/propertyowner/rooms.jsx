@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { X, Plus, Building2, ChevronDown, UploadCloud, Wind, Table as TableIcon, Tv, Bath, LayoutTemplate, Refrigerator, DoorClosed, Armchair, Utensils, Microwave, Flame, Shirt, Video, Fan, Check } from "lucide-react";
+import { X, Plus, Building2, ChevronDown, UploadCloud, Wind, Table as TableIcon, Tv, Bath, LayoutTemplate, Refrigerator, DoorClosed, Armchair, Utensils, Microwave, Flame, Shirt, Video, Fan, Check, Edit2, Trash2 } from "lucide-react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { fetchJson } from "../../utils/api";
 import {
-  assignTenant, clearOwnerRuntimeSession, createRoom,
+  assignTenant, clearOwnerRuntimeSession, createRoom, updateRoom, deleteRoom,
   fetchOwnerProperties, fetchOwnerRooms, fetchOwnerTenants, getOwnerRuntimeSession
 } from "../../utils/propertyowner";
 
@@ -110,7 +110,7 @@ export default function Rooms() {
     if (!owner?.loginId) return;
     
     const propId = currentProperty?._id || "";
-    if (!propId) {
+    if (!propId && !roomForm._id) {
       setErrorMsg("Please wait for properties to load or add a property first.");
       return;
     }
@@ -118,40 +118,103 @@ export default function Rooms() {
     try {
       setErrorMsg("");
       const bedCount = Number(roomForm.roomBeds || 1);
-      const local = normalizeRoom({
-        id: `R-${Date.now()}`, ownerLoginId: owner.loginId, propertyId: propId,
-        propertyTitle: currentProperty?.title || "", number: roomForm.roomNo,
-        type: roomForm.roomType, rent: Number(roomForm.roomRent || 0),
-        gender: roomForm.roomGender,
-        beds: Array.from({ length: bedCount }, () => ({ status: "available", tenantId: null, tenantName: null })),
-      }, owner.loginId);
-      const updated = [...readJson("roomhy_rooms", []), local];
-      writeJson("roomhy_rooms", updated);
-      setRooms(mergeRooms(owner.loginId, []));
-      try { 
-        await createRoom({ 
-          propertyId: propId, 
-          title: roomForm.roomNo, 
-          type: roomForm.roomType, 
-          rent: Number(roomForm.roomRent || 0), 
-          beds: bedCount, 
-          gender: roomForm.roomGender, 
-          ownerLoginId: owner.loginId,
-          unitType: roomForm.unitType,
-          floor: roomForm.floor,
-          sharingType: roomForm.sharingType,
-          remarks: roomForm.remarks,
-          isAvailable: roomForm.isAvailable,
-          facilities: roomForm.facilities,
-          roomTypeFeatures: roomForm.roomTypeFeatures,
-          media: roomForm.media,
-          electricityUnitCost: Number(roomForm.electricityUnitCost || 0)
-        }); 
-      } catch {}
-      setRoomModalOpen(false);
-      setRoomForm(defaultRoomForm);
-      await load(owner);
+      
+      const payload = { 
+        propertyId: propId, 
+        title: roomForm.roomNo, 
+        type: roomForm.roomType, 
+        rent: Number(roomForm.roomRent || 0), 
+        beds: bedCount, 
+        gender: roomForm.roomGender, 
+        ownerLoginId: owner.loginId,
+        unitType: roomForm.unitType,
+        floor: roomForm.floor,
+        sharingType: roomForm.sharingType,
+        remarks: roomForm.remarks,
+        isAvailable: roomForm.isAvailable,
+        facilities: roomForm.facilities,
+        roomTypeFeatures: roomForm.roomTypeFeatures,
+        media: roomForm.media,
+        electricityUnitCost: Number(roomForm.electricityUnitCost || 0)
+      };
+
+      if (roomForm._id) {
+        // Instead of updating room directly, send request to superadmin
+        await fetchJson("/api/notifications", {
+          method: "POST",
+          body: JSON.stringify({
+            toRole: "superadmin",
+            from: owner?.name || owner?.loginId || "Property Owner",
+            type: "edit_room_request",
+            meta: {
+              propertyId: propId,
+              propertyTitle: currentProperty?.title || "",
+              ownerLoginId: owner.loginId,
+              roomId: roomForm._id,
+              roomData: payload
+            }
+          })
+        });
+        
+        setErrorMsg("");
+        alert("Edit Room request sent to Superadmin successfully!");
+        setRoomModalOpen(false);
+        setRoomForm(defaultRoomForm);
+      } else {
+        // Instead of creating room directly, send request to superadmin
+        await fetchJson("/api/notifications", {
+          method: "POST",
+          body: JSON.stringify({
+            toRole: "superadmin",
+            from: owner?.name || owner?.loginId || "Property Owner",
+            type: "add_room_request",
+            meta: {
+              propertyId: propId,
+              propertyTitle: currentProperty?.title || "",
+              ownerLoginId: owner.loginId,
+              roomData: payload
+            }
+          })
+        });
+        
+        setErrorMsg("");
+        alert("Add Room request sent to Superadmin successfully!");
+        setRoomModalOpen(false);
+        setRoomForm(defaultRoomForm);
+      }
     } catch (e) { setErrorMsg(e?.message || "Failed."); }
+  };
+
+  const handleEditRoom = (room) => {
+    setRoomForm({
+      ...defaultRoomForm,
+      ...room,
+      roomNo: room.number || room.roomNo || room.title || "",
+      roomType: room.type || "AC",
+      roomRent: room.rent || room.price || "",
+      roomGender: room.gender || "",
+      roomBeds: room.beds?.length || room.capacity || 2,
+      electricityUnitCost: room.electricity?.unitCost || room.electricityUnitCost || 0,
+      unitType: room.unitType || "",
+      floor: room.floor || "",
+      sharingType: room.sharingType || "",
+      remarks: room.remarks || "",
+      facilities: room.facilities || [],
+      roomTypeFeatures: room.roomTypeFeatures || [],
+      media: room.media || []
+    });
+    setRoomModalOpen(true);
+  };
+
+  const handleDeleteRoom = async (room) => {
+    if (!window.confirm(`Are you sure you want to delete room ${room.number || room.title}?`)) return;
+    try {
+      setErrorMsg("");
+      await deleteRoom(room._id || room.id);
+      await load(owner);
+    } catch (e) {
+      setErrorMsg(e?.message || "Failed to delete room.");
+    }
   };
 
   const handleAssignTenant = async (e) => {
@@ -260,7 +323,7 @@ export default function Rooms() {
           <button className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors">
             <ChevronDown size={14} /> Filter
           </button>
-          <button type="button" onClick={() => setRoomModalOpen(true)} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
+          <button type="button" onClick={() => { setRoomForm(defaultRoomForm); setRoomModalOpen(true); }} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
             <Plus size={16} /> Add room
           </button>
         </div>
@@ -286,7 +349,7 @@ export default function Rooms() {
             <div className="w-14 h-14 bg-muted/60 rounded-full flex items-center justify-center mb-3"><Building2 className="size-7 text-muted-foreground" /></div>
             <h3 className="font-serif text-[22px] text-foreground mb-1">No rooms yet</h3>
             <p className="text-[13.5px] text-muted-foreground mb-4">Add your first room to manage beds and tenants.</p>
-            <button type="button" onClick={() => setRoomModalOpen(true)} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90"><Plus size={16}/> Add Room</button>
+            <button type="button" onClick={() => { setRoomForm(defaultRoomForm); setRoomModalOpen(true); }} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90"><Plus size={16}/> Add Room</button>
           </div>
         ) : Object.entries(grouped).map(([propTitle, propRooms]) => {
           const allBeds = propRooms.flatMap(r => toLegacyBeds(r));
@@ -306,9 +369,15 @@ export default function Rooms() {
                 {propRooms.slice(0,10).map(room => {
                   const beds = toLegacyBeds(room);
                   return (
-                    <div key={room._id||room.id} className="rounded-xl border border-border p-3 hover:border-primary/30 hover:shadow-soft transition-all">
+                    <div key={room._id||room.id} className="group rounded-xl border border-border p-3 hover:border-primary/30 hover:shadow-soft transition-all">
                       <div className="flex items-center justify-between">
-                        <div className="font-medium text-[13.5px] text-foreground">Room {room.number||room.roomNo||room.title}</div>
+                        <div className="font-medium text-[13.5px] text-foreground flex items-center gap-2">
+                          Room {room.number||room.roomNo||room.title}
+                          <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
+                            <button onClick={() => handleEditRoom(room)} className="p-1 text-muted-foreground hover:text-primary"><Edit2 size={12}/></button>
+                            <button onClick={() => handleDeleteRoom(room)} className="p-1 text-muted-foreground hover:text-destructive"><Trash2 size={12}/></button>
+                          </div>
+                        </div>
                         <span className="bg-muted text-muted-foreground inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium">{room.type||"AC"}</span>
                       </div>
                       <div className="text-[11px] text-muted-foreground mt-0.5">{room.gender||"Mixed"}</div>
@@ -329,7 +398,7 @@ export default function Rooms() {
                     </div>
                   );
                 })}
-                <button type="button" onClick={() => setRoomModalOpen(true)} className="rounded-xl border-2 border-dashed border-border p-3 flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors min-h-[8rem]">
+                <button type="button" onClick={() => { setRoomForm(defaultRoomForm); setRoomModalOpen(true); }} className="rounded-xl border-2 border-dashed border-border p-3 flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors min-h-[8rem]">
                   <Plus size={20}/><span className="text-[11px] font-medium">Add room</span>
                 </button>
               </div>
@@ -343,7 +412,7 @@ export default function Rooms() {
         <div className={cn("bg-white dark:bg-card w-full max-w-md rounded-2xl shadow-2xl flex flex-col transition-transform duration-300", roomModalOpen?"scale-100":"scale-95")}>
           <div className="flex items-center gap-3 px-6 py-4 border-b border-border">
             <button type="button" onClick={() => setRoomModalOpen(false)} className="p-1 -ml-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"><X size={18}/></button>
-            <h2 className="text-[18px] font-semibold text-foreground flex-1">Room Details</h2>
+            <h2 className="text-[18px] font-semibold text-foreground flex-1">{roomForm._id ? 'Edit Room' : 'Add Room Details'}</h2>
           </div>
           <div className="flex-1 overflow-y-auto p-6 max-h-[calc(100vh-180px)]">
             <form id="addRoomForm" onSubmit={handleCreateRoom} className="space-y-6">
@@ -511,15 +580,23 @@ export default function Rooms() {
                   )}
                 </div>
                 <label className="w-32 h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-all text-primary">
-                  <input type="file" multiple accept="image/*,video/*" onChange={(e) => {
+                  <input type="file" multiple accept="image/*,video/*" onChange={async (e) => {
                     const files = Array.from(e.target.files || []);
-                    files.forEach(file => {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        setRoomForm(p => ({...p, media: [...p.media, {file, preview: event.target.result}]}));
-                      };
-                      reader.readAsDataURL(file);
-                    });
+                    if (files.length === 0) return;
+                    try {
+                      const uploadPromises = files.map(async (file) => {
+                        const formData = new FormData();
+                        formData.append("image", file);
+                        const res = await fetch("/api/upload", { method: "POST", body: formData });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Upload failed");
+                        return { preview: data.url, url: data.url };
+                      });
+                      const uploadedFiles = await Promise.all(uploadPromises);
+                      setRoomForm(p => ({...p, media: [...(p.media || []), ...uploadedFiles]}));
+                    } catch (err) {
+                      alert("Failed to upload media: " + err.message);
+                    }
                   }} className="sr-only" />
                   <UploadCloud size={28} />
                   <span className="text-[11px] font-medium text-center px-2">Upload photos/videos</span>
@@ -531,7 +608,7 @@ export default function Rooms() {
           
           <div className="p-4 border-t border-border bg-card">
             <button type="submit" form="addRoomForm" className="w-full h-11 rounded-lg bg-primary text-primary-foreground text-[14px] font-medium hover:opacity-90 transition-opacity shadow-sm">
-              Add Room
+              {roomForm._id ? 'Update Room' : 'Add Room'}
             </button>
           </div>
         </div>

@@ -5,6 +5,7 @@ import {
   QrCode, Search, Trash2, CheckCircle2, 
   AlertCircle, Calendar, Plus
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function VisitorPassesPage() {
   const owner = getOwnerRuntimeSession();
@@ -24,8 +25,7 @@ export default function VisitorPassesPage() {
   const fetchPasses = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/visitors/owner/${owner.loginId}?status=Pre-approved`);
-      const data = await res.json();
+      const data = await apiFetch(`/api/visitors/owner/${owner.loginId}?status=Pre-approved`);
       if (data.success && data.visitors) {
         setPasses(data.visitors.map(v => ({
            id: v._id,
@@ -46,12 +46,11 @@ export default function VisitorPassesPage() {
 
   const handleRevoke = async (id) => {
     try {
-      const res = await fetch(`/api/visitors/${id}/status`, {
+      const data = await apiFetch(`/api/visitors/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Cancelled' })
       });
-      const data = await res.json();
       if (data.success) {
         setPasses(prev => prev.map(p => p.id === id ? { ...p, status: "Revoked" } : p));
       }

@@ -5,6 +5,7 @@ import {
   Users, Search, Plus, Trash2, Edit3, 
   CheckCircle2, AlertCircle, Phone, ArrowUpRight
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function AllStaffPage() {
   const owner = getOwnerRuntimeSession();
@@ -24,13 +25,11 @@ export default function AllStaffPage() {
   const fetchStaff = async () => {
     try {
       // Fetch employees where parentLoginId is owner.loginId (assuming our API returns all or we just filter client-side for now, wait, employeeRoutes returns all by default. We should pass filter, but it's not supported via query yet. We'll filter client side for safety.)
-      const res = await fetch('/api/employees');
-      const data = await res.json();
+      const data = await apiFetch('/api/employees');
       let myStaff = (data.data || []).filter(e => e.parentLoginId === owner.loginId);
 
       // Fetch their shifts to show duty hours
-      const shiftsRes = await fetch(`/api/hr/shifts/${owner.loginId}`);
-      const shiftsData = await shiftsRes.json();
+      const shiftsData = await apiFetch(`/api/hr/shifts/${owner.loginId}`);
       const shiftsMap = {};
       if (shiftsData.success) {
         shiftsData.data.forEach(sh => {
@@ -63,7 +62,7 @@ export default function AllStaffPage() {
   const handleTerminate = async (loginId) => {
     if (!window.confirm("Are you sure you want to terminate this staff member?")) return;
     try {
-      await fetch(`/api/employees/${loginId}/deactivate`, { method: 'POST' });
+      await apiFetch(`/api/employees/${loginId}/deactivate`, { method: 'POST' });
       setStaff(prev => prev.map(s => s.loginId === loginId ? { ...s, status: "Terminated" } : s));
     } catch (err) {
       console.error("Failed to terminate", err);

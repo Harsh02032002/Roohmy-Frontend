@@ -5,6 +5,7 @@ import {
   ShieldCheck, Search, Plus, ToggleLeft, ToggleRight, 
   Settings, CheckCircle2
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function RolesPermissionsPage() {
   const owner = getOwnerRuntimeSession();
@@ -22,8 +23,7 @@ export default function RolesPermissionsPage() {
 
   const fetchRoles = async () => {
     try {
-      const res = await fetch('/api/employees');
-      const data = await res.json();
+      const data = await apiFetch('/api/employees');
       const myStaff = (data.data || []).filter(e => e.parentLoginId === owner.loginId);
       
       const roleMap = {};
@@ -62,14 +62,13 @@ export default function RolesPermissionsPage() {
       // Update all employees having this role
       for (const loginId of roleObj.loginIds) {
         // Fetch current employee to get current permissions
-        const empRes = await fetch(`/api/employees/${loginId}`);
-        const empData = await empRes.json();
+        const empData = await apiFetch(`/api/employees/${loginId}`);
         if (empData.success) {
            let currentPerms = empData.data.permissions || [];
            if (newValue && !currentPerms.includes(field)) currentPerms.push(field);
            if (!newValue && currentPerms.includes(field)) currentPerms = currentPerms.filter(p => p !== field);
 
-           await fetch(`/api/employees/${loginId}`, {
+           await apiFetch(`/api/employees/${loginId}`, {
              method: 'PATCH',
              headers: { 'Content-Type': 'application/json' },
              body: JSON.stringify({ permissions: currentPerms })

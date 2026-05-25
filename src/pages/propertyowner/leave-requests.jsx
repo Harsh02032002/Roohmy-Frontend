@@ -5,6 +5,7 @@ import {
   Calendar, Search, CheckCircle2, XCircle, 
   Clock, Sparkles, MessageSquare
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function LeaveRequestsPage() {
   const owner = getOwnerRuntimeSession();
@@ -24,8 +25,7 @@ export default function LeaveRequestsPage() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/leaves/owner/${owner.loginId}`);
-      const data = await res.json();
+      const data = await apiFetch(`/api/leaves/owner/${owner.loginId}`);
       if (data.success && data.requests) {
         setRequests(data.requests.map(r => ({
            id: r._id,
@@ -46,12 +46,11 @@ export default function LeaveRequestsPage() {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      const res = await fetch(`/api/leaves/${id}/status`, {
+      const data = await apiFetch(`/api/leaves/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
-      const data = await res.json();
       if (data.success) {
         setRequests(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
       }

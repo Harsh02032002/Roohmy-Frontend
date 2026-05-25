@@ -5,6 +5,7 @@ import {
   IndianRupee, Search, Download, CheckCircle2, 
   CreditCard, Calendar, User, ChevronRight
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function StaffSalariesPage() {
   const owner = getOwnerRuntimeSession();
@@ -25,12 +26,10 @@ export default function StaffSalariesPage() {
     try {
       const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
       
-      const empRes = await fetch('/api/employees');
-      const empData = await empRes.json();
+      const empData = await apiFetch('/api/employees');
       const myStaff = (empData.data || []).filter(e => e.parentLoginId === owner.loginId);
 
-      const salRes = await fetch(`/api/hr/salaries/${owner.loginId}`);
-      const salData = await salRes.json();
+      const salData = await apiFetch(`/api/hr/salaries/${owner.loginId}`);
       
       const currentMonthRecords = (salData.data || []).filter(s => s.month === month);
       const salMap = {};
@@ -68,7 +67,7 @@ export default function StaffSalariesPage() {
   const handlePaySalary = async (id, base, deductions, bonus) => {
     try {
       const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
-      await fetch('/api/hr/salaries', {
+      await apiFetch('/api/hr/salaries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

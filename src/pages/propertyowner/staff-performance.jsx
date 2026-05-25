@@ -5,6 +5,7 @@ import {
   Sparkles, Search, Star, CheckCircle2, 
   MessageSquare, TrendingUp, ChevronRight
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function StaffPerformancePage() {
   const owner = getOwnerRuntimeSession();
@@ -22,15 +23,12 @@ export default function StaffPerformancePage() {
 
   const fetchPerformance = async () => {
     try {
-      const empRes = await fetch('/api/employees');
-      const empData = await empRes.json();
+      const empData = await apiFetch('/api/employees');
       const myStaff = (empData.data || []).filter(e => e.parentLoginId === owner.loginId);
 
-      const compRes = await fetch(`/api/complaints/owner/${owner.loginId}`);
-      const compData = await compRes.json();
+      const compData = await apiFetch(`/api/complaints/owner/${owner.loginId}`);
       
-      const maintRes = await fetch(`/api/maintenance/owner/${owner.loginId}`);
-      const maintData = await maintRes.json();
+      const maintData = await apiFetch(`/api/maintenance/owner/${owner.loginId}`);
 
       const perfMap = {};
       myStaff.forEach(s => {

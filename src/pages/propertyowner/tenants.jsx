@@ -258,7 +258,14 @@ export default function Tenants() {
                 <div className="p-4 rounded-xl border border-border bg-emerald-50/50">
                   <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider block mb-1">Rent Information</span>
                   <div className="font-bold text-emerald-700 text-[18px]">₹{selectedTenant.agreedRent || selectedTenant.rent || 0} <span className="text-[13px] font-normal text-emerald-600/70">/ month</span></div>
-                  <div className="text-[13px] text-emerald-600 mt-1">Due: {selectedTenant.paymentFrequency || "Monthly"}</div>
+                  <div className="flex items-center gap-2 mt-1">
+                     <span className="text-[13px] text-emerald-600">Due: {selectedTenant.paymentFrequency || "Monthly"}</span>
+                     {(selectedTenant.dueAmount || selectedTenant.dues) > 0 && (
+                        <span className="text-[11px] font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded ml-auto">
+                          Pending Dues: ₹{(selectedTenant.dueAmount || selectedTenant.dues).toLocaleString("en-IN")}
+                        </span>
+                     )}
+                  </div>
                 </div>
               </div>
 

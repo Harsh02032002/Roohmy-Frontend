@@ -5,6 +5,7 @@ import {
   LogIn, Search, Download, Filter, 
   FileText, Calendar
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function EntryLogsPage() {
   const owner = getOwnerRuntimeSession();
@@ -25,8 +26,7 @@ export default function EntryLogsPage() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/visitors/owner/${owner.loginId}`);
-      const data = await res.json();
+      const data = await apiFetch(`/api/visitors/owner/${owner.loginId}`);
       if (data.success && data.visitors) {
         // Filter those who have entered
         const entered = data.visitors.filter(v => v.entryTime);

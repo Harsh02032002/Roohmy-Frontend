@@ -5,6 +5,7 @@ import {
   UserPlus, Search, LogOut, CheckCircle2, 
   Clock, ShieldAlert, Phone
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function VisitorEntryPage() {
   const owner = getOwnerRuntimeSession();
@@ -31,8 +32,7 @@ export default function VisitorEntryPage() {
   const fetchVisitors = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/visitors/owner/${owner.loginId}?status=Inside`);
-      const data = await res.json();
+      const data = await apiFetch(`/api/visitors/owner/${owner.loginId}?status=Inside`);
       if (data.success && data.visitors) {
         setVisitors(data.visitors.map(v => ({
            id: v._id,
@@ -56,7 +56,7 @@ export default function VisitorEntryPage() {
     if (!vName || !vPhone || !vHost || !vRoom) return;
     
     try {
-      const res = await fetch('/api/visitors', {
+      const data = await apiFetch('/api/visitors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -69,7 +69,6 @@ export default function VisitorEntryPage() {
           status: 'Inside'
         })
       });
-      const data = await res.json();
       if (data.success) {
         fetchVisitors(); // Refresh list
         setVName("");
@@ -85,12 +84,11 @@ export default function VisitorEntryPage() {
 
   const handleCheckout = async (id) => {
     try {
-      const res = await fetch(`/api/visitors/${id}/status`, {
+      const data = await apiFetch(`/api/visitors/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Exited' })
       });
-      const data = await res.json();
       if (data.success) {
         setVisitors(prev => prev.filter(v => v.id !== id));
       }
