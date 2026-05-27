@@ -16,6 +16,7 @@ export default function ShiftManagementPage() {
 
   const [shifts, setShifts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedShift, setSelectedShift] = useState(null);
 
   React.useEffect(() => {
     fetchShifts();
@@ -23,8 +24,16 @@ export default function ShiftManagementPage() {
 
   const fetchShifts = async () => {
     try {
-      const data = await apiFetch(`/api/hr/shifts/${owner.loginId}`);
+      const [data, empData] = await Promise.all([
+        apiFetch(`/api/hr/shifts/${owner.loginId}`),
+        apiFetch(`/api/employees`)
+      ]);
       
+      const empMap = {};
+      if (empData && empData.data) {
+        empData.data.forEach(e => empMap[e._id] = e.name);
+      }
+
       const shiftGroups = {};
       
       (data.data || []).forEach(sh => {
@@ -35,10 +44,12 @@ export default function ShiftManagementPage() {
                  name: key,
                  hours: `${sh.startTime} - ${sh.endTime}`,
                  staffCount: 0,
+                 staffMembers: [],
                  days: sh.days && sh.days.length > 0 ? `${sh.days[0].substring(0,3)} - ${sh.days[sh.days.length-1].substring(0,3)}` : "Mon - Sun"
              };
          }
          shiftGroups[key].staffCount++;
+         shiftGroups[key].staffMembers.push(empMap[sh.employeeId] || "Unknown Staff");
       });
       
       setShifts(Object.values(shiftGroups));
@@ -63,7 +74,6 @@ export default function ShiftManagementPage() {
       </div>
 
       {/* Grid of Shifts */}
-      {/* Grid of Shifts */}
       {loading ? (
         <div className="py-12 text-center text-slate-500">Loading rosters...</div>
       ) : shifts.length === 0 ? (
@@ -71,7 +81,11 @@ export default function ShiftManagementPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {shifts.map((shift) => (
-            <div key={shift.id} className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md transition-all flex flex-col justify-between">
+            <div 
+              key={shift.id} 
+              onClick={() => setSelectedShift(shift)}
+              className="rounded-2xl border border-border bg-card p-6 shadow-soft hover:shadow-md cursor-pointer transition-all flex flex-col justify-between"
+            >
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
@@ -90,12 +104,58 @@ export default function ShiftManagementPage() {
                 <div className="border-t border-border/60 pt-4 space-y-2 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Staff Members Roster:</span>
-                    <span className="font-bold text-slate-800">{shift.staffCount} Members</span>
+                    <span className="font-bold text-slate-800 underline decoration-slate-300 underline-offset-4">{shift.staffCount} Members</span>
                   </div>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {selectedShift && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="font-serif text-[20px] font-bold text-slate-900">{selectedShift.name}</h3>
+                <p className="text-xs text-slate-500 mt-1">{selectedShift.hours} ({selectedShift.days})</p>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setSelectedShift(null); }} 
+                className="text-slate-400 hover:text-slate-600 transition-colors text-lg font-bold"
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div className="border-t border-slate-100 pt-4">
+              <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-tight mb-3">Assigned Staff Members</h4>
+              {selectedShift.staffMembers.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">No staff members assigned to this shift.</p>
+              ) : (
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {selectedShift.staffMembers.map((member, idx) => (
+                    <div key={`${member}-${idx}`} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 transition-colors">
+                      <div className="size-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs">
+                        {member.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-xs font-bold text-slate-800">{member}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedShift(null); }}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </PropertyOwnerLayout>

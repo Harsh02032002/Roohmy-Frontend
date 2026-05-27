@@ -56,6 +56,11 @@ export default function Rooms() {
   const [selectedBedIndex, setSelectedBedIndex] = useState(null);
   const [selectedTenantId, setSelectedTenantId] = useState("");
   const [newTenantForm, setNewTenantForm] = useState({ name: "", phone: "", email: "" });
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  const [showFilter, setShowFilter] = useState("all");
+  const [floorFilter, setFloorFilter] = useState("all");
+  const [sharingFilter, setSharingFilter] = useState("all");
 
   const currentProperty = useMemo(() => properties[0] || null, [properties]);
   const currentPropertyDisplay = useMemo(() => {
@@ -112,6 +117,11 @@ export default function Rooms() {
     const propId = currentProperty?._id || "";
     if (!propId && !roomForm._id) {
       setErrorMsg("Please wait for properties to load or add a property first.");
+      return;
+    }
+
+    if (!roomForm.media || roomForm.media.length === 0) {
+      setErrorMsg("Please upload at least one room photo/video before saving.");
       return;
     }
     
@@ -220,7 +230,14 @@ export default function Rooms() {
   const handleAssignTenant = async (e) => {
     e.preventDefault();
     if (!owner?.loginId || !selectedRoom) return;
+    if (isAssigning) return;
+    
+    if (!window.confirm(`Are you sure you want to assign this tenant to Room ${selectedRoom.number || selectedRoom.roomNo}, Bed ${Number(selectedBedIndex) + 1}?`)) {
+      return;
+    }
+
     try {
+      setIsAssigning(true);
       setErrorMsg("");
       const roomNo = selectedRoom.number || selectedRoom.roomNo || "";
       const agreedRent = Number(selectedRoom.rent || 0);
@@ -228,28 +245,43 @@ export default function Rooms() {
       let payload;
       if (assignMode === "existing") {
         const t = tenants.find(x => (x._id || x.id) === selectedTenantId);
-        if (!t) { setErrorMsg("Select a tenant."); return; }
+        if (!t) { setErrorMsg("Select a tenant."); setIsAssigning(false); return; }
         payload = { name: t.name, phone: t.phone, email: t.email, propertyId: currentProperty?._id || "", roomNo, bedNo: Number(selectedBedIndex) + 1, moveInDate, agreedRent, ownerLoginId: owner.loginId };
       } else {
-        if (!newTenantForm.name || !newTenantForm.phone || !newTenantForm.email) { setErrorMsg("All fields required."); return; }
+        if (!newTenantForm.name || !newTenantForm.phone || !newTenantForm.email) { setErrorMsg("All fields required."); setIsAssigning(false); return; }
         payload = { ...newTenantForm, propertyId: currentProperty?._id || "", roomNo, bedNo: Number(selectedBedIndex) + 1, moveInDate, agreedRent, ownerLoginId: owner.loginId };
       }
       await assignTenant(payload);
       setAssignModalOpen(false);
       await load(owner);
-    } catch (e) { setErrorMsg(e?.body || e?.message || "Failed."); }
+    } catch (e) { 
+      setErrorMsg(e?.body || e?.message || "Failed."); 
+    } finally {
+      setIsAssigning(false);
+    }
   };
 
   // Group rooms by property
   const grouped = useMemo(() => {
     const g = {};
-    rooms.forEach(r => {
+    const filteredRooms = rooms.filter(r => {
+      // Show filter (vacant means has at least one vacant bed, occupied means has at least one occupied bed)
+      if (showFilter === "vacant" && !r.beds.some(b => b.status === 'available')) return false;
+      if (showFilter === "occupied" && !r.beds.some(b => b.status === 'occupied')) return false;
+      // Floor filter
+      if (floorFilter !== "all" && r.floor !== floorFilter) return false;
+      // Sharing filter
+      if (sharingFilter !== "all" && r.sharingType !== sharingFilter) return false;
+      return true;
+    });
+
+    filteredRooms.forEach(r => {
       const k = r.propertyTitle || r.propertyId || "Your Property";
       if (!g[k]) g[k] = [];
       g[k].push(r);
     });
     return g;
-  }, [rooms]);
+  }, [rooms, showFilter, floorFilter, sharingFilter]);
 
   return (
     <PropertyOwnerLayout owner={owner} title="Rooms & Beds" onLogout={() => { clearOwnerRuntimeSession(); window.location.href = "/propertyowner/ownerlogin"; }} contentClassName="max-w-7xl mx-auto">
@@ -286,7 +318,7 @@ export default function Rooms() {
       <div className="flex flex-wrap items-center gap-4 mb-6">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground">Show:</span>
-          <select className="bg-card border border-border rounded-lg px-3 py-1 text-sm">
+          <select value={showFilter} onChange={e => setShowFilter(e.target.value)} className="bg-card border border-border rounded-lg px-3 py-1 text-sm outline-none focus:ring-1 focus:ring-primary">
             <option value="all">All Rooms</option>
             <option value="vacant">Vacant</option>
             <option value="occupied">Occupied</option>
@@ -294,7 +326,7 @@ export default function Rooms() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground">Floor:</span>
-          <select className="bg-card border border-border rounded-lg px-3 py-1 text-sm">
+          <select value={floorFilter} onChange={e => setFloorFilter(e.target.value)} className="bg-card border border-border rounded-lg px-3 py-1 text-sm outline-none focus:ring-1 focus:ring-primary">
             <option value="all">All Floors</option>
             {/* Dynamically generate floor options */}
             {Array.from(new Set(rooms.map(r=>r.floor).filter(Boolean))).map(f=>(
@@ -304,11 +336,13 @@ export default function Rooms() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground">Sharing:</span>
-          <select className="bg-card border border-border rounded-lg px-3 py-1 text-sm">
+          <select value={sharingFilter} onChange={e => setSharingFilter(e.target.value)} className="bg-card border border-border rounded-lg px-3 py-1 text-sm outline-none focus:ring-1 focus:ring-primary">
             <option value="all">All</option>
             <option value="Single Sharing">Single</option>
             <option value="Double Sharing">Double</option>
             <option value="Triple Sharing">Triple</option>
+            <option value="Four Sharing">Four</option>
+            <option value="Private Room (No Sharing)">Private</option>
           </select>
         </div>
       </div>
@@ -647,7 +681,9 @@ export default function Rooms() {
               </>
             )}
             {errorMsg && <p className="text-[12px] text-destructive">{errorMsg}</p>}
-            <button type="submit" className="w-full h-10 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90">Assign Tenant</button>
+            <button type="submit" disabled={isAssigning} className="w-full h-10 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 disabled:opacity-50">
+              {isAssigning ? "Assigning..." : "Assign Tenant"}
+            </button>
           </form>
         </div>
       </div>

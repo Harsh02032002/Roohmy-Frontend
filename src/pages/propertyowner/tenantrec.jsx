@@ -336,12 +336,18 @@ export default function TenantRec() {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
+
     if (!validateForm()) {
       toast.error("Please fill all required fields correctly.");
       return;
     }
     if (!confirmDetails) {
       toast.error("Please confirm the details are correct.");
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to onboard this tenant?")) {
       return;
     }
     

@@ -16,6 +16,7 @@ export default function CancelledBookingsPage() {
   const [search, setSearch] = useState("");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedSettlement, setSelectedSettlement] = useState(null);
 
   React.useEffect(() => {
     let active = true;
@@ -43,7 +44,7 @@ export default function CancelledBookingsPage() {
   }, [owner.loginId]);
 
   const handleViewSettlement = (b) => {
-    alert(`Settlement Details for ${b.name}:\n\nToken Paid: ₹${(b.payment_amount || b.rent_amount || b.total_amount || 0).toLocaleString("en-IN")}\nStatus: ${b.status || b.booking_status}\nRefund: Retained (No refund for owner rejection or client cancellation unless authorized)`);
+    setSelectedSettlement(b);
   };
 
   const filteredBookings = bookings.filter(b => 
@@ -138,6 +139,50 @@ export default function CancelledBookingsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Settlement Modal */}
+      {selectedSettlement && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <h3 className="font-serif text-[22px] text-foreground font-bold flex items-center gap-2">
+                <FileText className="size-5 text-primary" /> Settlement Details
+              </h3>
+              <button onClick={() => setSelectedSettlement(null)} className="p-1 text-muted-foreground hover:bg-muted rounded-full">
+                ✕
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <p className="text-[12px] font-bold text-slate-700 mb-1">Tenant Name</p>
+                <p className="text-[14px] text-foreground">{selectedSettlement.name}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[12px] font-bold text-slate-700 mb-1">Token Paid</p>
+                  <p className="text-[16px] font-bold text-emerald-600">₹{(selectedSettlement.payment_amount || selectedSettlement.rent_amount || selectedSettlement.total_amount || 0).toLocaleString("en-IN")}</p>
+                </div>
+                <div>
+                  <p className="text-[12px] font-bold text-slate-700 mb-1">Status</p>
+                  <p className="text-[14px] text-foreground capitalize">{selectedSettlement.status || selectedSettlement.booking_status}</p>
+                </div>
+              </div>
+              <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl mt-4">
+                <p className="text-[12px] font-bold text-rose-800 mb-1">Refund Policy</p>
+                <p className="text-[13px] text-rose-600">Retained (No refund for owner rejection or client cancellation unless authorized)</p>
+              </div>
+            </div>
+            <div className="p-4 border-t border-border bg-slate-50 flex justify-end">
+              <button 
+                onClick={() => setSelectedSettlement(null)}
+                className="px-6 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </PropertyOwnerLayout>

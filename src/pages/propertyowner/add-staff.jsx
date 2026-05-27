@@ -5,6 +5,7 @@ import {
   UserPlus, ShieldCheck, Mail, Phone, 
   Briefcase, IndianRupee, FileText, CheckCircle2, AlertCircle
 } from "lucide-react";
+import { apiFetch } from "../../services/api";
 
 export default function AddStaffPage() {
   const owner = getOwnerRuntimeSession();
@@ -34,9 +35,8 @@ export default function AddStaffPage() {
       const loginId = `${formData.name.replace(/\s+/g, '').toLowerCase()}_${Date.now().toString().slice(-4)}`;
       
       // 2. Create Employee
-      const empRes = await fetch('/api/employees', {
+      const empData = await apiFetch('/api/employees', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           loginId: loginId,
@@ -45,15 +45,13 @@ export default function AddStaffPage() {
           parentLoginId: owner.loginId
         })
       });
-      const empData = await empRes.json();
-      if (!empRes.ok) throw new Error(empData.error || 'Failed to create staff');
+      if (!empData || !empData.data) throw new Error(empData?.error || 'Failed to create staff');
       
       const employeeId = empData.data._id;
 
       // 3. Setup Salary
-      await fetch('/api/hr/salaries', {
+      await apiFetch('/api/hr/salaries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           employeeId,
           ownerLoginId: owner.loginId,
@@ -70,9 +68,8 @@ export default function AddStaffPage() {
         startTime = "08:00 PM";
         endTime = "08:00 AM";
       }
-      await fetch('/api/hr/shifts', {
+      await apiFetch('/api/hr/shifts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           employeeId,
           ownerLoginId: owner.loginId,

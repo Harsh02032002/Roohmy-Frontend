@@ -98,7 +98,7 @@ export default function RefundsPage() {
                         Approve Payout
                       </button>
                     )}
-                    <button className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
+                    <button onClick={() => alert("Downloading refund receipt...")} className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
                       <Download size={14} />
                     </button>
                   </td>

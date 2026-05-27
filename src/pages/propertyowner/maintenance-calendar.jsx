@@ -3,7 +3,7 @@ import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLay
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
 import { 
   Calendar, Clock, CheckCircle2, ChevronRight, 
-  MapPin, User, ChevronLeft
+  MapPin, User, ChevronLeft, Plus
 } from "lucide-react";
 import { apiFetch } from "../../services/api";
 
@@ -57,6 +57,11 @@ export default function MaintenanceCalendarPage() {
         <div>
           <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Maintenance Calendar</h1>
           <p className="mt-1.5 text-[13.5px] text-muted-foreground">Plan and track periodic repairs, safety tests, and housekeeping routines.</p>
+        </div>
+        <div className="flex items-center gap-2 md:mt-2">
+          <button onClick={() => alert("Add Event functionality coming soon...")} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
+            <Plus className="size-4" /> Add Event
+          </button>
         </div>
       </div>
 

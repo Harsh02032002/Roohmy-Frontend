@@ -34,6 +34,8 @@ export default function Tenants() {
   const [errorMsg, setErrorMsg] = useState("");
   const [tab, setTab] = useState("all");
   const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -66,7 +68,41 @@ export default function Tenants() {
     const q = search.toLowerCase();
     const matchSearch = !search || (t.name || "").toLowerCase().includes(q) || (t.phone || "").includes(q) || (t.roomNo || "").toLowerCase().includes(q);
     return matchTab && matchSearch;
+  }).sort((a, b) => {
+    let valA = a[sortKey] || "";
+    let valB = b[sortKey] || "";
+    if (sortKey === "rent") {
+      valA = Number(a.agreedRent || a.rent || 0);
+      valB = Number(b.agreedRent || b.rent || 0);
+    } else if (sortKey === "dues") {
+      valA = Number(a.dueAmount || a.dues || a.balance || 0);
+      valB = Number(b.dueAmount || b.dues || b.balance || 0);
+    } else {
+      valA = String(valA).toLowerCase();
+      valB = String(valB).toLowerCase();
+    }
+    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+    return 0;
   });
+
+  const handleExportCSV = () => {
+    const headers = ["Name,Phone,Room,Rent,Dues,Status,KYC"];
+    const rows = filtered.map(t => {
+      const roomStr = `Room ${t.roomNo || ""} / Bed ${t.bedNo || ""}`;
+      const rentStr = t.agreedRent || t.rent || 0;
+      const duesStr = t.dueAmount || t.dues || t.balance || 0;
+      return `"${t.name || ""}","${t.phone || ""}","${roomStr}","${rentStr}","${duesStr}","${t.status || "active"}","${t.kycStatus || t.kyc || "pending"}"`;
+    });
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `tenants_export_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const getInitial = (name) => (name || "T").charAt(0).toUpperCase();
   const getKycTone = (kyc) => kyc === "verified" ? "success" : kyc === "pending" ? "warning" : "muted";
@@ -85,7 +121,7 @@ export default function Tenants() {
           <p className="mt-1.5 text-[13.5px] text-muted-foreground">Every person living in your property — their rent, KYC and history in one place.</p>
         </div>
         <div className="flex items-center gap-2 md:mt-2">
-          <button className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors">
+          <button onClick={handleExportCSV} className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors">
             <Download className="size-3.5" /> Export
           </button>
           <a href="/propertyowner/tenantrec" className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
@@ -128,12 +164,26 @@ export default function Tenants() {
             className="w-full h-10 pl-9 pr-3 rounded-lg bg-card border border-border text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
           />
         </div>
-        <button className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors">
-          <Filter className="size-3.5" /> Filters
-        </button>
-        <button className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors">
-          <ArrowUpDown className="size-3.5" /> Sort
-        </button>
+        <select value={tab} onChange={e => setTab(e.target.value)} className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="notice">On notice</option>
+          <option value="dues">With dues</option>
+        </select>
+        <div className="relative">
+          <select value={`${sortKey}-${sortOrder}`} onChange={e => {
+            const [k, o] = e.target.value.split('-');
+            setSortKey(k);
+            setSortOrder(o);
+          }} className="inline-flex items-center gap-1.5 h-10 pl-3 pr-8 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer">
+            <option value="name-asc">Sort A-Z</option>
+            <option value="name-desc">Sort Z-A</option>
+            <option value="rent-desc">Rent (High-Low)</option>
+            <option value="rent-asc">Rent (Low-High)</option>
+            <option value="dues-desc">Dues (High-Low)</option>
+          </select>
+          <ArrowUpDown className="size-3.5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
+        </div>
       </div>
 
       {/* Table */}

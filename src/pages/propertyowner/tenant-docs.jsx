@@ -6,6 +6,14 @@ import {
   FileCheck, Search, Download, CheckCircle2, 
   Eye, ShieldCheck, XCircle, ExternalLink
 } from "lucide-react";
+import { API_URL } from "../../services/api";
+
+const getFileUrl = (url) => {
+  if (!url) return "#";
+  if (url.startsWith("http")) return url;
+  if (url.startsWith("/")) return `${API_URL}${url}`;
+  return `${API_URL}/${url}`;
+};
 
 export default function TenantDocsPage() {
   const owner = getOwnerRuntimeSession();
@@ -129,31 +137,31 @@ export default function TenantDocsPage() {
                   <div className="space-y-1.5 pt-2">
                     <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">Uploaded Files:</span>
                     {hasAadhaarFront && (
-                      <a href={d.kyc.aadhaarFront} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
+                      <a href={getFileUrl(d.kyc.aadhaarFront)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
                         <span>Aadhaar Card Front</span>
                         <ExternalLink size={12} />
                       </a>
                     )}
                     {hasAadhaarBack && (
-                      <a href={d.kyc.aadhaarBack} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
+                      <a href={getFileUrl(d.kyc.aadhaarBack)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
                         <span>Aadhaar Card Back</span>
                         <ExternalLink size={12} />
                       </a>
                     )}
                     {hasAadharFile && (
-                      <a href={d.kyc.aadharFile} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
+                      <a href={getFileUrl(d.kyc.aadharFile)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
                         <span>Aadhaar PDF</span>
                         <ExternalLink size={12} />
                       </a>
                     )}
                     {hasPAN && (
-                      <a href={d.kyc.idProofFile} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
+                      <a href={getFileUrl(d.kyc.idProofFile)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
                         <span>PAN Card Scan</span>
                         <ExternalLink size={12} />
                       </a>
                     )}
                     {hasAddressProof && (
-                      <a href={d.kyc.addressProofFile} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
+                      <a href={getFileUrl(d.kyc.addressProofFile)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 hover:underline">
                         <span>Address Proof File</span>
                         <ExternalLink size={12} />
                       </a>

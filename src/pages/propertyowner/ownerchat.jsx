@@ -46,6 +46,8 @@ export default function OwnerChat() {
           isMe: msg.sender_login_id === owner.loginId
         })));
         scrollToBottom();
+        // Mark these messages as read
+        await apiFetch(`/api/chat/mark-read/${owner.loginId}?sender=${targetUserId}`, { method: "POST" });
       }
     } catch (err) {
       console.error(err);
@@ -71,8 +73,14 @@ export default function OwnerChat() {
   }, [activeChat]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
   };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = async (e) => {
     e.preventDefault();

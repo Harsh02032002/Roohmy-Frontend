@@ -19,6 +19,18 @@ export default function PropertyDocumentsPage() {
     { id: 3, name: "GST Compliance Registration copy", expiry: "Lifetime validity", status: "Active" }
   ]);
 
+  const handleDownload = (docName) => {
+    const element = document.createElement("a");
+    const file = new Blob([
+      `Roomhy Legal Document Archive\n===========================\n\nDocument: ${docName}\nOwner ID: ${owner.loginId}\nStatus: Verified & Active\nGenerated on: ${new Date().toLocaleDateString()}`
+    ], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `${docName.replace(/\s+/g, "_")}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   return (
     <PropertyOwnerLayout 
       owner={owner} 
@@ -53,7 +65,10 @@ export default function PropertyDocumentsPage() {
             </div>
 
             <div className="border-t border-border/60 mt-6 pt-4 flex gap-2">
-              <button className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5">
+              <button 
+                onClick={() => handleDownload(d.name)}
+                className="flex-1 h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5"
+              >
                 <Download size={14} /> Download File Copy
               </button>
             </div>

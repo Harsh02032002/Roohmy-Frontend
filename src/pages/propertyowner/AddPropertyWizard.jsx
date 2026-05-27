@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ListPlus, Send, CheckCircle, Loader, Building2, User, Mail, Phone, MapPin, Home } from 'lucide-react';
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { submitEnquiry } from '../../utils/api';
+import { submitEnquiry, fetchJson } from '../../utils/api';
 import { clearOwnerRuntimeSession, getOwnerRuntimeSession } from "../../utils/propertyowner";
 
 export default function AddPropertyWizard() {
+  const owner = getOwnerRuntimeSession();
+
   const [formData, setFormData] = useState({
-    ownerName: '',
-    email: '',
-    phone: '',
+    ownerName: owner?.name || owner?.fullName || '',
+    email: owner?.email || '',
+    phone: owner?.phone || '',
     propertyName: '',
     propertyType: '',
     city: '',
@@ -21,7 +23,26 @@ export default function AddPropertyWizard() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const owner = getOwnerRuntimeSession();
+  useEffect(() => {
+    const fetchOwnerDetails = async () => {
+      if (owner?.loginId) {
+        try {
+          const response = await fetchJson(`/api/owners/${encodeURIComponent(owner.loginId)}`);
+          if (response) {
+            setFormData(prev => ({
+              ...prev,
+              ownerName: prev.ownerName || response.name || response.profile?.name || '',
+              email: prev.email || response.email || response.profile?.email || '',
+              phone: prev.phone || response.phone || response.profile?.phone || ''
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching owner details:', error);
+        }
+      }
+    };
+    fetchOwnerDetails();
+  }, [owner?.loginId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -257,7 +278,18 @@ export default function AddPropertyWizard() {
             <div className="flex gap-4 pt-6 border-t border-border">
               <button
                 type="button"
-                onClick={() => setFormData({ ownerName: '', email: '', phone: '', propertyName: '', propertyType: '', city: '', area: '', address: '', rent: '', description: '' })}
+                onClick={() => setFormData({
+                  ownerName: owner?.name || owner?.fullName || '',
+                  email: owner?.email || '',
+                  phone: owner?.phone || '',
+                  propertyName: '',
+                  propertyType: '',
+                  city: '',
+                  area: '',
+                  address: '',
+                  rent: '',
+                  description: ''
+                })}
                 className="flex-1 bg-muted text-foreground font-semibold py-4 rounded-xl hover:bg-muted/80 transition-colors text-[13px]"
               >
                 Clear Form

@@ -3,13 +3,16 @@ import { ListPlus, Send, CheckCircle, Loader, ArrowLeft, Building2, User, Mail, 
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
-import { submitEnquiry } from '../../utils/api';
+import { submitEnquiry, fetchJson } from '../../utils/api';
+import { getOwnerRuntimeSession } from '../../utils/propertyowner';
 
 export default function ListYourPropertyPage() {
+  const owner = getOwnerRuntimeSession();
+
   const [formData, setFormData] = useState({
-    ownerName: '',
-    email: '',
-    phone: '',
+    ownerName: owner?.name || owner?.fullName || '',
+    email: owner?.email || '',
+    phone: owner?.phone || '',
     propertyName: '',
     propertyType: '',
     city: '',
@@ -21,6 +24,27 @@ export default function ListYourPropertyPage() {
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const fetchOwnerDetails = async () => {
+      if (owner?.loginId) {
+        try {
+          const response = await fetchJson(`/api/owners/${encodeURIComponent(owner.loginId)}`);
+          if (response) {
+            setFormData(prev => ({
+              ...prev,
+              ownerName: prev.ownerName || response.name || response.profile?.name || '',
+              email: prev.email || response.email || response.profile?.email || '',
+              phone: prev.phone || response.phone || response.profile?.phone || ''
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching owner details:', error);
+        }
+      }
+    };
+    fetchOwnerDetails();
+  }, [owner?.loginId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -338,9 +362,9 @@ export default function ListYourPropertyPage() {
               <button
                 type="button"
                 onClick={() => setFormData({
-                  ownerName: '',
-                  email: '',
-                  phone: '',
+                  ownerName: owner?.name || owner?.fullName || '',
+                  email: owner?.email || '',
+                  phone: owner?.phone || '',
                   propertyName: '',
                   propertyType: '',
                   city: '',

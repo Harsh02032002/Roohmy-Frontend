@@ -38,10 +38,13 @@ export default function ConfirmedBookingsPage() {
   }, [owner.loginId]);
 
   const handleDownload = (b) => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(b, null, 2));
+    const headers = ["Booking ID,Tenant Name,Email,Phone,Property,Token Amount,Booking Date,Check-in Date,Status"];
+    const row = `"${b._id}","${b.name || ""}","${b.email || ""}","${b.phone || ""}","${b.property_name || ""}","${b.payment_amount || b.rent_amount || b.total_amount || 0}","${b.created_at ? new Date(b.created_at).toLocaleDateString() : ""}","${b.check_in_date ? new Date(b.check_in_date).toLocaleDateString() : ""}","${b.payment_status || "confirmed"}"`;
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, row].join("\n");
+    const encodedUri = encodeURI(csvContent);
     const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `booking_${b._id}.json`);
+    downloadAnchor.setAttribute("href", encodedUri);
+    downloadAnchor.setAttribute("download", `booking_${b._id}.csv`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();

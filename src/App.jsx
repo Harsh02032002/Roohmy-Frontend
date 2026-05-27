@@ -96,13 +96,22 @@ const ManagerRouteGuard = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const hasManagerSession =
-      !!sessionStorage.getItem("manager_user") ||
-      !!localStorage.getItem("managerData") ||
-      !!sessionStorage.getItem("managerToken") ||
-      !!localStorage.getItem("managerToken");
+    const getActiveRole = () => {
+      const keys = ["manager_user", "managerData", "staff_user", "user"];
+      for (const key of keys) {
+        try {
+          const val = sessionStorage.getItem(key) || localStorage.getItem(key);
+          if (val) {
+            const parsed = JSON.parse(val);
+            if (parsed && parsed.role) return String(parsed.role).toLowerCase();
+          }
+        } catch (_) {}
+      }
+      return "";
+    };
 
-    if (!hasManagerSession) return;
+    const activeRole = getActiveRole();
+    if (activeRole !== "manager") return;
 
     const currentPath = location.pathname || "";
     const blockedPrefixes = ["/superadmin/", "/staff"];

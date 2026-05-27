@@ -175,10 +175,14 @@ export default function Admin() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40">
+          <button 
+            onClick={() => window.location.href = '/propertyowner/payment'}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40">
             <Send className="size-3.5" /> Send rent reminders
           </button>
-          <button className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90">
+          <button 
+            onClick={() => window.location.href = '/propertyowner/tenantrec'}
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90">
             <Plus className="size-3.5" /> Add tenant
           </button>
         </div>

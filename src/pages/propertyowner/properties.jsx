@@ -168,7 +168,8 @@ export default function Properties() {
 
   const filters = ["All", "PG", "Hostel", "Flat"];
   const filtered = properties.filter(p => {
-    const matchFilter = filter === "All" || (p.type || "").toLowerCase() === filter.toLowerCase();
+    const pType = String(p.type || p.propertyType || p.category || "").toLowerCase();
+    const matchFilter = filter === "All" || pType === filter.toLowerCase() || pType.includes(filter.toLowerCase());
     const matchSearch = !search || (p.title || p.name || "").toLowerCase().includes(search.toLowerCase()) || (p.city || "").toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;
   });

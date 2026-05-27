@@ -664,6 +664,12 @@ export default function PropertyOwnerLayout({
               <input 
                 type="text" 
                 placeholder="Search..." 
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    // navigate to global search or just alert for now since we don't have a search page
+                    console.log("Searching for:", e.target.value);
+                  }
+                }}
                 className="bg-transparent border-none outline-none text-xs font-bold ml-3 w-full text-slate-700 placeholder:text-slate-400"
               />
             </div>
@@ -676,7 +682,7 @@ export default function PropertyOwnerLayout({
 
 
             {/* Help Center */}
-            <button onClick={() => navigate("/propertyowner/complaints")} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group hidden sm:block">
+            <button title="Complaints/Help" onClick={() => navigate("/propertyowner/complaints")} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group hidden sm:block">
               <HelpCircle size={20} className="group-hover:scale-110 transition-transform" />
             </button>
 
@@ -696,8 +702,31 @@ export default function PropertyOwnerLayout({
                 "absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden transition-all transform origin-top-right",
                 notificationOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none"
               )}>
-                <div className="px-5 py-2 border-b border-slate-50 mb-2">
+                <div className="px-5 py-2 border-b border-slate-50 mb-2 flex justify-between items-center">
                   <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Notifications</h3>
+                  {displayNotifications.length > 0 && (
+                    <button 
+                      onClick={async () => {
+                        // Clear notifications visually
+                        setGlobalNotifications([]);
+                        if (owner?.loginId) {
+                          try {
+                            const { fetchJson } = await import("../../utils/api");
+                            await fetchJson(`/api/notifications/mark-all-read`, { 
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ toLoginId: owner.loginId })
+                            });
+                          } catch (e) {
+                            console.error("Failed to clear notifications", e);
+                          }
+                        }
+                      }}
+                      className="text-[10px] font-bold text-blue-600 hover:text-blue-800"
+                    >
+                      Clear All
+                    </button>
+                  )}
                 </div>
                 <div className="max-h-80 overflow-y-auto custom-scrollbar">
                   {displayNotifications.length === 0 ? (

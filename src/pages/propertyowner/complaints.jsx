@@ -185,6 +185,9 @@ export default function Complaints() {
                         {(c.status === "In Progress" || c.status === "Taken") && (
                            <button onClick={() => updateStatus(c._id, "Resolved")} className="text-[11px] font-medium text-green-600 hover:text-green-800 bg-green-50 px-2 py-1 rounded mt-1">Mark Resolved</button>
                         )}
+                        {c.status === "Resolved" && (
+                           <button onClick={() => updateStatus(c._id, "Open")} className="text-[11px] font-medium text-amber-600 hover:text-amber-800 bg-amber-50 px-2 py-1 rounded mt-1">Mark Unresolved</button>
+                        )}
                       </td>
                     </tr>
                   ))}

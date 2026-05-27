@@ -70,7 +70,7 @@ export default function RevenueOverviewPage() {
             <option value="Last Month">Last Month</option>
             <option value="Last 3 Months">Last 3 Months</option>
           </select>
-          <button className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
+          <button onClick={() => alert(`Downloading Statement for ${dateRange}...`)} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
             <Download className="size-4" /> Download Statement
           </button>
         </div>

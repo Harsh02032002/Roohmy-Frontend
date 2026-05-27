@@ -23,24 +23,47 @@ export default function AmenitiesPage() {
   ]);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [newName, setNewName] = useState("");
   const [newBilling, setNewBilling] = useState("Free");
 
-  const handleAddAmenity = (e) => {
+  const handleAddOrEditAmenity = (e) => {
     e.preventDefault();
     if (!newName) return;
-    const newAmenity = {
-      id: amenities.length + 1,
-      name: newName,
-      icon: Wifi,
-      billing: newBilling,
-      rooms: 0,
-      active: true
-    };
-    setAmenities([...amenities, newAmenity]);
+    
+    if (isEditMode) {
+      setAmenities(prev => prev.map(a => a.id === editId ? { ...a, name: newName, billing: newBilling } : a));
+    } else {
+      const newAmenity = {
+        id: amenities.length > 0 ? Math.max(...amenities.map(a => a.id)) + 1 : 1,
+        name: newName,
+        icon: Wifi,
+        billing: newBilling,
+        rooms: 0,
+        active: true
+      };
+      setAmenities([...amenities, newAmenity]);
+    }
     setNewName("");
     setNewBilling("Free");
     setShowAddModal(false);
+    setIsEditMode(false);
+    setEditId(null);
+  };
+
+  const handleDeleteAmenity = (id) => {
+    if (window.confirm("Are you sure you want to delete this amenity?")) {
+      setAmenities(prev => prev.filter(a => a.id !== id));
+    }
+  };
+
+  const handleOpenEdit = (amenity) => {
+    setNewName(amenity.name);
+    setNewBilling(amenity.billing);
+    setEditId(amenity.id);
+    setIsEditMode(true);
+    setShowAddModal(true);
   };
 
   const handleToggleActive = (id) => {
@@ -60,7 +83,12 @@ export default function AmenitiesPage() {
         </div>
         <div className="flex items-center gap-2 md:mt-2">
           <button 
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              setNewName("");
+              setNewBilling("Free");
+              setIsEditMode(false);
+              setShowAddModal(true);
+            }}
             className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity"
           >
             <Plus className="size-4" /> Add Amenity
@@ -106,9 +134,14 @@ export default function AmenitiesPage() {
                     <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Billing Cost</span>
                     <span className="font-bold text-[14px] text-foreground">{amenity.billing}</span>
                   </div>
-                  <button className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
-                    <Edit3 size={14} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleOpenEdit(amenity)} className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-primary inline-flex items-center justify-center transition-colors" title="Edit">
+                      <Edit3 size={14} />
+                    </button>
+                    <button onClick={() => handleDeleteAmenity(amenity.id)} className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-destructive inline-flex items-center justify-center transition-colors" title="Delete">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -120,8 +153,8 @@ export default function AmenitiesPage() {
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
-            <h3 className="font-serif text-[22px] text-foreground mb-4">Add New Amenity</h3>
-            <form onSubmit={handleAddAmenity} className="space-y-4">
+            <h3 className="font-serif text-[22px] text-foreground mb-4">{isEditMode ? "Edit Amenity" : "Add New Amenity"}</h3>
+            <form onSubmit={handleAddOrEditAmenity} className="space-y-4">
               <div>
                 <label className="text-[12px] font-bold text-slate-700 block mb-1">Amenity Name</label>
                 <input 
@@ -158,7 +191,7 @@ export default function AmenitiesPage() {
                   type="submit"
                   className="flex-1 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
                 >
-                  Add Facility
+                  {isEditMode ? "Save Changes" : "Add Facility"}
                 </button>
               </div>
             </form>

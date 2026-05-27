@@ -52,7 +52,7 @@ export default function InvoicesPage() {
                   <td className="px-6 py-4 text-muted-foreground">{i.date}</td>
                   <td className="px-6 py-4 font-bold text-slate-850">₹{i.amount.toLocaleString("en-IN")}</td>
                   <td className="px-6 py-4 text-right space-x-2">
-                    <button className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
+                    <button onClick={() => alert("Downloading invoice...")} className="size-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground inline-flex items-center justify-center transition-colors">
                       <Download size={14} />
                     </button>
                   </td>

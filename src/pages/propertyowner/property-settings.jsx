@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
+import { fetchJson } from "../../utils/api";
 import { 
   Settings, Save, Clock, IndianRupee, ShieldAlert, 
   Coffee, Zap, ShieldCheck
@@ -20,11 +21,60 @@ export default function PropertySettingsPage() {
   const [curfewTime, setCurfewTime] = useState("11:00 PM");
   const [electricityUnitRate, setElectricityUnitRate] = useState(12);
   const [isSaved, setIsSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const handleSave = (e) => {
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await fetchJson(`/api/owners/${owner.loginId}`);
+        if (data?.settings) {
+          setCheckoutTime(data.settings.checkoutTime || "10:00 AM");
+          setCheckinTime(data.settings.checkinTime || "11:00 AM");
+          setFineGracePeriod(data.settings.fineGracePeriod !== undefined ? data.settings.fineGracePeriod : 5);
+          setFineAmount(data.settings.fineAmount !== undefined ? data.settings.fineAmount : 100);
+          setCurfewTime(data.settings.curfewTime || "11:00 PM");
+          setElectricityUnitRate(data.settings.electricityUnitRate !== undefined ? data.settings.electricityUnitRate : 12);
+        }
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+        setError("Failed to load settings from server.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (owner?.loginId) {
+      loadSettings();
+    }
+  }, [owner?.loginId]);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+    try {
+      setError("");
+      setIsSaved(false);
+      const payload = {
+        settings: {
+          checkoutTime,
+          checkinTime,
+          fineGracePeriod: Number(fineGracePeriod),
+          fineAmount: Number(fineAmount),
+          curfewTime,
+          electricityUnitRate: Number(electricityUnitRate)
+        }
+      };
+      await fetchJson(`/api/owners/${owner.loginId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      });
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+    } catch (err) {
+      console.error("Error saving settings:", err);
+      setError("Failed to save settings to server.");
+    }
   };
 
   return (
@@ -40,7 +90,18 @@ export default function PropertySettingsPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-8">
+      {error && (
+        <div className="mb-6 rounded-xl border border-rose-100 bg-rose-50 p-4 text-rose-700 text-xs font-bold flex items-center gap-2">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+        </div>
+      ) : (
+        <form onSubmit={handleSave} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Card 1: Check-in / Check-out timing */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-soft space-y-4">

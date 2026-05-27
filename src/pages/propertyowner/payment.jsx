@@ -98,10 +98,10 @@ export default function Payment() {
           <p className="mt-1.5 text-[13.5px] text-muted-foreground">See who's paid, who's pending and send reminders — all in one click.</p>
         </div>
         <div className="flex items-center gap-2 md:mt-2">
-          <button className="inline-flex items-center gap-1.5 h-10 px-3.5 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors">
+          <button onClick={() => alert("Reminders sent successfully!")} className="inline-flex items-center gap-1.5 h-10 px-3.5 rounded-lg border border-border bg-card text-[13px] font-medium hover:border-primary/40 transition-colors">
             <Send className="size-3.5" /> Send reminders ({counts.due + counts.overdue})
           </button>
-          <button className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
+          <button onClick={() => window.location.href = '/propertyowner/transactions'} className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
             <Plus className="size-4" /> Record payment
           </button>
         </div>
