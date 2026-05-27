@@ -23,7 +23,7 @@ const resolveHostHome = () => {
   const host = (window.location.hostname || "").toLowerCase();
 
   const readStoredUser = () => {
-    const keys = ["manager_user", "staff_user", "user"];
+    const keys = ["user", "staff_user", "manager_user"];
     for (const key of keys) {
       try {
         const sessionValue = sessionStorage.getItem(key);
@@ -97,7 +97,7 @@ const ManagerRouteGuard = () => {
     if (typeof window === "undefined") return;
 
     const getActiveRole = () => {
-      const keys = ["manager_user", "managerData", "staff_user", "user"];
+      const keys = ["user", "staff_user", "manager_user", "managerData"];
       for (const key of keys) {
         try {
           const val = sessionStorage.getItem(key) || localStorage.getItem(key);
