@@ -61,34 +61,34 @@ export default function SuperadminWebsiteenq() {
     <div className="p-8 space-y-10 bg-[#F8FAFC] min-h-full">
       {/* Header Area */}
       <div className="flex flex-col gap-2">
-         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Digital Lead Intelligence Hub</h1>
+         <h1 className="text-4xl font-bold text-slate-800 tracking-tight leading-none">Web Enquiries</h1>
          <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-2">
-            <span>Marketplace Growth</span>
+            <span>Dashboard</span>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-blue-600">Website Inbound Ledger</span>
+            <span className="text-blue-600">Web Enquiries</span>
          </div>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-         <p className="text-sm font-bold text-slate-400 max-w-2xl">Monitor platform-wide digital inquiries, track response velocity and optimize inbound lead conversion across regional property portfolios.</p>
+         <p className="text-sm font-bold text-slate-400 max-w-2xl">View and manage property listing requests submitted by owners from the website.</p>
          <button className="bg-slate-800 text-white px-8 py-4 rounded-2xl text-[10px] font-bold uppercase shadow-xl shadow-slate-800/20 hover:bg-slate-900 transition-all flex items-center gap-2">
-            <Download className="w-4 h-4" /> Export Marketplace Data
+            <Download className="w-4 h-4" /> Export Enquiries
          </button>
       </div>
 
       {/* Hero Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <StatCardLarge label="Total Inbound" value={stats.total} trend="+ 14.2% Delta" up icon={Inbox} color="blue" />
-        <StatCardLarge label="Awaiting Pulse" value={stats.pending} trend="High Priority" up icon={Hourglass} color="orange" />
-        <StatCardLarge label="Lead Velocity" value="1.8h" trend="Optimized Flow" up icon={Clock} color="green" />
-        <StatCardLarge label="Conv. Efficiency" value="23.4%" trend="+ 4.2% Yield" up icon={Zap} color="indigo" />
+        <StatCardLarge label="Total Enquiries" value={stats.total} trend="+ 14.2% Delta" up icon={Inbox} color="blue" />
+        <StatCardLarge label="Pending Review" value={stats.pending} trend="High Priority" up icon={Hourglass} color="orange" />
+        <StatCardLarge label="Avg Response Time" value="1.8h" trend="Optimal" up icon={Clock} color="green" />
+        <StatCardLarge label="Conversion Rate" value="23.4%" trend="+ 4.2% Yield" up icon={Zap} color="indigo" />
       </div>
 
       {/* Main Ledger Card */}
       <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
          <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-10">
-               <h3 className="text-2xl font-bold text-slate-800 tracking-tight">Digital Lead Portfolio</h3>
+               <h3 className="text-2xl font-bold text-slate-800 tracking-tight">All Web Enquiries</h3>
                <div className="hidden xl:flex items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
                   {["", "pending", "assigned"].map(f => (
                     <button 
@@ -98,7 +98,7 @@ export default function SuperadminWebsiteenq() {
                         statusFilter === f ? "bg-white text-blue-600 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
-                       {f === "" ? "Master Feed" : f}
+                       {f === "" ? "All" : f === "pending" ? "Pending" : "Assigned"}
                     </button>
                   ))}
                </div>
@@ -108,7 +108,7 @@ export default function SuperadminWebsiteenq() {
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                   <input 
                     value={search} onChange={e => setSearch(e.target.value)}
-                    placeholder="Search digital leads..." 
+                    placeholder="Search enquiries..." 
                     className="bg-slate-50 border-none rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold shadow-sm w-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all" 
                   />
                </div>
@@ -122,13 +122,13 @@ export default function SuperadminWebsiteenq() {
             <table className="w-full text-left min-w-[1200px]">
                <thead>
                   <tr className="text-slate-400 text-[10px] font-bold uppercase border-b border-slate-50">
-                     <th className="pb-6">Lead Identity</th>
-                     <th className="pb-6">Target Property</th>
-                     <th className="pb-6">Issuer Information</th>
-                     <th className="pb-6 text-center">Regional Zone</th>
-                     <th className="pb-6 text-center">Revenue Pulse</th>
-                     <th className="pb-6 text-center">Lead Status</th>
-                     <th className="pb-6 text-right">Lead Protocols</th>
+                     <th className="pb-6">ID / Date</th>
+                     <th className="pb-6">Property Details</th>
+                     <th className="pb-6">Owner Details</th>
+                     <th className="pb-6 text-center">Location</th>
+                     <th className="pb-6 text-center">Rent</th>
+                     <th className="pb-6 text-center">Status</th>
+                     <th className="pb-6 text-right">Actions</th>
                   </tr>
                </thead>
                <tbody className="divide-y divide-slate-50">
@@ -136,7 +136,7 @@ export default function SuperadminWebsiteenq() {
                     <tr><td colSpan="7" className="py-32 text-center">
                        <div className="flex flex-col items-center gap-4">
                           <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Accessing Inbound Vault...</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Web Enquiries...</p>
                        </div>
                     </td></tr>
                   ) : filteredEnquiries.map((e, i) => (
@@ -153,7 +153,7 @@ export default function SuperadminWebsiteenq() {
                              <div>
                                 <p className="text-base font-bold text-slate-800">{e.property_name || "Digital Prospect"}</p>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest opacity-70">
-                                   {e.property_type?.toUpperCase()} • {e.gender_suitability} Matrix
+                                   {e.property_type?.toUpperCase()} • Suitable for {e.gender_suitability || 'Anyone'}
                                 </p>
                              </div>
                           </div>
@@ -170,14 +170,14 @@ export default function SuperadminWebsiteenq() {
                        </td>
                        <td className="py-6 text-center">
                           <p className="text-base font-bold text-slate-800 tracking-tighter">₹ {e.rent?.toLocaleString()}</p>
-                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60">Revenue Target</p>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60">Monthly Rent</p>
                        </td>
                        <td className="py-6 text-center">
                           <span className={cn(
                              "text-[9px] font-bold px-3.5 py-1.5 rounded-full border shadow-sm uppercase tracking-widest",
                              e.status === "pending" ? "bg-amber-50 text-amber-600 border-amber-100 shadow-amber-50" : "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-50"
                           )}>
-                             {e.status === "pending" ? "Lead Pulse" : `Routed: ${e.assigned_to}`}
+                             {e.status === "pending" ? "Pending Review" : `Routed: ${e.assigned_to}`}
                           </span>
                        </td>
                        <td className="py-6 text-right">
@@ -187,10 +187,10 @@ export default function SuperadminWebsiteenq() {
                              </button>
                              <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white hover:shadow-md transition-all border border-slate-100 shadow-sm">
                                 <Eye className="w-5 h-5" />
-                             </button>
-                          </div>
-                       </td>
-                    </tr>
+                              </button>
+                           </div>
+                        </td>
+                     </tr>
                   ))}
                </tbody>
             </table>
