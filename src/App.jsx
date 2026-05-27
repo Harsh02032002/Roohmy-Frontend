@@ -44,6 +44,7 @@ const resolveHostHome = () => {
   const staffUser = readStoredUser();
   const role = String(staffUser?.role || "").toLowerCase();
   const owner = getOwnerSession();
+  const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1") || !host.includes(".");
 
   if (host === "admin.roomhy.com" || host === "www.admin.roomhy.com") {
     if (role === "superadmin" || role === "admin") return "/superadmin/superadmin";
@@ -61,6 +62,21 @@ const resolveHostHome = () => {
     if (owner?.loginId) return "/propertyowner/admin";
     return "/propertyowner/index";
   }
+
+  if (isLocalhost) {
+    if (role === "superadmin" || role === "admin") return "/superadmin/superadmin";
+    if (role === "manager") {
+      const hasManagerSession =
+        !!sessionStorage.getItem("managerToken") ||
+        !!localStorage.getItem("managerToken") ||
+        !!localStorage.getItem("managerData");
+      return hasManagerSession ? "/propertyowner/admin" : "/manager/login";
+    }
+    if (role === "areamanager" || role === "employee") return "/employee/areaadmin";
+    if (owner?.loginId) return "/propertyowner/admin";
+    return "/website/index";
+  }
+
   return "/website/index";
 };
 
@@ -93,7 +109,7 @@ const ManagerRouteGuard = () => {
     const isBlockedRoute = blockedPrefixes.some((prefix) => currentPath.startsWith(prefix));
 
     if (isBlockedRoute) {
-      window.location.replace("/manager/dashboard");
+      window.location.replace("/propertyowner/admin");
     }
   }, [location.pathname]);
 

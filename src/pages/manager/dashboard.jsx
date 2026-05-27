@@ -2,5 +2,5 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 export default function ManagerDashboard() {
-  return <Navigate to="/employee/areaadmin" replace />;
+  return <Navigate to="/propertyowner/admin" replace />;
 }
