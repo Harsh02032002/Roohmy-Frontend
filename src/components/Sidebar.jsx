@@ -90,6 +90,7 @@ const NAV = [
         { label: "Pending Properties", path: "/superadmin/property/pending" },
         { label: "All Properties List", path: "/superadmin/properties?view=list" },
         { label: "Online Leads", path: "/superadmin/enquiry" },
+        { label: "Web Enquiries", path: "/superadmin/websiteenq" },
         { label: "Property Categories", path: "/superadmin/property/categories" },
     ]
   },
