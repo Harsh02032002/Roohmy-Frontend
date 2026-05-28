@@ -232,6 +232,7 @@ export default function PropertySettingsPage() {
           )}
         </div>
       </form>
+      )}
     </PropertyOwnerLayout>
   );
 }

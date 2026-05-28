@@ -83,8 +83,8 @@ export default function PendingProperties() {
       {/* Header Area */}
       <div className="flex items-center justify-between">
          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Approve / Reject Properties</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Review and manage property listings before they go live</p>
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Pending Properties</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Review and approve new property listings.</p>
          </div>
          <div className="flex items-center gap-3">
             <button onClick={fetchPendingProperties} className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">

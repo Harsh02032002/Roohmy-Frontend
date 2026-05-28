@@ -27,6 +27,7 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Add Property", href: "/propertyowner/add-property", goldOnly: false },
       { label: "Rooms", href: "/propertyowner/rooms", goldOnly: false },
       { label: "Amenities", href: "/propertyowner/amenities", goldOnly: false },
+      { label: "Locations", href: "/propertyowner/location", goldOnly: false },
     ]
   },
   {
@@ -60,6 +61,7 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Cancelled Bookings", href: "/propertyowner/cancelled-bookings", goldOnly: false },
       { label: "Lead Sources", href: "/propertyowner/lead-sources", goldOnly: false },
       { label: "WhatsApp Leads", href: "/propertyowner/whatsapp-leads", goldOnly: false },
+      { label: "New Booking Form", href: "/propertyowner/booking-form", goldOnly: false },
     ]
   },
   {
@@ -146,6 +148,7 @@ export const PROPERTY_OWNER_NAV = [
     submenus: [
       { label: "Chat", href: "/propertyowner/ownerchat", goldOnly: false },
       { label: "Broadcast Message", href: "/propertyowner/announcements", goldOnly: false },
+      { label: "WhatsApp Broadcast", href: "/propertyowner/whatsapp", goldOnly: false },
     ]
   },
   {
@@ -168,6 +171,7 @@ export const PROPERTY_OWNER_NAV = [
     icon: FileText,
     href: "/propertyowner/documents",
     submenus: [
+      { label: "All Templates", href: "/propertyowner/documents", goldOnly: false },
       { label: "Agreements", href: "/propertyowner/agreement", goldOnly: false },
       { label: "Tenant Documents", href: "/propertyowner/tenant-docs", goldOnly: false },
       { label: "Staff Documents", href: "/propertyowner/staff-documents", goldOnly: false },
@@ -181,6 +185,7 @@ export const PROPERTY_OWNER_NAV = [
     icon: Settings,
     href: "/propertyowner/settings",
     submenus: [
+      { label: "General Settings", href: "/propertyowner/settings", goldOnly: false },
       { label: "Profile Settings", href: "/propertyowner/ownerprofile", goldOnly: false },
       { label: "Company Settings", href: "/propertyowner/company-settings", goldOnly: false },
       { label: "Property Settings", href: "/propertyowner/property-settings-global", goldOnly: false },
