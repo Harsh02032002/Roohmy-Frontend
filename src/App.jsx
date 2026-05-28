@@ -53,7 +53,7 @@ const resolveHostHome = () => {
         !!sessionStorage.getItem("managerToken") ||
         !!localStorage.getItem("managerToken") ||
         !!localStorage.getItem("managerData");
-      return hasManagerSession ? "/propertyowner/admin" : "/manager/login";
+      if (hasManagerSession) return "/propertyowner/admin";
     }
     if (role === "areamanager" || role === "employee") return "/employee/areaadmin";
     return "/superadmin/index";
@@ -70,7 +70,7 @@ const resolveHostHome = () => {
         !!sessionStorage.getItem("managerToken") ||
         !!localStorage.getItem("managerToken") ||
         !!localStorage.getItem("managerData");
-      return hasManagerSession ? "/propertyowner/admin" : "/manager/login";
+      if (hasManagerSession) return "/propertyowner/admin";
     }
     if (role === "areamanager" || role === "employee") return "/employee/areaadmin";
     if (owner?.loginId) return "/propertyowner/admin";
@@ -115,7 +115,8 @@ const ManagerRouteGuard = () => {
 
     const currentPath = location.pathname || "";
     const blockedPrefixes = ["/superadmin/", "/staff"];
-    const isBlockedRoute = blockedPrefixes.some((prefix) => currentPath.startsWith(prefix));
+    const isBlockedRoute = blockedPrefixes.some((prefix) => currentPath.startsWith(prefix)) &&
+      !["/superadmin", "/superadmin/", "/superadmin/index"].includes(currentPath);
 
     if (isBlockedRoute) {
       window.location.replace("/propertyowner/admin");
@@ -167,9 +168,8 @@ export default function App() {
   // Categorize routes for nested layout
   const shellRoutes = routes.filter(r => {
     const isSuperadmin = r.path.startsWith("/superadmin/") && r.path !== "/superadmin/index";
-    const isEmployee = r.path.startsWith("/employee/") && r.path !== "/employee/index";
-    // Owners and Tenants handle their own sidebar/layout inside their components
-    return isSuperadmin || isEmployee;
+    // Employees, Owners, and Tenants handle their own sidebar/layout inside their components
+    return isSuperadmin;
   });
 
   const standaloneRoutes = routes.filter(r => !shellRoutes.find(sr => sr.path === r.path));

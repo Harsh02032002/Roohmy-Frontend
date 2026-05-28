@@ -102,7 +102,7 @@ export default function Owner() {
           credentials: { password: formPassword, firstTime: true }
         })
       });
-      alert("Stakeholder added successfully");
+      alert("Property Owner added successfully! Digital KYC link has been sent to their email.");
       setSearchParams({ view: "list" });
       loadOwners();
     } catch (err) { alert(err.message || "Failed to add stakeholder"); }
