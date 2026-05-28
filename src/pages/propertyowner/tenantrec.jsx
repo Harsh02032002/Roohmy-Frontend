@@ -7,7 +7,7 @@ import {
   CheckCircle2, Save, Info, Clock, User, Eye, LayoutGrid, Pencil, RefreshCw,
   Mail, Phone, Calendar, Fingerprint, Briefcase, Heart, MessageSquare, AlertCircle, ChevronDown
 } from "lucide-react";
-import { getApiBase, fetchJson } from "../../utils/api";
+import { getApiBase, fetchJson, getAuthHeader } from "../../utils/api";
 import { toast } from "react-hot-toast";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchOwnerProperties } from "../../utils/propertyowner";
@@ -410,15 +410,30 @@ export default function TenantRec() {
     data.append("image", file);
 
     try {
-      const res = await fetch(`${apiUrl}/api/upload`, { method: "POST", body: data });
-      const json = await res.json();
+      const res = await fetch(`${apiUrl}/api/upload`, { 
+        method: "POST", 
+        body: data,
+        headers: getAuthHeader()
+      });
+      
+      let json;
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        json = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text || `HTTP error ${res.status}`);
+      }
+      
+      if (!res.ok) throw new Error(json.error || "Upload failed");
+      
       if (json.url) {
         setBasicDetails({ ...basicDetails, idProofFile: json.url });
         toast.success("ID Proof uploaded!");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Upload failed");
+      toast.error("Upload failed: " + err.message);
     } finally {
       toast.dismiss(loadingToast);
     }

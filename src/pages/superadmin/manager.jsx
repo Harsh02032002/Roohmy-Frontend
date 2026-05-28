@@ -9,7 +9,7 @@ import {
   Layers, Box, Globe2, Loader2, Save, Plus, X,
   CheckCircle2, AlertCircle, Camera, Fingerprint, Lock, Unlock, UserPlus
 } from "lucide-react";
-import { fetchJson } from "../../utils/api";
+import { fetchJson, getApiBase, getAuthHeader } from "../../utils/api";
 import { PageHeader } from "../../components/superadmin/PageHeader";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
@@ -153,14 +153,30 @@ export default function Manager() {
     const formData = new FormData();
     formData.append("profilePhoto", file);
     try {
-      const res = await fetch("/api/upload-profile-photo", { method: "POST", body: formData });
-      const data = await res.json();
+      const base = getApiBase();
+      const res = await fetch(`${base}/api/upload-profile-photo`, { 
+        method: "POST", 
+        body: formData,
+        headers: getAuthHeader()
+      });
+      
+      let data;
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text || `HTTP error ${res.status}`);
+      }
+
       if (res.ok && data.url) {
         setFormPhoto(data.url);
         showNotification("Profile biometric updated");
+      } else {
+        throw new Error(data.error || "Upload failed");
       }
     } catch (err) {
-      showNotification("Photo upload failed", "error");
+      showNotification("Photo upload failed: " + err.message, "error");
     }
   };
 

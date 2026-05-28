@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { X, Plus, Building2, ChevronDown, UploadCloud, Wind, Table as TableIcon, Tv, Bath, LayoutTemplate, Refrigerator, DoorClosed, Armchair, Utensils, Microwave, Flame, Shirt, Video, Fan, Check, Edit2, Trash2 } from "lucide-react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { fetchJson } from "../../utils/api";
+import { fetchJson, getApiBase, getAuthHeader } from "../../utils/api";
 import {
   assignTenant, clearOwnerRuntimeSession, createRoom, updateRoom, deleteRoom,
   fetchOwnerProperties, fetchOwnerRooms, fetchOwnerTenants, getOwnerRuntimeSession
@@ -621,8 +621,22 @@ export default function Rooms() {
                       const uploadPromises = files.map(async (file) => {
                         const formData = new FormData();
                         formData.append("image", file);
-                        const res = await fetch("/api/upload", { method: "POST", body: formData });
-                        const data = await res.json();
+                        const base = getApiBase();
+                        const res = await fetch(`${base}/api/upload`, { 
+                          method: "POST", 
+                          body: formData,
+                          headers: getAuthHeader()
+                        });
+                        
+                        let data;
+                        const contentType = res.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                          data = await res.json();
+                        } else {
+                          const text = await res.text();
+                          throw new Error(text || `HTTP error ${res.status}`);
+                        }
+
                         if (!res.ok) throw new Error(data.error || "Upload failed");
                         return { preview: data.url, url: data.url };
                       });

@@ -14,9 +14,15 @@ export const getApiBase = () => {
     return "https://roohmy-backend-xwa9.vercel.app";
   }
   
-  // Local development
-  return host === "localhost" || host === "127.0.0.1"
-    ? "http://localhost:5001"
+  // Local development (support localhost, 127.0.0.1, LAN IPs, and local domains)
+  const isLocal = host === "localhost" || 
+                  host === "127.0.0.1" || 
+                  host.startsWith("192.168.") || 
+                  host.startsWith("10.") || 
+                  host.startsWith("172.") || 
+                  host.endsWith(".local");
+  return isLocal
+    ? `http://${host}:5001`
     : "https://roohmy-backend-xwa9.vercel.app";
 };
 

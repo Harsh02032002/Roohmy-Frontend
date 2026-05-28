@@ -143,6 +143,30 @@ export default function Tenant() {
     finally { setIsUpdatingKyc(false); }
   };
 
+  const handleDeleteTenant = async (tenant) => {
+    const id = tenant._id || tenant.id;
+    if (!id) {
+      alert("Tenant ID not found");
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to permanently delete resident ${tenant.profile?.name || "this resident"}? This action cannot be undone.`)) {
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await fetchJson(`/api/tenants/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeader()
+      });
+      alert(res.message || "Resident deleted successfully");
+      loadTenants();
+    } catch (err) {
+      alert("Failed to delete resident: " + (err.body || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -268,12 +292,12 @@ export default function Tenant() {
                              {t.kyc.status}
                           </span>
                        </td>
-                       <td className="px-10 py-8 text-right">
-                          <div className="flex items-center justify-end gap-3">
-                             <button className="p-3.5 rounded-2xl bg-white text-slate-400 hover:text-blue-600 hover:border-blue-100 transition-all border border-slate-100 shadow-md active:scale-95"><Eye className="w-5 h-5" /></button>
-                             <button className="p-3.5 rounded-2xl bg-white text-slate-400 hover:text-rose-600 hover:border-rose-100 transition-all border border-slate-100 shadow-md active:scale-95"><MoreVertical className="w-5 h-5" /></button>
-                          </div>
-                       </td>
+                        <td className="px-10 py-8 text-right" onClick={(e) => e.stopPropagation()}>
+                           <div className="flex items-center justify-end gap-3">
+                              <button onClick={() => setSelectedTenant(t)} className="p-3.5 rounded-2xl bg-white text-slate-400 hover:text-blue-600 hover:border-blue-100 transition-all border border-slate-100 shadow-md active:scale-95"><Eye className="w-5 h-5" /></button>
+                              <button onClick={() => handleDeleteTenant(t)} className="p-3.5 rounded-2xl bg-white text-slate-400 hover:text-rose-600 hover:border-rose-100 transition-all border border-slate-100 shadow-md active:scale-95"><Trash2 className="w-5 h-5" /></button>
+                           </div>
+                        </td>
                     </tr>
                   ))}
                </tbody>
@@ -367,7 +391,15 @@ export default function Tenant() {
               </div>
 
               <div className="px-10 py-10 border-t border-slate-50 bg-slate-50/50 flex justify-between items-center">
-                 <button className="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:underline">Terminate Contract</button>
+                  <button 
+                     onClick={() => {
+                        handleDeleteTenant(selectedTenant);
+                        setSelectedTenant(null);
+                     }}
+                     className="text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:underline"
+                  >
+                     Delete Resident
+                  </button>
                  <div className="flex gap-4">
                     <button 
                        onClick={() => handleKycUpdate(selectedTenant.loginId, "rejected")}

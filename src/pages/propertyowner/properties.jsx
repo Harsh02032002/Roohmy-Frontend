@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchJson } from "../../utils/api";
+import { fetchJson, getApiBase, getAuthHeader } from "../../utils/api";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { requireOwnerSession } from "../../utils/ownerSession";
 import { fetchOwnerProperties } from "../../utils/propertyowner";
@@ -73,8 +73,22 @@ export default function Properties() {
       const uploadPromises = Array.from(files).map(async (file) => {
         const formData = new FormData();
         formData.append("image", file);
-        const res = await fetch("/api/upload", { method: "POST", body: formData });
-        const data = await res.json();
+        const base = getApiBase();
+        const res = await fetch(`${base}/api/upload`, { 
+          method: "POST", 
+          body: formData,
+          headers: getAuthHeader()
+        });
+        
+        let data;
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error(text || `HTTP error ${res.status}`);
+        }
+        
         if (!res.ok) throw new Error(data.error || "Upload failed");
         return data.url;
       });
@@ -93,9 +107,27 @@ export default function Properties() {
       const data = new FormData();
       data.append("image", file);
       try {
-        const res = await fetch("/api/upload", { method: "POST", body: data });
-        const json = await res.json();
-        if (json.url) uploadedUrls.push(json.url);
+        const base = getApiBase();
+        const res = await fetch(`${base}/api/upload`, { 
+          method: "POST", 
+          body: data,
+          headers: getAuthHeader()
+        });
+        
+        let json;
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          json = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error(text || `HTTP error ${res.status}`);
+        }
+        
+        if (res.ok && json.url) {
+          uploadedUrls.push(json.url);
+        } else {
+          console.error("Upload failed", json?.error || "Empty response");
+        }
       } catch (err) { console.error(err); }
     }
     setEditFormData(prev => {
