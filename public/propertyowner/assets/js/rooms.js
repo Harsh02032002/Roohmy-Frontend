@@ -684,6 +684,32 @@ window.addEventListener('load', () => { if(typeof lucide!=='undefined') lucide.c
                 console.error('Failed to save roomhy_rooms:', err);
             }
 
+            // Bypass superadmin and directly update owner's room inventory
+            try {
+                const payload = {
+                    rooms: allRooms,
+                    propertyId: propId,
+                    propertyTitle: newRoom.propertyTitle,
+                    propertyLocationCode: areaCode || ''
+                };
+                apiFetch(`/api/owners/${encodeURIComponent(ownerId)}/room-inventory`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).then(async (res) => {
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && Array.isArray(data.rooms)) {
+                            localStorage.setItem('roomhy_rooms', JSON.stringify(data.rooms));
+                            loadRooms();
+                        }
+                        alert("Room added directly to your inventory successfully!");
+                    }
+                }).catch(e => console.warn('Failed to sync room inventory:', e));
+            } catch (e) {
+                console.warn('API error during room save:', e);
+            }
+
             closeRoomModal();
             loadRooms();
         }

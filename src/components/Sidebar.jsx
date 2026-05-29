@@ -9,7 +9,7 @@ import {
   CreditCard, IndianRupee, RotateCcw, AlertCircle,
   BarChart, PieChart, Activity, Shield, LayoutGrid,
   FileSearch, CheckCircle2, History, MessageCircle,
-  Headset, ShieldAlert, Zap
+  Headset, ShieldAlert, Zap, ClipboardCheck
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogoutDialog } from "./superadmin/LogoutDialog";
@@ -87,6 +87,7 @@ const NAV = [
         { label: "Total Properties", path: "/superadmin/total-properties" },
         { label: "Add Property", path: "/superadmin/add-property" },
         { label: "Approve / Reject Properties", path: "/superadmin/property/approvals" },
+        { label: "Employee Property Approvals", path: "/superadmin/employee-properties" },
         { label: "Pending Properties", path: "/superadmin/property/pending" },
         { label: "All Properties List", path: "/superadmin/properties?view=list" },
         { label: "Online Leads", path: "/superadmin/enquiry" },
@@ -189,12 +190,17 @@ const NAV = [
     ]
   },
   { 
+    label: "Visit Reports", 
+    id: "visits",
+    icon: ClipboardCheck, 
+    path: "/superadmin/visit",
+  },
+  { 
     label: "Report & Analytics", 
     icon: BarChart3, 
     path: "/superadmin/reports",
     children: [
         { label: "Overview", path: "/superadmin/reports" },
-        { label: "Visit Reports", path: "/superadmin/visit" },
         { label: "Property Performance", path: "/superadmin/reports" },
         { label: "Location Wise Data", path: "/superadmin/reports" },
         { label: "Occupancy Rate", path: "/superadmin/reports" },
@@ -246,7 +252,16 @@ const NAV = [
 
 const getFilteredNav = () => {
   try {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
+    let rawUser = null;
+    try {
+      rawUser = sessionStorage.getItem("manager_user") ||
+                sessionStorage.getItem("user") ||
+                localStorage.getItem("staff_user") ||
+                localStorage.getItem("manager_user") ||
+                localStorage.getItem("user") ||
+                "null";
+    } catch (e) {}
+    const user = JSON.parse(rawUser);
     const role = String(user?.role || "").toLowerCase();
     if (role === "employee" || role === "areamanager" || role === "manager") {
       let perms = user.permissions || [];
@@ -263,15 +278,27 @@ const getFilteredNav = () => {
         if (!id) {
           id = item.label.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_');
         }
-        return perms.includes(id);
+        return id === "visits" || perms.includes(id);
       });
 
       // Rewrite paths to /employee/ for employees
-      const rewritePaths = (items) => items.map(item => ({
-        ...item,
-        path: item.path ? item.path.replace("/superadmin/", "/employee/") : item.path,
-        children: item.children ? rewritePaths(item.children) : undefined
-      }));
+      const rewritePaths = (items) => items.map(item => {
+        let newPath = item.path;
+        if (newPath) {
+          if (newPath === "/superadmin/superadmin") {
+            newPath = "/employee/areaadmin";
+          } else if (newPath === "/superadmin/index") {
+            newPath = "/employee/index";
+          } else {
+            newPath = newPath.replace("/superadmin/", "/employee/");
+          }
+        }
+        return {
+          ...item,
+          path: newPath,
+          children: item.children ? rewritePaths(item.children) : undefined
+        };
+      });
 
       return rewritePaths(allowedNav);
     }
@@ -287,7 +314,21 @@ export function Sidebar({ open, isMobile, onClose, onLogout }) {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [openMenus, setOpenMenus] = useState({ "Review": true, "Support": true });
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const resolveUser = () => {
+    try {
+      return JSON.parse(
+        sessionStorage.getItem("manager_user") ||
+        sessionStorage.getItem("user") ||
+        localStorage.getItem("staff_user") ||
+        localStorage.getItem("manager_user") ||
+        localStorage.getItem("user") ||
+        "{}"
+      );
+    } catch {
+      return {};
+    }
+  };
+  const user = resolveUser();
   const userName = user?.name || "User";
   const roleLower = String(user?.role || "").toLowerCase();
   const userRole = (roleLower === "employee" || roleLower === "areamanager" || roleLower === "manager") 

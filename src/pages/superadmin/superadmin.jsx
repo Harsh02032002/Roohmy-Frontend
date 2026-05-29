@@ -72,8 +72,25 @@ export default function SuperadminDashboard() {
     loadStats();
   }, []);
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const resolveUser = () => {
+    try {
+      return JSON.parse(
+        sessionStorage.getItem("manager_user") ||
+        sessionStorage.getItem("user") ||
+        localStorage.getItem("staff_user") ||
+        localStorage.getItem("manager_user") ||
+        localStorage.getItem("user") ||
+        "{}"
+      );
+    } catch {
+      return {};
+    }
+  };
+
+  const user = resolveUser();
   const userName = user?.name || "User";
+  const roleLower = String(user?.role || "").toLowerCase();
+  const isEmployee = ["employee", "areamanager", "manager"].includes(roleLower);
 
   return (
     <div className="space-y-6">
@@ -212,6 +229,7 @@ export default function SuperadminDashboard() {
           </div>
         </div>
 
+        {!isEmployee && (
         <div className="panel bg-blue-600 text-white border-none shadow-blue-600/20">
           <h3 className="font-bold text-lg mb-6">Quick Summary</h3>
           <div className="space-y-6">
@@ -236,6 +254,7 @@ export default function SuperadminDashboard() {
              Generate Full Report
           </button>
         </div>
+        )}
       </div>
     </div>
   );

@@ -221,6 +221,21 @@ export default function Visit() {
     }
   };
 
+  const loadAddedVisits = async () => {
+    try {
+      const data = await fetchJson("/api/property-enquiries");
+      const list = data?.enquiries || [];
+      const ids = new Set(list.map((e) => e.visitId || e.enquiryId).filter(Boolean));
+      setAddedVisitIds(ids);
+    } catch (err) {
+      console.error("Failed to load property enquiries for buttons:", err);
+      try {
+        const local = JSON.parse(localStorage.getItem("roomhy_property_enquiries") || "[]");
+        setAddedVisitIds(new Set(local.map((e) => e.visitId || e.enquiryId).filter(Boolean)));
+      } catch (_) {}
+    }
+  };
+
   useEffect(() => {
     setUser(readStoredUser());
   }, []);
@@ -296,7 +311,11 @@ export default function Visit() {
   useEffect(() => {
     if (!user) return;
     loadVisits();
-    const interval = setInterval(loadVisits, 15000);
+    loadAddedVisits();
+    const interval = setInterval(() => {
+      loadVisits();
+      loadAddedVisits();
+    }, 15000);
     return () => clearInterval(interval);
   }, [staffId, staffName, user]);
 
@@ -660,19 +679,39 @@ export default function Visit() {
         // Auto-create owner request
         if (fd.get("createOwnerRequest") === "true") {
           try {
-            const genId = "OWN" + Math.floor(1000 + Math.random() * 9000);
-            await fetchJson("/api/owners", {
-              method: "POST",
-              headers: getAuthHeader(),
-              body: JSON.stringify({
-                loginId: genId,
-                name: payload.ownerName,
-                email: payload.ownerEmail,
-                phone: payload.contactPhone,
-                locationCode: payload.locationCode,
-                credentials: { password: Math.random().toString(36).slice(-8).toUpperCase(), firstTime: true }
-              })
-            });
+            const onboardingReq = {
+              enquiryId: payload.visitId || `enq_${Date.now()}`,
+              type: "property_from_visit",
+              submittedAt: new Date().toISOString(),
+              propertyName: payload.propertyName,
+              propertyType: payload.propertyType,
+              address: payload.address,
+              city: payload.city,
+              area: payload.area,
+              ownerName: payload.ownerName,
+              ownerEmail: payload.ownerEmail,
+              ownerPhone: payload.contactPhone,
+              monthlyRent: payload.monthlyRent,
+              roomCount: payload.vacantRooms + payload.occupiedRooms,
+              bedCount: payload.vacantBeds + payload.occupiedBeds,
+              pendingCredentials: {
+                loginId: "OWN" + Math.floor(1000 + Math.random() * 9000),
+                password: Math.random().toString(36).slice(-8).toUpperCase()
+              }
+            };
+            
+            try {
+              await fetchJson("/api/property-enquiries", {
+                method: "POST",
+                body: JSON.stringify(onboardingReq)
+              });
+            } catch (errApi) {
+              console.error("Failed to POST property onboarding request:", errApi);
+            }
+
+            const existingEnquiries = JSON.parse(localStorage.getItem("roomhy_property_enquiries") || "[]");
+            existingEnquiries.push(onboardingReq);
+            localStorage.setItem("roomhy_property_enquiries", JSON.stringify(existingEnquiries));
           } catch (err) {
             console.error("Failed to auto-create owner request:", err);
           }
@@ -696,185 +735,260 @@ export default function Visit() {
     window.open(url, "_blank");
   };
 
-  const rows = useMemo(() => visits, [visits]);
+  const [search, setSearch] = useState("");
+  const [addedVisitIds, setAddedVisitIds] = useState(new Set());
+  const [showAddProp, setShowAddProp] = useState(false);
+  const [addPropVisit, setAddPropVisit] = useState(null);
+
+  const openAddProperty = async (visit) => {
+    const targetId = visit.visitId || visit._id;
+    if (!targetId) return;
+
+    if (!window.confirm(`Send owner onboarding request for "${visit.propertyName || visit.propertyInfo?.name}" to Superadmin?`)) return;
+    try {
+      if (addedVisitIds.has(targetId)) {
+        window.alert("Request already sent to Superadmin!");
+        return;
+      }
+      
+      const onboardingReq = {
+        enquiryId: visit.visitId || visit._id || `enq_${Date.now()}`,
+        type: "property_from_visit",
+        submittedAt: new Date().toISOString(),
+        propertyName: visit.propertyName || visit.propertyInfo?.name,
+        propertyType: visit.propertyType || visit.propertyInfo?.propertyType,
+        address: visit.address || visit.propertyInfo?.address,
+        city: visit.city || visit.propertyInfo?.city,
+        area: visit.area || visit.propertyInfo?.area,
+        ownerName: visit.ownerName || visit.propertyInfo?.ownerName,
+        ownerEmail: visit.ownerEmail || visit.propertyInfo?.ownerEmail,
+        ownerPhone: visit.contactPhone || visit.ownerPhone || visit.propertyInfo?.contactPhone,
+        monthlyRent: visit.monthlyRent || visit.propertyInfo?.monthlyRent || visit.rent,
+        roomCount: (visit.vacantRooms || 0) + (visit.occupiedRooms || 0),
+        bedCount: (visit.vacantBeds || 0) + (visit.occupiedBeds || 0),
+        pendingCredentials: {
+          loginId: "OWN" + Math.floor(1000 + Math.random() * 9000),
+          password: Math.random().toString(36).slice(-8).toUpperCase()
+        }
+      };
+
+      // POST to backend API
+      await fetchJson("/api/property-enquiries", {
+        method: "POST",
+        body: JSON.stringify(onboardingReq)
+      });
+
+      let existingEnquiries = [];
+      try {
+        existingEnquiries = JSON.parse(localStorage.getItem("roomhy_property_enquiries") || "[]");
+        if (!Array.isArray(existingEnquiries)) existingEnquiries = [];
+      } catch (_) {}
+      existingEnquiries.push(onboardingReq);
+      localStorage.setItem("roomhy_property_enquiries", JSON.stringify(existingEnquiries));
+      setAddedVisitIds(prev => new Set([...prev, targetId]));
+      window.alert("Property Onboarding request sent to Superadmin successfully!");
+    } catch (err) {
+      console.error(err);
+      window.alert("Failed to send request: " + (err.message || ""));
+    }
+  };
+  const filteredVisits = useMemo(() => {
+    const q = search.toLowerCase();
+    return visits.filter(v => {
+      const propName = (v.propertyName || v.propertyInfo?.name || "").toLowerCase();
+      const staffName = (v.staffName || v.submittedBy || "").toLowerCase();
+      return propName.includes(q) || staffName.includes(q);
+    });
+  }, [visits, search]);
+
+  const stats = useMemo(() => {
+    const total = visits.length;
+    const approved = visits.filter(v => v.status === "approved").length;
+    const photosCount = visits.reduce((acc, curr) => acc + (curr.photos?.length || 0), 0);
+    return { total, approved, pending: total - approved, photosCount };
+  }, [visits]);
 
   return (
-    <div className="html-page">
-      <div className="flex h-screen overflow-hidden">
-        <aside className="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">AREA ADMIN</span>
-              </div>
-            </div>
-          </div>
-          <nav id="dynamicSidebarNav" className="flex-1 py-6 space-y-1"></nav>
-        </aside>
-
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center text-sm">
-              <span className="text-slate-500 font-medium">Management</span>
-              <i data-lucide="chevron-right" className="w-4 h-4 mx-2 text-slate-400"></i>
-              <span className="text-slate-800 font-semibold">Visit Reports</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button className="text-slate-400 hover:text-slate-600" aria-label="Notifications">
-                <i data-lucide="bell" className="w-5 h-5"></i>
-              </button>
-              <div className="relative group">
-                <button className="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-full transition-colors">
-                  <img src="https://i.pravatar.cc/150?u=areaadmin" alt="Admin" className="w-8 h-8 rounded-full border border-slate-200" />
-                  <div className="text-left hidden sm:block">
-                    <p className="text-xs font-semibold text-gray-700">{staffName || "Manager"}</p>
-                    <p className="text-[10px] text-gray-500">Area Manager</p>
-                  </div>
-                  <i data-lucide="chevron-down" className="w-3 h-3 text-gray-400 hidden sm:block"></i>
-                </button>
-              </div>
-            </div>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="max-w-[1600px] mx-auto">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Visit Reports</h1>
-                  <p className="text-sm text-slate-500">Submit new property visits for Super Admin approval.</p>
-                </div>
-                <button onClick={openModal} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">
-                  <i data-lucide="plus" className="w-4 h-4"></i> Add Property Visit
-                </button>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse excel-table">
-                    <thead>
-                      <tr>
-                        <th>Visit ID</th>
-                        <th>Visit Date & Time</th>
-                        <th>Staff Name</th>
-                        <th>Staff ID</th>
-                        <th>Property Name</th>
-                        <th>Property Type</th>
-                        <th>Full Address</th>
-                        <th>Area / Locality</th>
-                        <th>Nearby Location</th>
-                        <th>Landmark</th>
-                        <th>Owner Name</th>
-                        <th>Owner Contact</th>
-                        <th>Owner Gmail</th>
-                        <th>Gender</th>
-                        <th>Student Reviews</th>
-                        <th>Employee Rating</th>
-                        <th>Amenities</th>
-                        <th>Cleanliness</th>
-                        <th>Owner Behaviour</th>
-                        <th>Photo Count</th>
-                        <th>Professional Photo</th>
-                        <th>Geo Status</th>
-                        <th>Map</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loading && (
-                        <tr>
-                          <td colSpan={25} className="text-center py-8 text-gray-500">Loading...</td>
-                        </tr>
-                      )}
-                      {!loading && errorMsg && (
-                        <tr>
-                          <td colSpan={25} className="text-center py-8 text-red-500">{errorMsg}</td>
-                        </tr>
-                      )}
-                      {!loading && !errorMsg && rows.length === 0 && (
-                        <tr>
-                          <td colSpan={25} className="text-center py-8 text-gray-500">No visits found. Add one to start.</td>
-                        </tr>
-                      )}
-                      {rows.map((visit) => {
-                        const prop = visit.propertyInfo || {};
-                        const photos = visit.photos || [];
-                        const prof = visit.professionalPhotos || [];
-                        const visitDateTime = new Date(visit.submittedAt || Date.now()).toLocaleString();
-                        const statusText = visit.status || "submitted";
-                        return (
-                          <tr key={visit._id}>
-                            <td className="text-xs font-mono">{visit._id}</td>
-                            <td className="text-sm text-gray-600">{visitDateTime}</td>
-                            <td className="text-sm text-gray-600">{visit.submittedBy || visit.staffName || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.submittedById || visit.staffId || "-"}</td>
-                            <td className="font-bold text-slate-700">{prop.name || visit.propertyName || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.propertyType || visit.propertyType || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.address || prop.address || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.area || visit.area || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.nearbyLocation || prop.nearbyLocation || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.landmark || prop.landmark || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.ownerName || visit.ownerName || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.contactPhone || visit.contactPhone || "-"}</td>
-                            <td className="text-sm text-gray-600">{prop.ownerEmail || visit.ownerEmail || "-"}</td>
-                            <td className="text-sm text-gray-600">{visit.gender || "-"}</td>
-                            <td className="text-center">
-                              <span className="text-lg font-bold text-amber-600">
-                                {visit.studentReviewsRating
-                                  ? `${"★".repeat(Math.floor(visit.studentReviewsRating))}${"☆".repeat(5 - Math.floor(visit.studentReviewsRating))}`
-                                  : "-"}
-                              </span>
-                            </td>
-                            <td className="text-center">
-                              <span className="text-lg font-bold text-emerald-600">
-                                {visit.employeeRating
-                                  ? `${"★".repeat(Math.floor(visit.employeeRating))}${"☆".repeat(5 - Math.floor(visit.employeeRating))}`
-                                  : "-"}
-                              </span>
-                            </td>
-                            <td className="text-sm text-gray-600">{(visit.amenities || []).slice(0, 3).join(", ") || "-"}</td>
-                            <td className="text-sm text-gray-600 text-center">{visit.cleanlinessRating || "-"}</td>
-                            <td className="text-sm text-gray-600 text-center">{visit.ownerBehaviourPublic || "-"}</td>
-                            <td className="text-center">{photos.length}</td>
-                            <td className="text-center">
-                              {prof.length > 0 ? (
-                                <div className="inline-flex items-center gap-2">
-                                  <img src={prof[0]} className="w-12 h-12 object-cover rounded-full border" alt="Professional" />
-                                  <span className="text-xs text-gray-600">({prof.length})</span>
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </td>
-                            <td className="text-center">{visit.latitude && visit.longitude ? "Verified" : "Not Verified"}</td>
-                            <td className="text-center">
-                              <button onClick={() => viewMap(visit)} className="text-slate-600 hover:bg-slate-50 p-1 rounded text-xs">
-                                View Map
-                              </button>
-                            </td>
-                            <td className="text-sm text-gray-600">{statusText}</td>
-                            <td className="text-center">
-                              <div className="inline-flex items-center gap-2">
-                                <button onClick={() => openEditModal(visit)} className="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded text-xs font-medium">
-                                  Edit
-                                </button>
-                                <button onClick={() => deleteVisit(visit)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs font-medium">
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </main>
+    <>
+    <div className="p-6 space-y-6 bg-[#F8FAFC] min-h-full max-w-[1600px] mx-auto">
+      {/* Header Area */}
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Visit Reports</h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Submit new property visits for approval</p>
+        </div>
+        <div className="flex items-center gap-3">
+            <button onClick={openModal} className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">
+              <i data-lucide="plus" className="w-3.5 h-3.5"></i> Add New Visit
+            </button>
         </div>
       </div>
+
+      {/* Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105 bg-blue-50 text-blue-600 border-blue-100">
+             <i data-lucide="clipboard-check" className="w-5 h-5"/>
+          </div>
+          <div className="min-w-0">
+             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">Total Visits</p>
+             <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">{stats.total}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105 bg-indigo-50 text-indigo-600 border-indigo-100">
+             <i data-lucide="clock" className="w-5 h-5"/>
+          </div>
+          <div className="min-w-0">
+             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">Average Time</p>
+             <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">24m</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105 bg-emerald-50 text-emerald-600 border-emerald-100">
+             <i data-lucide="check-circle-2" className="w-5 h-5"/>
+          </div>
+          <div className="min-w-0">
+             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">Approved</p>
+             <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">{stats.approved}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-md flex items-start gap-3 group hover:translate-y-[-2px] transition-all">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-105 bg-amber-50 text-amber-600 border-amber-100">
+             <i data-lucide="camera" className="w-5 h-5"/>
+          </div>
+          <div className="min-w-0">
+             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none truncate">Photos Uploaded</p>
+             <p className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-2">{stats.photosCount}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Ledger Card */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 overflow-hidden">
+        <div className="flex items-center justify-between mb-8">
+            <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest leading-none">All Visit Reports</h3>
+            <div className="flex items-center gap-3">
+              <div className="relative group w-48">
+                  <i data-lucide="search" className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+                  <input 
+                    value={search} onChange={e => setSearch(e.target.value)}
+                    placeholder="Search visits..." 
+                    className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 pl-9 pr-3 text-[10px] font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" 
+                  />
+              </div>
+              <button onClick={loadVisits} className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm">
+                  <i data-lucide="refresh-cw" className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+        </div>
+
+        <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                  <tr className="text-slate-400 text-[8px] font-bold uppercase border-b border-slate-50">
+                    <th className="pb-4">Visit ID</th>
+                    <th className="pb-4">Property Details</th>
+                    <th className="pb-4 text-center">Staff Details</th>
+                    <th className="pb-4 text-center">Cleanliness</th>
+                    <th className="pb-4 text-center">Photos</th>
+                    <th className="pb-4 text-center">Status</th>
+                    <th className="pb-4 text-center">Add Prop</th>
+                    <th className="pb-4 text-right">Actions</th>
+                  </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                  {loading ? (
+                    <tr><td colSpan="8" className="py-20 text-center">
+                      <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Loading Visit Reports...</p>
+                    </td></tr>
+                  ) : filteredVisits.length === 0 ? (
+                    <tr><td colSpan="8" className="py-12 text-center text-[10px] font-bold text-slate-400 uppercase">No visits found.</td></tr>
+                  ) : filteredVisits.map((v, i) => {
+                    const alreadyAdded = addedVisitIds?.has ? addedVisitIds.has(v.visitId || v._id) : false;
+                    return (
+                    <tr key={i} className="group hover:bg-slate-50 transition-colors cursor-pointer">
+                        <td className="py-3">
+                          <p className="text-[9px] font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm inline-block">#{String(v._id || "").substring(0, 6) || "ERR"}</p>
+                          <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60 leading-none">{new Date(v.submittedAt || Date.now()).toLocaleDateString()}</p>
+                        </td>
+                        <td className="py-3">
+                          <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm transition-transform group-hover:scale-105 shrink-0">
+                                <i data-lucide="building-2" className="w-4.5 h-4.5" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[11px] font-bold text-slate-800 leading-none truncate max-w-[150px]">{v.propertyName || v.propertyInfo?.name || "Unknown Property"}</p>
+                                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1.5 opacity-60 leading-none truncate">
+                                    {v.propertyType || v.propertyInfo?.propertyType || "Property"} • {v.area || v.propertyInfo?.area || "Area"}
+                                </p>
+                              </div>
+                          </div>
+                        </td>
+                        <td className="py-3 text-center">
+                          <p className="text-[10px] font-bold text-slate-700 leading-none">{v.staffName || v.submittedBy || "System Admin"}</p>
+                          <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1 opacity-60 leading-none">ID: {v.staffId || v.submittedById || "ADMIN"}</p>
+                        </td>
+                        <td className="py-3 text-center">
+                          <div className="inline-flex flex-col items-center bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg shadow-sm">
+                              <div className="flex text-amber-400 text-[8px] gap-0.5">
+                                {[...Array(5)].map((_, idx) => (
+                                    <i key={idx} data-lucide="star" className={`w-2 h-2 ${idx < (v.cleanlinessRating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-200 fill-slate-200"}`} />
+                                ))}
+                              </div>
+                              <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-1 leading-none">{v.cleanlinessRating || 0}/5 Rating</p>
+                          </div>
+                        </td>
+                        <td className="py-3 text-center">
+                          <div className="flex items-center justify-center -space-x-2.5">
+                              {(v.photos || []).slice(0, 2).map((img, idx) => (
+                                <div key={idx} className="w-8 h-8 rounded-xl border-2 border-white bg-slate-100 overflow-hidden shadow-sm transition-transform group-hover:scale-105 hover:z-20 relative">
+                                    <img src={img} className="w-full h-full object-cover" alt="" />
+                                </div>
+                              ))}
+                              {(v.photos || []).length > 2 && (
+                                <div className="w-8 h-8 rounded-xl border-2 border-white bg-slate-800 text-white flex items-center justify-center text-[8px] font-bold shadow-sm z-10 transition-transform group-hover:scale-105">
+                                    +{(v.photos || []).length - 2}
+                                  </div>
+                              )}
+                          </div>
+                        </td>
+                        <td className="py-3 text-center">
+                          <span className={`text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider shadow-sm ${
+                              v.status === "approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-amber-50 text-amber-600 border-amber-100"
+                          }`}>
+                              {v.status || "Submitted"}
+                          </span>
+                        </td>
+                        <td className="py-3 text-center">
+                          {alreadyAdded ? (
+                            <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg whitespace-nowrap shadow-sm">
+                              ✓ Added
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => openAddProperty(v)}
+                              className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-widest text-white bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded-lg transition shadow-sm whitespace-nowrap"
+                            >
+                              + Prop
+                            </button>
+                          )}
+                        </td>
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                              <button onClick={() => viewMap(v)} className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-blue-600 transition-all border border-slate-100 shadow-sm"><i data-lucide="map" className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => deleteVisit(v)} className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-rose-600 transition-all border border-slate-100 shadow-sm"><i data-lucide="trash" className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => openEditModal(v)} className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all border border-slate-100 shadow-sm"><i data-lucide="edit-3" className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </td>
+                    </tr>
+                  )})}
+              </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
@@ -937,25 +1051,31 @@ export default function Visit() {
               <div className="grid grid-cols-3 gap-3 p-3 border border-gray-200 rounded">
                 {["Wi-Fi", "Drinking water", "Food", "Power backup", "Washing machine", "Parking", "CCTV"].map((a) => (
                   <label key={a} className="inline-flex items-center text-xs">
-                    <input type="checkbox" name="amenities" value={a} className="mr-2" /> {a}
+                    <input type="checkbox" name="amenities" value={a} className="mr-2" defaultChecked={editingVisit?.amenities?.some(x => x?.toLowerCase() === a?.toLowerCase())} /> {a}
                   </label>
                 ))}
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <input name="monthlyRent" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Monthly Rent" />
-                <input name="deposit" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Deposit" />
-                <input name="electricityCharges" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Electricity Charges" />
+              <div className="grid grid-cols-4 gap-3">
+                <input name="monthlyRent" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Monthly Rent" defaultValue={editingVisit?.monthlyRent || ""} />
+                <input name="deposit" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Deposit" defaultValue={editingVisit?.deposit || ""} />
+                <input name="vacantRooms" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Vacant Rooms" defaultValue={editingVisit?.vacantRooms || ""} />
+                <input name="vacantBeds" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Beds in Vacant Rooms" defaultValue={editingVisit?.vacantBeds || ""} />
+                <input name="occupiedRooms" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Occupied Rooms" defaultValue={editingVisit?.occupiedRooms || ""} />
+                <input name="occupiedBeds" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Beds in Occupied Rooms" defaultValue={editingVisit?.occupiedBeds || ""} />
               </div>
-              <div className="grid grid-cols-3 gap-3 mt-2">
-                <input name="foodCharges" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Food Charges" />
-                <input name="maintenanceCharges" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Maintenance Charges" />
-                <input name="minStay" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Minimum Stay (months)" />
+              <div className="grid grid-cols-3 gap-3 mt-3">
+                <input name="electricityCharges" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Electricity Charges" defaultValue={editingVisit?.electricityCharges || ""} />
+                <input name="foodCharges" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Food Charges" defaultValue={editingVisit?.foodCharges || ""} />
+                <input name="maintenanceCharges" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Maintenance Charges" defaultValue={editingVisit?.maintenanceCharges || ""} />
+              </div>
+              <div className="grid grid-cols-1 gap-3 mt-3">
+                <input name="minStay" type="number" min="0" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Minimum Stay (months)" defaultValue={editingVisit?.minStay || ""} />
               </div>
 
               <div className="p-3 border border-gray-200 rounded">
                 <div className="font-semibold mb-2">House Rules</div>
-                <input name="entryExit" type="text" className="w-full border border-gray-300 rounded px-3 py-2 text-sm mb-3" placeholder="Entry / Exit timing" />
+                <input name="entryExit" type="text" className="w-full border border-gray-300 rounded px-3 py-2 text-sm mb-3" placeholder="Entry / Exit timing" defaultValue={editingVisit?.entryExit || ""} />
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { id: "visitorsAllowed", label: "Visitors Allowed", value: visitorsAllowed, setter: setVisitorsAllowed },
@@ -1037,10 +1157,10 @@ export default function Visit() {
                   </div>
                 </div>
               </div>
-              <textarea name="studentReviews" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Student reviews feedback"></textarea>
-              <textarea name="internalRemarks" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Internal remarks (private)"></textarea>
-              <textarea name="cleanlinessNote" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Cleanliness note (private)"></textarea>
-              <textarea name="ownerBehaviour" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Owner behaviour (private)"></textarea>
+              <textarea name="studentReviews" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Student reviews feedback" defaultValue={editingVisit?.studentReviews || ""}></textarea>
+              <textarea name="internalRemarks" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Internal remarks (private)" defaultValue={editingVisit?.internalRemarks || ""}></textarea>
+              <textarea name="cleanlinessNote" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Cleanliness note (private)" defaultValue={editingVisit?.cleanlinessNote || ""}></textarea>
+              <textarea name="ownerBehaviour" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Owner behaviour (private)" defaultValue={editingVisit?.ownerBehaviour || ""}></textarea>
 
               {!editingVisit && (
                 <div className="p-3 border border-blue-200 rounded bg-blue-50/50 mb-4">
@@ -1243,7 +1363,7 @@ export default function Visit() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

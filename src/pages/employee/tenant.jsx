@@ -41,59 +41,8 @@ export default function Tenant() {
 
   return (
     <div className="html-page" dangerouslySetInnerHTML={{ __html: `
-<!-- Mobile Sidebar Overlay -->
-    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
-    
-    <div class="flex h-screen overflow-hidden">
-                <!-- Sidebar -->
-        <aside id="mobile-sidebar" class="sidebar w-72 flex-shrink-0 hidden md:flex flex-col z-20 overflow-y-auto custom-scrollbar fixed md:static inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-            <div class="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-                 <div class="flex items-center gap-3">
-                     
-                     <div><img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" class="h-16 w-auto"><span class="text-[10px] text-gray-500">SUPER ADMIN</span></div>
-                 </div>
-                 <button id="mobile-sidebar-close" class="md:hidden ml-auto p-2 text-gray-400 hover:text-white">
-                     <i data-lucide="x" class="w-5 h-5"></i>
-                 </button>
-            </div>
-            <nav id="dynamicSidebarNav" className="flex-1 py-6 space-y-1"></nav>
-        </aside>
-
+    <div class="flex h-full overflow-hidden">
         <div class="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-            <!-- Header -->
-            <header class="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-                <div class="flex items-center">
-                    <button id="mobile-menu-open" class="md:hidden mr-4 text-slate-500"><i data-lucide="menu" class="w-6 h-6"></i></button>
-                    <div class="flex items-center text-sm">
-                        <span class="text-slate-500 font-medium">Management</span>
-                        <i data-lucide="chevron-right" class="w-4 h-4 mx-2 text-slate-400"></i>
-                        <span class="text-slate-800 font-semibold">Tenants & KYC</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <input type="text" id="areaSearch" placeholder="Search by Area/Property..." class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none w-64" onkeyup="filterTenants()">
-                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                    </div>
-                    <button class="text-slate-400 hover:text-slate-600"><i data-lucide="bell" class="w-5 h-5"></i></button>
-                    <div class="relative group">
-                        <button class="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-full transition-colors">
-                            <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs">SP</div>
-                            <div class="text-left hidden sm:block">
-                                <p class="text-xs font-semibold text-gray-700">Super Admin</p>
-                            </div>
-                            <i data-lucide="chevron-down" class="w-3 h-3 text-gray-400 hidden sm:block"></i>
-                        </button>
-                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 hidden group-hover:block z-50">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
-                            <div class="border-t border-gray-100 my-1"></div>
-                            <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
             <!-- Content -->
             <main class="flex-1 overflow-y-auto p-8">
                 <div class="max-w-7xl mx-auto">

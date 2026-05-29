@@ -340,46 +340,8 @@ export default function SuperadminProperties() {
         onClick={() => setMobileOpen(false)}
       ></div>
 
-      <div className="flex h-screen overflow-hidden">
-        <aside className={`sidebar w-72 flex-shrink-0 ${mobileOpen ? "flex" : "hidden"} md:flex flex-col z-20 overflow-y-auto custom-scrollbar fixed md:static inset-y-0 left-0 transform ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} transition-transform duration-300`}>
-          <div className="h-16 flex items-center px-6 border-b border-gray-800 sticky top-0 bg-[#111827] z-10">
-            <div className="flex items-center gap-3">
-              <div>
-                <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="h-16 w-auto" />
-                <span className="text-[10px] text-gray-500">SUPER ADMIN</span>
-              </div>
-            </div>
-            <button className="md:hidden ml-auto p-2 text-gray-400 hover:text-white" onClick={() => setMobileOpen(false)}>
-              <i data-lucide="x" className="w-5 h-5"></i>
-            </button>
-          </div>
-          <nav id="dynamicSidebarNav" className="flex-1 py-6 space-y-1"></nav>
-        </aside>
+      <div className="flex h-full overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden bg-[#f3f4f6]">
-          <header className="bg-white h-16 flex items-center justify-between px-6 shadow-sm z-10">
-            <div className="flex items-center">
-              <button className="md:hidden mr-4 text-slate-500" onClick={() => setMobileOpen(true)}>
-                <i data-lucide="menu" className="w-6 h-6"></i>
-              </button>
-              <div className="flex items-center text-sm">
-                <span className="text-slate-500 font-medium">Management</span>
-                <i data-lucide="chevron-right" className="w-4 h-4 mx-2 text-slate-400"></i>
-                <span className="text-slate-800 font-semibold">Properties</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {demoMode ? (
-                <div className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded">Demo Mode</div>
-              ) : null}
-              <button className="text-slate-400 hover:text-slate-600"><i data-lucide="bell" className="w-5 h-5"></i></button>
-              <div className="relative group">
-                <button className="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-full transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs">SP</div>
-                </button>
-              </div>
-            </div>
-          </header>
-
           <main className="flex-1 overflow-y-auto p-8">
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
