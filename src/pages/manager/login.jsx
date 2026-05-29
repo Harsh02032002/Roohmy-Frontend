@@ -120,15 +120,10 @@ const ManagerLogin = () => {
 
       if (response.success) {
         setRequireReset(false);
-        setPassword(newPassword);
+        setPassword('');
         setNewPassword('');
         setConfirmPassword('');
-        setSuccess('Password reset successfully. Logging you in...');
-        
-        // Auto login with new password
-        setTimeout(() => {
-          handleLogin({ preventDefault: () => {} });
-        }, 1500);
+        setSuccess('Password reset successfully. Please login with your new password.');
       } else {
         setError(response.message || 'Failed to reset password');
       }

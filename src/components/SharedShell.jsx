@@ -45,6 +45,45 @@ export default function SharedShell() {
     : (user?.role || "Superadmin");
   const initial = userName.charAt(0).toUpperCase();
 
+  const [notifications, setNotifications] = useState([]);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchRecentNotifications = async () => {
+    try {
+      const loginId = user?.loginId || "superadmin";
+      const response = await fetch(`/api/notifications?toLoginId=${encodeURIComponent(loginId)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          const formatted = data.map(n => {
+            const meta = typeof n.meta === 'string' ? JSON.parse(n.meta) : (n.meta || {});
+            return {
+              id: n._id,
+              type: n.type || "system",
+              title: meta.title || n.title || "System Alert",
+              msg: meta.message || n.message || "You have a new notification",
+              time: new Date(n.createdAt).toLocaleDateString(),
+              read: n.read
+            };
+          });
+          setNotifications(formatted.slice(0, 4));
+          setUnreadCount(formatted.filter(n => !n.read).length);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching notifications in header:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.loginId) {
+      fetchRecentNotifications();
+      const interval = setInterval(fetchRecentNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.loginId]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(max-width: 1024px)");
@@ -139,10 +178,68 @@ export default function SharedShell() {
 
               {/* Notifications */}
               <div className="relative">
-                <button className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group">
+                <button 
+                  onClick={() => {
+                    setNotifDropdownOpen(!notifDropdownOpen);
+                    if (!notifDropdownOpen) {
+                      fetchRecentNotifications();
+                    }
+                  }}
+                  className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all relative group"
+                >
                   <Bell size={20} className="group-hover:rotate-12 transition-transform" />
-                  <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm" />
+                  )}
                 </button>
+
+                {notifDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setNotifDropdownOpen(false)} 
+                    />
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="px-4 py-2 border-b border-slate-50 flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Recent Alerts</span>
+                        {unreadCount > 0 && (
+                          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{unreadCount} unread</span>
+                        )}
+                      </div>
+                      
+                      <div className="max-h-64 overflow-y-auto divide-y divide-slate-50">
+                        {notifications.length === 0 ? (
+                          <div className="p-6 text-center text-slate-400 text-xs font-medium">
+                            No notifications yet
+                          </div>
+                        ) : (
+                          notifications.map((n) => (
+                            <div key={n.id} className="p-3.5 hover:bg-slate-50 transition-colors flex items-start gap-3">
+                              <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!n.read ? 'bg-blue-600' : 'bg-transparent'}`} />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-slate-800 truncate">{n.title}</p>
+                                <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">{n.msg}</p>
+                                <span className="text-[9px] font-bold text-slate-400 mt-1 block uppercase">{n.time}</span>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                      <div className="p-2 border-t border-slate-50 bg-slate-50/50">
+                        <button 
+                          onClick={() => {
+                            setNotifDropdownOpen(false);
+                            navigate(section === "superadmin" ? "/superadmin/notifications" : "/employee/notifications");
+                          }}
+                          className="w-full py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors bg-white border border-slate-100 rounded-xl shadow-sm block"
+                        >
+                          All Notifications
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Property Switcher */}

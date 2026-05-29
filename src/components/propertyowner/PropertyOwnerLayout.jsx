@@ -743,6 +743,17 @@ export default function PropertyOwnerLayout({
                     ))
                   )}
                 </div>
+                <div className="p-2 border-t border-slate-50 bg-slate-50/50">
+                  <button 
+                    onClick={() => {
+                      setNotificationOpen(false);
+                      navigate("/propertyowner/notifications");
+                    }}
+                    className="w-full py-2 text-center text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors bg-white border border-slate-100 rounded-xl shadow-sm block"
+                  >
+                    See All Notifications
+                  </button>
+                </div>
               </div>
             </div>
 

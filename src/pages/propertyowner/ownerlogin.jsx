@@ -102,12 +102,15 @@ export default function Ownerlogin() {
     setErrorMsg("");
     setLoading(true);
     try {
-      const data = await fetchJson("/api/auth/owner/set-password", {
+      await fetchJson("/api/auth/owner/set-password", {
         method: "POST",
         body: JSON.stringify({ loginId, tempPassword: password, newPassword })
       });
-      storeAuth(data);
-      window.location.href = resolvePanelPath("propertyowner", "admin");
+      alert("Password updated successfully! Please login with your new password.");
+      setStep("login");
+      setPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (err) {
       setErrorMsg(err?.body || err?.message || "Failed to update password.");
     } finally {

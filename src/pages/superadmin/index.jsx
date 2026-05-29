@@ -17,6 +17,7 @@ export default function SuperadminIndexPage() {
     const [otp, setOtp] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [requireReset, setRequireReset] = useState(false);
 
     useHeadAssets({ 
         title, 
@@ -46,6 +47,11 @@ export default function SuperadminIndexPage() {
             });
             const data = await res.json();
 
+            if (res.ok && data.requireReset) {
+                setRequireReset(true);
+                return;
+            }
+
             if (res.ok && data.token) {
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
@@ -66,6 +72,45 @@ export default function SuperadminIndexPage() {
         }
     };
 
+    const handleResetInitialPassword = async (e) => {
+        e.preventDefault();
+        setError("");
+        if (newPassword !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+        if (newPassword.length < 6) {
+            setError("Password must be at least 6 characters long");
+            return;
+        }
+
+        const API_URL = getApiBase();
+        try {
+            const res = await fetch(`${API_URL}/api/auth/reset-initial-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    loginId,
+                    oldPassword: password,
+                    newPassword
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setRequireReset(false);
+                setPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+                setError("");
+                alert("Password reset successfully! Please login with your new password.");
+            } else {
+                setError(data.message || "Failed to reset password");
+            }
+        } catch (err) {
+            setError("Connection error. Please try again.");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-inter">
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-10 fade-in">
@@ -79,55 +124,97 @@ export default function SuperadminIndexPage() {
                     <p className="text-slate-500 text-sm">Enter your credentials to access Roomhy</p>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Login ID</label>
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                                <User size={20} />
-                            </span>
+                {requireReset ? (
+                    <form onSubmit={handleResetInitialPassword} className="space-y-6">
+                        <div className="text-center mb-6">
+                            <h2 className="text-xl font-bold text-slate-800">Set New Password</h2>
+                            <p className="text-slate-500 text-xs mt-1">This is your first login. Please set a new password.</p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">New Password</label>
                             <input 
-                                type="text" 
-                                value={loginId}
-                                onChange={(e) => setLoginId(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none text-slate-800 placeholder:text-slate-400" 
-                                placeholder="Enter your ID..." 
+                                type="password" 
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
+                                placeholder="New Password" 
                                 required
                             />
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-2 ml-1 uppercase font-bold tracking-wider">Email or Employee ID</p>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                                <Lock size={20} />
-                            </span>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">Confirm Password</label>
                             <input 
                                 type="password" 
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none text-slate-800 placeholder:text-slate-400" 
-                                placeholder="••••••••" 
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
+                                placeholder="Confirm Password" 
                                 required
                             />
                         </div>
                         {error && (
-                            <div className="mt-3 text-rose-500 text-xs font-bold flex items-center gap-1 animate-shake">
+                            <div className="text-rose-500 text-xs font-bold flex items-center gap-1 animate-shake">
                                 <X size={14} /> {error}
                             </div>
                         )}
-                    </div>
+                        <button 
+                            type="submit" 
+                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all"
+                        >
+                            Reset Password
+                        </button>
+                    </form>
+                ) : (
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">Login ID</label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                    <User size={20} />
+                                </span>
+                                <input 
+                                    type="text" 
+                                    value={loginId}
+                                    onChange={(e) => setLoginId(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none text-slate-800 placeholder:text-slate-400" 
+                                    placeholder="Enter your ID..." 
+                                    required
+                                />
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-2 ml-1 uppercase font-bold tracking-wider">Email or Employee ID</p>
+                        </div>
 
-                    <button 
-                        type="submit" 
-                        className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all flex justify-center items-center gap-2 group shadow-lg shadow-slate-900/10 active:scale-[0.98]"
-                    >
-                        Login 
-                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-                </form>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                    <Lock size={20} />
+                                </span>
+                                <input 
+                                    type="password" 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none text-slate-800 placeholder:text-slate-400" 
+                                    placeholder="••••••••" 
+                                    required
+                                />
+                            </div>
+                            {error && (
+                                <div className="mt-3 text-rose-500 text-xs font-bold flex items-center gap-1 animate-shake">
+                                    <X size={14} /> {error}
+                                </div>
+                            )}
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all flex justify-center items-center gap-2 group shadow-lg shadow-slate-900/10 active:scale-[0.98]"
+                        >
+                            Login 
+                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </form>
+                )}
                 
                 <div className="mt-8 text-center pt-6 border-t border-slate-50">
                     <button 
