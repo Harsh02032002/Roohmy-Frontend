@@ -51,34 +51,34 @@ export default function Visit() {
       {/* Header Area */}
       <div className="flex items-center justify-between">
          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Field Logistics</h1>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Operational Field Audits, Site Inspection Logistics & Evidence Compliance Matrix</p>
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Visit Reports</h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">View and manage property visit reports</p>
          </div>
          <div className="flex items-center gap-3">
             <button className="bg-slate-800 text-white px-4 py-2 rounded-xl text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all flex items-center gap-2">
-               <Plus className="w-3.5 h-3.5" /> Schedule Field Audit
+               <Plus className="w-3.5 h-3.5" /> Add New Visit
             </button>
          </div>
       </div>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCardHorizontal label="Audits Logistics" value={stats.total} trend="+12.4% Flux" up icon={ClipboardCheck} color="blue" />
-        <StatCardHorizontal label="Inspection Pulse" value="24m Avg" trend="High Velocity" up icon={Clock} color="indigo" />
-        <StatCardHorizontal label="Compliance Index" value={stats.approved} trend="92% Yield" up icon={CheckCircle2} color="emerald" />
-        <StatCardHorizontal label="Media Evidence" value="842 Units" trend="+18% Delta" up icon={Camera} color="amber" />
+        <StatCardHorizontal label="Total Visits" value={stats.total} trend="This Month" up icon={ClipboardCheck} color="blue" />
+        <StatCardHorizontal label="Average Time" value="24m" trend="Per Visit" up icon={Clock} color="indigo" />
+        <StatCardHorizontal label="Approved Visits" value={stats.approved} trend="Verified" up icon={CheckCircle2} color="emerald" />
+        <StatCardHorizontal label="Photos Uploaded" value="842" trend="Total Media" up icon={Camera} color="amber" />
       </div>
 
       {/* Main Ledger Card */}
       <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/50 overflow-hidden">
          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest leading-none">Inspection Registry</h3>
+            <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest leading-none">All Visit Reports</h3>
             <div className="flex items-center gap-3">
                <div className="relative group w-48">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
                   <input 
                     value={search} onChange={e => setSearch(e.target.value)}
-                    placeholder="Search audit trail..." 
+                    placeholder="Search visits..." 
                     className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 pl-9 pr-3 text-[10px] font-bold outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-sm" 
                   />
                </div>
@@ -92,12 +92,12 @@ export default function Visit() {
             <table className="w-full text-left">
                <thead>
                   <tr className="text-slate-400 text-[8px] font-bold uppercase border-b border-slate-50">
-                     <th className="pb-4">Audit Identity Hub</th>
-                     <th className="pb-4">Asset / Hub Context</th>
-                     <th className="pb-4 text-center">Personnel mapping</th>
-                     <th className="pb-4 text-center">Quality Pulse</th>
-                     <th className="pb-4 text-center">Media Stack</th>
-                     <th className="pb-4 text-center">Audit Status</th>
+                     <th className="pb-4">Visit ID</th>
+                     <th className="pb-4">Property Details</th>
+                     <th className="pb-4 text-center">Staff Details</th>
+                     <th className="pb-4 text-center">Cleanliness</th>
+                     <th className="pb-4 text-center">Photos</th>
+                     <th className="pb-4 text-center">Status</th>
                      <th className="pb-4 text-right">Actions</th>
                   </tr>
                </thead>
@@ -105,13 +105,13 @@ export default function Visit() {
                   {loading ? (
                     <tr><td colSpan="7" className="py-20 text-center">
                        <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Accessing Logistics Vault Intelligence...</p>
+                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Loading Visit Reports...</p>
                     </td></tr>
                   ) : filteredVisits.map((v, i) => (
                     <tr key={i} className="group hover:bg-slate-50 transition-colors cursor-pointer">
                        <td className="py-3">
-                          <p className="text-[9px] font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm inline-block">#{v._id?.substring(0, 6) || "ID-ERR"}</p>
-                          <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60 leading-none">{new Date(v.submittedAt || Date.now()).toLocaleDateString()} Cycle</p>
+                          <p className="text-[9px] font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 shadow-sm inline-block">#{v._id?.substring(0, 6) || "ERR"}</p>
+                          <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-1 opacity-60 leading-none">{new Date(v.submittedAt || Date.now()).toLocaleDateString()}</p>
                        </td>
                        <td className="py-3">
                           <div className="flex items-center gap-3">
@@ -119,16 +119,16 @@ export default function Visit() {
                                 <Building2 className="w-4.5 h-4.5" />
                              </div>
                              <div className="min-w-0">
-                                <p className="text-[11px] font-bold text-slate-800 leading-none truncate max-w-[150px]">{v.propertyName || v.propertyInfo?.name || "Global Asset"}</p>
+                                <p className="text-[11px] font-bold text-slate-800 leading-none truncate max-w-[150px]">{v.propertyName || v.propertyInfo?.name || "Unknown Property"}</p>
                                 <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1.5 opacity-60 leading-none truncate">
-                                   {v.propertyType || v.propertyInfo?.propertyType || "Core"} • {v.area || v.propertyInfo?.area || "Zone"}
+                                   {v.propertyType || v.propertyInfo?.propertyType || "Property"} • {v.area || v.propertyInfo?.area || "Area"}
                                 </p>
                              </div>
                           </div>
                        </td>
                        <td className="py-3 text-center">
                           <p className="text-[10px] font-bold text-slate-700 leading-none">{v.staffName || v.submittedBy || "System Admin"}</p>
-                          <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1 opacity-60 leading-none">ID: {v.staffId || v.submittedById || "CORE"}</p>
+                          <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-1 opacity-60 leading-none">ID: {v.staffId || v.submittedById || "ADMIN"}</p>
                        </td>
                        <td className="py-3 text-center">
                           <div className="inline-flex flex-col items-center bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg shadow-sm">
@@ -137,7 +137,7 @@ export default function Visit() {
                                    <Star key={idx} className={cn("w-2 h-2 fill-current", idx >= (v.cleanlinessRating || 0) && "text-slate-200 fill-slate-200")} />
                                 ))}
                              </div>
-                             <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-1 leading-none">{v.cleanlinessRating || 0}/5 Yield</p>
+                             <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest mt-1 leading-none">{v.cleanlinessRating || 0}/5 Rating</p>
                           </div>
                        </td>
                        <td className="py-3 text-center">
@@ -159,7 +159,7 @@ export default function Visit() {
                              "text-[7px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider shadow-sm",
                              v.status === "approved" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-amber-50 text-amber-600 border-amber-100"
                           )}>
-                             {v.status || "Audit Filed"}
+                             {v.status || "Submitted"}
                           </span>
                        </td>
                        <td className="py-3 text-right">

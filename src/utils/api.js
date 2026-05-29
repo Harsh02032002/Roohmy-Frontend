@@ -52,7 +52,14 @@ export const fetchJson = async (path, options = {}) => {
   });
   if (!res.ok) {
     const text = await res.text();
-    const err = new Error(`Request failed: ${res.status} ${res.statusText}`);
+    let errorMsg = `Request failed: ${res.status} ${res.statusText}`;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.error) errorMsg = parsed.error + (parsed.details ? `: ${parsed.details}` : '');
+    } catch (e) {
+      // Not JSON
+    }
+    const err = new Error(errorMsg);
     err.status = res.status;
     err.body = text;
     throw err;

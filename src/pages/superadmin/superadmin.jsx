@@ -72,11 +72,14 @@ export default function SuperadminDashboard() {
     loadStats();
   }, []);
 
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userName = user?.name || "User";
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Dashboard"
-        subtitle="Welcome back, Aman! Here's what's happening with Roomhy."
+        subtitle={`Welcome back, ${userName}! Here's what's happening with Roomhy.`}
         actions={
           <div className="flex items-center gap-3 bg-white border border-border/60 px-4 py-2 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-all text-xs font-bold text-slate-600">
             <Calendar className="w-4 h-4 text-slate-400" />

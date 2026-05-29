@@ -23,6 +23,28 @@ export default function SharedShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  const resolveUser = () => {
+    try {
+      return JSON.parse(
+        sessionStorage.getItem("manager_user") ||
+        sessionStorage.getItem("user") ||
+        localStorage.getItem("staff_user") ||
+        localStorage.getItem("manager_user") ||
+        localStorage.getItem("user") ||
+        "{}"
+      );
+    } catch {
+      return {};
+    }
+  };
+  const user = resolveUser();
+  const userName = user?.name || "User";
+  const roleLower = String(user?.role || "").toLowerCase();
+  const userRole = (roleLower === "employee" || roleLower === "areamanager" || roleLower === "manager") 
+    ? (user?.team || "Area Admin") 
+    : (user?.role || "Superadmin");
+  const initial = userName.charAt(0).toUpperCase();
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(max-width: 1024px)");
@@ -35,7 +57,7 @@ export default function SharedShell() {
   if (isEmbed) return <Outlet />;
   if (!config) return <div className="shared-shell"><Outlet /></div>;
 
-  if (section === "superadmin") {
+  if (section === "superadmin" || section === "employee") {
     return (
       <div className="flex h-screen w-full bg-white overflow-hidden font-inter">
         <Sidebar 
@@ -138,11 +160,11 @@ export default function SharedShell() {
               {/* Profile Identity - Screenshot Style */}
               <div className="flex items-center gap-4 pl-6 border-l border-slate-100 group cursor-pointer relative">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold text-slate-900 leading-none group-hover:text-blue-600 transition-colors">Aman</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest opacity-60">Superadmin</p>
+                  <p className="text-sm font-bold text-slate-900 leading-none group-hover:text-blue-600 transition-colors">{userName}</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest opacity-60">{userRole}</p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-600/20 group-hover:scale-105 transition-transform">
-                  A
+                  {initial}
                 </div>
                 <div className="absolute top-full right-0 mt-4 w-48 bg-white rounded-xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all -translate-y-2 group-hover:translate-y-0 z-50 overflow-hidden">
                   <div className="p-2 space-y-1">

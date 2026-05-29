@@ -18,11 +18,12 @@ export default function AddStaffPage() {
     name: "",
     role: "Warden",
     phone: "",
+    email: "",
     salary: "",
     shift: "Day Shift (09:00 AM - 06:00 PM)",
     aadhaar: ""
   });
-  const [success, setSuccess] = useState(false);
+  const [successData, setSuccessData] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -34,6 +35,9 @@ export default function AddStaffPage() {
       // 1. Generate loginId
       const loginId = `${formData.name.replace(/\s+/g, '').toLowerCase()}_${Date.now().toString().slice(-4)}`;
       
+      // Generate a secure 8-character random password
+      const password = Math.random().toString(36).slice(-8).toUpperCase();
+
       // 2. Create Employee
       const empData = await apiFetch('/api/employees', {
         method: 'POST',
@@ -41,6 +45,8 @@ export default function AddStaffPage() {
           name: formData.name,
           loginId: loginId,
           phone: formData.phone,
+          email: formData.email,
+          password: password,
           role: formData.role,
           parentLoginId: owner.loginId
         })
@@ -80,11 +86,11 @@ export default function AddStaffPage() {
         })
       });
 
-      setSuccess(true);
+      setSuccessData({ loginId, password });
       setTimeout(() => {
-        setSuccess(false);
-        setFormData({ name: "", role: "Warden", phone: "", salary: "", shift: "Day Shift (09:00 AM - 06:00 PM)", aadhaar: "" });
-      }, 3000);
+        setSuccessData(null);
+        setFormData({ name: "", role: "Warden", phone: "", email: "", salary: "", shift: "Day Shift (09:00 AM - 06:00 PM)", aadhaar: "" });
+      }, 10000);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -109,9 +115,22 @@ export default function AddStaffPage() {
       <div className="max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-soft space-y-6">
         <h3 className="font-serif text-[20px] text-foreground border-b border-border/60 pb-3">Staff Profile Information</h3>
         
-        {success && (
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 text-xs font-bold flex items-center gap-2 animate-bounce">
-            <CheckCircle2 size={16} /> Staff member registered successfully!
+        {successData && (
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-6 space-y-4 animate-in fade-in zoom-in duration-300">
+            <div className="flex items-center gap-2 text-emerald-800 text-sm font-bold">
+              <CheckCircle2 size={18} className="text-emerald-600 animate-bounce" /> Staff registered successfully & Credentials Email sent!
+            </div>
+            <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-emerald-100 text-xs">
+              <div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Login ID</span>
+                <code className="text-sm font-black text-blue-600 tracking-wider">{successData.loginId}</code>
+              </div>
+              <div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Access Password</span>
+                <code className="text-sm font-black text-slate-800 tracking-wider">{successData.password}</code>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400 font-medium">Please note down these credentials. An email containing these details has also been dispatched to the employee's inbox.</p>
           </div>
         )}
         {error && (
@@ -152,6 +171,18 @@ export default function AddStaffPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Email Address</label>
+              <input 
+                type="email" 
+                value={formData.email} 
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="e.g. ramesh@roomhy.com"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
+                required
+              />
+            </div>
+
+            <div>
               <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Phone Number</label>
               <input 
                 type="tel" 
@@ -162,7 +193,9 @@ export default function AddStaffPage() {
                 required
               />
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Monthly Salary (₹)</label>
               <input 
@@ -170,6 +203,18 @@ export default function AddStaffPage() {
                 value={formData.salary} 
                 onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                 placeholder="e.g. 15000"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Aadhaar Card Number</label>
+              <input 
+                type="text" 
+                value={formData.aadhaar} 
+                onChange={(e) => setFormData({ ...formData, aadhaar: e.target.value })}
+                placeholder="12-digit Aadhaar"
                 className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
                 required
               />
@@ -188,18 +233,6 @@ export default function AddStaffPage() {
                 <option value="Night Shift (08:00 PM - 08:00 AM)">Night Shift (08:00 PM - 08:00 AM)</option>
                 <option value="Flexible Shift">Flexible Hours</option>
               </select>
-            </div>
-
-            <div>
-              <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Aadhaar Card Number</label>
-              <input 
-                type="text" 
-                value={formData.aadhaar} 
-                onChange={(e) => setFormData({ ...formData, aadhaar: e.target.value })}
-                placeholder="12-digit Aadhaar"
-                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all"
-                required
-              />
             </div>
           </div>
 

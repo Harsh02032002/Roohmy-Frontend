@@ -168,8 +168,9 @@ export default function App() {
   // Categorize routes for nested layout
   const shellRoutes = routes.filter(r => {
     const isSuperadmin = r.path.startsWith("/superadmin/") && r.path !== "/superadmin/index";
-    // Employees, Owners, and Tenants handle their own sidebar/layout inside their components
-    return isSuperadmin;
+    const isEmployee = r.path.startsWith("/employee/") && r.path !== "/employee/index";
+    // Employees and Superadmins use the same shared shell layout
+    return isSuperadmin || isEmployee;
   });
 
   const standaloneRoutes = routes.filter(r => !shellRoutes.find(sr => sr.path === r.path));

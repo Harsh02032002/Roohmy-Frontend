@@ -147,6 +147,47 @@ const mapManagerPermissionsToModules = (permissions = {}) => {
   return Array.from(allowed);
 };
 
+const mapEmployeePermissionsToModules = (permissions) => {
+  const assigned = normalizePermissions(permissions);
+  const allowed = new Set(["dashboard"]);
+
+  if (assigned.includes("user_management")) {
+    allowed.add("teams");
+    allowed.add("owners");
+    allowed.add("tenants");
+    allowed.add("new_signups");
+  }
+  if (assigned.includes("property_management")) {
+    allowed.add("properties");
+    allowed.add("locations");
+  }
+  if (assigned.includes("accounting")) {
+    allowed.add("rent_collections");
+    allowed.add("commissions");
+    allowed.add("refunds");
+  }
+  if (assigned.includes("report_analytics")) {
+    allowed.add("visits");
+    allowed.add("complaint_history");
+  }
+  if (assigned.includes("booking_leads")) {
+    allowed.add("web_enquiry");
+    allowed.add("enquiries");
+    allowed.add("bookings");
+  }
+  if (assigned.includes("review")) {
+    allowed.add("reviews");
+  }
+  if (assigned.includes("home")) {
+    allowed.add("live_properties");
+  }
+  
+  // also add any direct matches just in case
+  assigned.forEach(p => allowed.add(p));
+
+  return Array.from(allowed);
+};
+
 const parseCountPayload = (payload) => {
   if (Array.isArray(payload)) return payload.length;
   if (Array.isArray(payload?.data)) return payload.data.length;
@@ -289,6 +330,33 @@ export default function SuperadminAreaadmin() {
       return;
     }
 
+    // Fetch latest user data from server to ensure permissions are up to date
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (token) {
+      fetch(`${getApiUrl()}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data?.user) {
+            const updatedUser = { ...stored, ...data.user };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            
+            let newAllowed = [];
+            if (updatedUser.role === "areamanager") {
+              newAllowed = Object.keys(sidebarConfig);
+            } else if (updatedUser.role === "manager") {
+              newAllowed = mapManagerPermissionsToModules(updatedUser.permissions);
+            } else {
+              newAllowed = mapEmployeePermissionsToModules(updatedUser.permissions);
+            }
+            setAllowedModules(newAllowed);
+          }
+        })
+        .catch(err => console.error("Failed to fetch fresh user data:", err));
+    }
+
     if (stored.role === "employee") {
       const empRecord = getEmployeeRecord(stored.loginId);
       if (empRecord) {
@@ -345,8 +413,7 @@ export default function SuperadminAreaadmin() {
     } else if (stored.role === "manager") {
       allowed = mapManagerPermissionsToModules(stored.permissions);
     } else {
-      const assigned = normalizePermissions(stored.permissions);
-      allowed = [...new Set([...assigned, ...mandatoryPermissions])];
+      allowed = mapEmployeePermissionsToModules(stored.permissions);
     }
     setAllowedModules(allowed);
   }, []);
@@ -529,48 +596,8 @@ export default function SuperadminAreaadmin() {
   }, [displayName, user]);
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] flex">
-      <aside className="w-[290px] bg-[#0f172a] text-white min-h-screen hidden lg:flex lg:flex-col">
-        <div className="px-8 py-8 border-b border-white/10">
-          <h2 className="text-[22px] font-extrabold leading-none">
-            {user?.role === "manager" ? "Manager" : "Employee"}
-          </h2>
-          <p className="text-xs text-slate-400 mt-3 uppercase tracking-[0.22em]">
-            {user?.role === "manager" ? "Assigned Property Access" : roleLabel}
-          </p>
-        </div>
-
-        <div className="py-4 overflow-y-auto">
-          <a href="/employee/areaadmin" className="sidebar-link active">
-            <i data-lucide="layout-dashboard" className="w-5 h-5 mr-3"></i> Dashboard
-          </a>
-          {renderSection("Management", navManagement)}
-          {renderSection("Finance", navFinance)}
-          {renderSection("System", navSystem)}
-        </div>
-
-        <div className="mt-auto px-6 py-6 border-t border-white/10">
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-            <p className="text-xs font-semibold text-slate-300 uppercase tracking-[0.2em]">
-              {user?.role === "manager" ? "Assigned Property" : "Access Scope"}
-            </p>
-            <p className="text-sm font-bold text-white mt-3 break-words">
-              {user?.role === "manager" ? assignedPropertyLabel : headerBadge}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={logout}
-            className="w-full mt-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-3 text-sm font-semibold text-slate-200 transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      <main className="flex-1 min-h-full p-6 md:p-10">
-      <div class="w-full">
-        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+    <div className="w-full">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
             <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
               Welcome, <span id="welcomeName">{displayName}</span>!
@@ -657,8 +684,6 @@ export default function SuperadminAreaadmin() {
           </div>
         </div>
       </div>
-      </main>
-    </div>
   );
 }
 

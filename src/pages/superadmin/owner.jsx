@@ -167,6 +167,22 @@ export default function Owner() {
     finally { setIsUpdatingKyc(false); }
   };
 
+  const handleApproveRequest = async (id) => {
+    try {
+      setIsUpdatingKyc(true);
+      const password = Math.random().toString(36).slice(-8).toUpperCase();
+      await fetchJson(`/api/owners/${id}/approve`, {
+        method: "POST",
+        headers: getAuthHeader(),
+        body: JSON.stringify({ password })
+      });
+      alert("Owner request approved and link sent successfully!");
+      loadOwners();
+      setSelectedOwner(prev => prev ? { ...prev, kycStatus: "sent", kyc: { ...prev.kyc, status: "sent" }, credentials: { password } } : null);
+    } catch (err) { alert(err?.body?.message || err?.message || "Failed to approve owner request"); }
+    finally { setIsUpdatingKyc(false); }
+  };
+
   const exportToExcel = () => {
     const data = filteredOwners.map(o => ({
       "Owner ID": o.loginId,
@@ -546,14 +562,25 @@ export default function Owner() {
                     >
                        Reject Audit
                     </button>
-                    <button 
-                      onClick={() => handleKycUpdate(selectedOwner.loginId || selectedOwner._id, "verified")}
-                      disabled={isUpdatingKyc}
-                      className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all flex items-center gap-3 disabled:opacity-50"
-                    >
-                       {isUpdatingKyc ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-                       Approve Compliance
-                    </button>
+                    {(selectedOwner.kycStatus === 'requested' || selectedOwner.kyc?.status === 'requested') ? (
+                       <button 
+                         onClick={() => handleApproveRequest(selectedOwner.loginId || selectedOwner._id)}
+                         disabled={isUpdatingKyc}
+                         className="px-8 py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center gap-3 disabled:opacity-50"
+                       >
+                          {isUpdatingKyc ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                          Approve Request
+                       </button>
+                    ) : (
+                       <button 
+                         onClick={() => handleKycUpdate(selectedOwner.loginId || selectedOwner._id, "verified")}
+                         disabled={isUpdatingKyc}
+                         className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all flex items-center gap-3 disabled:opacity-50"
+                       >
+                          {isUpdatingKyc ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                          Approve Compliance
+                       </button>
+                    )}
                  </div>
               </div>
            </div>

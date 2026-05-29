@@ -95,6 +95,7 @@ const routeEntries = [
   ["/superadmin/home-overview", "./pages/superadmin/home-overview.jsx"],
   
   // Employee Routes
+  ["/employee/superadmin", "./pages/employee/areaadmin.jsx"],
   ["/employee/areaadmin", "./pages/employee/areaadmin.jsx"],
   ["/employee/backup", "./pages/employee/backup.jsx"],
   ["/employee/booking", "./pages/employee/booking.jsx"],
@@ -122,7 +123,6 @@ const routeEntries = [
   ["/employee/reviews", "./pages/employee/reviews.jsx"],
   ["/employee/security", "./pages/employee/security.jsx"],
   ["/employee/settings", "./pages/employee/settings.jsx"],
-  ["/employee/superadmin", "./pages/employee/areaadmin.jsx"],
   ["/employee/superchat", "./pages/employee/superchat.jsx"],
   ["/employee/tenant", "./pages/employee/tenant.jsx"],
   ["/employee/visit", "./pages/employee/visit.jsx"],
@@ -343,7 +343,17 @@ const buildRouteElement = (modulePath) => {
   return <Component />;
 };
 
-const routes = routeEntries.map(([path, modulePath]) => ({
+const processedEntries = [...routeEntries];
+routeEntries.forEach(([path, modulePath]) => {
+  if (path.startsWith("/superadmin/") && path !== "/superadmin/superadmin" && path !== "/superadmin/index") {
+    const empPath = path.replace("/superadmin/", "/employee/");
+    if (!processedEntries.find(r => r[0] === empPath)) {
+      processedEntries.push([empPath, modulePath]);
+    }
+  }
+});
+
+const routes = processedEntries.map(([path, modulePath]) => ({
   path,
   element: buildRouteElement(modulePath)
 }));

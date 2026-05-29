@@ -194,6 +194,7 @@ const NAV = [
     path: "/superadmin/reports",
     children: [
         { label: "Overview", path: "/superadmin/reports" },
+        { label: "Visit Reports", path: "/superadmin/visit" },
         { label: "Property Performance", path: "/superadmin/reports" },
         { label: "Location Wise Data", path: "/superadmin/reports" },
         { label: "Occupancy Rate", path: "/superadmin/reports" },
@@ -238,16 +239,61 @@ const NAV = [
         { label: "Issues Resolutions Tracking", path: "/superadmin/complaint-history" },
     ]
   },
-  { label: "CRM", icon: Target, path: "/superadmin/enquiry" },
-  { label: "Subscription Control", icon: ShieldCheck, path: "/superadmin/pricing" },
-  { label: "Settings", icon: Settings, path: "/superadmin/settings" },
+  { label: "CRM", id: "crm", icon: Target, path: "/superadmin/enquiry" },
+  { label: "Subscription Control", id: "subscription_control", icon: ShieldCheck, path: "/superadmin/pricing" },
+  { label: "Settings", id: "settings", icon: Settings, path: "/superadmin/settings" },
 ];
+
+const getFilteredNav = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const role = String(user?.role || "").toLowerCase();
+    if (role === "employee" || role === "areamanager" || role === "manager") {
+      let perms = user.permissions || [];
+      // Normalize permissions to an array of strings
+      if (typeof perms === "string") {
+        perms = perms.split(",").map(p => p.trim());
+      } else if (Array.isArray(perms)) {
+        perms = perms.map(p => (typeof p === "object" ? p.id || p.value || p.key : p));
+      }
+      
+      const allowedNav = NAV.filter(item => {
+        // Find the id from allPermissions mapping
+        let id = item.id;
+        if (!id) {
+          id = item.label.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_');
+        }
+        return perms.includes(id);
+      });
+
+      // Rewrite paths to /employee/ for employees
+      const rewritePaths = (items) => items.map(item => ({
+        ...item,
+        path: item.path ? item.path.replace("/superadmin/", "/employee/") : item.path,
+        children: item.children ? rewritePaths(item.children) : undefined
+      }));
+
+      return rewritePaths(allowedNav);
+    }
+  } catch (e) {
+    console.error("Failed to parse user for sidebar filtering", e);
+  }
+  return NAV;
+};
 
 export function Sidebar({ open, isMobile, onClose, onLogout }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [openMenus, setOpenMenus] = useState({ "Review": true, "Support": true });
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userName = user?.name || "User";
+  const roleLower = String(user?.role || "").toLowerCase();
+  const userRole = (roleLower === "employee" || roleLower === "areamanager" || roleLower === "manager") 
+    ? (user?.team || "Area Admin") 
+    : (user?.role || "Superadmin");
+  const initial = userName.charAt(0).toUpperCase();
 
   const toggleMenu = (e, label) => {
     e.stopPropagation();
@@ -331,17 +377,17 @@ export function Sidebar({ open, isMobile, onClose, onLogout }) {
         {/* Header - Profile from Screenshot */}
         <div className="p-6 flex items-center gap-3 shrink-0">
           <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg border-2 border-white/10 shadow-lg shadow-blue-600/20">
-            A
+            {initial}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-white leading-none truncate">Aman</p>
-            <p className="text-[10px] text-slate-500 font-medium mt-1 uppercase tracking-widest truncate">Superadmin</p>
+            <p className="text-sm font-bold text-white leading-none truncate">{userName}</p>
+            <p className="text-[10px] text-slate-500 font-medium mt-1 uppercase tracking-widest truncate">{userRole}</p>
           </div>
         </div>
 
         {/* Navigation - No Numbers, Extreme Left Alignment */}
         <nav className="flex-1 overflow-y-auto px-4 space-y-0.5 custom-scrollbar pb-6">
-          {renderNavItems(NAV)}
+          {renderNavItems(getFilteredNav())}
 
           <div className="pt-4 mt-4 border-t border-slate-800/50">
              <button 

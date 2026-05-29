@@ -70,10 +70,8 @@ export default function Manager() {
   const [formPhoto, setFormPhoto] = useState("");
   const [selectedPerms, setSelectedPerms] = useState(new Set());
   
-  // Creds Modal
-  const [showCredModal, setShowCredModal] = useState(false);
-  const [credsData, setCredsData] = useState({ loginId: "", password: "" });
   
+  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const uploadRef = useRef(null);
 
@@ -222,6 +220,8 @@ export default function Manager() {
   };
 
   const saveEmployee = async () => {
+    if (saving) return;
+    setSaving(true);
     const finalRole = formRole === "Custom" ? customRole : formRole;
     const areaCode = getLocalCode(formCity, formArea);
     
@@ -252,14 +252,14 @@ export default function Manager() {
           method: "POST",
           body: JSON.stringify(payload)
         });
-        setCredsData({ loginId: formLoginId, password: formPassword });
-        setShowCredModal(true);
-        showNotification("New personnel provisioned");
+        showNotification("New personnel provisioned & credentials emailed");
       }
       setShowModal(false);
       loadData();
     } catch (err) {
       showNotification(err.message || "Operation failed", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -270,7 +270,7 @@ export default function Manager() {
       showNotification("Personnel purged from system");
       loadData();
     } catch (err) {
-      showNotification("Purge failed", "error");
+      showNotification(`Purge failed: ${err.message}`, "error");
     }
   };
 
@@ -292,7 +292,7 @@ export default function Manager() {
       {/* Toast */}
       {toast && (
         <div className={cn(
-          "fixed top-6 right-6 z-[100] px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4",
+          "fixed top-6 right-6 z-[9999] px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4",
           toast.type === "success" ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"
         )}>
           {toast.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
@@ -634,49 +634,27 @@ export default function Manager() {
               </div>
 
               <div className="px-10 py-8 border-t border-slate-50 bg-slate-50/50 flex justify-end gap-4">
-                 <button onClick={() => setShowModal(false)} className="px-8 py-3.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-white transition-all">Cancel</button>
+                 <button onClick={() => setShowModal(false)} disabled={saving} className="px-8 py-3.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-white transition-all disabled:opacity-50">Cancel</button>
                  <button 
                    onClick={saveEmployee}
-                   className="px-10 py-3.5 bg-blue-600 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center gap-3"
+                   disabled={saving}
+                   className="px-10 py-3.5 bg-blue-600 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center gap-3 disabled:opacity-50"
                  >
-                    <Save size={16} /> Save Staff
+                    {saving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} /> Save Staff
+                      </>
+                    )}
                  </button>
               </div>
            </div>
         </div>
       )}
 
-      {/* Credentials Modal */}
-      {showCredModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-           <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl" />
-           <div className="bg-white w-full max-w-sm rounded-[3rem] shadow-2xl relative p-10 text-center animate-in zoom-in-95 duration-300">
-              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-lg shadow-emerald-100">
-                 <ShieldCheck size={40} />
-              </div>
-              <h3 className="text-2xl font-black text-slate-800 tracking-tighter mb-2">Staff Created</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-10">Credentials have been generated</p>
-              
-              <div className="space-y-6 bg-slate-50 p-8 rounded-3xl border border-slate-100 text-left mb-10">
-                 <div>
-                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Login ID</label>
-                    <code className="text-base font-black text-blue-600 block tracking-widest">{credsData.loginId}</code>
-                 </div>
-                 <div className="pt-6 border-t border-slate-200">
-                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Password</label>
-                    <code className="text-base font-black text-slate-800 block tracking-wider">{credsData.password}</code>
-                 </div>
-              </div>
-
-              <button 
-                onClick={() => setShowCredModal(false)}
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/20"
-              >
-                 Done
-              </button>
-           </div>
-        </div>
-      )}
     </div>
   );
 }

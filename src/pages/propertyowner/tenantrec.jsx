@@ -255,7 +255,7 @@ export default function TenantRec() {
     }
     const loadRooms = async () => {
       try {
-        const data = await fetchJson(`/api/rooms/property/${roomAssignment.propertyId}`);
+        const data = await fetchJson(`/api/rooms/property/${roomAssignment.propertyId}?unassigned=true`);
         let roomList = [];
         if (Array.isArray(data)) {
           roomList = data;

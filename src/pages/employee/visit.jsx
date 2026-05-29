@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useHtmlPage } from "../../utils/htmlPage";
-import { fetchJson } from "../../utils/api";
+import { fetchJson, getAuthHeader } from "../../utils/api";
 
 const readStoredUser = () => {
   try {
@@ -656,6 +656,27 @@ export default function Visit() {
         });
       } else {
         await fetchJson("/api/visits", { method: "POST", body: JSON.stringify(payload) });
+        
+        // Auto-create owner request
+        if (fd.get("createOwnerRequest") === "true") {
+          try {
+            const genId = "OWN" + Math.floor(1000 + Math.random() * 9000);
+            await fetchJson("/api/owners", {
+              method: "POST",
+              headers: getAuthHeader(),
+              body: JSON.stringify({
+                loginId: genId,
+                name: payload.ownerName,
+                email: payload.ownerEmail,
+                phone: payload.contactPhone,
+                locationCode: payload.locationCode,
+                credentials: { password: Math.random().toString(36).slice(-8).toUpperCase(), firstTime: true }
+              })
+            });
+          } catch (err) {
+            console.error("Failed to auto-create owner request:", err);
+          }
+        }
       }
       setShowModal(false);
       setEditingVisit(null);
@@ -1020,6 +1041,19 @@ export default function Visit() {
               <textarea name="internalRemarks" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Internal remarks (private)"></textarea>
               <textarea name="cleanlinessNote" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Cleanliness note (private)"></textarea>
               <textarea name="ownerBehaviour" rows="2" className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="Owner behaviour (private)"></textarea>
+
+              {!editingVisit && (
+                <div className="p-3 border border-blue-200 rounded bg-blue-50/50 mb-4">
+                  <div className="font-semibold text-blue-900 mb-2">Property Owner Onboarding</div>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" name="createOwnerRequest" value="true" className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                    <div>
+                      <span className="text-sm font-medium text-gray-900 block">Send Owner Onboarding Request to Superadmin</span>
+                      <span className="text-xs text-gray-500">Automatically creates a pending request for the property owner to complete their Digital KYC and receive login credentials once approved by Superadmin.</span>
+                    </div>
+                  </label>
+                </div>
+              )}
 
               <div className="p-3 border-2 border-purple-300 rounded bg-purple-50">
                 <div className="flex items-center gap-2 mb-3">
