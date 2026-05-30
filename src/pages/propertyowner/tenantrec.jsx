@@ -5,7 +5,8 @@ import {
   MapPin, Building2, Users, Home, X,
   Zap, ShieldCheck, Loader2,
   CheckCircle2, Save, Info, Clock, User, Eye, LayoutGrid, Pencil, RefreshCw,
-  Mail, Phone, Calendar, Fingerprint, Briefcase, Heart, MessageSquare, AlertCircle, ChevronDown
+  Mail, Phone, Calendar, Fingerprint, Briefcase, Heart, MessageSquare, AlertCircle, ChevronDown,
+  Images, Camera, Paperclip
 } from "lucide-react";
 import { getApiBase, fetchJson, getAuthHeader } from "../../utils/api";
 import { toast } from "react-hot-toast";
@@ -13,6 +14,214 @@ import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLay
 import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchOwnerProperties } from "../../utils/propertyowner";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
+
+const dataURLtoFile = (dataUrl, filename) => {
+  const [header, data] = dataUrl.split(",");
+  const mime = header.match(/:(.*?);/)[1];
+  const bytes = atob(data);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new File([arr], filename, { type: mime });
+};
+
+const CameraModal = ({ onCapture, onClose }) => {
+  const videoRef = React.useRef(null);
+  const canvasRef = React.useRef(null);
+  const streamRef = React.useRef(null);
+  const [ready, setReady] = React.useState(false);
+  const [facingMode, setFacingMode] = React.useState("environment");
+
+  const startStream = React.useCallback(async (facing) => {
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => setReady(true);
+      }
+    } catch {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => setReady(true);
+        }
+      } catch (err) {
+        alert("Camera access denied or unavailable: " + err.message);
+        onClose();
+      }
+    }
+  }, [onClose]);
+
+  React.useEffect(() => {
+    startStream(facingMode);
+    return () => streamRef.current?.getTracks().forEach(t => t.stop());
+  }, [facingMode, startStream]);
+
+  const handleCapture = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    onCapture(dataURLtoFile(dataUrl, `capture-${Date.now()}.jpg`));
+  };
+
+  const toggleCamera = () => setFacingMode(f => f === "environment" ? "user" : "environment");
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75">
+      <div className="bg-white rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-4">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <span className="text-[11px] font-black text-slate-700 uppercase tracking-widest">Take Photo</span>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-700 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="bg-black relative aspect-[4/3]">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover"
+          />
+          {!ready && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            </div>
+          )}
+        </div>
+        <canvas ref={canvasRef} className="hidden" />
+        <div className="p-4 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={toggleCamera}
+            className="w-10 h-10 rounded-xl border border-border flex items-center justify-center text-slate-500 hover:bg-muted transition-colors"
+            title="Flip camera"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleCapture}
+            disabled={!ready}
+            className="flex-1 h-10 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase flex items-center justify-center gap-2 disabled:opacity-40"
+          >
+            <Camera className="w-3.5 h-3.5" />
+            Capture Photo
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-10 h-10 rounded-xl border border-border flex items-center justify-center text-slate-400 hover:bg-muted transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MultiSourceUpload = ({ value, onUpload, error }) => {
+  const [showMenu, setShowMenu] = React.useState(false);
+  const [showCamera, setShowCamera] = React.useState(false);
+  const photosRef = React.useRef(null);
+  const filesRef = React.useRef(null);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setShowMenu(false);
+    await onUpload(file);
+    e.target.value = "";
+  };
+
+  const handleCameraCapture = async (file) => {
+    setShowCamera(false);
+    await onUpload(file);
+  };
+
+  return (
+    <>
+      {showCamera && (
+        <CameraModal
+          onCapture={handleCameraCapture}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
+
+      <div className="relative">
+        <input ref={photosRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        <input ref={filesRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
+
+        <div
+          onClick={() => setShowMenu(s => !s)}
+          className={cn(
+            "w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-muted/10",
+            error ? "border-rose-300 bg-rose-50/30" : "border-border hover:border-primary/40"
+          )}
+        >
+          {value ? (
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              <span className="text-[11.5px] font-bold text-slate-600">ID Proof Uploaded Successfully</span>
+            </div>
+          ) : (
+            <>
+              <Upload className="w-5 h-5 text-slate-400 transition-colors" />
+              <div className="text-center">
+                <p className="text-[10px] font-black text-slate-600 uppercase">Click to upload document</p>
+                <p className="text-[8px] font-bold text-slate-400 mt-1 uppercase">PNG, JPG, PDF up to 5MB</p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {showMenu && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+            <div className="absolute bottom-full left-0 right-0 mb-2 z-50 bg-white rounded-2xl border border-border shadow-xl p-4">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Choose upload source</p>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setShowMenu(false); setTimeout(() => photosRef.current?.click(), 50); }}
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:bg-slate-50 transition-colors"
+                >
+                  <Images className="w-6 h-6 text-indigo-500" />
+                  <span className="text-[10px] font-bold text-slate-600">Photos</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowMenu(false); setShowCamera(true); }}
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:bg-slate-50 transition-colors"
+                >
+                  <Camera className="w-6 h-6 text-slate-600" />
+                  <span className="text-[10px] font-bold text-slate-600">Camera</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowMenu(false); setTimeout(() => filesRef.current?.click(), 50); }}
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl border border-border hover:bg-slate-50 transition-colors"
+                >
+                  <Paperclip className="w-6 h-6 text-slate-500" />
+                  <span className="text-[10px] font-bold text-slate-600">Files</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+};
 
 const FormField = ({ label, value, onChange, placeholder, type = "text", suffix, prefix, className, list, required, error }) => (
   <div className={cn("flex flex-col", className)}>
@@ -184,7 +393,8 @@ export default function TenantRec() {
     roomUnit: "",
     roomType: "",
     bed: "",
-    rentAgreementType: "Standard"
+    rentAgreementType: "Standard",
+    propertyAddress: ""
   });
 
   // Section 3: Tenancy Details
@@ -194,9 +404,14 @@ export default function TenantRec() {
     moveInDate: "",
     minStay: "11",
     noticePeriod: "30",
-    rentDueDate: "5th of every month",
+    rentDueDate: "5",
     paymentFrequency: "Monthly",
-    lateFee: ""
+    lateFee: "",
+    licenseDuration: "",
+    moveOutCharges: "0",
+    noticePeriodCharges: "0",
+    inclusions: "",
+    gstCharges: "0"
   });
 
   // Section 4: Additional Details
@@ -206,6 +421,7 @@ export default function TenantRec() {
     emergencyName: "",
     emergencyPhone: "",
     relationship: "",
+    permanentAddress: "",
     remarks: ""
   });
 
@@ -317,9 +533,7 @@ export default function TenantRec() {
     if (!basicDetails.idProofFile) newErrors.idProofFile = "Proof upload is required";
 
     if (!roomAssignment.propertyId) newErrors.propertyId = "Property is required";
-    if (!roomAssignment.building) newErrors.building = "Building/Block is required";
     if (!roomAssignment.floor) newErrors.floor = "Floor is required";
-    if (!roomAssignment.roomUnit) newErrors.roomUnit = "Room is required";
     if (!roomAssignment.rentAgreementType) newErrors.rentAgreementType = "Agreement type is required";
 
     if (!tenancyDetails.rentAmount) newErrors.rentAmount = "Rent is required";
@@ -353,23 +567,37 @@ export default function TenantRec() {
     
     setSubmitting(true);
     try {
+      const selectedPropObj = properties.find(p => p._id === roomAssignment.propertyId);
       const payload = {
         name: basicDetails.fullName,
         email: basicDetails.email,
         phone: basicDetails.phone,
         propertyId: roomAssignment.propertyId,
-        roomNo: roomAssignment.roomUnit,
+        propertyTitle: selectedPropObj?.title || "",
+        roomNo: roomAssignment.roomUnit || [roomAssignment.floor, roomAssignment.roomType].filter(Boolean).join(" - ") || roomAssignment.floor,
         bedNo: roomAssignment.bed,
+        floor: roomAssignment.floor,
+        building: roomAssignment.building,
         moveInDate: tenancyDetails.moveInDate,
         agreedRent: tenancyDetails.rentAmount,
         securityDepositTotal: tenancyDetails.depositAmount,
         securityDepositPaid: 0,
         dob: basicDetails.dob,
         gender: basicDetails.gender,
-        building: roomAssignment.building,
-        floor: roomAssignment.floor,
         rentAgreementType: roomAssignment.rentAgreementType,
         paymentFrequency: tenancyDetails.paymentFrequency,
+        minStay: tenancyDetails.minStay,
+        noticePeriod: tenancyDetails.noticePeriod,
+        rentDueDate: tenancyDetails.rentDueDate,
+        accommodationType: roomAssignment.roomType,
+        lateFee: tenancyDetails.lateFee,
+        licenseDuration: tenancyDetails.licenseDuration,
+        moveOutCharges: tenancyDetails.moveOutCharges,
+        noticePeriodCharges: tenancyDetails.noticePeriodCharges,
+        inclusions: tenancyDetails.inclusions,
+        gstCharges: tenancyDetails.gstCharges,
+        propertyAddress: roomAssignment.propertyAddress,
+        permanentAddress: additionalDetails.permanentAddress,
         idProof: {
           type: basicDetails.idProofType,
           number: basicDetails.idProofNumber,
@@ -401,10 +629,9 @@ export default function TenantRec() {
     }
   };
 
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
+  const handlePhotoUpload = async (file) => {
     if (!file) return;
-    
+
     const loadingToast = toast.loading("Uploading ID Proof...");
     const data = new FormData();
     data.append("image", file);
@@ -538,134 +765,138 @@ export default function TenantRec() {
                 <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">
                   Upload ID Proof File <span className="text-rose-500">*</span>
                 </label>
-                <div className={cn("relative group rounded-2xl", errors.idProofFile && "ring-4 ring-rose-500/5")}>
-                  <input 
-                    type="file" 
-                    id="id-proof-upload-owner"
-                    className="hidden" 
-                    onChange={handlePhotoUpload}
-                    accept="image/*,.pdf"
-                  />
-                  <label 
-                    htmlFor="id-proof-upload-owner"
-                    className={cn(
-                      "w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-muted/10",
-                      errors.idProofFile ? "border-rose-300 bg-rose-50/30" : "border-border hover:border-primary/40"
-                    )}
-                  >
-                    {basicDetails.idProofFile ? (
-                      <div className="flex items-center gap-3">
-                        <CheckCircle2 className="w-6 h-6 text-emerald-500" />
-                        <span className="text-[11.5px] font-bold text-slate-600">ID Proof Uploaded Successfully</span>
-                      </div>
-                    ) : (
-                      <>
-                        <Upload className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
-                        <div className="text-center">
-                          <p className="text-[10px] font-black text-slate-600 uppercase">Click to upload document</p>
-                          <p className="text-[8px] font-bold text-slate-400 mt-1 uppercase">PNG, JPG, PDF up to 5MB</p>
-                        </div>
-                      </>
-                    )}
-                  </label>
-                </div>
+                <MultiSourceUpload
+                  value={basicDetails.idProofFile}
+                  onUpload={handlePhotoUpload}
+                  error={errors.idProofFile}
+                />
                 {errors.idProofFile && <span className="text-[8px] font-bold text-rose-500 mt-2 uppercase tracking-widest block">{errors.idProofFile}</span>}
               </div>
             </div>
           </div>
 
           {/* Section 2 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-soft space-y-6">
-            <h3 className="font-serif text-[20px] text-slate-800 flex items-center gap-2">
-              <Home size={18} className="text-primary" />
-              2. Room & Bed Allocation
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <FormSelect 
-                label="Property" 
-                required
-                value={roomAssignment.propertyId}
-                onChange={e => setRoomAssignment({...roomAssignment, propertyId: e.target.value})}
-                options={properties.map(p => ({ label: p.title, value: p._id }))}
-                placeholder="Select property"
-                error={errors.propertyId}
-              />
-              <FormField 
-                label="Building / Block" 
-                required
-                value={roomAssignment.building}
-                onChange={e => setRoomAssignment({...roomAssignment, building: e.target.value})}
-                placeholder="Select building"
-                error={errors.building}
-              />
-              <FormField 
-                label="Floor" 
-                required
-                value={roomAssignment.floor}
-                onChange={e => setRoomAssignment({...roomAssignment, floor: e.target.value})}
-                placeholder="Select floor"
-                error={errors.floor}
-              />
-              <FormSelect 
-                label="Room / Unit" 
-                required
-                value={roomAssignment.roomUnit}
-                onChange={e => {
-                  const selectedTitle = e.target.value;
-                  const selectedRoom = rooms.find(r => r.title === selectedTitle);
-                  
-                  setRoomAssignment(prev => ({
-                    ...prev,
-                    roomUnit: selectedTitle,
-                    roomType: selectedRoom?.type || prev.roomType,
-                    floor: selectedRoom?.floor || prev.floor
-                  }));
+          {(() => {
+            const floorOptions = [...new Set(rooms.map(r => r.floor).filter(Boolean))].sort();
+            const hasVacantBed = (r) => {
+              if (Array.isArray(r.beds)) {
+                return r.beds.some(b => !b.tenantId && b.status !== "occupied");
+              }
+              const total = Number(r.beds || r.capacity || r.totalBeds || 0);
+              return total > 0;
+            };
+            const roomsForFloor = (roomAssignment.floor
+              ? rooms.filter(r => !r.floor || r.floor === roomAssignment.floor)
+              : rooms
+            ).filter(hasVacantBed);
+            const selectedRoom = rooms.find(r => (r.title || r.number || r.roomNo) === roomAssignment.roomUnit);
+            const bedCount = selectedRoom ? (Array.isArray(selectedRoom.beds) ? selectedRoom.beds.length : Number(selectedRoom.beds || selectedRoom.capacity || 0)) : 0;
+            const bedOptions = Array.from({ length: bedCount }, (_, i) => `Bed ${i + 1}`);
 
-                  if (selectedRoom?.price) {
-                    setTenancyDetails(prev => ({
-                      ...prev,
-                      rentAmount: selectedRoom.price.toString()
-                    }));
-                  }
-                }}
-                options={
-                  roomAssignment.propertyId && rooms.length === 0 
-                    ? [{ label: "No rooms available", value: "" }] 
-                    : rooms.map(r => ({ label: r.title, value: r.title }))
-                }
-                placeholder={roomAssignment.propertyId ? "Select room" : "Select property first"}
-                error={errors.roomUnit}
-              />
-              <FormSelect 
-                label="Room Type" 
-                value={roomAssignment.roomType}
-                onChange={e => setRoomAssignment({...roomAssignment, roomType: e.target.value})}
-                options={(() => {
-                  const selectedProp = properties.find(p => p._id === roomAssignment.propertyId);
-                  if (selectedProp && Array.isArray(selectedProp.roomTypes)) {
-                    return selectedProp.roomTypes.map(rt => ({ label: rt.type, value: rt.type }));
-                  }
-                  return ["AC", "Non-AC", "Single", "Double", "Triple"];
-                })()}
-                placeholder="Select room type"
-              />
-              <FormField 
-                label="Bed" 
-                value={roomAssignment.bed}
-                onChange={e => setRoomAssignment({...roomAssignment, bed: e.target.value})}
-                placeholder="Select bed"
-              />
-              <FormSelect 
-                label="Rent Agreement Type" 
-                required
-                value={roomAssignment.rentAgreementType}
-                onChange={e => setRoomAssignment({...roomAssignment, rentAgreementType: e.target.value})}
-                options={["Standard", "Short Term", "Long Term", "Custom"]}
-                error={errors.rentAgreementType}
-              />
-            </div>
-          </div>
+            const handleRoomSelect = (roomTitle) => {
+              const room = rooms.find(r => (r.title || r.number || r.roomNo) === roomTitle);
+              setRoomAssignment(prev => ({
+                ...prev,
+                roomUnit: roomTitle,
+                floor: room?.floor || prev.floor,
+                roomType: room?.type || room?.roomType || prev.roomType,
+                bed: ""
+              }));
+              if (room?.rent || room?.price) {
+                setTenancyDetails(prev => ({ ...prev, rentAmount: String(room.rent || room.price || "") }));
+              }
+            };
+
+            return (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-soft space-y-6">
+                <h3 className="font-serif text-[20px] text-slate-800 flex items-center gap-2">
+                  <Home size={18} className="text-primary" />
+                  2. Room & Bed Allocation
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <FormSelect
+                    label="Property"
+                    required
+                    value={roomAssignment.propertyId}
+                    onChange={e => setRoomAssignment({ propertyId: e.target.value, building: "", floor: "", roomUnit: "", roomType: "", bed: "", rentAgreementType: roomAssignment.rentAgreementType, propertyAddress: roomAssignment.propertyAddress })}
+                    options={properties.map(p => ({ label: p.title, value: p._id }))}
+                    placeholder="Select property"
+                    error={errors.propertyId}
+                  />
+                  <FormSelect
+                    label="Floor"
+                    required
+                    value={roomAssignment.floor}
+                    onChange={e => setRoomAssignment({ ...roomAssignment, floor: e.target.value, roomUnit: "", bed: "" })}
+                    options={
+                      floorOptions.length > 0
+                        ? floorOptions.map(f => ({ label: f, value: f }))
+                        : ["Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor", "5th Floor"]
+                    }
+                    placeholder={roomAssignment.propertyId ? "Select floor" : "Select property first"}
+                    error={errors.floor}
+                  />
+                  <FormSelect
+                    label="Room Number"
+                    required
+                    value={roomAssignment.roomUnit}
+                    onChange={e => handleRoomSelect(e.target.value)}
+                    options={
+                      roomsForFloor.length > 0
+                        ? roomsForFloor.map(r => {
+                            const label = r.title || r.number || r.roomNo || r._id;
+                            return { label, value: label };
+                          })
+                        : []
+                    }
+                    placeholder={roomAssignment.propertyId ? (rooms.length === 0 ? "No rooms found" : "Select room") : "Select property first"}
+                    error={errors.roomUnit}
+                  />
+                  <FormSelect
+                    label="Room Type"
+                    value={roomAssignment.roomType}
+                    onChange={e => setRoomAssignment({ ...roomAssignment, roomType: e.target.value })}
+                    options={(() => {
+                      const selectedProp = properties.find(p => p._id === roomAssignment.propertyId);
+                      if (selectedProp && Array.isArray(selectedProp.roomTypes) && selectedProp.roomTypes.length > 0) {
+                        return selectedProp.roomTypes.map(rt => ({ label: rt.type, value: rt.type }));
+                      }
+                      return ["AC", "Non-AC", "Single", "Double", "Triple"];
+                    })()}
+                    placeholder="Select room type"
+                  />
+                  <FormSelect
+                    label="Bed"
+                    value={roomAssignment.bed}
+                    onChange={e => setRoomAssignment({ ...roomAssignment, bed: e.target.value })}
+                    options={
+                      bedOptions.length > 0
+                        ? bedOptions.map(b => ({ label: b, value: b }))
+                        : ["Bed 1", "Bed 2", "Bed 3", "Bed 4"]
+                    }
+                    placeholder={roomAssignment.roomUnit ? "Select bed" : "Select room first"}
+                  />
+                  <FormSelect
+                    label="Rent Agreement Type"
+                    required
+                    value={roomAssignment.rentAgreementType}
+                    onChange={e => setRoomAssignment({ ...roomAssignment, rentAgreementType: e.target.value })}
+                    options={["Standard", "Short Term", "Long Term", "Custom"]}
+                    error={errors.rentAgreementType}
+                  />
+                  <div className="sm:col-span-3">
+                    <FormField
+                      label="Property Address"
+                      value={roomAssignment.propertyAddress}
+                      onChange={e => setRoomAssignment({ ...roomAssignment, propertyAddress: e.target.value })}
+                      placeholder="Full address of the property"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Section 3 */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-soft space-y-6">
@@ -717,27 +948,64 @@ export default function TenantRec() {
                 placeholder="Enter notice period"
                 type="number"
               />
-              <FormField 
-                label="Rent Due Date" 
+              <FormField
+                label="License Fee Due Date (day of month)"
                 value={tenancyDetails.rentDueDate}
                 onChange={e => setTenancyDetails({...tenancyDetails, rentDueDate: e.target.value})}
-                placeholder="e.g. 5th of every month"
+                placeholder="e.g. 5"
+                type="number"
               />
-              <FormSelect 
-                label="Payment Frequency" 
+              <FormField
+                label="License Duration (months)"
+                value={tenancyDetails.licenseDuration}
+                onChange={e => setTenancyDetails({...tenancyDetails, licenseDuration: e.target.value})}
+                placeholder="e.g. 11"
+                type="number"
+              />
+              <FormSelect
+                label="Payment Frequency"
                 required
                 value={tenancyDetails.paymentFrequency}
                 onChange={e => setTenancyDetails({...tenancyDetails, paymentFrequency: e.target.value})}
                 options={["Monthly", "Quarterly", "Semi-Annually", "Annually"]}
                 error={errors.paymentFrequency}
               />
-              <FormField 
-                label="Late Fee (₹)" 
-                value={tenancyDetails.lateFee}
-                onChange={e => setTenancyDetails({...tenancyDetails, lateFee: e.target.value})}
-                placeholder="Enter late fee (optional)"
+              <FormField
+                label="Move Out Charges (₹)"
+                value={tenancyDetails.moveOutCharges}
+                onChange={e => setTenancyDetails({...tenancyDetails, moveOutCharges: e.target.value})}
+                placeholder="0"
                 type="number"
               />
+              <FormField
+                label="Notice Period Charges (₹)"
+                value={tenancyDetails.noticePeriodCharges}
+                onChange={e => setTenancyDetails({...tenancyDetails, noticePeriodCharges: e.target.value})}
+                placeholder="0"
+                type="number"
+              />
+              <FormField
+                label="GST Charges (₹)"
+                value={tenancyDetails.gstCharges}
+                onChange={e => setTenancyDetails({...tenancyDetails, gstCharges: e.target.value})}
+                placeholder="0"
+                type="number"
+              />
+              <FormField
+                label="Late Fee (₹)"
+                value={tenancyDetails.lateFee}
+                onChange={e => setTenancyDetails({...tenancyDetails, lateFee: e.target.value})}
+                placeholder="0"
+                type="number"
+              />
+              <div className="sm:col-span-4">
+                <FormField
+                  label="Inclusions (WiFi, meals, etc.)"
+                  value={tenancyDetails.inclusions}
+                  onChange={e => setTenancyDetails({...tenancyDetails, inclusions: e.target.value})}
+                  placeholder="e.g. WiFi, 2 meals/day, housekeeping"
+                />
+              </div>
             </div>
           </div>
 
@@ -787,8 +1055,16 @@ export default function TenantRec() {
                 error={errors.relationship}
               />
               <div className="sm:col-span-3">
+                <FormField
+                  label="Permanent Address (optional — tenant can fill in KYC)"
+                  value={additionalDetails.permanentAddress}
+                  onChange={e => setAdditionalDetails({...additionalDetails, permanentAddress: e.target.value})}
+                  placeholder="House/Flat No., Street, Area, City, State, PIN"
+                />
+              </div>
+              <div className="sm:col-span-3">
                 <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Remarks (Optional)</label>
-                <textarea 
+                <textarea
                   value={additionalDetails.remarks}
                   onChange={e => setAdditionalDetails({...additionalDetails, remarks: e.target.value})}
                   className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[11.5px] font-bold text-slate-800 outline-none focus:bg-white focus:border-blue-200 transition-all h-24 resize-none"
@@ -813,9 +1089,45 @@ export default function TenantRec() {
         </div>
 
         {/* Sidebar info */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-card border border-border rounded-2xl p-6 space-y-6 sticky top-24">
-            <h3 className="font-serif text-[18px] text-foreground">Onboarding Timeline</h3>
+        <div className="lg:col-span-4">
+          <div className="sticky top-24 space-y-6">
+
+          {/* Onboarding Summary */}
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <h3 className="font-serif text-[16px] text-foreground">Onboarding Summary</h3>
+            <div className="divide-y divide-border">
+              {(() => {
+                const propName = properties.find(p => p._id === roomAssignment.propertyId)?.title;
+                const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+                const rows = [
+                  { label: "Tenant Name",       val: basicDetails.fullName },
+                  { label: "Email",             val: basicDetails.email },
+                  { label: "Phone",             val: basicDetails.phone },
+                  { label: "Property",          val: propName },
+                  { label: "Floor",             val: roomAssignment.floor },
+                  { label: "Room Number",       val: roomAssignment.roomUnit },
+                  { label: "Accommodation Type",val: roomAssignment.roomType },
+                  { label: "Bed",               val: roomAssignment.bed },
+                  { label: "Monthly Rent (₹)",  val: tenancyDetails.rentAmount ? `₹${tenancyDetails.rentAmount}` : null },
+                  { label: "Security Deposit",  val: tenancyDetails.depositAmount ? `₹${tenancyDetails.depositAmount}` : null },
+                  { label: "Move-in Date",      val: fmtDate(tenancyDetails.moveInDate) !== "—" ? fmtDate(tenancyDetails.moveInDate) : null },
+                  { label: "Minimum Stay",      val: tenancyDetails.minStay ? `${tenancyDetails.minStay} months` : null },
+                  { label: "Notice Period",     val: tenancyDetails.noticePeriod ? `${tenancyDetails.noticePeriod} days` : null },
+                  { label: "Rent Due Date",     val: tenancyDetails.rentDueDate },
+                ];
+                return rows.map(({ label, val }) => (
+                  <div key={label} className="flex justify-between items-center py-2 gap-2">
+                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-tight shrink-0">{label}</span>
+                    <span className="text-[10.5px] font-black text-slate-700 text-right truncate max-w-[55%]">{val || "—"}</span>
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+
+          {/* Onboarding Timeline */}
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
+            <h3 className="font-serif text-[16px] text-foreground">Onboarding Timeline</h3>
             <div className="space-y-6">
               {[
                 { step: 1, title: "Personal Details & Room", sub: "Add tenant details, assign room and tenancy information.", status: "In Progress" },
@@ -839,6 +1151,8 @@ export default function TenantRec() {
               ))}
             </div>
           </div>
+
+          </div>{/* end scrollable sticky wrapper */}
         </div>
       </div>
 

@@ -86,6 +86,9 @@ export function getPropertyOwnerNavConfig(variant = "default") {
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
+const _notifCache = {};
+const _NOTIF_TTL = 30_000;
+
 export default function PropertyOwnerLayout({
   owner,
   title,
@@ -140,6 +143,12 @@ export default function PropertyOwnerLayout({
   useEffect(() => {
     if (owner?.loginId) {
       const fetchNotifs = async () => {
+        const cacheKey = `notifs_${owner.loginId}`;
+        const cached = _notifCache[cacheKey];
+        if (cached && Date.now() - cached.ts < _NOTIF_TTL) {
+          setGlobalNotifications(cached.data);
+          return;
+        }
         try {
           const { fetchJson } = await import("../../utils/api");
           const res = await fetchJson(`/api/notifications?toLoginId=${encodeURIComponent(owner.loginId)}`);
@@ -154,6 +163,7 @@ export default function PropertyOwnerLayout({
                 meta: meta
               };
             });
+            _notifCache[cacheKey] = { data: formatted, ts: Date.now() };
             setGlobalNotifications(formatted);
           }
         } catch (e) {

@@ -679,39 +679,19 @@ export default function Visit() {
         // Auto-create owner request
         if (fd.get("createOwnerRequest") === "true") {
           try {
-            const onboardingReq = {
-              enquiryId: payload.visitId || `enq_${Date.now()}`,
-              type: "property_from_visit",
-              submittedAt: new Date().toISOString(),
-              propertyName: payload.propertyName,
-              propertyType: payload.propertyType,
-              address: payload.address,
-              city: payload.city,
-              area: payload.area,
-              ownerName: payload.ownerName,
-              ownerEmail: payload.ownerEmail,
-              ownerPhone: payload.contactPhone,
-              monthlyRent: payload.monthlyRent,
-              roomCount: payload.vacantRooms + payload.occupiedRooms,
-              bedCount: payload.vacantBeds + payload.occupiedBeds,
-              pendingCredentials: {
-                loginId: "OWN" + Math.floor(1000 + Math.random() * 9000),
-                password: Math.random().toString(36).slice(-8).toUpperCase()
-              }
-            };
-            
-            try {
-              await fetchJson("/api/property-enquiries", {
-                method: "POST",
-                body: JSON.stringify(onboardingReq)
-              });
-            } catch (errApi) {
-              console.error("Failed to POST property onboarding request:", errApi);
-            }
-
-            const existingEnquiries = JSON.parse(localStorage.getItem("roomhy_property_enquiries") || "[]");
-            existingEnquiries.push(onboardingReq);
-            localStorage.setItem("roomhy_property_enquiries", JSON.stringify(existingEnquiries));
+            const genId = "ROOMHY" + Math.floor(1000 + Math.random() * 9000);
+            await fetchJson("/api/owners", {
+              method: "POST",
+              headers: getAuthHeader(),
+              body: JSON.stringify({
+                loginId: genId,
+                name: payload.ownerName,
+                email: payload.ownerEmail,
+                phone: payload.contactPhone,
+                locationCode: payload.locationCode,
+                credentials: { password: Math.random().toString(36).slice(-8).toUpperCase(), firstTime: true }
+              })
+            });
           } catch (err) {
             console.error("Failed to auto-create owner request:", err);
           }

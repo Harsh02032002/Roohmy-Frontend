@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
-import { ownerApi, apiFetch } from "../../services/api";
+import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchOwnerTenants } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   FileText, Search, Printer, Mail, IndianRupee, 
   ArrowUpRight, ArrowDownRight, ClipboardList, Plus
@@ -31,12 +31,11 @@ export default function TenantLedgerPage() {
     const fetchTenants = async () => {
       try {
         setLoading(true);
-        const data = await ownerApi.getOwnerTenants(owner.loginId);
-        if (active && data?.tenants) {
-          setTenants(data.tenants);
-          if (data.tenants.length > 0) {
-            setSelectedTenantLoginId(data.tenants[0].loginId);
-          }
+        const list = await fetchOwnerTenants(owner.loginId);
+        if (active) {
+          const tenantList = list || [];
+          setTenants(tenantList);
+          if (tenantList.length > 0) setSelectedTenantLoginId(tenantList[0].loginId);
         }
       } catch (err) {
         console.error("Error fetching tenants for ledger:", err);

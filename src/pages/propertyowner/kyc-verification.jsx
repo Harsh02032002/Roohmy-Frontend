@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
-import { ownerApi, apiFetch } from "../../services/api";
+import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchOwnerTenants, clearOwnerFetchCache } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   UserCheck, Search, FileText, CheckCircle2, XCircle, 
   Clock, ShieldCheck, Eye, Download, AlertTriangle
@@ -21,16 +21,13 @@ export default function KycVerificationPage() {
   const fetchKycData = async () => {
     try {
       setLoading(true);
-      const data = await ownerApi.getOwnerTenants(owner.loginId);
-      if (data?.tenants) {
-        // Sort so that 'submitted' (pending verification) is at the top
-        const sorted = [...data.tenants].sort((a, b) => {
-          if (a.kycStatus === "submitted" && b.kycStatus !== "submitted") return -1;
-          if (a.kycStatus !== "submitted" && b.kycStatus === "submitted") return 1;
-          return 0;
-        });
-        setTenants(sorted);
-      }
+      const all = await fetchOwnerTenants(owner.loginId);
+      const sorted = [...(all || [])].sort((a, b) => {
+        if (a.kycStatus === "submitted" && b.kycStatus !== "submitted") return -1;
+        if (a.kycStatus !== "submitted" && b.kycStatus === "submitted") return 1;
+        return 0;
+      });
+      setTenants(sorted);
     } catch (err) {
       console.error("Error fetching KYC tenants:", err);
     } finally {
@@ -48,6 +45,7 @@ export default function KycVerificationPage() {
         method: "POST",
         body: JSON.stringify({ tenantId })
       });
+      clearOwnerFetchCache(owner.loginId);
       fetchKycData();
     } catch (err) {
       alert("Error approving KYC: " + err.message);
@@ -60,6 +58,7 @@ export default function KycVerificationPage() {
         method: "POST",
         body: JSON.stringify({ tenantId })
       });
+      clearOwnerFetchCache(owner.loginId);
       fetchKycData();
     } catch (err) {
       alert("Error rejecting KYC: " + err.message);

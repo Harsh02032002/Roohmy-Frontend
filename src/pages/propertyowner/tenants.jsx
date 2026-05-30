@@ -2,14 +2,25 @@ import React, { useEffect, useState } from "react";
 import { fetchJson } from "../../utils/api";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import {
-  Plus, Search, Filter, Phone, MoreHorizontal, ArrowUpDown, Download, Users, ExternalLink,
-  User, CalendarClock, CheckCircle, AlertTriangle
+  Plus, Search, ArrowUpDown, Download, Users, ExternalLink,
+  User, CalendarClock, CheckCircle, AlertTriangle, Phone,
+  Shield, Building2, FileText, BadgeCheck, X, MapPin, Mail,
+  CreditCard, Home
 } from "lucide-react";
 import {
   clearOwnerRuntimeSession,
   fetchOwnerTenants,
   getOwnerRuntimeSession
 } from "../../utils/propertyowner";
+import { API_URL } from "../../services/api";
+
+const getFileUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith("data:")) return url;
+  if (url.startsWith("http")) return url;
+  if (url.startsWith("/")) return `${API_URL}${url}`;
+  return `${API_URL}/${url}`;
+};
 
 const Pill = ({ tone = "muted", children }) => {
   const toneMap = {
@@ -34,6 +45,7 @@ export default function Tenants() {
   const [errorMsg, setErrorMsg] = useState("");
   const [tab, setTab] = useState("all");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortKey, setSortKey] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [selectedTenant, setSelectedTenant] = useState(null);
@@ -56,6 +68,11 @@ export default function Tenants() {
     load();
   }, []);
 
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
   const counts = {
     all: tenants.length,
     active: tenants.filter(t => t.status === "active" || t.active).length,
@@ -65,8 +82,8 @@ export default function Tenants() {
 
   const filtered = tenants.filter(t => {
     const matchTab = tab === "all" || (tab === "active" && (t.status === "active" || t.active)) || (tab === "notice" && (t.status === "notice" || t.status === "move-out")) || (tab === "dues" && (t.dueAmount || t.dues || t.balance) > 0);
-    const q = search.toLowerCase();
-    const matchSearch = !search || (t.name || "").toLowerCase().includes(q) || (t.phone || "").includes(q) || (t.roomNo || "").toLowerCase().includes(q);
+    const q = debouncedSearch.toLowerCase();
+    const matchSearch = !debouncedSearch || (t.name || "").toLowerCase().includes(q) || (t.phone || "").includes(q) || (t.roomNo || "").toLowerCase().includes(q);
     return matchTab && matchSearch;
   }).sort((a, b) => {
     let valA = a[sortKey] || "";
@@ -275,125 +292,259 @@ export default function Tenants() {
       </div>
 
       {/* Tenant Details Modal */}
-      {modalOpen && selectedTenant && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
-              <div className="flex items-center gap-4">
-                <div className="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
-                  {getInitial(selectedTenant.name)}
-                </div>
-                <div>
-                  <h2 className="text-[20px] font-semibold text-foreground">{selectedTenant.name || "—"}</h2>
-                  <p className="text-[13px] text-muted-foreground mt-0.5">ID: {selectedTenant.loginId || "—"}</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => { setModalOpen(false); setSelectedTenant(null); }}
-                className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto flex-1 space-y-6">
-              {/* Room & Rent Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl border border-border bg-muted/10">
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Room Details</span>
-                  <div className="font-medium text-foreground">Room {selectedTenant.roomNo || selectedTenant.room?.number || "N/A"}</div>
-                  {selectedTenant.bedNo && <div className="text-[13px] text-muted-foreground">Bed: {selectedTenant.bedNo}</div>}
-                  {selectedTenant.building && <div className="text-[13px] text-muted-foreground">Building: {selectedTenant.building}</div>}
-                </div>
-                <div className="p-4 rounded-xl border border-border bg-emerald-50/50">
-                  <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider block mb-1">Rent Information</span>
-                  <div className="font-bold text-emerald-700 text-[18px]">₹{selectedTenant.agreedRent || selectedTenant.rent || 0} <span className="text-[13px] font-normal text-emerald-600/70">/ month</span></div>
-                  <div className="flex items-center gap-2 mt-1">
-                     <span className="text-[13px] text-emerald-600">Due: {selectedTenant.paymentFrequency || "Monthly"}</span>
-                     {(selectedTenant.dueAmount || selectedTenant.dues) > 0 && (
-                        <span className="text-[11px] font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded ml-auto">
-                          Pending Dues: ₹{(selectedTenant.dueAmount || selectedTenant.dues).toLocaleString("en-IN")}
-                        </span>
-                     )}
-                  </div>
-                </div>
-              </div>
+      {modalOpen && selectedTenant && (() => {
+        const t = selectedTenant;
+        const kyc = t.kyc || {};
+        const profile = t.digitalCheckin?.profile || {};
+        const agr = t.digitalCheckin?.agreementDetails || {};
 
-              {/* Personal Info */}
-              <div>
-                <h3 className="text-[14px] font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <User size={16} className="text-primary" /> Personal Information
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 p-4 rounded-xl border border-border">
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">Phone Number</div>
-                    <div className="text-[13px] font-medium text-foreground">{selectedTenant.phone || "N/A"}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">Email Address</div>
-                    <div className="text-[13px] font-medium text-foreground">{selectedTenant.email || "N/A"}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">Date of Birth</div>
-                    <div className="text-[13px] font-medium text-foreground">{selectedTenant.dob || "N/A"}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">Gender</div>
-                    <div className="text-[13px] font-medium text-foreground capitalize">{selectedTenant.gender || "N/A"}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">Guardian Number</div>
-                    <div className="text-[13px] font-medium text-foreground">{selectedTenant.guardianNumber || "N/A"}</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">Occupation</div>
-                    <div className="text-[13px] font-medium text-foreground">{selectedTenant.occupation || "N/A"}</div>
-                  </div>
-                </div>
-              </div>
+        const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+        const val = (...sources) => sources.find(v => v !== undefined && v !== null && v !== "") || "—";
 
-              {/* Status & Dates */}
-              <div>
-                <h3 className="text-[14px] font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <CalendarClock size={16} className="text-primary" /> Timeline & Status
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl border border-border flex items-center justify-between">
-                    <div>
-                      <div className="text-[11px] text-muted-foreground mb-0.5">Move-in Date</div>
-                      <div className="text-[13px] font-medium text-foreground">
-                        {selectedTenant.moveInDate ? new Date(selectedTenant.moveInDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : "Not specified"}
-                      </div>
+        const tenantPhoto = getFileUrl(t.photo || kyc.idProofFile);
+        const aadhaarFront = getFileUrl(kyc.aadhaarFront);
+        const aadhaarBack  = getFileUrl(kyc.aadhaarBack);
+
+        const InfoField = ({ label, value, mono, wide }) => (
+          <div className={wide ? "col-span-2 sm:col-span-3" : ""}>
+            <div className="text-[11px] text-muted-foreground mb-0.5 uppercase tracking-wide">{label}</div>
+            <div className={`text-[13px] font-medium text-foreground break-words ${mono ? "font-mono" : ""}`}>{value || "—"}</div>
+          </div>
+        );
+
+        const SectionHead = ({ icon: Icon, title, color = "text-primary" }) => (
+          <h3 className={`text-[13.5px] font-semibold text-foreground mb-3 flex items-center gap-2`}>
+            <Icon size={15} className={color} /> {title}
+          </h3>
+        );
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm">
+            <div className="bg-card rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
+
+              {/* ── Header ── */}
+              <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/30">
+                <div className="flex items-center gap-4">
+                  {tenantPhoto ? (
+                    <img src={tenantPhoto} alt={t.name} className="size-14 rounded-full object-cover border-2 border-border shrink-0" />
+                  ) : (
+                    <div className="size-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[22px] shrink-0">
+                      {getInitial(t.name)}
+                    </div>
+                  )}
+                  <div>
+                    <h2 className="text-[20px] font-semibold text-foreground">{t.name || "—"}</h2>
+                    <p className="text-[12px] text-muted-foreground font-mono mt-0.5">{t.loginId || "—"}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <Pill tone={getStatusTone(t.status)}>{t.status || "active"}</Pill>
+                      <Pill tone={getKycTone(t.kycStatus || t.kyc)}>{t.kycStatus || t.kyc || "pending"} KYC</Pill>
                     </div>
                   </div>
-                  <div className="p-4 rounded-xl border border-border flex items-center justify-between">
-                    <div>
-                      <div className="text-[11px] text-muted-foreground mb-0.5">Agreement Signed</div>
-                      <div className="text-[13px] font-medium text-foreground">
-                        {selectedTenant.agreementSigned ? (
-                           <span className="flex items-center gap-1.5 text-emerald-600"><CheckCircle size={14}/> Yes ({new Date(selectedTenant.agreementSignedAt).toLocaleDateString('en-IN')})</span>
+                </div>
+                <button
+                  onClick={() => { setModalOpen(false); setSelectedTenant(null); }}
+                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* ── Scrollable Body ── */}
+              <div className="p-6 overflow-y-auto flex-1 space-y-6">
+
+                {/* Room & Rent */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border border-border bg-muted/10">
+                    <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Room Details</span>
+                    <div className="font-medium text-foreground text-[14px]">
+                      {val(t.propertyName, typeof t.property === "object" ? t.property?.title : null, "—")}
+                    </div>
+                    <div className="text-[12.5px] text-muted-foreground mt-0.5">
+                      Room {t.roomNo || "—"}{t.bedNo ? ` / Bed ${t.bedNo}` : ""}
+                      {agr.accommodationType || profile.accommodationType ? ` · ${agr.accommodationType || profile.accommodationType}` : ""}
+                    </div>
+                    {(agr.propertyAddress || profile.propertyAddress) && (
+                      <div className="text-[12px] text-muted-foreground mt-1 flex items-start gap-1">
+                        <MapPin size={11} className="mt-0.5 shrink-0" />
+                        {agr.propertyAddress || profile.propertyAddress}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 rounded-xl border border-border bg-emerald-50/50">
+                    <span className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider block mb-1.5">Rent Information</span>
+                    <div className="font-bold text-emerald-700 text-[18px]">
+                      ₹{(t.agreedRent || t.rent || 0).toLocaleString("en-IN")}
+                      <span className="text-[13px] font-normal text-emerald-600/70"> / month</span>
+                    </div>
+                    {(agr.securityDeposit || t.securityDepositTotal) && (
+                      <div className="text-[12.5px] text-emerald-600 mt-0.5">
+                        Security deposit: ₹{Number(agr.securityDeposit || t.securityDepositTotal || 0).toLocaleString("en-IN")}
+                      </div>
+                    )}
+                    {(t.dueAmount || t.dues) > 0 && (
+                      <span className="inline-block mt-1.5 text-[11px] font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded">
+                        Dues: ₹{(t.dueAmount || t.dues).toLocaleString("en-IN")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Personal Information */}
+                <div>
+                  <SectionHead icon={User} title="Personal Information" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 p-4 rounded-xl border border-border">
+                    <InfoField label="Phone Number" value={val(t.phone, profile.phone)} />
+                    <InfoField label="Email Address" value={val(t.email, profile.email)} />
+                    <InfoField label="Date of Birth" value={val(t.dob, profile.dob) !== "—" ? fmtDate(val(t.dob, profile.dob)) : "—"} />
+                    <InfoField label="Gender" value={t.gender ? t.gender.charAt(0).toUpperCase() + t.gender.slice(1) : "—"} />
+                    <InfoField label="Occupation" value={val(t.occupation, profile.occupation)} />
+                    <InfoField label="Guardian / Emergency No." value={val(t.guardianNumber, profile.guardianNumber)} />
+                    {(agr.permanentAddress || profile.permanentAddress) && (
+                      <InfoField label="Permanent Address" value={agr.permanentAddress || profile.permanentAddress} wide />
+                    )}
+                    {(agr.backupEmail || profile.backupEmail) && (
+                      <InfoField label="Backup Email" value={agr.backupEmail || profile.backupEmail} />
+                    )}
+                  </div>
+                </div>
+
+                {/* Agreement & Financial Details */}
+                {(agr.licenseDuration || agr.licenseEndDate || agr.inclusions || agr.moveOutCharges || agr.gstCharges) && (
+                  <div>
+                    <SectionHead icon={FileText} title="Agreement & Financial Terms" color="text-amber-600" />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 p-4 rounded-xl border border-border">
+                      {t.moveInDate && <InfoField label="Move-in Date" value={fmtDate(t.moveInDate)} />}
+                      {agr.licenseEndDate && <InfoField label="License End Date" value={fmtDate(agr.licenseEndDate)} />}
+                      {agr.licenseDuration && <InfoField label="License Duration" value={agr.licenseDuration} />}
+                      {agr.licenseFeeDueDate && <InfoField label="Rent Due Day" value={`${agr.licenseFeeDueDate}th of month`} />}
+                      {agr.minimumStayDuration && <InfoField label="Minimum Stay" value={agr.minimumStayDuration} />}
+                      {agr.moveOutCharges && <InfoField label="Move-out Charges" value={`₹${Number(agr.moveOutCharges).toLocaleString("en-IN")}`} />}
+                      {agr.noticePeriodCharges && <InfoField label="Notice Period Charges" value={`₹${Number(agr.noticePeriodCharges).toLocaleString("en-IN")}`} />}
+                      {agr.gstCharges && Number(agr.gstCharges) > 0 && <InfoField label="GST Charges" value={`₹${Number(agr.gstCharges).toLocaleString("en-IN")}`} />}
+                      {agr.inclusions && <InfoField label="Inclusions" value={agr.inclusions} wide />}
+                    </div>
+                  </div>
+                )}
+
+                {/* KYC & Identity Documents */}
+                <div>
+                  <SectionHead icon={Shield} title="KYC & Identity Documents" color="text-indigo-500" />
+                  <div className="p-4 rounded-xl border border-border space-y-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6">
+                      {kyc.aadhaarNumber && <InfoField label="Aadhaar Number" value={kyc.aadhaarNumber} mono />}
+                      {kyc.aadhaarLinkedPhone && <InfoField label="Aadhaar Linked Phone" value={kyc.aadhaarLinkedPhone} />}
+                      <div>
+                        <div className="text-[11px] text-muted-foreground mb-0.5 uppercase tracking-wide">Verification Status</div>
+                        {kyc.digilockerVerified ? (
+                          <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-emerald-600">
+                            <BadgeCheck size={14} /> Verified {kyc.digilockerVerifiedAt ? `· ${fmtDate(kyc.digilockerVerifiedAt)}` : ""}
+                          </span>
                         ) : (
-                           <span className="flex items-center gap-1.5 text-rose-600"><AlertTriangle size={14}/> Pending</span>
+                          <span className="text-[12.5px] text-muted-foreground">Not verified</span>
                         )}
                       </div>
                     </div>
+
+                    {/* Aadhaar Images */}
+                    {(aadhaarFront || aadhaarBack) && (
+                      <div>
+                        <div className="text-[11px] text-muted-foreground mb-2 uppercase tracking-wide">Aadhaar Card Photos</div>
+                        <div className="flex gap-4 flex-wrap">
+                          {aadhaarFront && (
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[11px] text-muted-foreground">Front Side</span>
+                              <a href={aadhaarFront} target="_blank" rel="noopener noreferrer">
+                                <img
+                                  src={aadhaarFront}
+                                  alt="Aadhaar Front"
+                                  className="h-32 w-52 object-cover rounded-lg border border-border hover:opacity-90 transition-opacity cursor-zoom-in"
+                                />
+                              </a>
+                            </div>
+                          )}
+                          {aadhaarBack && (
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[11px] text-muted-foreground">Back Side</span>
+                              <a href={aadhaarBack} target="_blank" rel="noopener noreferrer">
+                                <img
+                                  src={aadhaarBack}
+                                  alt="Aadhaar Back"
+                                  className="h-32 w-52 object-cover rounded-lg border border-border hover:opacity-90 transition-opacity cursor-zoom-in"
+                                />
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {/* Tenant Photo */}
+                {tenantPhoto && (
+                  <div>
+                    <SectionHead icon={CreditCard} title="Tenant Photo" color="text-rose-400" />
+                    <div className="p-4 rounded-xl border border-border">
+                      <a href={tenantPhoto} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={tenantPhoto}
+                          alt="Tenant Photo"
+                          className="h-40 w-32 object-cover rounded-xl border border-border hover:opacity-90 transition-opacity cursor-zoom-in"
+                        />
+                      </a>
+                      <p className="text-[11.5px] text-muted-foreground mt-2">Click to open full size</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Timeline & Status */}
+                <div>
+                  <SectionHead icon={CalendarClock} title="Timeline & Status" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl border border-border">
+                      <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wide">Move-in Date</div>
+                      <div className="text-[13px] font-medium text-foreground">{t.moveInDate ? fmtDate(t.moveInDate) : "Not specified"}</div>
+                    </div>
+                    <div className="p-4 rounded-xl border border-border">
+                      <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wide">Agreement Signed</div>
+                      <div className="text-[13px] font-medium">
+                        {t.agreementSigned ? (
+                          <span className="flex items-center gap-1.5 text-emerald-600">
+                            <CheckCircle size={14} /> Yes {t.agreementSignedAt ? `· ${fmtDate(t.agreementSignedAt)}` : ""}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1.5 text-rose-600"><AlertTriangle size={14} /> Pending</span>
+                        )}
+                      </div>
+                    </div>
+                    {kyc.digilockerVerifiedAt && (
+                      <div className="p-4 rounded-xl border border-border">
+                        <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wide">KYC Verified On</div>
+                        <div className="text-[13px] font-medium text-foreground">{fmtDate(kyc.digilockerVerifiedAt)}</div>
+                      </div>
+                    )}
+                    <div className="p-4 rounded-xl border border-border">
+                      <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wide">Tenant Status</div>
+                      <Pill tone={getStatusTone(t.status)}>{t.status || "active"}</Pill>
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
-            </div>
-            
-            <div className="p-4 border-t border-border bg-muted/30 flex justify-end">
-              <button 
-                onClick={() => { setModalOpen(false); setSelectedTenant(null); }}
-                className="px-6 py-2 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity"
-              >
-                Close Details
-              </button>
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-border bg-muted/30 flex justify-end">
+                <button
+                  onClick={() => { setModalOpen(false); setSelectedTenant(null); }}
+                  className="px-6 py-2 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </PropertyOwnerLayout>
   );
 }

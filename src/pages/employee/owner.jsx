@@ -75,8 +75,7 @@ export default function EmployeeOwner() {
   }, [currentView]);
 
   const generateCreds = () => {
-    const prefix = "OWN";
-    const genId = `${prefix}${Math.floor(1000 + Math.random() * 9000)}`;
+    const genId = `ROOMHY${Math.floor(1000 + Math.random() * 9000)}`;
     setFormLoginId(genId);
   };
 

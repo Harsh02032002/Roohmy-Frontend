@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
-import { ownerApi } from "../../services/api";
+import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchActiveOwnerTenants } from "../../utils/propertyowner";
 import { 
   Users, Search, ShieldCheck, Mail, Phone, ExternalLink, 
   MapPin, CheckCircle, Clock, AlertTriangle, User, CalendarClock
@@ -25,11 +24,8 @@ export default function ActiveTenantsPage() {
     const fetchTenants = async () => {
       try {
         setLoading(true);
-        const data = await ownerApi.getOwnerTenants(owner.loginId);
-        if (active && data?.tenants) {
-          const activeList = data.tenants.filter(t => t.status === "active");
-          setTenants(activeList);
-        }
+        const activeList = await fetchActiveOwnerTenants(owner.loginId);
+        if (active) setTenants(activeList || []);
       } catch (err) {
         console.error("Error fetching active tenants:", err);
       } finally {

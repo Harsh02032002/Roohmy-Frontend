@@ -1,3 +1,4 @@
+/* ── Base ── */
 body {
   margin: 0;
   font-family: "Inter", Arial, sans-serif;
@@ -20,6 +21,7 @@ body::before {
     repeating-radial-gradient(circle at 0 0, transparent 0 22px, rgba(255, 255, 255, 0.2) 22px 23px);
 }
 
+/* ── Header ── */
 .dc-header {
   background: transparent;
   border-bottom: none;
@@ -59,6 +61,7 @@ body::before {
   letter-spacing: -0.05em;
 }
 
+/* ── Wrap / Card ── */
 .wrap {
   max-width: 1080px;
   margin: 16px auto 38px;
@@ -69,6 +72,7 @@ body::before {
   box-shadow: 0 22px 60px rgba(31, 45, 61, 0.16);
 }
 
+/* ── Hero card ── */
 .hero-card {
   margin-bottom: 24px;
   padding: 0;
@@ -98,24 +102,17 @@ p {
   color: #5d6773;
 }
 
-.info-panel,
-.section-card,
-.occupancy-block,
-.status-box {
+/* ── Info panel ── */
+.info-panel {
   border: 1.5px solid rgba(59, 74, 88, 0.18);
   border-radius: 18px;
   background: #ffffff;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.info-panel {
   padding: 18px 20px;
   margin-bottom: 20px;
 }
 
-.info-panel-title,
-.section-card h2,
-.full > h2 {
+.info-panel-title {
   display: inline-flex;
   align-items: center;
   min-height: 38px;
@@ -140,6 +137,7 @@ p {
   font-family: "Courier New", monospace;
 }
 
+/* ── Form / Grid ── */
 form {
   display: grid;
   gap: 18px;
@@ -151,53 +149,53 @@ form {
   gap: 18px 18px;
 }
 
-.section-card {
-  margin-top: 4px;
-  padding: 22px;
-}
-
-.section-card p,
-.full > p {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.occupancy-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-top: 12px;
-}
-
-.occupancy-block {
-  padding: 18px;
-}
-
-.room-bed-row {
-  margin-top: 12px;
-}
-
-.occupancy-total {
-  margin: 12px 0 0;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #324354;
-}
-
 .full {
   grid-column: 1 / -1;
 }
 
+/* ── Section label + badges ── */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #263342;
+  letter-spacing: -0.01em;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge--readonly {
+  background: #eef2f7;
+  color: #5c6f84;
+  border: 1px solid #d0dae4;
+}
+
+.badge--owner {
+  background: #e8f4ec;
+  color: #2d6a3f;
+  border: 1px solid #b3d9be;
+}
+
+/* ── Inputs ── */
 label {
   display: block;
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 700;
   color: #2d3742;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 input,
@@ -212,7 +210,7 @@ select {
   background: #fff;
   color: #1f2933;
   font-size: 14px;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  transition: border-color 0.16s, box-shadow 0.16s, transform 0.16s;
 }
 
 textarea {
@@ -228,6 +226,24 @@ select:focus {
   transform: translateY(-1px);
 }
 
+.input-readonly {
+  background: #f4f6f9;
+  color: #64717e;
+  border-color: #d0d8e2;
+  cursor: default;
+}
+
+.req {
+  color: #c0392b;
+}
+
+.hint {
+  color: #6f7b88;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* ── Buttons ── */
 button {
   min-height: 46px;
   margin-top: 12px;
@@ -239,14 +255,12 @@ button {
   cursor: pointer;
   font-weight: 800;
   letter-spacing: 0.01em;
-  text-transform: none;
   box-shadow: 0 10px 24px rgba(46, 61, 77, 0.16);
-  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+  transition: transform 0.16s, box-shadow 0.16s, background 0.16s;
 }
 
 button:hover:not(:disabled) {
   background: #445769;
-  color: #fff;
   transform: translateY(-1px);
   box-shadow: 0 14px 28px rgba(46, 61, 77, 0.2);
 }
@@ -277,7 +291,40 @@ button:disabled {
   margin-top: 0;
 }
 
+/* ── Occupancy ── */
+.occupancy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.occupancy-block {
+  border: 1.5px solid rgba(59, 74, 88, 0.18);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 18px;
+}
+
+.room-bed-row {
+  margin-top: 12px;
+}
+
+.occupancy-total {
+  margin: 12px 0 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #324354;
+}
+
+/* ── Status box ── */
 .status-box {
+  border: 1.5px solid rgba(59, 74, 88, 0.18);
+  border-radius: 18px;
+  background: #ffffff;
   padding: 14px 16px;
   font-size: 13px;
   font-weight: 700;
@@ -293,12 +340,469 @@ button:disabled {
   color: #5b2c2c;
 }
 
-.hint {
-  color: #6f7b88;
-  font-size: 12px;
-  margin-top: 6px;
+/* ═══════════════════════════════════════════
+   DOCUMENT UPLOAD BOXES
+═══════════════════════════════════════════ */
+
+/* Two-column grid for owner photo + bank proof */
+.upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
+/* ── Single upload card ── */
+.doc-upload-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1.5px solid #d0dae7;
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(44, 57, 70, 0.08);
+  transition: box-shadow 0.2s;
+}
+
+.doc-upload-wrap:hover {
+  box-shadow: 0 8px 28px rgba(44, 57, 70, 0.13);
+}
+
+/* Header row inside card */
+.doc-upload-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #edf1f5;
+  background: #f7f9fb;
+}
+
+.doc-upload-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #2d3742;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.doc-remove-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  color: #c0392b;
+  background: #fff0ef;
+  border: 1px solid #f5c6c3;
+  border-radius: 999px;
+  padding: 3px 12px;
+  margin-top: 0;
+  min-height: unset;
+  box-shadow: none;
+  transition: background 0.14s, color 0.14s;
+}
+
+.doc-remove-btn:hover {
+  background: #ffe0de;
+  color: #922b21;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Drop zone */
+.doc-drop-zone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  background: #fafbfc;
+  border: 2.5px dashed #c8d4de;
+  border-radius: 0;
+  transition: border-color 0.18s, background 0.18s;
+  overflow: hidden;
+}
+
+.doc-drop-zone:hover {
+  border-color: #8fa4ba;
+  background: #f3f6fa;
+}
+
+.doc-drop-zone--done {
+  border-style: solid;
+  border-color: #2ecc71;
+  background: #f2fbf5;
+}
+
+/* Centered content when empty */
+.doc-drop-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px;
+  text-align: center;
+}
+
+.doc-drop-icon {
+  font-size: 38px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.doc-drop-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3742;
+}
+
+.doc-drop-sub {
+  margin: 0;
+  font-size: 12px;
+  color: #8496a6;
+}
+
+/* Image preview fills the zone */
+.doc-preview-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Footer status badge */
+.doc-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  border-top: 1px solid #edf1f5;
+}
+
+.doc-status-badge--pending {
+  background: #fffbea;
+  color: #856404;
+}
+
+.doc-status-badge--done {
+  background: #f0faf4;
+  color: #196a34;
+}
+
+/* Upload button */
+.upload-btn {
+  background: #263342;
+  color: #fff;
+  border-radius: 12px;
+  padding: 0 28px;
+}
+
+.upload-btn:hover:not(:disabled) {
+  background: #1a2430;
+}
+
+/* ═══════════════════════════════════════════
+   AADHAAR UPLOAD AREA
+═══════════════════════════════════════════ */
+
+.aadhaar-upload-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Aadhaar drop zone */
+.aadhaar-drop-zone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 2.5px dashed #c8d4de;
+  border-radius: 16px;
+  background: #fafbfc;
+  overflow: hidden;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.aadhaar-drop-zone:hover {
+  border-color: #8fa4ba;
+  background: #f3f6fa;
+}
+
+/* OCR state colours */
+.aadhaar-drop-zone--verified {
+  border-color: #27ae60;
+  border-style: solid;
+  background: #f2fbf5;
+}
+
+.aadhaar-drop-zone--scanning {
+  border-color: #3498db;
+  border-style: dashed;
+  background: #f0f7ff;
+}
+
+.aadhaar-drop-zone--suspicious {
+  border-color: #f39c12;
+  border-style: solid;
+  background: #fffbf0;
+}
+
+.aadhaar-drop-zone--rejected,
+.aadhaar-drop-zone--error {
+  border-color: #e74c3c;
+  border-style: solid;
+  background: #fff5f5;
+}
+
+.aadhaar-drop-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  text-align: center;
+}
+
+.aadhaar-drop-icon {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.aadhaar-drop-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d3742;
+}
+
+.aadhaar-drop-sub {
+  margin: 0;
+  font-size: 12px;
+  color: #8496a6;
+}
+
+/* Preview image */
+.aadhaar-preview-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  border-radius: 13px;
+}
+
+/* OCR status badge */
+.aadhaar-ocr-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+}
+
+.aadhaar-ocr-badge--verified {
+  background: #eafaf1;
+  color: #1e6e3c;
+  border-color: #a9dfbe;
+}
+
+.aadhaar-ocr-badge--scanning {
+  background: #eaf4fd;
+  color: #1a5f8a;
+  border-color: #aacfe8;
+}
+
+.aadhaar-ocr-badge--suspicious {
+  background: #fef9ea;
+  color: #7d5a00;
+  border-color: #f0d080;
+}
+
+.aadhaar-ocr-badge--rejected,
+.aadhaar-ocr-badge--error {
+  background: #fdedec;
+  color: #7b241c;
+  border-color: #f5b7b1;
+}
+
+.aadhaar-ocr-badge-icon {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+/* Spinner for scanning state */
+.aadhaar-ocr-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #aacfe8;
+  border-top-color: #1a5f8a;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.aadhaar-upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.aadhaar-file-name {
+  font-size: 12px;
+  color: #6f7b88;
+  font-style: italic;
+}
+
+.aadhaar-uploaded-msg {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #196a34;
+}
+
+/* ═══════════════════════════════════════════
+   KYC CARDS (Aadhaar upload + OTP sections)
+═══════════════════════════════════════════ */
+
+.kyc-card {
+  border: 1.5px solid #d0dae7;
+  border-radius: 20px;
+  background: #fff;
+  padding: 22px 24px;
+  box-shadow: 0 4px 16px rgba(44, 57, 70, 0.07);
+}
+
+.kyc-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.kyc-card-icon-wrap {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #f0f4f8;
+  border: 1.5px solid #d8e2ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.kyc-card-title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e2a35;
+}
+
+.kyc-card-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #6d7c8a;
+  line-height: 1.5;
+}
+
+.kyc-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.kyc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.kyc-actions button {
+  margin-top: 0;
+}
+
+/* KYC button variants */
+.kyc-btn {
+  padding: 0 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.kyc-btn--primary {
+  background: #263342;
+  color: #fff;
+}
+
+.kyc-btn--primary:hover:not(:disabled) {
+  background: #1a2430;
+}
+
+.kyc-btn--complete {
+  background: #1a6e3c;
+  color: #fff;
+}
+
+.kyc-btn--complete:hover:not(:disabled) {
+  background: #155630;
+}
+
+.kyc-btn--save {
+  background: #1a5f8a;
+  color: #fff;
+}
+
+.kyc-btn--save:hover:not(:disabled) {
+  background: #154d70;
+}
+
+/* KYC status message */
+.kyc-status-msg {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+}
+
+.kyc-status-msg--success {
+  background: #eafaf1;
+  color: #1e6e3c;
+  border-color: #a9dfbe;
+}
+
+.kyc-status-msg--error {
+  background: #fdedec;
+  color: #7b241c;
+  border-color: #f5b7b1;
+}
+
+.kyc-status-msg--info {
+  background: #eaf4fd;
+  color: #1a5f8a;
+  border-color: #aacfe8;
+}
+
+/* ── Responsive ── */
 @media (max-width: 760px) {
   .dc-header-inner,
   .wrap {
@@ -313,7 +817,9 @@ button:disabled {
 
   .grid,
   .info-panel-grid,
-  .occupancy-grid {
+  .occupancy-grid,
+  .upload-grid,
+  .kyc-fields-grid {
     grid-template-columns: 1fr;
   }
 
@@ -325,5 +831,15 @@ button:disabled {
     margin: 16px 12px 26px;
     border-radius: 18px;
     padding-top: 24px;
+  }
+
+  .doc-preview-img,
+  .aadhaar-preview-img {
+    height: 180px;
+  }
+
+  .doc-drop-zone,
+  .aadhaar-drop-zone {
+    min-height: 160px;
   }
 }

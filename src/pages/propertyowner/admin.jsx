@@ -50,6 +50,7 @@ export default function Admin() {
 
   const [owner, setOwner] = useState(null);
   const [roomsCount, setRoomsCount] = useState(0);
+  const [totalBedsCapacity, setTotalBedsCapacity] = useState(0);
   const [tenantsCount, setTenantsCount] = useState(0);
   const [rentTotal, setRentTotal] = useState(0);
   const [enquiries, setEnquiries] = useState([]);
@@ -89,6 +90,7 @@ export default function Admin() {
       const filteredTenants = Array.isArray(tenantsRes) ? tenantsRes : tenantsRes?.tenants || []; // already filtered by fetchOwnerTenants
       
       setRoomsCount(filteredRooms.length);
+      setTotalBedsCapacity(filteredRooms.reduce((s, r) => s + (r.beds || 1), 0));
       setTenantsCount(filteredTenants.length);
       
       const computedRent = allEnquiries
@@ -275,7 +277,7 @@ export default function Admin() {
           <div className="relative h-[200px] mt-2">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={[{name: "Occupied", value: tenantsCount || 10}, {name: "Vacant", value: Math.max(roomsCount - tenantsCount, 0) || 5}]} dataKey="value" innerRadius={60} outerRadius={82} paddingAngle={3} stroke="none">
+                <Pie data={[{name: "Occupied", value: Math.min(tenantsCount || 0, totalBedsCapacity || tenantsCount || 1)}, {name: "Vacant", value: Math.max((totalBedsCapacity || 0) - (tenantsCount || 0), 0)}]} dataKey="value" innerRadius={60} outerRadius={82} paddingAngle={3} stroke="none">
                   <Cell fill="oklch(var(--primary))" />
                   <Cell fill="oklch(var(--muted))" />
                 </Pie>
@@ -283,8 +285,8 @@ export default function Admin() {
             </ResponsiveContainer>
             <div className="absolute inset-0 grid place-items-center pointer-events-none">
               <div className="text-center">
-                <div className="font-serif text-[34px] leading-none text-foreground">{roomsCount ? Math.round(((tenantsCount||0) / roomsCount) * 100) : 0}%</div>
-                <div className="text-[11px] text-muted-foreground mt-1">{tenantsCount}/{roomsCount} beds</div>
+                <div className="font-serif text-[34px] leading-none text-foreground">{totalBedsCapacity ? Math.min(100, Math.round(((tenantsCount||0) / totalBedsCapacity) * 100)) : 0}%</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{tenantsCount}/{totalBedsCapacity} beds</div>
               </div>
             </div>
           </div>
@@ -295,7 +297,7 @@ export default function Admin() {
             </div>
             <div>
               <div className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground"><span className="size-2 w-2 h-2 rounded-full bg-muted-foreground/30" /> Vacant</div>
-              <div className="font-medium text-[14px] mt-0.5 text-foreground">{Math.max(roomsCount - tenantsCount, 0)}</div>
+              <div className="font-medium text-[14px] mt-0.5 text-foreground">{Math.max((totalBedsCapacity || 0) - (tenantsCount || 0), 0)}</div>
             </div>
           </div>
         </div>

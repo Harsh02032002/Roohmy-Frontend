@@ -47,6 +47,7 @@ export default function Payment() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("all");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
     const session = getOwnerRuntimeSession();
@@ -55,9 +56,21 @@ export default function Payment() {
     fetchOwnerTenants(session.loginId).then(data => setTenants(data || [])).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
   const rows = tenants.map(t => {
-    const hasDues = (t.dueAmount || t.dues || 0) > 0;
-    const status = hasDues ? (Math.random() > 0.4 ? "overdue" : "due") : "paid";
+    const due = t.dueAmount || t.dues || 0;
+    // overdue = has dues AND either explicitly flagged OR last paid date is past due
+    const isOverdue = due > 0 && (
+      t.isOverdue === true ||
+      t.overdue === true ||
+      t.paymentStatus === "overdue" ||
+      (t.dueDate && new Date(t.dueDate) < new Date())
+    );
+    const status = due === 0 ? "paid" : isOverdue ? "overdue" : "due";
     return { ...t, payStatus: status };
   });
 
@@ -69,7 +82,7 @@ export default function Payment() {
   };
 
   const filtered = (tab === "all" ? rows : rows.filter(r => r.payStatus === tab))
-    .filter(t => !search || (t.name || "").toLowerCase().includes(search.toLowerCase()) || (t.roomNo || "").toLowerCase().includes(search.toLowerCase()));
+    .filter(t => !debouncedSearch || (t.name || "").toLowerCase().includes(debouncedSearch.toLowerCase()) || (t.roomNo || "").toLowerCase().includes(debouncedSearch.toLowerCase()));
 
   const totalExpected = tenants.reduce((s, t) => s + (t.agreedRent || t.rent || 0), 0);
   const totalCollected = rows.filter(r => r.payStatus === "paid").reduce((s, t) => s + (t.agreedRent || t.rent || 0), 0);

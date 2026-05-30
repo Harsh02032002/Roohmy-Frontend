@@ -3,7 +3,14 @@ import { fetchJson, getApiBase } from "../../utils/api";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
 import { useHtmlPage } from "../../utils/htmlPage";
 import { requireOwnerSession } from "../../utils/ownerSession";
-import { MapPin, Plus, Search, Check, X, ShieldCheck } from "lucide-react";
+import { MapPin, Plus, Search, Check, X, Trash2 } from "lucide-react";
+
+// area.city can be a populated City object or a plain string
+const cityName = (area) => {
+  if (!area?.city) return "-";
+  if (typeof area.city === "string") return area.city;
+  return area.city?.name || area.city?.city || "-";
+};
 
 export default function Location() {
   useHtmlPage({
@@ -22,50 +29,45 @@ export default function Location() {
         rel: "stylesheet"
       }
     ],
-    scripts: [
-      { src: "https://cdn.tailwindcss.com" }
-    ]
+    scripts: [{ src: "https://cdn.tailwindcss.com" }]
   });
 
-  const [owner, setOwner] = useState(null);
-  const [cities, setCities] = useState([]);
-  const [areas, setAreas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [activeTab, setActiveTab] = useState("cities");
-  const [cityForm, setCityForm] = useState({ name: "", state: "" });
-  const [areaForm, setAreaForm] = useState({ name: "", city: "", pincode: "" });
+  const [owner, setOwner]           = useState(null);
+  const [cities, setCities]         = useState([]);
+  const [areas, setAreas]           = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [errorMsg, setErrorMsg]     = useState("");
+  const [activeTab, setActiveTab]   = useState("cities");
+  const [cityForm, setCityForm]     = useState({ name: "", state: "" });
+  const [areaForm, setAreaForm]     = useState({ name: "", city: "", pincode: "" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleting, setDeleting]     = useState(null); // id being deleted
 
   useEffect(() => {
     const session = requireOwnerSession();
     if (!session) return;
     setOwner(session);
-    const load = async () => {
+    (async () => {
       try {
         const [citiesRes, areasRes] = await Promise.all([
           fetchJson("/api/locations/cities"),
           fetchJson("/api/locations/areas")
         ]);
-        setCities(citiesRes?.data || citiesRes || []);
-        setAreas(areasRes?.data || areasRes || []);
+        setCities(Array.isArray(citiesRes?.data) ? citiesRes.data : Array.isArray(citiesRes) ? citiesRes : []);
+        setAreas(Array.isArray(areasRes?.data) ? areasRes.data : Array.isArray(areasRes) ? areasRes : []);
       } catch (err) {
         setErrorMsg(err?.body || err?.message || "Failed to load locations.");
       } finally {
         setLoading(false);
       }
-    };
-    load();
+    })();
   }, []);
 
   const citiesOptions = useMemo(() => cities.map((c) => c.name || c.city || ""), [cities]);
 
   const createCity = async (e) => {
     e.preventDefault();
-    if (!cityForm.name || !cityForm.state) {
-      setErrorMsg("Please fill in both city name and state.");
-      return;
-    }
+    if (!cityForm.name || !cityForm.state) { setErrorMsg("Please fill in both city name and state."); return; }
     setErrorMsg("");
     try {
       const formData = new FormData();
@@ -74,8 +76,7 @@ export default function Location() {
       const res = await fetch(`${getApiBase()}/api/locations/cities`, { method: "POST", body: formData });
       if (!res.ok) throw new Error(await res.text());
       const result = await res.json();
-      const newCity = result?.data || result;
-      setCities((prev) => [...prev, newCity]);
+      setCities((prev) => [...prev, result?.data || result]);
       setCityForm({ name: "", state: "" });
     } catch (err) {
       setErrorMsg(err?.message || "Failed to create city.");
@@ -97,32 +98,61 @@ export default function Location() {
       const res = await fetch(`${getApiBase()}/api/locations/areas`, { method: "POST", body: formData });
       if (!res.ok) throw new Error(await res.text());
       const result = await res.json();
-      const newArea = result?.data || result;
-      setAreas((prev) => [...prev, newArea]);
+      setAreas((prev) => [...prev, result?.data || result]);
       setAreaForm({ name: "", city: "", pincode: "" });
     } catch (err) {
       setErrorMsg(err?.message || "Failed to create area.");
     }
   };
 
-  const filteredCities = useMemo(() => {
-    return cities.filter(c => 
-      (c.name || c.city || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
-      (c.state || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [cities, searchQuery]);
+  const handleDeleteCity = async (city) => {
+    if (!city._id) return;
+    if (!window.confirm(`Delete "${city.name || city.city}"? This will also remove all its areas.`)) return;
+    setDeleting(city._id);
+    try {
+      const res = await fetch(`${getApiBase()}/api/locations/cities/${city._id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      const deletedName = city.name || city.city || "";
+      setCities((prev) => prev.filter((c) => c._id !== city._id));
+      // Remove areas belonging to this city too
+      setAreas((prev) => prev.filter((a) => cityName(a).toLowerCase() !== deletedName.toLowerCase()));
+    } catch (err) {
+      setErrorMsg(err?.message || "Failed to delete city.");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
-  const filteredAreas = useMemo(() => {
-    return areas.filter(a => 
-      (a.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
-      (a.city || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const handleDeleteArea = async (area) => {
+    if (!area._id) return;
+    if (!window.confirm(`Delete area "${area.name}"?`)) return;
+    setDeleting(area._id);
+    try {
+      const res = await fetch(`${getApiBase()}/api/locations/areas/${area._id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      setAreas((prev) => prev.filter((a) => a._id !== area._id));
+    } catch (err) {
+      setErrorMsg(err?.message || "Failed to delete area.");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const filteredCities = useMemo(() =>
+    cities.filter((c) =>
+      (c.name || c.city || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.state || "").toLowerCase().includes(searchQuery.toLowerCase())
+    ), [cities, searchQuery]);
+
+  const filteredAreas = useMemo(() =>
+    areas.filter((a) =>
+      (a.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cityName(a).toLowerCase().includes(searchQuery.toLowerCase()) ||
       (a.pincode || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [areas, searchQuery]);
+    ), [areas, searchQuery]);
 
   return (
     <PropertyOwnerLayout owner={owner} title="Serviceable Locations" onLogout={() => { window.location.href = "/propertyowner/ownerlogin"; }}>
-      {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
         <div>
           <h1 className="font-serif text-[38px] md:text-[44px] leading-[1.05] text-foreground">Serviceable locations</h1>
@@ -134,10 +164,13 @@ export default function Location() {
         <div className="text-sm text-destructive mb-4 bg-destructive/10 px-4 py-3 rounded-lg flex items-center gap-2 border border-destructive/20">
           <X className="size-4 shrink-0" />
           <span>{errorMsg}</span>
+          <button onClick={() => setErrorMsg("")} className="ml-auto shrink-0 opacity-60 hover:opacity-100">
+            <X className="size-3.5" />
+          </button>
         </div>
       )}
 
-      {/* Tabs and Search Section */}
+      {/* Tabs + Search */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
         <div className="flex gap-2 bg-muted/30 p-1.5 rounded-xl border border-border/50">
           <button
@@ -159,7 +192,6 @@ export default function Location() {
             Areas
           </button>
         </div>
-
         <div className="relative w-full sm:w-72">
           <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -185,14 +217,14 @@ export default function Location() {
               <h3 className="text-base font-bold text-foreground mb-4">
                 {activeTab === "cities" ? "Add Serviceable City" : "Add Serviceable Area"}
               </h3>
-              
+
               {activeTab === "cities" ? (
                 <form onSubmit={createCity} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">City Name</label>
                     <input
                       value={cityForm.name}
-                      onChange={(e) => setCityForm(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) => setCityForm((p) => ({ ...p, name: e.target.value }))}
                       placeholder="e.g. Indore"
                       className="w-full p-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
@@ -201,7 +233,7 @@ export default function Location() {
                     <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">State Name</label>
                     <input
                       value={cityForm.state}
-                      onChange={(e) => setCityForm(prev => ({ ...prev, state: e.target.value }))}
+                      onChange={(e) => setCityForm((p) => ({ ...p, state: e.target.value }))}
                       placeholder="e.g. Madhya Pradesh"
                       className="w-full p-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
@@ -219,7 +251,7 @@ export default function Location() {
                     <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Area / Locality Name</label>
                     <input
                       value={areaForm.name}
-                      onChange={(e) => setAreaForm(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) => setAreaForm((p) => ({ ...p, name: e.target.value }))}
                       placeholder="e.g. Vijay Nagar"
                       className="w-full p-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
@@ -228,7 +260,7 @@ export default function Location() {
                     <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">City</label>
                     <select
                       value={areaForm.city}
-                      onChange={(e) => setAreaForm(prev => ({ ...prev, city: e.target.value }))}
+                      onChange={(e) => setAreaForm((p) => ({ ...p, city: e.target.value }))}
                       className="w-full p-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                       <option value="">Select Serviceable City</option>
@@ -242,7 +274,7 @@ export default function Location() {
                     <input
                       type="text"
                       value={areaForm.pincode}
-                      onChange={(e) => setAreaForm(prev => ({ ...prev, pincode: e.target.value }))}
+                      onChange={(e) => setAreaForm((p) => ({ ...p, pincode: e.target.value }))}
                       placeholder="e.g. 452010"
                       className="w-full p-2.5 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
@@ -269,12 +301,13 @@ export default function Location() {
                         <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider">City Name</th>
                         <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider">State</th>
                         <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider">Status</th>
+                        <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/60">
                       {filteredCities.length === 0 ? (
                         <tr>
-                          <td colSpan={3} className="p-8 text-center text-muted-foreground font-medium">
+                          <td colSpan={4} className="p-8 text-center text-muted-foreground font-medium">
                             No cities match your search.
                           </td>
                         </tr>
@@ -287,6 +320,17 @@ export default function Location() {
                               <span className="inline-flex items-center gap-1 bg-success/10 text-success-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-success/20">
                                 <Check className="size-3" /> Active
                               </span>
+                            </td>
+                            <td className="p-4 text-right">
+                              <button
+                                onClick={() => handleDeleteCity(city)}
+                                disabled={deleting === city._id}
+                                title="Delete city and all its areas"
+                                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[11px] font-bold text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                              >
+                                <Trash2 className="size-3.5" />
+                                {deleting === city._id ? "Deleting..." : "Delete"}
+                              </button>
                             </td>
                           </tr>
                         ))
@@ -301,12 +345,13 @@ export default function Location() {
                         <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider">City</th>
                         <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider">Pincode</th>
                         <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider">Status</th>
+                        <th className="p-4 font-bold text-[12px] uppercase text-muted-foreground tracking-wider text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/60">
                       {filteredAreas.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className="p-8 text-center text-muted-foreground font-medium">
+                          <td colSpan={5} className="p-8 text-center text-muted-foreground font-medium">
                             No areas match your search.
                           </td>
                         </tr>
@@ -314,12 +359,23 @@ export default function Location() {
                         filteredAreas.map((area, idx) => (
                           <tr key={area._id || idx} className="hover:bg-muted/15 transition-colors">
                             <td className="p-4 font-bold text-foreground">{area.name || "-"}</td>
-                            <td className="p-4 font-medium text-muted-foreground">{area.city || "-"}</td>
+                            <td className="p-4 font-medium text-muted-foreground">{cityName(area)}</td>
                             <td className="p-4 font-medium text-slate-500 font-mono">{area.pincode || "-"}</td>
                             <td className="p-4">
                               <span className="inline-flex items-center gap-1 bg-success/10 text-success-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-success/20">
                                 <Check className="size-3" /> Active
                               </span>
+                            </td>
+                            <td className="p-4 text-right">
+                              <button
+                                onClick={() => handleDeleteArea(area)}
+                                disabled={deleting === area._id}
+                                title="Delete this area"
+                                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[11px] font-bold text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                              >
+                                <Trash2 className="size-3.5" />
+                                {deleting === area._id ? "Deleting..." : "Delete"}
+                              </button>
                             </td>
                           </tr>
                         ))

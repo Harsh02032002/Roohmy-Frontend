@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getApiBases, postExpectSuccess } from "./utils";
+import { getApiBases, getWithFallback, postExpectSuccess } from "./utils";
 
 export const useTenantAgreement = () => {
   const apiBases = useMemo(() => getApiBases(), []);
@@ -7,29 +7,48 @@ export const useTenantAgreement = () => {
   const [eSignName, setESignName] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [loadingData, setLoadingData] = useState(false);
+  const [tenantData, setTenantData] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("loginId")) setLoginId(params.get("loginId"));
   }, []);
 
-  const handleSubmit = useCallback(async () => {
+  useEffect(() => {
+    if (!loginId.trim()) return;
+    setLoadingData(true);
+    getWithFallback(`/api/checkin/tenant/profile/${encodeURIComponent(loginId.trim())}`, apiBases)
+      .then((data) => setTenantData(data?.tenant || data || null))
+      .catch(() => {})
+      .finally(() => setLoadingData(false));
+  }, [loginId, apiBases]);
+
+  const handleSubmit = useCallback(async (signatureDataUrl = "") => {
+    setError("");
     if (!loginId.trim() || !eSignName.trim() || !accepted) {
-      alert("Login ID, e-sign and acceptance are required");
+      setError("Login ID, e-sign name and acceptance are required");
+      return;
+    }
+    if (!signatureDataUrl) {
+      setError("Please draw your signature before submitting");
       return;
     }
 
     setSubmitting(true);
     try {
-      await postExpectSuccess(
+      const agreementResp = await postExpectSuccess(
         "/api/checkin/tenant/agreement",
-        { loginId: loginId.trim(), eSignName: eSignName.trim(), accepted: true },
+        { loginId: loginId.trim(), eSignName: eSignName.trim(), accepted: true, signatureDataUrl },
         apiBases
       );
-      await postExpectSuccess("/api/checkin/tenant/final-submit", { loginId: loginId.trim() }, apiBases);
-      window.location.href = `/digital-checkin/tenant-confirmation?loginId=${encodeURIComponent(loginId.trim())}`;
+      const nextUrl =
+        agreementResp?.nextUrl ||
+        `/digital-checkin/tenant-confirmation?loginId=${encodeURIComponent(loginId.trim())}`;
+      window.location.href = nextUrl;
     } catch (err) {
-      alert(err.message || "Unable to submit tenant agreement");
+      setError(err.message || "Unable to submit tenant agreement");
     } finally {
       setSubmitting(false);
     }
@@ -43,7 +62,9 @@ export const useTenantAgreement = () => {
     accepted,
     setAccepted,
     submitting,
+    error,
+    loadingData,
+    tenantData,
     handleSubmit
   };
 };
-

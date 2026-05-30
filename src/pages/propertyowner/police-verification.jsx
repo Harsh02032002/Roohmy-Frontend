@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
-import { ownerApi, apiFetch } from "../../services/api";
+import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchOwnerTenants } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   ShieldCheck, Search, Download, Upload, FileText, 
   CheckCircle2, AlertTriangle, Clock, Eye, XCircle
@@ -21,16 +21,13 @@ export default function PoliceVerificationPage() {
   const fetchPoliceData = async () => {
     try {
       setLoading(true);
-      const data = await ownerApi.getOwnerTenants(owner.loginId);
-      if (data?.tenants) {
-        // Sort so that 'submitted' (pending verification) is at the top
-        const sorted = [...data.tenants].sort((a, b) => {
-          if (a.policeVerification?.status === "submitted" && b.policeVerification?.status !== "submitted") return -1;
-          if (a.policeVerification?.status !== "submitted" && b.policeVerification?.status === "submitted") return 1;
-          return 0;
-        });
-        setTenants(sorted);
-      }
+      const all = await fetchOwnerTenants(owner.loginId);
+      const sorted = [...(all || [])].sort((a, b) => {
+        if (a.policeVerification?.status === "submitted" && b.policeVerification?.status !== "submitted") return -1;
+        if (a.policeVerification?.status !== "submitted" && b.policeVerification?.status === "submitted") return 1;
+        return 0;
+      });
+      setTenants(sorted);
     } catch (err) {
       console.error("Error fetching police verification tenants:", err);
     } finally {

@@ -23,6 +23,23 @@ const writeJson = (key, value) => {
   }
 };
 
+const _fetchCache = {};
+const _CACHE_TTL = 60_000;
+const _getCached = (key) => { const e = _fetchCache[key]; return e && Date.now() - e.ts < _CACHE_TTL ? e.data : null; };
+const _setCached = (key, data) => { _fetchCache[key] = { data, ts: Date.now() }; };
+
+export const clearOwnerFetchCache = (loginId) => {
+  delete _fetchCache[`props_${loginId}_false`];
+  delete _fetchCache[`props_${loginId}_true`];
+  delete _fetchCache[`rooms_${loginId}`];
+  delete _fetchCache[`tenants_${loginId}`];
+  delete _fetchCache[`active_tenants_${loginId}`];
+};
+
+export const clearTenantDocCache = (tenantId) => {
+  delete _fetchCache[`tenant_${tenantId}`];
+};
+
 export const normalizeOwnerLoginId = (raw) => {
   const value = String(raw || "").trim().toUpperCase();
   return OWNER_LOGIN_ID_REGEX.test(value) ? value : "";
@@ -237,6 +254,9 @@ export const downloadCsv = (filename, rows) => {
 };
 
 export const fetchOwnerProperties = async (loginId, bypassFilter = false) => {
+  const _cacheKey = `props_${loginId}_${bypassFilter}`;
+  const _hit = _getCached(_cacheKey);
+  if (_hit) return _hit;
   let response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/properties`);
   let properties = (response?.properties || []).filter((item) => {
     const candidateOwner = item?.ownerLoginId || item?.ownerId || item?.owner || "";
@@ -263,10 +283,14 @@ export const fetchOwnerProperties = async (loginId, bypassFilter = false) => {
   }
 
   writeJson("roomhy_properties", properties);
+  _setCached(_cacheKey, properties);
   return properties;
 };
 
 export const fetchOwnerRooms = async (loginId) => {
+  const _cacheKey = `rooms_${loginId}`;
+  const _hit = _getCached(_cacheKey);
+  if (_hit) return _hit;
   try {
     const response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/rooms`);
     let backendRooms = response?.rooms || response?.data || [];
@@ -289,7 +313,9 @@ export const fetchOwnerRooms = async (loginId) => {
     }));
     
     writeJson("roomhy_rooms", rooms);
-    return { rooms };
+    const _result = { rooms };
+    _setCached(_cacheKey, _result);
+    return _result;
   } catch (_) {
     let rooms = readJson("roomhy_rooms", []);
     rooms = filterByActiveProperty(rooms, false);
@@ -305,6 +331,9 @@ export const addElectricityReading = async (roomId, payload) => {
 };
 
 export const fetchOwnerTenants = async (loginId) => {
+  const _cacheKey = `tenants_${loginId}`;
+  const _hit = _getCached(_cacheKey);
+  if (_hit) return _hit;
   try {
     const response = await fetchJson("/api/tenants");
     let tenants = (Array.isArray(response) ? response : response?.tenants || response?.data || []).filter((tenant) => {
@@ -317,6 +346,7 @@ export const fetchOwnerTenants = async (loginId) => {
     });
     tenants = filterByActiveProperty(tenants);
     writeJson("roomhy_tenants", tenants);
+    _setCached(_cacheKey, tenants);
     return tenants;
   } catch (_) {
     try {
@@ -324,15 +354,38 @@ export const fetchOwnerTenants = async (loginId) => {
       let tenants = Array.isArray(response) ? response : response?.tenants || response?.data || [];
       tenants = filterByActiveProperty(tenants);
       writeJson("roomhy_tenants", tenants);
+      _setCached(_cacheKey, tenants);
       return tenants;
     } catch (_) {
       const response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/tenants`);
       let tenants = response?.tenants || [];
       tenants = filterByActiveProperty(tenants);
       writeJson("roomhy_tenants", tenants);
+      _setCached(_cacheKey, tenants);
       return tenants;
     }
   }
+};
+
+export const fetchTenantById = async (tenantId) => {
+  if (!tenantId) return null;
+  const _cacheKey = `tenant_${tenantId}`;
+  const _hit = _getCached(_cacheKey);
+  if (_hit) return _hit;
+  const response = await fetchJson(`/api/tenants/${encodeURIComponent(tenantId)}`);
+  const tenant = response?.tenant || response?.data || response || null;
+  if (tenant) _setCached(_cacheKey, tenant);
+  return tenant;
+};
+
+export const fetchActiveOwnerTenants = async (loginId) => {
+  const _cacheKey = `active_tenants_${loginId}`;
+  const _hit = _getCached(_cacheKey);
+  if (_hit) return _hit;
+  const all = await fetchOwnerTenants(loginId);
+  const active = (all || []).filter((t) => !t.status || t.status === "active");
+  _setCached(_cacheKey, active);
+  return active;
 };
 
 export const fetchAllTenants = async () => {

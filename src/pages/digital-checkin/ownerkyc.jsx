@@ -38,9 +38,22 @@ export default function DigitalCheckinOwnerkyc() {
 
   return (
     <div className="html-page">
+      <header className="dc-header">
+        <div className="dc-header-inner">
+          <img src="/website/images/whitelogo.jpeg" alt="Roomhy Logo" className="dc-logo" />
+          <div>
+            <p className="dc-eyebrow">Digital Check-In</p>
+            <h1 className="dc-header-title">Owner KYC</h1>
+          </div>
+        </div>
+      </header>
+
       <div className="wrap">
-        <h2>Owner Aadhaar KYC</h2>
-        <p className="muted">Verify your identity using Aadhaar for secure access.</p>
+        <div className="hero-card">
+          <p className="hero-kicker">Identity Verification</p>
+          <h2 className="hero-title">Aadhaar verification for secure owner access</h2>
+          <p className="hero-copy muted">Verify your identity using Aadhaar for secure access.</p>
+        </div>
 
         {ownerEmail && (
           <div

@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { X, Plus, Building2, ChevronDown, UploadCloud, Wind, Table as TableIcon, Tv, Bath, LayoutTemplate, Refrigerator, DoorClosed, Armchair, Utensils, Microwave, Flame, Shirt, Video, Fan, Check, Edit2, Trash2 } from "lucide-react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { fetchJson, getApiBase, getAuthHeader } from "../../utils/api";
+import { getApiBase, getAuthHeader } from "../../utils/api";
 import {
-  assignTenant, clearOwnerRuntimeSession, createRoom, updateRoom, deleteRoom,
+  assignTenant, clearOwnerFetchCache, clearOwnerRuntimeSession, createRoom, updateRoom, deleteRoom,
   fetchOwnerProperties, fetchOwnerRooms, fetchOwnerTenants, getOwnerRuntimeSession
 } from "../../utils/propertyowner";
 
@@ -40,6 +40,27 @@ const normalizeRoom = (room, ownerId) => {
 const readJson = (k, fb) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fb; } catch { return fb; } };
 const writeJson = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 
+const compressImage = (file, maxWidth = 1200, quality = 0.75) =>
+  new Promise((resolve) => {
+    if (!file.type.startsWith("image/")) { resolve(file); return; }
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxWidth / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(img.src);
+      canvas.toBlob(
+        (blob) => resolve(new File([blob], file.name, { type: "image/jpeg" })),
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => resolve(file);
+  });
+
 export default function Rooms() {
   const [owner, setOwner] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -57,6 +78,7 @@ export default function Rooms() {
   const [selectedTenantId, setSelectedTenantId] = useState("");
   const [newTenantForm, setNewTenantForm] = useState({ name: "", phone: "", email: "" });
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
 
   const [showFilter, setShowFilter] = useState("all");
   const [floorFilter, setFloorFilter] = useState("all");
@@ -120,11 +142,6 @@ export default function Rooms() {
       return;
     }
 
-    if (!roomForm.media || roomForm.media.length === 0) {
-      setErrorMsg("Please upload at least one room photo/video before saving.");
-      return;
-    }
-    
     try {
       setErrorMsg("");
       const bedCount = Number(roomForm.roomBeds || 1);
@@ -149,48 +166,19 @@ export default function Rooms() {
       };
 
       if (roomForm._id) {
-        // Instead of updating room directly, send request to superadmin
-        await fetchJson("/api/notifications", {
-          method: "POST",
-          body: JSON.stringify({
-            toRole: "superadmin",
-            from: owner?.name || owner?.loginId || "Property Owner",
-            type: "edit_room_request",
-            meta: {
-              propertyId: propId,
-              propertyTitle: currentProperty?.title || "",
-              ownerLoginId: owner.loginId,
-              roomId: roomForm._id,
-              roomData: payload
-            }
-          })
-        });
-        
+        await updateRoom(roomForm._id, payload);
         setErrorMsg("");
-        alert("Edit Room request sent to Superadmin successfully!");
         setRoomModalOpen(false);
         setRoomForm(defaultRoomForm);
+        clearOwnerFetchCache(owner.loginId);
+        await load(owner);
       } else {
-        // Instead of creating room directly, send request to superadmin
-        await fetchJson("/api/notifications", {
-          method: "POST",
-          body: JSON.stringify({
-            toRole: "superadmin",
-            from: owner?.name || owner?.loginId || "Property Owner",
-            type: "add_room_request",
-            meta: {
-              propertyId: propId,
-              propertyTitle: currentProperty?.title || "",
-              ownerLoginId: owner.loginId,
-              roomData: payload
-            }
-          })
-        });
-        
+        await createRoom(payload);
         setErrorMsg("");
-        alert("Add Room request sent to Superadmin successfully!");
         setRoomModalOpen(false);
         setRoomForm(defaultRoomForm);
+        clearOwnerFetchCache(owner.loginId);
+        await load(owner);
       }
     } catch (e) { setErrorMsg(e?.message || "Failed."); }
   };
@@ -221,6 +209,7 @@ export default function Rooms() {
     try {
       setErrorMsg("");
       await deleteRoom(room._id || room.id);
+      clearOwnerFetchCache(owner.loginId);
       await load(owner);
     } catch (e) {
       setErrorMsg(e?.message || "Failed to delete room.");
@@ -253,6 +242,7 @@ export default function Rooms() {
       }
       await assignTenant(payload);
       setAssignModalOpen(false);
+      clearOwnerFetchCache(owner.loginId);
       await load(owner);
     } catch (e) { 
       setErrorMsg(e?.body || e?.message || "Failed."); 
@@ -613,21 +603,23 @@ export default function Rooms() {
                     </div>
                   )}
                 </div>
-                <label className="w-32 h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-all text-primary">
+                <label className={`w-32 h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all text-primary ${isUploadingMedia ? "border-primary/40 bg-primary/5 cursor-wait" : "border-border cursor-pointer hover:border-primary/50 hover:bg-muted/30"}`}>
                   <input type="file" multiple accept="image/*,video/*" onChange={async (e) => {
                     const files = Array.from(e.target.files || []);
                     if (files.length === 0) return;
+                    setIsUploadingMedia(true);
                     try {
                       const uploadPromises = files.map(async (file) => {
+                        const compressed = await compressImage(file);
                         const formData = new FormData();
-                        formData.append("image", file);
+                        formData.append("image", compressed);
                         const base = getApiBase();
-                        const res = await fetch(`${base}/api/upload`, { 
-                          method: "POST", 
+                        const res = await fetch(`${base}/api/upload`, {
+                          method: "POST",
                           body: formData,
                           headers: getAuthHeader()
                         });
-                        
+
                         let data;
                         const contentType = res.headers.get("content-type");
                         if (contentType && contentType.includes("application/json")) {
@@ -644,10 +636,21 @@ export default function Rooms() {
                       setRoomForm(p => ({...p, media: [...(p.media || []), ...uploadedFiles]}));
                     } catch (err) {
                       alert("Failed to upload media: " + err.message);
+                    } finally {
+                      setIsUploadingMedia(false);
                     }
-                  }} className="sr-only" />
-                  <UploadCloud size={28} />
-                  <span className="text-[11px] font-medium text-center px-2">Upload photos/videos</span>
+                  }} className="sr-only" disabled={isUploadingMedia} />
+                  {isUploadingMedia ? (
+                    <>
+                      <svg className="animate-spin size-7 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                      <span className="text-[11px] font-medium text-center px-2 text-primary">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud size={28} />
+                      <span className="text-[11px] font-medium text-center px-2">Upload photos/videos</span>
+                    </>
+                  )}
                 </label>
               </div>
 
@@ -655,6 +658,7 @@ export default function Rooms() {
           </div>
           
           <div className="p-4 border-t border-border bg-card">
+            {errorMsg && <p className="text-[12px] text-destructive mb-3 px-1">{errorMsg}</p>}
             <button type="submit" form="addRoomForm" className="w-full h-11 rounded-lg bg-primary text-primary-foreground text-[14px] font-medium hover:opacity-90 transition-opacity shadow-sm">
               {roomForm._id ? 'Update Room' : 'Add Room'}
             </button>

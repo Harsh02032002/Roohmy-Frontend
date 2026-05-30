@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropertyOwnerLayout from "../../components/propertyowner/PropertyOwnerLayout";
-import { getOwnerRuntimeSession, clearOwnerRuntimeSession } from "../../utils/propertyowner";
-import { ownerApi, apiFetch } from "../../services/api";
+import { getOwnerRuntimeSession, clearOwnerRuntimeSession, fetchOwnerTenants } from "../../utils/propertyowner";
+import { apiFetch } from "../../services/api";
 import { 
   CalendarClock, Search, UserPlus, Phone, Mail, 
   ArrowRight, CheckCircle, Clock, AlertTriangle
@@ -23,11 +23,8 @@ export default function UpcomingMoveinsPage() {
     const fetchMoveins = async () => {
       try {
         setLoading(true);
-        const data = await ownerApi.getOwnerTenants(owner.loginId);
-        if (active && data?.tenants) {
-          const pendingList = data.tenants.filter(t => t.status === "pending");
-          setMoveins(pendingList);
-        }
+        const all = await fetchOwnerTenants(owner.loginId);
+        if (active) setMoveins((all || []).filter(t => t.status === "pending"));
       } catch (err) {
         console.error("Error fetching upcoming move-ins:", err);
       } finally {

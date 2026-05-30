@@ -62,7 +62,7 @@ const AadhaarUpload = ({ label, side, value, onChange }) => {
         ) : (
           <>
             <div style={{ fontSize: "28px", marginBottom: "6px", lineHeight: 1 }}>
-              {side === "front" ? "🪪" : "↩️"}
+              {side === "front" ? "🪪" : side === "selfie" ? "🤳" : "↩️"}
             </div>
             <div style={{ fontSize: "12px", color: "#546e7a", fontWeight: 600 }}>Click to upload</div>
             <div style={{ fontSize: "11px", color: "#90a4ae", marginTop: "2px" }}>JPG / PNG — max 5 MB</div>
@@ -135,6 +135,7 @@ export default function DigitalCheckinTenantkyc() {
 
   const [aadhaarFront, setAadhaarFront] = React.useState("");
   const [aadhaarBack, setAadhaarBack] = React.useState("");
+  const [tenantPhoto, setTenantPhoto] = React.useState("");
 
   return (
     <div className="html-page">
@@ -177,8 +178,19 @@ export default function DigitalCheckinTenantkyc() {
           </div>
         </div>
 
+        {/* Tenant Selfie */}
+        <div style={{ marginTop: "24px" }}>
+          <label style={{ marginBottom: "4px" }}>Tenant Selfie / Photo</label>
+          <p style={{ margin: "0 0 14px", fontSize: "12px", color: "#7a8fa6" }}>
+            Upload a clear face photo of the tenant. This will be stored with your KYC record.
+          </p>
+          <div style={{ maxWidth: "200px" }}>
+            <AadhaarUpload label="Tenant Photo" side="selfie" value={tenantPhoto} onChange={setTenantPhoto} />
+          </div>
+        </div>
+
         <button type="button" onClick={handleStart}>Send OTP</button>
-        <button type="button" onClick={() => handleComplete(aadhaarFront, aadhaarBack)}>
+        <button type="button" onClick={() => handleComplete(aadhaarFront, aadhaarBack, tenantPhoto)}>
           {otpSent ? "Verify OTP & Complete" : "Complete Verification"}
         </button>
         {otpMsg && <p className="muted">{otpMsg}</p>}
