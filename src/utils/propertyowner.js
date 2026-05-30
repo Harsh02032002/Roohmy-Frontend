@@ -1,7 +1,7 @@
 import { fetchJson, getApiBase } from "./api";
 import { getOwnerSession } from "./ownerSession";
 
-const OWNER_LOGIN_ID_REGEX = /^ROOMHY\d{4}$/i;
+const OWNER_LOGIN_ID_REGEX = /^ROOMHY\d{4,}$/i;
 const WEBSITE_USER_ID_REGEX = /^roomhyweb\d{6}$/i;
 
 const readJson = (key, fallback) => {
@@ -260,7 +260,7 @@ export const fetchOwnerProperties = async (loginId, bypassFilter = false) => {
   let response = await fetchJson(`/api/owners/${encodeURIComponent(loginId)}/properties`);
   let properties = (response?.properties || []).filter((item) => {
     const candidateOwner = item?.ownerLoginId || item?.ownerId || item?.owner || "";
-    return !candidateOwner || matchesOwnerLoginId(candidateOwner, loginId);
+    return candidateOwner && matchesOwnerLoginId(candidateOwner, loginId);
   });
 
   if (!bypassFilter) {
@@ -268,19 +268,6 @@ export const fetchOwnerProperties = async (loginId, bypassFilter = false) => {
   }
 
   const session = getOwnerSession();
-  if (!properties.length && session?.role !== 'manager') {
-    try {
-      const res = await fetchJson('/api/properties/ensure-owner', {
-        method: 'POST',
-        body: JSON.stringify({ ownerLoginId: loginId, title: `${loginId} Premium Property` })
-      });
-      if (res?.success && res?.property) {
-        properties = [res.property];
-      }
-    } catch (err) {
-      console.warn("Failed to ensure owner property:", err);
-    }
-  }
 
   writeJson("roomhy_properties", properties);
   _setCached(_cacheKey, properties);
@@ -449,7 +436,7 @@ export const fetchBookingRequestsForOwner = async (ownerId) => {
   const list = Array.isArray(response) ? response : response?.requests || response?.data || [];
   let filtered = list.filter((item) => {
     const candidateOwner = item?.owner_id || item?.ownerId || item?.owner_login_id || item?.ownerLoginId || item?.owner || "";
-    return !candidateOwner || matchesOwnerLoginId(candidateOwner, ownerId);
+    return candidateOwner && matchesOwnerLoginId(candidateOwner, ownerId);
   });
   return filterByActiveProperty(filtered);
 };

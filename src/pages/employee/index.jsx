@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useHtmlPage } from "../../utils/htmlPage";
 import { fetchJson } from "../../utils/api";
 
@@ -32,6 +33,9 @@ export default function Index() {
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [requireReset, setRequireReset] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState("email");
@@ -366,14 +370,22 @@ export default function Index() {
                 <i data-lucide="lock" className="w-5 h-5"></i>
               </span>
               <input
-                type="password"
-                className="input-focus w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 transition-colors outline-none"
+                type={showPassword ? "text" : "password"}
+                className="input-focus w-full pl-10 pr-10 p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 transition-colors outline-none"
                 id="login-password"
                 placeholder="********"
                 autoComplete="off"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(prev => !prev)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
             {loginError && <div id="error-msg" className="error-msg mt-2">{loginError}</div>}
           </div>
@@ -455,23 +467,43 @@ export default function Index() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                  <input
-                    type="password"
-                    className="input-focus w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 transition-colors outline-none"
-                    placeholder="Enter new password..."
-                    value={newPassword}
-                    onChange={(event) => setNewPassword(event.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      className="input-focus w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-indigo-500 transition-colors outline-none"
+                      placeholder="Enter new password..."
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(prev => !prev)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                  <input
-                    type="password"
-                    className="input-focus w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 transition-colors outline-none"
-                    placeholder="Confirm your password..."
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      className="input-focus w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-indigo-500 transition-colors outline-none"
+                      placeholder="Confirm your password..."
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(prev => !prev)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
                 {forgotError && <div className="error-msg">{forgotError}</div>}
                 <button type="button" className="btn-primary w-full text-white font-bold py-3 rounded-lg transition-all" onClick={resetPassword} disabled={forgotLoading}>

@@ -151,7 +151,7 @@ export default function Owner() {
   const stats = useMemo(() => {
     const total = owners.length;
     const verified = owners.filter(o => (o.kycStatus === "verified" || o.kyc?.status === "verified")).length;
-    const properties = owners.reduce((acc, o) => acc + (o.propertyCount || 1), 0);
+    const properties = owners.reduce((acc, o) => acc + (o.propertyCount || 0), 0);
     return { total, verified, pending: total - verified, properties };
   }, [owners]);
 

@@ -191,7 +191,6 @@ export default function TenantDocsPage() {
                   <th className="px-6 py-3.5 font-semibold">Signed Agreement</th>
                   <th className="px-6 py-3.5 font-semibold">Tenant Photo</th>
                   <th className="px-6 py-3.5 font-semibold">KYC Status</th>
-                  <th className="px-6 py-3.5 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -318,19 +317,6 @@ export default function TenantDocsPage() {
                         </span>
                       </td>
 
-                      {/* Actions */}
-                      <td className="px-6 py-4 text-right">
-                        {d.kycStatus === "submitted" ? (
-                          <button
-                            onClick={() => handleVerify(d._id)}
-                            className="h-8 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[11px] font-bold transition-all"
-                          >
-                            Approve KYC
-                          </button>
-                        ) : (
-                          <span className="text-[11.5px] text-muted-foreground">—</span>
-                        )}
-                      </td>
                     </tr>
                   );
                 })}

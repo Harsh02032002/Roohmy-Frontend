@@ -3,7 +3,7 @@ import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { setWebsiteSession, getWebsiteApiUrl } from "../../utils/websiteSession";
-import { User, Mail, Phone, Lock, ArrowRight, CheckCircle2, Sparkles, Building2, Wallet } from "lucide-react";
+import { User, Mail, Phone, Lock, ArrowRight, CheckCircle2, Sparkles, Building2, Wallet, Eye, EyeOff } from "lucide-react";
 
 export default function WebsiteSignup() {
   const apiUrl = getWebsiteApiUrl();
@@ -29,6 +29,7 @@ export default function WebsiteSignup() {
   const [verificationVisible, setVerificationVisible] = useState(false);
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingVerify, setLoadingVerify] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
@@ -329,13 +330,21 @@ export default function WebsiteSignup() {
                       <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
                     </div>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       required
-                      className="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
+                      className="block w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none"
                       placeholder="••••••••"
                       value={signup.password}
                       onChange={(e) => setSignup({ ...signup, password: e.target.value })}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-teal-600 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
 

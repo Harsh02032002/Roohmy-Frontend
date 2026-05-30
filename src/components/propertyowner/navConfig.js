@@ -42,7 +42,6 @@ export const PROPERTY_OWNER_NAV = [
       { label: "Move-out Requests", href: "/propertyowner/moveout-requests", goldOnly: false },
       { label: "Ex-Tenants", href: "/propertyowner/ex-tenants", goldOnly: false },
       { label: "Tenant Documents", href: "/propertyowner/tenant-docs", goldOnly: false },
-      { label: "KYC Verification", href: "/propertyowner/kyc-verification", goldOnly: false },
       { label: "Police Verification", href: "/propertyowner/police-verification", goldOnly: false },
       { label: "Tenant Feedback", href: "/propertyowner/review", goldOnly: false },
     ]
@@ -169,9 +168,8 @@ export const PROPERTY_OWNER_NAV = [
   {
     label: "Documents",
     icon: FileText,
-    href: "/propertyowner/documents",
+    href: "/propertyowner/agreement",
     submenus: [
-      { label: "All Templates", href: "/propertyowner/documents", goldOnly: false },
       { label: "Agreements", href: "/propertyowner/agreement", goldOnly: false },
       { label: "Tenant Documents", href: "/propertyowner/tenant-docs", goldOnly: false },
       { label: "Staff Documents", href: "/propertyowner/staff-documents", goldOnly: false },

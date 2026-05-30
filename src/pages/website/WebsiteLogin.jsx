@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import WebsiteNavbar from "../../components/website/WebsiteNavbar";
 import WebsiteFooter from "../../components/website/WebsiteFooter";
 import MobileBottomNav from "../../components/website/MobileBottomNav";
 import { useWebsiteLogin } from "../../hooks/useWebsiteLogin";
-import { Mail, Lock, ArrowRight, ShieldCheck, UserCheck, Star } from "lucide-react";
+import { Mail, Lock, ArrowRight, ShieldCheck, UserCheck, Star, Eye, EyeOff } from "lucide-react";
 
 export default function WebsiteLogin() {
   const {
@@ -16,6 +16,7 @@ export default function WebsiteLogin() {
     handleSubmit,
     handleForgot
   } = useWebsiteLogin();
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -120,13 +121,21 @@ export default function WebsiteLogin() {
                     <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-teal-500 transition-colors" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
-                    className="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none text-sm"
+                    className="block w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white transition-all outline-none text-sm"
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-teal-600 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 

@@ -1,4 +1,4 @@
-const OWNER_LOGIN_ID_REGEX = /^ROOMHY\d{4}$/i;
+const OWNER_LOGIN_ID_REGEX = /^ROOMHY\d{4,}$/i;
 
 const normalizeOwnerSession = (value) => {
   if (!value || typeof value !== "object") return null;

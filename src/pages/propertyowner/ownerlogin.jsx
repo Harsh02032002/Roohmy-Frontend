@@ -53,12 +53,17 @@ export default function Ownerlogin() {
 
   const storeAuth = (data) => {
     if (!data?.token || !data?.user) return;
+    // Ensure loginId is always present in session — required by getOwnerSession() regex check
+    const sessionUser = {
+      ...data.user,
+      loginId: data.user.loginId || String(loginId || "").trim().toUpperCase()
+    };
     localStorage.setItem("token", data.token);
     sessionStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    sessionStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("owner_user", JSON.stringify(data.user));
-    sessionStorage.setItem("owner_session", JSON.stringify(data.user));
+    localStorage.setItem("user", JSON.stringify(sessionUser));
+    sessionStorage.setItem("user", JSON.stringify(sessionUser));
+    localStorage.setItem("owner_user", JSON.stringify(sessionUser));
+    sessionStorage.setItem("owner_session", JSON.stringify(sessionUser));
   };
 
   const handleLogin = async () => {

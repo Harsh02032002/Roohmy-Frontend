@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Lock, ArrowRight, X, Mail } from "lucide-react";
+import { User, Lock, ArrowRight, X, Mail, Eye, EyeOff } from "lucide-react";
 import { useHeadAssets } from "../../utils/useHeadAssets.js";
 import { getApiBase } from "../../utils/api";
 
@@ -18,6 +18,9 @@ export default function SuperadminIndexPage() {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [requireReset, setRequireReset] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useHeadAssets({ 
         title, 
@@ -132,25 +135,45 @@ export default function SuperadminIndexPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">New Password</label>
-                            <input 
-                                type="password" 
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
-                                placeholder="New Password" 
-                                required
-                            />
+                            <div className="relative">
+                                <input 
+                                    type={showNewPassword ? "text" : "password"} 
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full p-3.5 pr-12 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
+                                    placeholder="New Password" 
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNewPassword(prev => !prev)}
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-purple-600 transition-colors"
+                                    tabIndex={-1}
+                                >
+                                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">Confirm Password</label>
-                            <input 
-                                type="password" 
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
-                                placeholder="Confirm Password" 
-                                required
-                            />
+                            <div className="relative">
+                                <input 
+                                    type={showConfirmPassword ? "text" : "password"} 
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="w-full p-3.5 pr-12 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
+                                    placeholder="Confirm Password" 
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(prev => !prev)}
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-purple-600 transition-colors"
+                                    tabIndex={-1}
+                                >
+                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                         </div>
                         {error && (
                             <div className="text-rose-500 text-xs font-bold flex items-center gap-1 animate-shake">
@@ -191,13 +214,21 @@ export default function SuperadminIndexPage() {
                                     <Lock size={20} />
                                 </span>
                                 <input 
-                                    type="password" 
+                                    type={showPassword ? "text" : "password"} 
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none text-slate-800 placeholder:text-slate-400" 
+                                    className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none text-slate-800 placeholder:text-slate-400" 
                                     placeholder="••••••••" 
                                     required
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(prev => !prev)}
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-purple-600 transition-colors"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
                             {error && (
                                 <div className="mt-3 text-rose-500 text-xs font-bold flex items-center gap-1 animate-shake">
@@ -290,23 +321,43 @@ export default function SuperadminIndexPage() {
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">New Password</label>
-                                    <input 
-                                        type="password" 
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
-                                        placeholder="New Password" 
-                                    />
+                                    <div className="relative">
+                                        <input 
+                                            type={showNewPassword ? "text" : "password"} 
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="w-full p-3.5 pr-12 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
+                                            placeholder="New Password" 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(prev => !prev)}
+                                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-purple-600 transition-colors"
+                                            tabIndex={-1}
+                                        >
+                                            {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Confirm Password</label>
-                                    <input 
-                                        type="password" 
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
-                                        placeholder="Confirm Password" 
-                                    />
+                                    <div className="relative">
+                                        <input 
+                                            type={showConfirmPassword ? "text" : "password"} 
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full p-3.5 pr-12 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none" 
+                                            placeholder="Confirm Password" 
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(prev => !prev)}
+                                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-purple-600 transition-colors"
+                                            tabIndex={-1}
+                                        >
+                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <button 
                                     onClick={() => setShowForgotModal(false)}

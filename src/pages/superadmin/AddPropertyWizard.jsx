@@ -129,6 +129,12 @@ export default function AddPropertyWizard() {
   const [contactName, setContactName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [email, setEmail] = useState("");
+
+  // Owner dropdown for Contact Person autofill
+  const [ownersList, setOwnersList] = useState([]);
+  const [ownerSearch, setOwnerSearch] = useState("");
+  const [showOwnerDropdown, setShowOwnerDropdown] = useState(false);
+  const ownerDropdownRef = useRef(null);
   const [videoUrl, setVideoUrl] = useState("");
 
   const parseLatLngFromUrl = (url) => {
@@ -173,6 +179,46 @@ export default function AddPropertyWizard() {
     }).catch(console.error);
   }, []);
 
+  // Fetch all owners for Contact Person dropdown autofill
+  useEffect(() => {
+    fetch(`${apiUrl}/api/owners?limit=500`)
+      .then(r => r.json())
+      .then(data => {
+        const list = Array.isArray(data) ? data : (Array.isArray(data?.owners) ? data.owners : []);
+        setOwnersList(list);
+      })
+      .catch(console.error);
+  }, [apiUrl]);
+
+  // Close owner dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ownerDropdownRef.current && !ownerDropdownRef.current.contains(e.target)) {
+        setShowOwnerDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handler: owner selected from dropdown
+  const handleOwnerSelect = (owner) => {
+    const name = owner.name || owner.profile?.name || "";
+    const phone = owner.phone || owner.checkinPhone || owner.profile?.phone || "";
+    const ownerEmail = owner.email || owner.profile?.email || "";
+    setContactName(name);
+    setOwnerSearch(name);
+    setContactNumber(phone);
+    setEmail(ownerEmail);
+    setShowOwnerDropdown(false);
+  };
+
+  // Filtered owners based on search
+  const filteredOwners = ownersList.filter(o => {
+    const name = (o.name || o.profile?.name || "").toLowerCase();
+    return name.includes(ownerSearch.toLowerCase());
+  });
+
   // Step 2 — Property Details
   const [roomTypes, setRoomTypes] = useState(ROOM_TYPES_DEFAULT);
   const [totalArea, setTotalArea] = useState("5000");
@@ -209,7 +255,9 @@ export default function AddPropertyWizard() {
               setLongitude(p.longitude);
               setGoogleMapInput(`https://www.google.com/maps/@${p.latitude},${p.longitude},17z`);
             }
-            setContactName(p.contact?.name || p.ownerName || "");
+            const prefilledName = p.contact?.name || p.ownerName || "";
+            setContactName(prefilledName);
+            setOwnerSearch(prefilledName);
             setContactNumber(p.contact?.number || p.ownerPhone || "");
             setEmail(p.contact?.email || "");
             
@@ -718,7 +766,71 @@ export default function AddPropertyWizard() {
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
                 <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight mb-8">Contact Person Details</h2>
                 <div className="grid grid-cols-3 gap-6">
-                   <FormField label="Contact Name *" value={contactName} onChange={e => setContactName(e.target.value)} placeholder="Full Name" />
+
+                  {/* ── Owner Name Searchable Dropdown ── */}
+                  <div className="flex flex-col" ref={ownerDropdownRef}>
+                    <label className="text-[10px] font-black text-slate-800 uppercase mb-3 block tracking-tight">Contact Name *</label>
+                    <div className="relative">
+                      <div className={cn(
+                        "flex items-center bg-slate-50 border rounded-xl px-4 py-2.5 transition-all",
+                        showOwnerDropdown ? "bg-white border-blue-200 ring-2 ring-blue-500/10" : "border-slate-100 hover:border-slate-200"
+                      )}>
+                        <input
+                          type="text"
+                          value={ownerSearch !== "" ? ownerSearch : contactName}
+                          onChange={e => {
+                            setOwnerSearch(e.target.value);
+                            setContactName(e.target.value);
+                            setShowOwnerDropdown(true);
+                          }}
+                          onFocus={() => setShowOwnerDropdown(true)}
+                          placeholder="Type or select owner name"
+                          className="w-full bg-transparent text-[10px] font-black text-slate-800 outline-none placeholder:text-slate-300"
+                        />
+                        {contactName && (
+                          <button
+                            type="button"
+                            onClick={() => { setContactName(""); setOwnerSearch(""); setContactNumber(""); setEmail(""); }}
+                            className="ml-2 text-slate-300 hover:text-red-400 transition-colors flex-shrink-0"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Dropdown list */}
+                      {showOwnerDropdown && (
+                        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden max-h-52 overflow-y-auto">
+                          {filteredOwners.length === 0 ? (
+                            <div className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                              {ownersList.length === 0 ? "Loading owners..." : "No owner found"}
+                            </div>
+                          ) : (
+                            filteredOwners.slice(0, 40).map((owner, i) => {
+                              const name = owner.name || owner.profile?.name || "";
+                              const phone = owner.phone || owner.checkinPhone || owner.profile?.phone || "";
+                              const ownerEmail = owner.email || owner.profile?.email || "";
+                              return (
+                                <button
+                                  key={owner._id || owner.loginId || i}
+                                  type="button"
+                                  onClick={() => handleOwnerSelect(owner)}
+                                  className="w-full text-left px-4 py-2.5 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0 group"
+                                >
+                                  <p className="text-[11px] font-black text-slate-800 group-hover:text-blue-600 transition-colors">{name || "—"}</p>
+                                  <p className="text-[9px] font-bold text-slate-400 mt-0.5">
+                                    {phone && <span className="mr-3">📞 {phone}</span>}
+                                    {ownerEmail && <span>✉ {ownerEmail}</span>}
+                                  </p>
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                    <FormField label="Contact Number *" value={contactNumber} onChange={e => setContactNumber(e.target.value)} placeholder="Phone Number" prefix="+91" />
                    <FormField label="Email Address *" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
                 </div>
