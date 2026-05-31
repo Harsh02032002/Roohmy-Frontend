@@ -303,16 +303,13 @@ export default function Properties() {
             const occupied = p.occupiedBeds ?? p.tenantCount ?? 0;
             const total = p.totalBeds ?? p.roomCount ?? 1;
             const occ = Math.round((occupied / Math.max(total, 1)) * 100);
-            const originalPrice = Math.round((p.rent || 5000) * 1.3);
-            const discountPercent = Math.round(((originalPrice - (p.rent || 5000)) / originalPrice) * 100);
+            const actualRent = p.monthlyRent || p.rent || 0;
+            const discountAmount = p.discount || 0;
+            const hasDiscount = discountAmount > 0;
+            const originalPrice = hasDiscount ? (actualRent + discountAmount) : actualRent;
+            const discountPercent = hasDiscount ? Math.round((discountAmount / originalPrice) * 100) : 0;
             
-            // Generate some fake amenities if none exist
-            const amenities = p.amenities && p.amenities.length > 0 ? p.amenities : [
-              { name: "WiFi", icon: "Wifi" },
-              { name: "Power Backup", icon: "Zap" },
-              { name: "RO Water", icon: "Droplets" },
-              { name: "First Aid Kit", icon: "Check" }
-            ];
+            const amenities = p.amenities && p.amenities.length > 0 ? p.amenities : [];
             
             const displayImage = p.image || (p.images && p.images.length > 0 ? p.images[0] : null) || (p.professionalPhotos && p.professionalPhotos.length > 0 ? p.professionalPhotos[0] : null);
 
@@ -349,9 +346,11 @@ export default function Properties() {
                          <h3 className="text-[19px] font-bold text-foreground leading-tight truncate group-hover:text-primary transition-colors">
                            {p.title || p.name || "Property"}
                          </h3>
-                         <div className="bg-success/90 text-success-foreground px-2 py-0.5 rounded flex items-center gap-1 text-[11px] font-bold shadow-sm shrink-0">
-                           {p.rating || '4.5'} <Star className="w-3 h-3 fill-current" />
-                         </div>
+                         {p.rating && (
+                           <div className="bg-success/90 text-success-foreground px-2 py-0.5 rounded flex items-center gap-1 text-[11px] font-bold shadow-sm shrink-0">
+                             {p.rating} <Star className="w-3 h-3 fill-current" />
+                           </div>
+                         )}
                       </div>
                       
                       <p className="text-[13px] text-muted-foreground font-medium flex items-center gap-1 truncate">
@@ -360,14 +359,16 @@ export default function Properties() {
                       </p>
                       
                       {/* Amenities Row */}
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] text-muted-foreground font-medium py-1">
-                        {amenities.slice(0, 4).map((amn, i) => (
-                          <div key={i} className="flex items-center gap-1.5 shrink-0">
-                            <Check className="w-3 h-3" />
-                            <span>{typeof amn === 'string' ? amn : amn.name}</span>
-                          </div>
-                        ))}
-                      </div>
+                      {amenities.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] text-muted-foreground font-medium py-1">
+                          {amenities.slice(0, 4).map((amn, i) => (
+                            <div key={i} className="flex items-center gap-1.5 shrink-0">
+                              <Check className="w-3 h-3" />
+                              <span>{typeof amn === 'string' ? amn : amn.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Badges */}
                       <div className="flex items-center gap-2 pt-1.5">
@@ -398,11 +399,15 @@ export default function Properties() {
                   <div className="w-full md:w-[220px] flex flex-col justify-between border-t md:border-t-0 md:border-l border-border p-4 bg-muted/20 shrink-0">
                     <div className="text-right">
                       <div className="flex items-baseline justify-end gap-2">
-                        <span className="text-[13px] text-muted-foreground line-through font-medium">₹{originalPrice.toLocaleString()}</span>
-                        <div className="text-[22px] font-black text-foreground tracking-tight">₹{(p.rent || 5000).toLocaleString()}</div>
+                        {hasDiscount && (
+                          <span className="text-[13px] text-muted-foreground line-through font-medium">₹{originalPrice.toLocaleString()}</span>
+                        )}
+                        <div className="text-[22px] font-black text-foreground tracking-tight">₹{actualRent.toLocaleString()}</div>
                       </div>
                       <div className="flex items-center justify-end gap-2 mt-1">
-                        <div className="text-[11px] font-bold text-success bg-success/15 px-1.5 py-0.5 rounded">{discountPercent}% off</div>
+                        {hasDiscount && (
+                          <div className="text-[11px] font-bold text-success bg-success/15 px-1.5 py-0.5 rounded">{discountPercent}% off</div>
+                        )}
                         <p className="text-[10px] text-muted-foreground font-medium">+ taxes & fees</p>
                       </div>
                     </div>

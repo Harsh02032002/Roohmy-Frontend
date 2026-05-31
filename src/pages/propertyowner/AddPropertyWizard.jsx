@@ -80,6 +80,7 @@ export default function AddPropertyWizard() {
     if (!validateForm()) return;
 
     setLoading(true);
+    try {
       const propertyData = {
         title: formData.propertyName,
         description: formData.description || '',

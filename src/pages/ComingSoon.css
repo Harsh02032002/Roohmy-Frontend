@@ -79,6 +79,7 @@
   color: #8b5cf6;
   background: linear-gradient(135deg, #a78bfa, #8b5cf6);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -95,6 +96,7 @@
 .text-gradient {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
