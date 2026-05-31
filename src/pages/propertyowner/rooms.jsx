@@ -72,7 +72,7 @@ export default function Rooms() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const defaultRoomForm = { roomNo: "", unitType: "", floor: "", sharingType: "", roomRent: "", remarks: "", isAvailable: true, facilities: [], roomTypeFeatures: [], media: [], roomType: "AC", roomGender: "", roomBeds: 2, electricityUnitCost: 0, meterReadings: [] };
   const [roomForm, setRoomForm] = useState(defaultRoomForm);
-  const [assignMode, setAssignMode] = useState("new");
+  const [assignMode, setAssignMode] = useState("existing");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedBedIndex, setSelectedBedIndex] = useState(null);
   const [selectedTenantId, setSelectedTenantId] = useState("");
@@ -129,7 +129,7 @@ export default function Rooms() {
   const openAssignModal = (room, bedIdx) => {
     setSelectedRoom(room); setSelectedBedIndex(bedIdx);
     setSelectedTenantId(""); setNewTenantForm({ name: "", phone: "", email: "" });
-    setAssignMode("new"); setAssignModalOpen(true);
+    setAssignMode("existing"); setAssignModalOpen(true);
   };
 
   const handleCreateRoom = async (e) => {
@@ -231,15 +231,22 @@ export default function Rooms() {
       const roomNo = selectedRoom.number || selectedRoom.roomNo || "";
       const agreedRent = Number(selectedRoom.rent || 0);
       const moveInDate = new Date().toISOString().split("T")[0];
-      let payload;
-      if (assignMode === "existing") {
-        const t = tenants.find(x => (x._id || x.id) === selectedTenantId);
-        if (!t) { setErrorMsg("Select a tenant."); setIsAssigning(false); return; }
-        payload = { name: t.name, phone: t.phone, email: t.email, propertyId: currentProperty?._id || "", roomNo, bedNo: Number(selectedBedIndex) + 1, moveInDate, agreedRent, ownerLoginId: owner.loginId };
-      } else {
-        if (!newTenantForm.name || !newTenantForm.phone || !newTenantForm.email) { setErrorMsg("All fields required."); setIsAssigning(false); return; }
-        payload = { ...newTenantForm, propertyId: currentProperty?._id || "", roomNo, bedNo: Number(selectedBedIndex) + 1, moveInDate, agreedRent, ownerLoginId: owner.loginId };
-      }
+      
+      const t = tenants.find(x => (x._id || x.id) === selectedTenantId);
+      if (!t) { setErrorMsg("Select a tenant."); setIsAssigning(false); return; }
+      
+      const payload = { 
+        name: t.name, 
+        phone: t.phone, 
+        email: t.email, 
+        propertyId: currentProperty?._id || "", 
+        roomNo, 
+        bedNo: Number(selectedBedIndex) + 1, 
+        moveInDate, 
+        agreedRent, 
+        ownerLoginId: owner.loginId 
+      };
+
       await assignTenant(payload);
       setAssignModalOpen(false);
       clearOwnerFetchCache(owner.loginId);
@@ -674,30 +681,13 @@ export default function Rooms() {
             <button onClick={() => setAssignModalOpen(false)} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"><X size={20}/></button>
           </div>
           <form onSubmit={handleAssignTenant} className="p-6 space-y-4">
-            <div className="flex gap-2">
-              {["new","existing"].map(m => (
-                <button key={m} type="button" onClick={() => setAssignMode(m)} className={cn("flex-1 h-9 rounded-lg text-[12.5px] font-medium capitalize transition-colors", assignMode===m?"bg-foreground text-background":"bg-card border border-border text-muted-foreground hover:border-primary/40")}>
-                  {m==="new"?"New Tenant":"Existing"}
-                </button>
-              ))}
+            <div>
+              <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Select Existing Tenant</label>
+              <select required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" value={selectedTenantId} onChange={e=>setSelectedTenantId(e.target.value)}>
+                <option value="">-- Select Tenant --</option>
+                {tenants.map(t=><option key={t._id||t.id} value={t._id||t.id}>{t.name} ({t.phone})</option>)}
+              </select>
             </div>
-            {assignMode==="existing" ? (
-              <div>
-                <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Select Tenant</label>
-                <select required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" value={selectedTenantId} onChange={e=>setSelectedTenantId(e.target.value)}>
-                  <option value="">-- Select --</option>
-                  {tenants.map(t=><option key={t._id||t.id} value={t._id||t.id}>{t.name} ({t.phone})</option>)}
-                </select>
-              </div>
-            ) : (
-              <>
-                <div><label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Name</label><input required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Tenant name" value={newTenantForm.name} onChange={e=>setNewTenantForm(p=>({...p,name:e.target.value}))}/></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Phone</label><input required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Phone" value={newTenantForm.phone} onChange={e=>setNewTenantForm(p=>({...p,phone:e.target.value}))}/></div>
-                  <div><label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Email</label><input required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Email" value={newTenantForm.email} onChange={e=>setNewTenantForm(p=>({...p,email:e.target.value}))}/></div>
-                </div>
-              </>
-            )}
             {errorMsg && <p className="text-[12px] text-destructive">{errorMsg}</p>}
             <button type="submit" disabled={isAssigning} className="w-full h-10 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 disabled:opacity-50">
               {isAssigning ? "Assigning..." : "Assign Tenant"}

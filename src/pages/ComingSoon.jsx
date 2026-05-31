@@ -27,11 +27,7 @@ const ComingSoon = () => {
           <div className="feature-pill">🛡️ Verified Hosts</div>
         </div>
 
-        <div className="action-container">
-          <a href="/website/index" className="preview-button">
-            Preview Website
-          </a>
-        </div>
+
 
         {/* Social Links */}
         <div className="social-links">

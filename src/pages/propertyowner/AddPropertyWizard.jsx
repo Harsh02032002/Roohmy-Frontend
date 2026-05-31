@@ -80,30 +80,28 @@ export default function AddPropertyWizard() {
     if (!validateForm()) return;
 
     setLoading(true);
-    try {
-      const enquiryData = {
-        property_type: formData.propertyType || 'pg',
-        property_name: formData.propertyName,
+      const propertyData = {
+        title: formData.propertyName,
+        description: formData.description || '',
+        address: formData.address || '',
         city: formData.city,
         locality: formData.area || '',
-        address: formData.address || '',
-        pincode: '',
-        description: formData.description || '',
-        amenities: [],
-        gender_suitability: '',
-        rent: parseInt(formData.rent) || 0,
-        deposit: '',
-        owner_name: formData.ownerName,
-        owner_email: formData.email,
-        owner_phone: formData.phone,
-        contact_name: formData.ownerName,
-        country: 'India',
-        tenants_managed: 0,
-        additional_message: formData.description || '',
-        photos: []
+        propertyType: formData.propertyType || 'pg',
+        monthlyRent: parseInt(formData.rent) || 0,
+        ownerLoginId: owner?.loginId || '',
+        ownerName: formData.ownerName,
+        ownerPhone: formData.phone,
+        contact: {
+          name: formData.ownerName,
+          number: formData.phone,
+          email: formData.email
+        }
       };
       
-      await submitEnquiry(enquiryData);
+      await fetchJson('/api/properties/add', {
+        method: 'POST',
+        body: JSON.stringify(propertyData)
+      });
 
       setShowSuccess(true);
       setFormData({
@@ -111,8 +109,8 @@ export default function AddPropertyWizard() {
         city: '', area: '', address: '', rent: '', description: ''
       });
     } catch (error) {
-      console.error('Error submitting enquiry:', error);
-      alert('Failed to submit. Please try again.');
+      console.error('Error submitting property:', error);
+      alert('Failed to submit property listing. Please try again.');
     } finally {
       setLoading(false);
     }
