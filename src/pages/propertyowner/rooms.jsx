@@ -10,15 +10,22 @@ import {
 const cn = (...c) => c.filter(Boolean).join(" ");
 
 const toLegacyBeds = (room) => {
-  const beds = Array.isArray(room?.beds) ? room.beds
-    : Array.from({ length: Number(room?.beds || room?.capacity || room?.totalBeds || 0) }, (_, i) => {
-        const a = room?.bedAssignments?.[i] || room?.bedsInfo?.[i] || null;
-        return a && (a.tenantName || a.name || a.tenantId)
-          ? { status: "occupied", tenantId: a.tenantId || a._id, tenantName: a.tenantName || a.name }
-          : { status: "available", tenantId: null, tenantName: null };
-      });
-  return beds.length ? beds : [{ status: "available", tenantId: null, tenantName: null }];
+  // If room.beds is already an array of {status, tenantId, tenantName} objects, use as-is
+  if (Array.isArray(room?.beds) && room.beds.length && typeof room.beds[0] === 'object' && 'status' in room.beds[0]) {
+    return room.beds;
+  }
+  const bedCount = Number(room?.beds || room?.capacity || room?.totalBeds || 0);
+  return Array.from({ length: bedCount }, (_, i) => {
+    const a = room?.bedAssignments?.[i] || room?.bedsInfo?.[i] || null;
+    // tenantId can be an ObjectId object or a string
+    const tid = a?.tenantId;
+    const hasOccupant = !!(a && (a.tenantName || a.name || (tid && String(tid).length > 0 && String(tid) !== '[object Object]')));
+    return hasOccupant
+      ? { status: "occupied", tenantId: tid ? String(tid) : null, tenantName: a.tenantName || a.name || null }
+      : { status: "available", tenantId: null, tenantName: null };
+  }).concat(bedCount === 0 ? [{ status: "available", tenantId: null, tenantName: null }] : []);
 };
+
 
 const normalizeRoom = (room, ownerId) => {
   const number = room?.number || room?.roomNo || room?.title || "Room";
@@ -75,6 +82,7 @@ export default function Rooms() {
   const [assignMode, setAssignMode] = useState("existing");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedBedIndex, setSelectedBedIndex] = useState(null);
+  const [selectedBedOccupied, setSelectedBedOccupied] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState("");
   const [newTenantForm, setNewTenantForm] = useState({ name: "", phone: "", email: "" });
   const [isAssigning, setIsAssigning] = useState(false);
@@ -95,7 +103,9 @@ export default function Rooms() {
   const mergeRooms = (ownerId, backendRooms) => {
     const local = readJson("roomhy_rooms", []);
     const seen = new Set();
-    return [...local, ...backendRooms]
+    // Backend rooms first — they win deduplication (have fresh bedAssignments)
+    // Local rooms only fill in any rooms not returned by backend
+    return [...backendRooms, ...local]
       .map(r => normalizeRoom(r, ownerId))
       .filter(r => {
         const key = `${r.propertyId}:${r.number}`;
@@ -127,9 +137,16 @@ export default function Rooms() {
   }, []);
 
   const openAssignModal = (room, bedIdx) => {
-    setSelectedRoom(room); setSelectedBedIndex(bedIdx);
-    setSelectedTenantId(""); setNewTenantForm({ name: "", phone: "", email: "" });
-    setAssignMode("existing"); setAssignModalOpen(true);
+    const beds = toLegacyBeds(room);
+    const bed = beds[bedIdx];
+    const isOccupied = !!(bed?.status === "occupied" || bed?.tenantId);
+    setSelectedRoom(room);
+    setSelectedBedIndex(bedIdx);
+    setSelectedBedOccupied(isOccupied);
+    setSelectedTenantId("");
+    setNewTenantForm({ name: "", phone: "", email: "" });
+    setAssignMode("existing");
+    setAssignModalOpen(true);
   };
 
   const handleCreateRoom = async (e) => {
@@ -413,18 +430,30 @@ export default function Rooms() {
                       </div>
                       <div className="text-[11px] text-muted-foreground mt-0.5">{room.gender||"Mixed"}</div>
                       <div className="mt-2.5 flex gap-1.5">
-                        {beds.map((bed,i) => (
-                          <div key={i} onClick={() => { if(!(bed.status==="occupied"||bed.tenantId)) openAssignModal(room,i); }}
-                            title={bed.tenantName||(bed.status==="occupied"||bed.tenantId?"Occupied":"Vacant")}
-                            className={cn("flex-1 h-10 rounded-md grid place-items-center text-[10.5px] font-semibold cursor-pointer transition-colors",
-                              bed.status==="occupied"||bed.tenantId?"bg-primary/80 text-primary-foreground":i===0&&beds.length>2?"bg-warning/30 text-foreground":"border border-dashed border-border text-muted-foreground hover:bg-muted")}>
-                            {String.fromCharCode(65+i)}
-                          </div>
-                        ))}
+                        {beds.map((bed,i) => {
+                          const isOcc = bed.status==="occupied"||!!bed.tenantId;
+                          return (
+                            <div key={i}
+                              onClick={() => openAssignModal(room, i)}
+                              title={isOcc ? `Occupied${bed.tenantName ? ` — ${bed.tenantName}` : ""}` : "Vacant — Click to assign"}
+                              className={cn("flex-1 h-10 rounded-md grid place-items-center text-[10.5px] font-semibold transition-colors",
+                                isOcc
+                                  ? "bg-primary/80 text-primary-foreground cursor-pointer hover:bg-primary/70"
+                                  : i===0&&beds.length>2
+                                    ? "bg-warning/30 text-foreground cursor-pointer hover:bg-warning/50"
+                                    : "border border-dashed border-border text-muted-foreground cursor-pointer hover:bg-muted")}
+                            >
+                              {String.fromCharCode(65+i)}
+                            </div>
+                          );
+                        })}
                       </div>
                       <div className="mt-2.5 flex items-center justify-between">
                         <span className="text-[11px] text-muted-foreground">₹{(room.rent||0).toLocaleString("en-IN")}/bed</span>
-                        <button type="button" onClick={() => openAssignModal(room, beds.findIndex(b=>!(b.status==="occupied"||b.tenantId)))} className="text-[11px] font-medium text-primary hover:underline">Manage</button>
+                        <button type="button" onClick={() => {
+                          const firstVacant = beds.findIndex(b=>!(b.status==="occupied"||b.tenantId));
+                          openAssignModal(room, firstVacant !== -1 ? firstVacant : 0);
+                        }} className="text-[11px] font-medium text-primary hover:underline">Manage</button>
                       </div>
                     </div>
                   );
@@ -677,22 +706,70 @@ export default function Rooms() {
       <div className={cn("fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm transition-all", assignModalOpen?"opacity-100 pointer-events-auto":"opacity-0 pointer-events-none")}>
         <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
           <div className="p-6 border-b border-border flex justify-between items-center">
-            <div><h2 className="text-[18px] font-semibold text-foreground">Assign Tenant</h2><p className="text-[12px] text-muted-foreground mt-0.5">Room {selectedRoom?.number||selectedRoom?.roomNo} · Bed {selectedBedIndex!=null?selectedBedIndex+1:""}</p></div>
+            <div>
+              <h2 className="text-[18px] font-semibold text-foreground">
+                {selectedBedOccupied ? "Bed Info" : "Assign Tenant"}
+              </h2>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                Room {selectedRoom?.number||selectedRoom?.roomNo} · Bed {selectedBedIndex!=null?selectedBedIndex+1:""}
+                {selectedBedOccupied && (
+                  <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-primary/15 text-primary">Occupied</span>
+                )}
+              </p>
+            </div>
             <button onClick={() => setAssignModalOpen(false)} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"><X size={20}/></button>
           </div>
-          <form onSubmit={handleAssignTenant} className="p-6 space-y-4">
-            <div>
-              <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Select Existing Tenant</label>
-              <select required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" value={selectedTenantId} onChange={e=>setSelectedTenantId(e.target.value)}>
-                <option value="">-- Select Tenant --</option>
-                {tenants.map(t=><option key={t._id||t.id} value={t._id||t.id}>{t.name} ({t.phone})</option>)}
-              </select>
-            </div>
-            {errorMsg && <p className="text-[12px] text-destructive">{errorMsg}</p>}
-            <button type="submit" disabled={isAssigning} className="w-full h-10 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 disabled:opacity-50">
-              {isAssigning ? "Assigning..." : "Assign Tenant"}
-            </button>
-          </form>
+
+          {selectedBedOccupied ? (
+            // Show occupied bed details — no reassignment allowed
+            (() => {
+              const bed = selectedRoom ? toLegacyBeds(selectedRoom)[selectedBedIndex] : null;
+              const assignedTenant = tenants.find(t => (t._id||t.id) === bed?.tenantId) || null;
+              return (
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/8 border border-primary/20">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-[16px]">
+                      {(bed?.tenantName || assignedTenant?.name || "?").charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-[14px] font-semibold text-foreground">{bed?.tenantName || assignedTenant?.name || "Tenant"}</p>
+                      {assignedTenant?.phone && <p className="text-[12px] text-muted-foreground">{assignedTenant.phone}</p>}
+                      {assignedTenant?.email && <p className="text-[11px] text-muted-foreground">{assignedTenant.email}</p>}
+                    </div>
+                  </div>
+                  <p className="text-[12px] text-muted-foreground text-center">
+                    This bed is currently occupied. To reassign, first move out the current tenant.
+                  </p>
+                  <button type="button" onClick={() => setAssignModalOpen(false)}
+                    className="w-full h-10 rounded-lg bg-muted text-foreground text-[13px] font-medium hover:bg-muted/80">
+                    Close
+                  </button>
+                </div>
+              );
+            })()
+          ) : (
+            // Show assign form for vacant bed
+            <form onSubmit={handleAssignTenant} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Select Existing Tenant</label>
+                <select required className="w-full bg-card border border-border rounded-lg px-4 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20" value={selectedTenantId} onChange={e=>setSelectedTenantId(e.target.value)}>
+                  <option value="">-- Select Tenant --</option>
+                  {tenants
+                    .filter(t => {
+                      // Exclude tenants already assigned to any bed in any room
+                      const assignedIds = rooms.flatMap(r => toLegacyBeds(r).map(b => b.tenantId).filter(Boolean));
+                      return !assignedIds.includes(t._id || t.id);
+                    })
+                    .map(t=><option key={t._id||t.id} value={t._id||t.id}>{t.name} ({t.phone})</option>)
+                  }
+                </select>
+              </div>
+              {errorMsg && <p className="text-[12px] text-destructive">{errorMsg}</p>}
+              <button type="submit" disabled={isAssigning} className="w-full h-10 rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 disabled:opacity-50">
+                {isAssigning ? "Assigning..." : "Assign Tenant"}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </PropertyOwnerLayout>

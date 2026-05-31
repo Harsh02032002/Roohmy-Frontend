@@ -292,8 +292,10 @@ export const fetchOwnerRooms = async (loginId) => {
       rent: room.price || room.rent || 0,
       roomRent: room.price || room.rent || 0,
       roomType: room.type || "AC",
+      beds: room.beds, // keep as-is (number) for toLegacyBeds to use bedCount
       capacity: room.beds || 1,
       totalBeds: room.beds || 1,
+      bedAssignments: Array.isArray(room.bedAssignments) ? room.bedAssignments : [],
       propertyId: room.property?._id || room.property || room.propertyId,
       propertyTitle: room.property?.title || room.propertyTitle || "",
       ownerLoginId: room.property?.ownerLoginId || room.ownerLoginId || loginId
