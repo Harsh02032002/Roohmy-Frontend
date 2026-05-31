@@ -19,7 +19,7 @@ const PageLoader = () => (
 );
 
 const resolveHostHome = () => {
-  if (typeof window === "undefined") return "/website/index";
+  if (typeof window === "undefined") return "/coming-soon";
   const host = (window.location.hostname || "").toLowerCase();
 
   const readStoredUser = () => {
@@ -74,10 +74,10 @@ const resolveHostHome = () => {
     }
     if (role === "areamanager" || role === "employee") return "/employee/areaadmin";
     if (owner?.loginId) return "/propertyowner/admin";
-    return "/website/index";
+    return "/coming-soon";
   }
 
-  return "/website/index";
+  return "/coming-soon";
 };
 
 const HtmlRedirectOrHome = () => {
