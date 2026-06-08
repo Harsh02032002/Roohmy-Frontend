@@ -152,6 +152,19 @@ export default function Properties() {
     setRequestSending(true);
     setRequestResult(null);
     try {
+      const updatedData = {
+        ...editFormData,
+        // Keep edits in the review queue until superadmin approves them.
+        status: "pending_approval",
+        isPublished: false,
+        isLiveOnWebsite: false
+      };
+
+      await fetchJson(`/api/properties/${encodeURIComponent(editProperty._id)}`, {
+        method: "PUT",
+        body: JSON.stringify(updatedData)
+      });
+
       await fetchJson("/api/notifications", {
         method: "POST",
         body: JSON.stringify({
@@ -163,10 +176,19 @@ export default function Properties() {
             propertyName: editProperty.title || editProperty.name,
             ownerLoginId: owner?.loginId,
             message: editRequestMsg,
-            updatedData: editFormData
+            updatedData
           }
         })
       });
+
+      setProperties(prev =>
+        prev.map(item =>
+          item._id === editProperty._id
+            ? { ...item, ...updatedData, _id: item._id }
+            : item
+        )
+      );
+
       setRequestResult({ success: true, message: "Edit request sent to Superadmin successfully!" });
       setTimeout(() => {
         setEditProperty(null);
