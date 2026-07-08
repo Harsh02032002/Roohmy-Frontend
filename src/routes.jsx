@@ -88,6 +88,7 @@ const routeEntries = [
   ["/superadmin/tenant", "./pages/superadmin/tenant.jsx"],
   ["/superadmin/add-tenant", "./pages/superadmin/AddTenant.jsx"],
   ["/superadmin/visit", "./pages/superadmin/visit.jsx"],
+  ["/superadmin/rooms", "./pages/superadmin/rooms.jsx"],
   ["/superadmin/website-db", "./pages/superadmin/website-db.jsx"],
   ["/superadmin/website", "./pages/superadmin/website.jsx"],
   ["/superadmin/websiteenq", "./pages/superadmin/websiteenq.jsx"],
@@ -98,7 +99,7 @@ const routeEntries = [
   
   // Employee Routes
   ["/employee/superadmin", "./pages/superadmin/superadmin.jsx"],
-  ["/employee/areaadmin", "./pages/superadmin/superadmin.jsx"],
+  ["/employee/areaadmin", "./pages/superadmin/areaadmin.jsx"],
   ["/employee/backup", "./pages/superadmin/backup.jsx"],
   ["/employee/booking", "./pages/superadmin/booking.jsx"],
   ["/employee/complaint-history", "./pages/superadmin/complaint-history.jsx"],

@@ -633,64 +633,19 @@ export default function Rooms() {
                     <div className="grid grid-cols-4 gap-2 mb-4">
                       {roomForm.media.map((file, idx) => (
                         <div key={idx} className="relative group">
-                          <img src={file.preview} alt={`media-${idx}`} className="w-full h-20 object-cover rounded-lg border border-border" />
-                          <button type="button" onClick={() => setRoomForm(p => ({...p, media: p.media.filter((_, i) => i !== idx)}))} className="absolute top-1 right-1 p-1 bg-destructive text-background rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                            <X size={14} />
-                          </button>
+                          <img src={file.preview || file.url} alt={`media-${idx}`} className="w-full h-20 object-cover rounded-lg border border-border" />
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-                <label className={`w-32 h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all text-primary ${isUploadingMedia ? "border-primary/40 bg-primary/5 cursor-wait" : "border-border cursor-pointer hover:border-primary/50 hover:bg-muted/30"}`}>
-                  <input type="file" multiple accept="image/*,video/*" onChange={async (e) => {
-                    const files = Array.from(e.target.files || []);
-                    if (files.length === 0) return;
-                    setIsUploadingMedia(true);
-                    try {
-                      const uploadPromises = files.map(async (file) => {
-                        const compressed = await compressImage(file);
-                        const formData = new FormData();
-                        formData.append("image", compressed);
-                        const base = getApiBase();
-                        const res = await fetch(`${base}/api/upload`, {
-                          method: "POST",
-                          body: formData,
-                          headers: getAuthHeader()
-                        });
-
-                        let data;
-                        const contentType = res.headers.get("content-type");
-                        if (contentType && contentType.includes("application/json")) {
-                          data = await res.json();
-                        } else {
-                          const text = await res.text();
-                          throw new Error(text || `HTTP error ${res.status}`);
-                        }
-
-                        if (!res.ok) throw new Error(data.error || "Upload failed");
-                        return { preview: data.url, url: data.url };
-                      });
-                      const uploadedFiles = await Promise.all(uploadPromises);
-                      setRoomForm(p => ({...p, media: [...(p.media || []), ...uploadedFiles]}));
-                    } catch (err) {
-                      alert("Failed to upload media: " + err.message);
-                    } finally {
-                      setIsUploadingMedia(false);
-                    }
-                  }} className="sr-only" disabled={isUploadingMedia} />
-                  {isUploadingMedia ? (
-                    <>
-                      <svg className="animate-spin size-7 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
-                      <span className="text-[11px] font-medium text-center px-2 text-primary">Uploading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud size={28} />
-                      <span className="text-[11px] font-medium text-center px-2">Upload photos/videos</span>
-                    </>
-                  )}
-                </label>
+                <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl mb-4 text-[12px] text-amber-700 dark:text-amber-300">
+                  Room images are managed by Super Admin.
+                </div>
+                <div className="w-32 h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 opacity-50 bg-slate-50 cursor-not-allowed text-slate-400">
+                  <UploadCloud size={28} />
+                  <span className="text-[11px] font-medium text-center px-2">Upload disabled</span>
+                </div>
               </div>
 
             </form>

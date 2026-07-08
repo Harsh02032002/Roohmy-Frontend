@@ -168,7 +168,7 @@ const RouteRoleGuard = () => {
       return;
     }
 
-    if (isEmployeeRoute && role !== 'areamanager' && role !== 'employee') {
+    if (isEmployeeRoute && role !== 'areamanager' && role !== 'employee' && role !== 'superadmin' && role !== 'admin') {
       window.location.replace('/superadmin/index');
     }
   }, [location.pathname]);
